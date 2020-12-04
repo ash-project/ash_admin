@@ -1,0 +1,34 @@
+@import "./app/variables";
+@import "./app/fonts";
+@import "~bootstrap/scss/bootstrap";
+
+@import "./app/layout";
+
+@import "./app/components/app_info";
+@import "./app/components/backgrounds";
+@import "./app/components/banner_card";
+@import "./app/components/buttons";
+@import "./app/components/card";
+@import "./app/components/charts";
+@import "./app/components/code_field";
+@import "./app/components/cookie_status";
+@import "./app/components/copy_indicator";
+@import "./app/components/environment_card";
+@import "./app/components/header";
+@import "./app/components/footer";
+@import "./app/components/hint";
+@import "./app/components/logs_card";
+@import "./app/components/tabular_info";
+@import "./app/components/tabular_page";
+@import "./app/components/progress_section";
+@import "./app/components/resource_usage";
+@import "./app/components/modals";
+@import "./app/components/tables";
+@import "./app/offcanvas";
+@import "./app/liveview";
+@import "../node_modules/nprogress/nprogress.css";
+@import "./app/tree";
+
+body {
+  padding-top: 65px;
+}

@@ -1,0 +1,52 @@
+.table-hover {
+  .active { color:#212529; background-color:rgba(0,0,0,.075) }
+}
+
+.dash-modal {
+  display: block;
+  overflow-y: auto;
+  background-color: change-color($color-gray-900, $alpha: 0.5, $lightness: 20%);
+
+  pre {
+    margin-bottom: 0;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .modal-dialog {
+    max-width: 900px;
+  }
+
+  .modal-header {
+    background-color: $color-gray-100;
+    border-bottom: 2px solid $color-gray-500;
+    padding: 1rem 1.5rem;
+    h6 {
+      font-weight: 700;
+    }
+  }
+
+  .modal-content {
+    .modal-close {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      text-align: right;
+
+      &:hover, &:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+@media (max-width: map-get($grid-breakpoints, lg)) {
+  .dash-modal {
+    .modal-dialog {
+      max-width: 700px;
+    }
+  }
+}
