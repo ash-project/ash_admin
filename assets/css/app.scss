@@ -1,34 +1,91 @@
-@import "./app/variables";
-@import "./app/fonts";
-@import "~bootstrap/scss/bootstrap";
+/* This file is for your main application css. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@import "./app/layout";
+/* LiveView specific classes for your customizations */
+.phx-no-feedback.invalid-feedback,
+.phx-no-feedback .invalid-feedback {
+  display: none;
+}
 
-@import "./app/components/app_info";
-@import "./app/components/backgrounds";
-@import "./app/components/banner_card";
-@import "./app/components/buttons";
-@import "./app/components/card";
-@import "./app/components/charts";
-@import "./app/components/code_field";
-@import "./app/components/cookie_status";
-@import "./app/components/copy_indicator";
-@import "./app/components/environment_card";
-@import "./app/components/header";
-@import "./app/components/footer";
-@import "./app/components/hint";
-@import "./app/components/logs_card";
-@import "./app/components/tabular_info";
-@import "./app/components/tabular_page";
-@import "./app/components/progress_section";
-@import "./app/components/resource_usage";
-@import "./app/components/modals";
-@import "./app/components/tables";
-@import "./app/offcanvas";
-@import "./app/liveview";
-@import "../node_modules/nprogress/nprogress.css";
-@import "./app/tree";
+.phx-click-loading {
+  opacity: 0.5;
+  transition: opacity 1s ease-out;
+}
 
-body {
-  padding-top: 65px;
+.phx-disconnected {
+  cursor: wait;
+}
+.phx-disconnected * {
+  pointer-events: none;
+}
+
+.phx-modal {
+  opacity: 1 !important;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.phx-modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+.phx-modal-close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.phx-modal-close:hover,
+.phx-modal-close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Alerts and form errors */
+.alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+.alert-info {
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+}
+.alert-warning {
+  color: #8a6d3b;
+  background-color: #fcf8e3;
+  border-color: #faebcc;
+}
+.alert-danger {
+  color: #a94442;
+  background-color: #f2dede;
+  border-color: #ebccd1;
+}
+.alert p {
+  margin-bottom: 0;
+}
+.alert:empty {
+  display: none;
+}
+.invalid-feedback {
+  color: #a94442;
+  display: block;
+  margin: -1rem 0 2rem;
 }

@@ -1,6 +1,7 @@
 defmodule AshAdmin.Components.Resource.Nav do
   use Surface.Component
   alias Surface.Components.LiveRedirect
+  alias AshAdmin.Components.TopNav.Dropdown
   import AshAdmin.Helpers
 
   prop resource, :any, required: true
@@ -10,34 +11,48 @@ defmodule AshAdmin.Components.Resource.Nav do
 
   def render(assigns) do
     ~H"""
-    <nav class="navbar navbar-expand navbar-light bg-light" style="margin-bottom: 20px;">
-      <span class="navbar-brand" href="#"> {{ AshAdmin.Resource.name(@resource) }}</span>
-      <ul class="navbar-nav mr-auto" style="overflow-y: visible;">
-        <li class={{"nav-item", active: @tab == "info"}}>
-          <LiveRedirect class="nav-link" to={{ash_admin_path(@socket, @api, @resource)}}>Info</LiveRedirect>
-        </li>
-        <li class="nav-item dropdown">
-          <a class={{"nav-link", "dropdown-toggle", active: @action && @action.type == :read}} href="#" id="dataDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Data
-          </a>
-          <div class="dropdown-menu" aria-labelledby="dataDropdown">
-            <a :if={{ has_create_action?(@resource) }} href="#" class="dropdown-item">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-              Create
-            </a>
-            <div :if={{ has_create_action?(@resource) }} class="dropdown-divider"></div>
-            <LiveRedirect
-              :for={{ action <- read_actions(@resource) }}
-              to={{ash_action_path(@socket, @api, @resource, action.type, action.name)}}
-              class={{ "dropdown-item", active: action_active?(action, @action) }}
-              opts={{[id: "read-#{action.name}", "aria-selected": to_string(action_active?(action, @action))]}}>
-              {{ action_name(action) }}
-            </LiveRedirect>
+    <nav class="bg-gray-700 w-full">
+      <div class="px-4 sm:px-6 lg:px-8 w-full">
+        <div class="flex items-center justify-between h-16 w-full">
+          <div class="flex items-center w-full">
+            <div class="flex-shrink-0">
+              <h3 class="text-white text-lg ">
+                <LiveRedirect to={{ash_admin_path(@socket, @api, @resource)}}>
+                  {{AshAdmin.Resource.name(@resource)}}
+                </LiveRedirect>
+              </h3>
+            </div>
+            <div class="w-full">
+              <div class="ml-12 flex items-center">
+                <div :if={{has_create_action?(@resource)}} class="relative">
+                  <LiveRedirect
+                    to="#"
+                    class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
+                  Create
+                  </LiveRedirect>
+                </div>
+                <Dropdown name="Read" id={{"#{@resource}_data_dropdown"}} groups={{data_groups(@socket, @api, @resource)}} />
+              </div>
+            </div>
           </div>
-        </li>
-      </ul>
+        </div>
+      </div>
     </nav>
     """
+  end
+
+  defp data_groups(socket, api, resource) do
+    [
+      resource
+      |> Ash.Resource.actions()
+      |> Enum.filter(&(&1.type == :read))
+      |> Enum.map(fn action ->
+        %{
+          text: action_name(action),
+          to: ash_action_path(socket, api, resource, :read, action.name)
+        }
+      end)
+    ]
   end
 
   defp has_create_action?(resource) do

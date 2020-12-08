@@ -5,6 +5,43 @@ defmodule AshAdmin.Helpers do
     apply(socket.router.__helpers__(), :ash_admin_path, [socket, :page])
   end
 
+  def self_path(url_path, socket_params, new_params) do
+    url_path <>
+      "?" <>
+      Plug.Conn.Query.encode(Map.merge(socket_params || %{}, Enum.into(new_params, %{})))
+  end
+
+  def to_name(name) do
+    name
+    |> to_string()
+    |> String.split("_")
+    |> Enum.map(&String.capitalize/1)
+    |> Enum.join(" ")
+  end
+
+  def short_description(nil), do: {:not_split, nil}
+
+  def short_description(description) do
+    case String.split(description, ~r/\.(\n|$|\s)/, parts: 2) do
+      [first, rest] ->
+        {:split, first <> ".", rest}
+
+      _ ->
+        description
+        |> String.split("\n", parts: 2)
+        |> case do
+          [first] ->
+            {:not_split, first}
+
+          [first, rest] ->
+            {:split, first <> "\n", rest}
+
+          _ ->
+            {:not_split, nil}
+        end
+    end
+  end
+
   @doc """
   TODO
   """

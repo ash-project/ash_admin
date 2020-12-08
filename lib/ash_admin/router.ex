@@ -12,9 +12,10 @@ defmodule AshAdmin.Router do
   ## Examples
       defmodule MyAppWeb.Router do
         use Phoenix.Router
-        import Phoenix.LiveDashboard.Router
 
         scope "/", MyAppWeb do
+          import AshAdmin.Router
+
           pipe_through [:browser]
           ash_admin "/admin",
             apis: [MyApp.Api1, MyApp.Api2]
@@ -131,26 +132,33 @@ defmodule AshAdmin.Router do
   def __options__(options, as, session) do
     live_socket_path = Keyword.get(options, :live_socket_path, "/live")
 
-    csp_nonce_assign_key =
-      case options[:csp_nonce_assign_key] do
-        nil -> nil
-        key when is_atom(key) -> %{img: key, style: key, script: key}
-        %{} = keys -> Map.take(keys, [:img, :style, :script])
-      end
-
     [
-      session: {__MODULE__, :__session__, [session, csp_nonce_assign_key]},
-      private: %{live_socket_path: live_socket_path, csp_nonce_assign_key: csp_nonce_assign_key},
+      session: {__MODULE__, :__session__, [session]},
+      private: %{live_socket_path: live_socket_path},
       layout: {AshAdmin.LayoutView, :admin},
       as: as
     ]
   end
 
-  def __session__(conn, session, csp_nonce_assign_key) do
-    Map.put(session, "csp_nonces", %{
-      img: conn.assigns[csp_nonce_assign_key[:img]],
-      style: conn.assigns[csp_nonce_assign_key[:style]],
-      script: conn.assigns[csp_nonce_assign_key[:script]]
-    })
+  @cookies_to_replicate [
+    "tenant",
+    "actor_resource",
+    "actor_primary_key",
+    "actor_action",
+    "actor_api",
+    "actor_authorizing",
+    "actor_paused"
+  ]
+
+  def __session__(conn, session) do
+    Enum.reduce(@cookies_to_replicate, session, fn cookie, session ->
+      case conn.req_cookies[cookie] do
+        value when value in [nil, "", "null"] ->
+          Map.put(session, cookie, nil)
+
+        value ->
+          Map.put(session, cookie, value)
+      end
+    end)
   end
 end

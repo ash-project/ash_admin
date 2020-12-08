@@ -15,6 +15,22 @@ defmodule AshAdmin.PageLive do
     {:ok, socket}
   end
 
+  %{
+    "action_name" => nil,
+    "action_type" => nil,
+    "actor_action" => nil,
+    "actor_api" => nil,
+    "actor_authorizing" => nil,
+    "actor_paused" => nil,
+    "actor_primary_key" => nil,
+    "actor_resource" => nil,
+    "api" => Demo.Accounts.Api,
+    "apis" => [Demo.Accounts.Api, Demo.Tickets.Api],
+    "resource" => nil,
+    "tab" => nil,
+    "tenant" => nil
+  }
+
   @impl true
   def mount(
         _params,
@@ -24,7 +40,6 @@ defmodule AshAdmin.PageLive do
           "tab" => tab,
           "action_type" => action_type,
           "action_name" => action_name,
-          "csp_nonces" => csp_nonces,
           "resource" => resource
         } = session,
         socket
@@ -49,12 +64,13 @@ defmodule AshAdmin.PageLive do
      |> assign(:resource, resource)
      |> assign(:action, action)
      |> assign(:tab, tab)
-     |> assign(:csp_nonces, csp_nonces)
      |> assign(:actor_resources, actor_resources(apis))
      |> assign(:tenant, session["tenant"])
      |> assign(:actor, AshAdmin.ActorPlug.actor_from_session(session))
      |> assign(:authorizing, AshAdmin.ActorPlug.session_bool(session["actor_authorizing"]))
-     |> assign(:actor_paused, actor_paused)}
+     |> assign(:recover_filter, nil)
+     |> assign(:actor_paused, actor_paused)
+     |> assign(:page_num, 1)}
   end
 
   @impl true
@@ -78,13 +94,19 @@ defmodule AshAdmin.PageLive do
      />
      <Resource
        :if={{ @resource }}
+       id={{ @resource }}
        resource={{ @resource }}
        set_actor="set_actor"
        api={{ @api }}
        tab={{ @tab }}
+       url_path={{ @url_path }}
+       params={{ @params }}
+       page_params={{ @page_params }}
+       page_num={{ @page_num }}
        action= {{ @action }}
        tenant= {{ @tenant }}
        actor= {{ unless @actor_paused, do: @actor }}
+       recover_filter={{@recover_filter}}
        authorize= {{ @authorizing }}
      />
     """
@@ -105,19 +127,54 @@ defmodule AshAdmin.PageLive do
   def handle_params(params, url, socket) do
     url = URI.parse(url)
 
-    if params["filter"] do
-      {:noreply,
-       socket
-       |> assign(:recover_filter, params["filter"])
-       |> assign(:url_path, url.path)
-       |> assign(:params, %{filter: params})}
-    else
-      {:noreply,
-       socket
-       |> assign(:filter, nil)
-       |> assign(:recover_filter, nil)
-       |> assign(:url_path, url.path)
-       |> assign(:params, %{})}
+    socket =
+      if params["filter"] && socket.assigns[:resource] do
+        assign(socket, :recover_filter, params["filter"])
+      else
+        socket
+      end
+
+    socket =
+      if params["page"] do
+        default_limit =
+          socket.assigns[:action] && socket.assigns.action.pagination &&
+            socket.assigns.action.pagination.default_limit
+
+        count? =
+          socket.assigns[:action] && socket.assigns.action.pagination &&
+            socket.assigns.action.pagination.countable
+
+        page_params =
+          AshPhoenix.LiveView.page_from_params(params["page"], default_limit, !!count?)
+
+        socket
+        |> assign(
+          :page_params,
+          page_params
+        )
+        |> assign(:page_num, page_num_from_page_params(page_params))
+      else
+        socket
+        |> assign(:page_params, nil)
+        |> assign(:page_num, 1)
+      end
+
+    {:noreply,
+     socket
+     |> assign(:url_path, url.path)
+     |> assign(:params, %{})}
+  end
+
+  defp page_num_from_page_params(params) do
+    cond do
+      !params[:offset] || params[:after] || params[:before] ->
+        1
+
+      params[:offset] && params[:limit] ->
+        trunc(Float.ceil(params[:offset] / params[:limit])) + 1
+
+      true ->
+        nil
     end
   end
 
@@ -199,13 +256,9 @@ defmodule AshAdmin.PageLive do
      socket
      |> push_patch(
        to:
-         self_path(socket, %{
+         self_path(socket.assigns.url_path, socket.assigns.params, %{
            filter: filter_query
          })
      )}
-  end
-
-  defp self_path(socket, params) do
-    socket.assigns.url_path <> "?" <> Plug.Conn.Query.encode(params)
   end
 end

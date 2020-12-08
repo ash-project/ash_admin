@@ -3,6 +3,7 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import NProgress from "nprogress"
 import { LiveSocket, Browser } from "phoenix_live_view"
+import 'alpinejs'
 
 function cookieValue(name) {
   if (document.cookie) {
@@ -67,6 +68,13 @@ Hooks.Tenant = {
 
 let liveSocket = new LiveSocket(socketPath, Socket, {
   hooks: Hooks,
+  dom: {
+    onBeforeElUpdated(from, to) {
+      if (from.__x) {
+        window.Alpine.clone(from.__x, to)
+      }
+    }
+  },
   params: { _csrf_token: csrfToken }
 })
 
