@@ -4,7 +4,7 @@ defmodule AshAdmin.Components.Resource do
   import AshAdmin.Helpers
   require Ash.Query
 
-  alias AshAdmin.Components.Resource.{Info, Nav}
+  alias AshAdmin.Components.Resource.{Form, Info, Nav}
   alias AshPhoenix.Components.{DataTable, FilterBuilder}
   alias Surface.Components.LiveRedirect
 
@@ -22,6 +22,8 @@ defmodule AshAdmin.Components.Resource do
   prop page_num, :integer, default: 1
   prop url_path, :string, default: ""
   prop params, :map, default: %{}
+  prop primary_key, :any, default: nil
+  prop record, :any, default: nil
 
   data filter_open, :boolean, default: false
 
@@ -33,9 +35,9 @@ defmodule AshAdmin.Components.Resource do
         api={{ @api }}
         tab={{ @tab }}
         action={{ @action }}/>
-      <div class="mx-32 relative grid grid-cols-1 justify-items-center">
+      <div class="mx-24 relative grid grid-cols-1 justify-items-center">
         <FilterBuilder
-          :if={{@tab == "data" && @action.type == :read && @filter_open}}
+          :if={{@tab == "data" && @action.type == :read && @filter_open && !@record}}
           id={{data_table_id(@resource) <> "_id"}}
           class="my-6 border-2 rounded max-w-5xl p-2 border-gray-600 bg-gray-300"
           header_class="flex justify-between w-full mb-2 h-6"
@@ -129,13 +131,13 @@ defmodule AshAdmin.Components.Resource do
             </button>
           </template>
         </FilterBuilder>
-        <div class="mx-32 relative grid grid-cols-1 justify-items-center">
-          <div :if={{!@filter_open}}>
+        <div class="mx-24 relative grid grid-cols-1 justify-items-center">
+          <div :if={{@tab == "data" && @action.type == :read && !@filter_open && !@record}}>
             <button :on-click="toggle_filter" class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500 m-5">
               Add Filter
             </button>
           </div>
-          <div :if={{@filter_open}}>
+          <div :if={{@tab == "data" && @action.type == :read && @filter_open && !@record}}>
             <button :on-click="toggle_filter" class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500 m-5">
               Clear Filter
             </button>
@@ -143,7 +145,7 @@ defmodule AshAdmin.Components.Resource do
         </div>
         <DataTable
           class="w-full rounded"
-          :if={{@tab == "data" && @action.type == :read}}
+          :if={{@tab == "data" && @action.type == :read && !@record}}
           id={{data_table_id(@resource)}}
           resource={{ @resource }}
           api={{ @api }}
@@ -157,20 +159,28 @@ defmodule AshAdmin.Components.Resource do
           pagination_footer_container_class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6"
           loading=true>
             <template slot="actions" :let={{ item: item }}>
-              <button
-              :if={{AshAdmin.Resource.actor?(@resource)}}
-              slot="actions"
-              type="button"
-              :on-click={{@set_actor}}
-              phx-value-resource={{@resource}}
-              phx-value-api={{@api}}
-              phx-value-action={{@action.name}}
-              phx-value-pkey={{encode_primary_key(item)}}>
-                <svg width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <path fill-rule="evenodd" d="M0 8a4 4 0 0 1 7.465-2H14a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0L13 9.207l-.646.647a.5.5 0 0 1-.708 0L11 9.207l-.646.647a.5.5 0 0 1-.708 0L9 9.207l-.646.647A.5.5 0 0 1 8 10h-.535A4 4 0 0 1 0 8zm4-3a3 3 0 1 0 2.712 4.285A.5.5 0 0 1 7.163 9h.63l.853-.854a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.793-.793-1-1h-6.63a.5.5 0 0 1-.451-.285A3 3 0 0 0 4 5z"/>
-                  <path d="M4 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                </svg>
-              </button>
+              <div class="flex align-items-center gap-2">
+                <LiveRedirect :if={{Ash.Resource.primary_action(@resource, :read)}} to={{ash_update_path(@socket, @api, @resource, item)}} class="mr-1">
+                  <svg width="1em" height="1em" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                    <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+                  </svg>
+                </LiveRedirect>
+                <button
+                :if={{AshAdmin.Resource.actor?(@resource)}}
+                slot="actions"
+                type="button"
+                :on-click={{@set_actor}}
+                phx-value-resource={{@resource}}
+                phx-value-api={{@api}}
+                phx-value-action={{@action.name}}
+                phx-value-pkey={{encode_primary_key(item)}}>
+                  <svg width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M0 8a4 4 0 0 1 7.465-2H14a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0L13 9.207l-.646.647a.5.5 0 0 1-.708 0L11 9.207l-.646.647a.5.5 0 0 1-.708 0L9 9.207l-.646.647A.5.5 0 0 1 8 10h-.535A4 4 0 0 1 0 8zm4-3a3 3 0 1 0 2.712 4.285A.5.5 0 0 1 7.163 9h.63l.853-.854a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.793-.793-1-1h-6.63a.5.5 0 0 1-.451-.285A3 3 0 0 0 4 5z"/>
+                    <path d="M4 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                  </svg>
+                </button>
+              </div>
             </template>
             <template slot="error" :let={{ error: error}}>
               {{ inspect(error) }}
@@ -207,7 +217,7 @@ defmodule AshAdmin.Components.Resource do
             <template slot="right_footer" :let={{ data: data}}>
               <nav class="relative z-0 inline-flex shadow-sm -space-x-px" aria-label="Pagination">
                 <LiveRedirect
-                :if={{page_link_params(data, "prev") != :invalid}}
+                :if={{page_link_params(data, "prev")}}
                 to={{self_path(@url_path, @params, page_link_params(data, "prev"))}}
                 class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                   <span class="sr-only">Previous</span>
@@ -222,23 +232,10 @@ defmodule AshAdmin.Components.Resource do
                   class={{"relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700", "hover:bg-gray-50": page_num != @page_num, "bg-gray-300": page_num == @page_num}}>
                   {{page_num}}
                 </LiveRedirect>
-                <span :if={{@page_num != 4 && show_ellipses?(data)}} class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                  ...
-                </span>
                 <span
-                class="relative inline-flex items-center px-4 py-2 border border-gray-30 text-sm font-medium text-gray-700 bg-gray-300"
-                :if={{@page_num == 4 && @page_num < (Enum.at(trailing_page_nums(data), 0) || @page_num + 1)}}>
-                  {{@page_num}}
-                </span>
-                <span
-                class="relative inline-flex items-center px-4 py-2 border border-gray-30 text-sm font-medium text-gray-700 bg-gray-300"
-                :if={{@page_num != 4 && @page_num > 3 && @page_num < (Enum.at(trailing_page_nums(data), 0) || @page_num + 1)}}>
-                  {{@page_num}}
-                </span>
-                <span
-                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
-                :if={{@page_num != 4 && @page_num > 3 && @page_num < (Enum.at(trailing_page_nums(data), 0) || @page_num + 1)}}>
-                  ...
+                :if={{show_ellipses?(data)}}
+                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                  {{middle_page_num(@page_num, trailing_page_nums(data))}}
                 </span>
                 <LiveRedirect
                   :for={{ page_num <- trailing_page_nums(data) }}
@@ -247,7 +244,7 @@ defmodule AshAdmin.Components.Resource do
                   {{ page_num }}
                 </LiveRedirect>
                 <LiveRedirect
-                  :if={{page_link_params(data, "next") != :invalid}}
+                  :if={{page_link_params(data, "next")}}
                   to={{self_path(@url_path, @params, page_link_params(data, "next"))}}
                   class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
                   >
@@ -261,15 +258,34 @@ defmodule AshAdmin.Components.Resource do
             </template>
         </DataTable>
       </div>
+      <div :if={{@record && match?({:ok, record} when not is_nil(record), @record) && @tab == "update"}}>
+        {{{:ok, record} = @record; nil}}
+        <Form type={{:update}} record={{record}} resource={{@resource}} api={{@api}} id={{update_id(@resource)}}/>
+      </div>
       <Info :if={{@tab == "info"}} resource={{@resource}} api={{@api}}/>
+      <Form :if={{@tab == "create"}} type={{:create}} resource={{@resource}} api={{@api}} id={{create_id(@resource)}}/>
     </div>
     """
+  end
+
+  defp middle_page_num(num, trailing_page_nums) do
+    if num in trailing_page_nums || num <= 3 do
+      "..."
+    else
+      "...#{num}..."
+    end
   end
 
   defp page_link_params({:ok, page}, target), do: page_link_params(page, target)
 
   defp page_link_params(page, target) do
-    [page: AshPhoenix.LiveView.page_link_params(page, target)]
+    case AshPhoenix.LiveView.page_link_params(page, target) do
+      :invalid ->
+        nil
+
+      params ->
+        [page: params]
+    end
   end
 
   defp show_ellipses?(%Ash.Page.Offset{count: count, limit: limit}) when not is_nil(count) do
@@ -348,6 +364,14 @@ defmodule AshAdmin.Components.Resource do
 
   defp data_table_id(resource) do
     "#{resource}_table"
+  end
+
+  defp create_id(resource) do
+    "#{resource}_create"
+  end
+
+  defp update_id(resource) do
+    "#{resource}_update"
   end
 
   defp run_query() do

@@ -24,12 +24,12 @@ defmodule Demo.Tickets.Ticket do
     read :reported do
       filter reporter: actor(:id)
 
-      pagination offset?: true, countable: true, required?: false
+      pagination offset?: true, countable: true, required?: false, default_limit: 25
     end
 
     read :assigned do
       filter representative: actor(:id)
-      pagination offset?: true, countable: true, required?: false
+      pagination offset?: true, countable: true, required?: false, default_limit: 25
     end
 
     read :read do

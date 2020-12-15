@@ -11,7 +11,7 @@ defmodule AshAdmin.Components.Resource.Nav do
 
   def render(assigns) do
     ~H"""
-    <nav class="bg-gray-700 w-full">
+    <nav class="bg-gray-800 w-full">
       <div class="px-4 sm:px-6 lg:px-8 w-full">
         <div class="flex items-center justify-between h-16 w-full">
           <div class="flex items-center w-full">
@@ -26,12 +26,12 @@ defmodule AshAdmin.Components.Resource.Nav do
               <div class="ml-12 flex items-center">
                 <div :if={{has_create_action?(@resource)}} class="relative">
                   <LiveRedirect
-                    to="#"
+                    to={{ash_create_path(@socket, @api, @resource)}}
                     class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
                   Create
                   </LiveRedirect>
                 </div>
-                <Dropdown name="Read" id={{"#{@resource}_data_dropdown"}} groups={{data_groups(@socket, @api, @resource)}} />
+                <Dropdown name="Read" id={{"#{@resource}_data_dropdown"}} active={{@tab == "data"}} groups={{data_groups(@socket, @api, @resource, @action)}} />
               </div>
             </div>
           </div>
@@ -41,7 +41,7 @@ defmodule AshAdmin.Components.Resource.Nav do
     """
   end
 
-  defp data_groups(socket, api, resource) do
+  defp data_groups(socket, api, resource, current_action) do
     [
       resource
       |> Ash.Resource.actions()
@@ -49,7 +49,8 @@ defmodule AshAdmin.Components.Resource.Nav do
       |> Enum.map(fn action ->
         %{
           text: action_name(action),
-          to: ash_action_path(socket, api, resource, :read, action.name)
+          to: ash_action_path(socket, api, resource, :read, action.name),
+          active: current_action == action
         }
       end)
     ]
@@ -67,15 +68,5 @@ defmodule AshAdmin.Components.Resource.Nav do
     |> String.split("_")
     |> Enum.map(&String.capitalize/1)
     |> Enum.join(" ")
-  end
-
-  defp action_active?(_, nil), do: false
-  defp action_active?(%{type: type, name: name}, %{type: type, name: name}), do: true
-  defp action_active?(_, _), do: false
-
-  defp read_actions(resource) do
-    resource
-    |> Ash.Resource.actions()
-    |> Enum.filter(&(&1.type == :read))
   end
 end

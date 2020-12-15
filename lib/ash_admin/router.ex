@@ -54,6 +54,7 @@ defmodule AshAdmin.Router do
           as =
             api
             |> AshAdmin.Api.name()
+            |> String.downcase()
             |> String.to_atom()
 
           live(
@@ -75,6 +76,7 @@ defmodule AshAdmin.Router do
               api
               |> AshAdmin.Api.name()
               |> Kernel.<>(AshAdmin.Resource.name(resource))
+              |> String.downcase()
               |> String.to_atom()
 
             live(
@@ -91,21 +93,63 @@ defmodule AshAdmin.Router do
               })
             )
 
-            for action <- Ash.Resource.actions(resource) do
+            if Enum.any?(Ash.Resource.actions(resource), &(&1.type == :create)) do
+              as =
+                api
+                |> AshAdmin.Api.name()
+                |> Kernel.<>(AshAdmin.Resource.name(resource))
+                |> Kernel.<>("create")
+                |> String.downcase()
+                |> String.to_atom()
+
+              live(
+                "/#{AshAdmin.Api.name(api)}/create",
+                AshAdmin.PageLive,
+                :resource_page,
+                AshAdmin.Router.__options__(opts, as, %{
+                  "apis" => apis,
+                  "api" => api,
+                  "resource" => resource,
+                  "tab" => "create",
+                  "action_type" => :create,
+                  "action_name" => Ash.Resource.primary_action!(resource, :create).name
+                })
+              )
+            end
+
+            if Enum.any?(Ash.Resource.actions(resource), &(&1.type == :update)) do
+              as =
+                api
+                |> AshAdmin.Api.name()
+                |> Kernel.<>(AshAdmin.Resource.name(resource))
+                |> Kernel.<>("update")
+                |> String.downcase()
+                |> String.to_atom()
+
+              live(
+                "/#{AshAdmin.Api.name(api)}/update/:primary_key",
+                AshAdmin.PageLive,
+                :resource_page,
+                AshAdmin.Router.__options__(opts, as, %{
+                  "apis" => apis,
+                  "api" => api,
+                  "resource" => resource,
+                  "tab" => "update",
+                  "action_type" => :update,
+                  "action_name" => Ash.Resource.primary_action!(resource, :update).name
+                })
+              )
+            end
+
+            for %{type: :read} = action <- Ash.Resource.actions(resource) do
               as =
                 api
                 |> AshAdmin.Api.name()
                 |> Kernel.<>(AshAdmin.Resource.name(resource))
                 |> Kernel.<>("_#{action.type}")
                 |> Kernel.<>("_#{action.name}")
+                |> String.downcase()
                 |> String.to_atom()
-
-              tab =
-                if action.type in [:create, :read] do
-                  "data"
-                else
-                  "unknown"
-                end
 
               live(
                 "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/#{action.type}/#{
@@ -117,8 +161,8 @@ defmodule AshAdmin.Router do
                   "apis" => apis,
                   "api" => api,
                   "resource" => resource,
-                  "tab" => tab,
-                  "action_type" => action.type,
+                  "tab" => "data",
+                  "action_type" => :read,
                   "action_name" => action.name
                 })
               )

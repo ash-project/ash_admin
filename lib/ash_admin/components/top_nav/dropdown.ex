@@ -6,6 +6,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
   prop name, :string, required: true
   prop groups, :list, required: true
   prop id, :string, required: true
+  prop active, :boolean, required: true
 
   def render(assigns) do
     ~H"""
@@ -13,7 +14,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
       <div x-data="{isOpen: false}" class="mx-2">
         <button
         type="button"
-        class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
+        class={{"inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500", "bg-gray-800 hover:bg-gray-900 text-white": @active, "bg-white text-gray-700 hover:bg-gray-300": !@active}}
         @click="isOpen = !isOpen"
         id={{"#{@id}_dropown"}}
         aria-haspopup="true"
@@ -27,7 +28,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
 
         <div
           x-show="isOpen"
-          class="origin-top-right absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 z-10"
+          class={{"origin-top-right absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 z-10", "bg-gray-600 hover:bg-gray-700": single_active_group?(@groups)}}
           x-transition:enter="transition ease-out duration-100"
           x-transition:enter-start="transform opacity-0 scale-95"
           x-transition:enter-end="transform opacity-0 scale-95"
@@ -47,7 +48,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
             <LiveRedirect
             :for={{ link <- group }}
             to={{ link.to }}
-            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+            class={{"block px-4 py-2 text-sm ", "bg-gray-600 text-white hover:bg-gray-700": Map.get(link, :active), "text-gray-700 hover:bg-gray-100 hover:text-gray-900": !Map.get(link, :active)}}
             opts={{role: "menuitem"}}>
               {{link.text}}
             </LiveRedirect>
@@ -57,4 +58,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
     </div>
     """
   end
+
+  defp single_active_group?([[%{active: true}]]), do: true
+  defp single_active_group?(_), do: false
 end

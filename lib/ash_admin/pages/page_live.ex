@@ -63,6 +63,8 @@ defmodule AshAdmin.PageLive do
      |> assign(:apis, apis)
      |> assign(:resource, resource)
      |> assign(:action, action)
+     |> assign(:primary_key, nil)
+     |> assign(:record, nil)
      |> assign(:tab, tab)
      |> assign(:actor_resources, actor_resources(apis))
      |> assign(:tenant, session["tenant"])
@@ -97,6 +99,8 @@ defmodule AshAdmin.PageLive do
        id={{ @resource }}
        resource={{ @resource }}
        set_actor="set_actor"
+      primary_key={{ @primary_key }}
+      record={{ @record }}
        api={{ @api }}
        tab={{ @tab }}
        url_path={{ @url_path }}
@@ -159,6 +163,40 @@ defmodule AshAdmin.PageLive do
         |> assign(:page_num, 1)
       end
 
+    socket =
+      if params["primary_key"] do
+        case decode_primary_key(socket.assigns.resource, params["primary_key"]) do
+          {:ok, primary_key} ->
+            actor =
+              if socket.assigns.actor_paused do
+                nil
+              else
+                socket.assigns.actor
+              end
+
+            record =
+              socket.assigns.resource
+              |> Ash.Query.filter(^primary_key)
+              |> socket.assigns.api.read_one(
+                action: Ash.Resource.primary_action!(socket.assigns.resource, :read),
+                actor: actor
+              )
+
+            socket
+            |> assign(:id, params["primary_key"])
+            |> assign(:record, record)
+
+          _ ->
+            socket
+            |> assign(:id, nil)
+            |> assign(:record, nil)
+        end
+      else
+        socket
+        |> assign(:id, nil)
+        |> assign(:record, nil)
+      end
+
     {:noreply,
      socket
      |> assign(:url_path, url.path)
@@ -209,7 +247,7 @@ defmodule AshAdmin.PageLive do
         %{"resource" => resource, "api" => api, "action" => action, "pkey" => primary_key},
         socket
       ) do
-    case decode_primary_key(primary_key) do
+    case decode_primary_key(socket.assigns.resource, primary_key) do
       {:ok, pkey_filter} ->
         api = Module.concat([api])
         resource = Module.concat([resource])

@@ -68,7 +68,7 @@ defmodule AshAdmin.ActorPlug do
         Ash.Resource.action(resource, String.to_existing_atom(action), :read)
       end
 
-    case decode_primary_key(primary_key) do
+    case decode_primary_key(resource, primary_key) do
       :error ->
         nil
 

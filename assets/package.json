@@ -7,6 +7,7 @@
     "watch": "NODE_ENV=production webpack --mode development --watch"
   },
   "dependencies": {
+    "@tailwindcss/forms": "^0.2.1",
     "alpinejs": "2.7.3",
     "nprogress": "^0.2.0",
     "phoenix": "file:../deps/phoenix",

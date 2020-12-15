@@ -10,6 +10,11 @@ defmodule Demo.Accounts.User do
 
   admin do
     actor? true
+
+    form do
+      field :first_name, :short_text
+      field :last_name, :short_text
+    end
   end
 
   policies do

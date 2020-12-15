@@ -36,7 +36,12 @@ defmodule AshAdmin.Components.TopNav do
             <div class="hidden md:block w-full">
               <div class="flex justify-between">
                 <div class="ml-10 flex items-center">
-                  <Dropdown :for={{api <- @apis}} id={{AshAdmin.Api.name(api) <> "_api_nav"}} name={{AshAdmin.Api.name(api)}} groups={{ dropdown_groups(@socket, api)}}/>
+                  <Dropdown
+                  :for={{api <- @apis}}
+                  active={{api == @api}}
+                  id={{AshAdmin.Api.name(api) <> "_api_nav"}}
+                  name={{AshAdmin.Api.name(api)}}
+                  groups={{ dropdown_groups(@socket, @resource, api)}}/>
                 </div>
                 <div class="ml-10 flex items-center">
                   <ActorSelect
@@ -91,19 +96,20 @@ defmodule AshAdmin.Components.TopNav do
             set_tenant={{ @set_tenant }}
             clear_tenant={{ @clear_tenant }}/>
           </div>
-          <DrawerDropdown :for={{api <- @apis}} id={{AshAdmin.Api.name(api) <> "_api_nav_drawer"}} name={{AshAdmin.Api.name(api)}} groups={{ dropdown_groups(@socket, api)}}/>
+          <DrawerDropdown :for={{api <- @apis}} id={{AshAdmin.Api.name(api) <> "_api_nav_drawer"}} name={{AshAdmin.Api.name(api)}} groups={{ dropdown_groups(@socket, @resource, api)}}/>
         </div>
       </div>
     </nav>
     """
   end
 
-  defp dropdown_groups(socket, api) do
+  defp dropdown_groups(socket, current_resource, api) do
     [
       for resource <- Ash.Api.resources(api) do
         %{
           text: AshAdmin.Resource.name(resource),
-          to: ash_admin_path(socket, api, resource)
+          to: ash_admin_path(socket, api, resource),
+          active: resource == current_resource
         }
       end
     ]
