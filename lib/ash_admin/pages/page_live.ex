@@ -229,15 +229,18 @@ defmodule AshAdmin.PageLive do
 
   def handle_event(
         "set_actor",
-        %{"resource" => resource, "api" => api, "action" => action, "pkey" => primary_key},
+        %{"resource" => resource, "api" => api, "pkey" => primary_key},
         socket
       )
       when not is_nil(resource) and not is_nil(api) do
-    case decode_primary_key(socket.assigns.resource, primary_key) do
+    resource = Module.concat([resource])
+
+    IO.inspect("here")
+
+    case decode_primary_key(resource, primary_key) do
       {:ok, pkey_filter} ->
         api = Module.concat([api])
-        resource = Module.concat([resource])
-        action = Ash.Resource.Info.action(resource, String.to_existing_atom(action), :read)
+        action = Ash.Resource.Info.primary_action!(resource, :read)
 
         actor =
           resource

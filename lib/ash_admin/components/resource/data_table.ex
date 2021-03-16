@@ -9,6 +9,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   prop(api, :atom)
   prop(action, :any)
   prop(authorize, :boolean)
+  prop(set_actor, :event, required: true)
 
   data(initialized, :boolean, default: false)
   data(data, :any)
@@ -91,6 +92,10 @@ defmodule AshAdmin.Components.Resource.DataTable do
                     {{ {:safe, Heroicons.Solid.pencil(class: "h-5 w-5 text-gray-500")} }}
                   </LiveRedirect>
                 </div>
+
+                <button :if={{ AshAdmin.Resource.actor?(@resource) }} :on-click={{@set_actor}} phx-value-resource={{@resource}} phx-value-api={{@api}} phx-value-pkey={{encode_primary_key(record)}}>
+                  {{ {:safe, Heroicons.Solid.key(class: "h-5 w-5 text-gray-500")} }}
+                </button>
               </div>
             </td>
           </tr>

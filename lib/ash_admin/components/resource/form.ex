@@ -418,6 +418,12 @@ defmodule AshAdmin.Components.Resource.Form do
     |> sort_attributes(resource)
   end
 
+  def attributes(resource, %{type: :destroy} = action) do
+    action.arguments
+    |> Enum.reject(& &1.private?)
+    |> sort_attributes(resource)
+  end
+
   def attributes(resource, action) do
     attributes =
       resource

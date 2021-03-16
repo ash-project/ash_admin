@@ -62,6 +62,7 @@ defmodule AshAdmin.Components.Resource do
         resource={{ @resource }}
         action={{ @action }}
         api={{ @api }}
+        set_actor={{ @set_actor }}
         id={{ data_table_id(@resource) }}
         authorize={{ @authorize }}
       />
