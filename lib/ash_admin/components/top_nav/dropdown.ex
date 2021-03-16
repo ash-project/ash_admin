@@ -11,7 +11,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
   def render(assigns) do
     ~H"""
     <div class="relative">
-      <div x-data="{isOpen: false}" class="mx-2">
+      <div x-data="{isOpen: false}">
         <button
         type="button"
         class={{"inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500", "bg-gray-800 hover:bg-gray-900 text-white": @active, "bg-white text-gray-700 hover:bg-gray-300": !@active}}

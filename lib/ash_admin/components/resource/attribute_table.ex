@@ -39,7 +39,7 @@ defmodule AshAdmin.Components.Resource.AttributeTable do
 
   defp attributes(resource) do
     resource
-    |> Ash.Resource.attributes()
+    |> Ash.Resource.Info.attributes()
     |> Enum.sort_by(& &1.private?)
   end
 

@@ -2,6 +2,6 @@ defmodule Demo.Repo do
   use AshPostgres.Repo, otp_app: :ash_admin
 
   def installed_extensions() do
-    ["uuid-ossp"]
+    ["uuid-ossp", "pg_trgm", "citext"]
   end
 end

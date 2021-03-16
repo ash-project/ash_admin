@@ -3,6 +3,21 @@ defmodule AshAdmin.Router do
   Provides LiveView routing for AshAdmin.
   """
 
+  defmacro admin_browser_pipeline(name \\ :browser) do
+    quote do
+      import Phoenix.LiveView.Router
+
+      pipeline unquote(name) do
+        plug(:accepts, ["html"])
+        plug(:fetch_session)
+        plug(:fetch_live_flash)
+        plug(:put_root_layout, {ThingyWeb.LayoutView, :root})
+        plug(:protect_from_forgery)
+        plug(:put_secure_browser_headers)
+      end
+    end
+  end
+
   @doc """
   Defines an AshAdmin route.
   It expects the `path` the admin dashboard will be mounted at
@@ -13,7 +28,7 @@ defmodule AshAdmin.Router do
       defmodule MyAppWeb.Router do
         use Phoenix.Router
 
-        scope "/", MyAppWeb do
+        scope "/" do
           import AshAdmin.Router
 
           pipe_through [:browser]
@@ -93,7 +108,7 @@ defmodule AshAdmin.Router do
               })
             )
 
-            if Enum.any?(Ash.Resource.actions(resource), &(&1.type == :create)) do
+            if Enum.any?(Ash.Resource.Info.actions(resource), &(&1.type == :create)) do
               as =
                 api
                 |> AshAdmin.Api.name()
@@ -103,7 +118,7 @@ defmodule AshAdmin.Router do
                 |> String.to_atom()
 
               live(
-                "/#{AshAdmin.Api.name(api)}/create",
+                "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/create",
                 AshAdmin.PageLive,
                 :resource_page,
                 AshAdmin.Router.__options__(opts, as, %{
@@ -112,12 +127,12 @@ defmodule AshAdmin.Router do
                   "resource" => resource,
                   "tab" => "create",
                   "action_type" => :create,
-                  "action_name" => Ash.Resource.primary_action!(resource, :create).name
+                  "action_name" => Ash.Resource.Info.primary_action!(resource, :create).name
                 })
               )
             end
 
-            if Enum.any?(Ash.Resource.actions(resource), &(&1.type == :update)) do
+            if Enum.any?(Ash.Resource.Info.actions(resource), &(&1.type == :update)) do
               as =
                 api
                 |> AshAdmin.Api.name()
@@ -127,7 +142,7 @@ defmodule AshAdmin.Router do
                 |> String.to_atom()
 
               live(
-                "/#{AshAdmin.Api.name(api)}/update/:primary_key",
+                "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/update/:primary_key",
                 AshAdmin.PageLive,
                 :resource_page,
                 AshAdmin.Router.__options__(opts, as, %{
@@ -136,12 +151,66 @@ defmodule AshAdmin.Router do
                   "resource" => resource,
                   "tab" => "update",
                   "action_type" => :update,
-                  "action_name" => Ash.Resource.primary_action!(resource, :update).name
+                  "action_name" => Ash.Resource.Info.primary_action!(resource, :update).name
+                })
+              )
+
+              for %{type: :update} = action <- Ash.Resource.Info.actions(resource) do
+                as =
+                  api
+                  |> AshAdmin.Api.name()
+                  |> Kernel.<>(AshAdmin.Resource.name(resource))
+                  |> Kernel.<>(to_string(action.name))
+                  |> Kernel.<>("update")
+                  |> String.downcase()
+                  |> String.to_atom()
+
+                live(
+                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(api)}/update/#{action.name}/:primary_key",
+                  AshAdmin.PageLive,
+                  :resource_page,
+                  AshAdmin.Router.__options__(opts, as, %{
+                    "apis" => apis,
+                    "api" => api,
+                    "resource" => resource,
+                    "tab" => "update",
+                    "action_type" => :update,
+                    "action_name" => action.name
+                  })
+                )
+              end
+            end
+
+            show_action = AshAdmin.Resource.show_action(resource)
+
+            if show_action do
+              action = Ash.Resource.Info.action(resource, AshAdmin.Resource.show_action(resource))
+
+              as =
+                api
+                |> AshAdmin.Api.name()
+                |> Kernel.<>(AshAdmin.Resource.name(resource))
+                |> Kernel.<>("_show")
+                |> Kernel.<>("_#{action.name}")
+                |> String.downcase()
+                |> String.to_atom()
+
+              live(
+                "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/show/:primary_key",
+                AshAdmin.PageLive,
+                :show_page,
+                AshAdmin.Router.__options__(opts, as, %{
+                  "apis" => apis,
+                  "api" => api,
+                  "resource" => resource,
+                  "tab" => "read",
+                  "action_type" => :read,
+                  "action_name" => action.name
                 })
               )
             end
 
-            for %{type: :read} = action <- Ash.Resource.actions(resource) do
+            for %{type: :read} = action <- Ash.Resource.Info.actions(resource) do
               as =
                 api
                 |> AshAdmin.Api.name()

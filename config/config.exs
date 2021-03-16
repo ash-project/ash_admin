@@ -8,7 +8,7 @@ config :phoenix, :json_library, Jason
 config :ash_admin, ecto_repos: [Demo.Repo]
 
 config :ash_admin,
-  apis: [
+  ash_apis: [
     Demo.Accounts.Api,
     Demo.Tickets.Api
   ]

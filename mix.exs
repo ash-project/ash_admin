@@ -8,10 +8,18 @@ defmodule AshAdmin.MixProject do
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      elixirc_paths: ["lib", "dev"],
+      elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix] ++ Mix.compilers(),
       aliases: aliases()
     ]
+  end
+
+  defp elixirc_paths(env) when env in [:dev, :test] do
+    ["lib", "dev"]
+  end
+
+  defp elixirc_paths(:prod) do
+    ["lib"]
   end
 
   defp aliases() do
@@ -39,17 +47,17 @@ defmodule AshAdmin.MixProject do
   defp deps do
     [
       {:ash, path: "../ash", override: true},
-      # "~> 1.24"},
       {:surface, "~> 0.1.1"},
       {:ash_phoenix, path: "../ash_phoenix"},
-      {:phoenix_live_view, "~> 0.15.0"},
+      {:phoenix_live_view, "~> 0.15.4"},
       {:phoenix_html, "~> 2.14.1 or ~> 2.15"},
       {:jason, "~> 1.0"},
+      {:heroicons, "~> 0.1.0"},
       # Dev dependencies
       {:plug_cowboy, "~> 2.0", only: :dev},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:ash_postgres, "~> 0.26.1", only: :dev},
-      {:ash_policy_authorizer, "~> 0.14.0", only: :dev}
+      {:ash_postgres, path: "../ash_postgres", only: :dev},
+      {:ash_policy_authorizer, path: "../ash_policy_authorizer", only: :dev}
     ]
   end
 end

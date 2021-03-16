@@ -23,7 +23,7 @@ defmodule AshAdmin.Components.Resource.Nav do
               </h3>
             </div>
             <div class="w-full">
-              <div class="ml-12 flex items-center">
+              <div class="ml-12 flex items-center space-x-1">
                 <div :if={{has_create_action?(@resource)}} class="relative">
                   <LiveRedirect
                     to={{ash_create_path(@socket, @api, @resource)}}
@@ -31,6 +31,7 @@ defmodule AshAdmin.Components.Resource.Nav do
                   Create
                   </LiveRedirect>
                 </div>
+
                 <Dropdown name="Read" id={{"#{@resource}_data_dropdown"}} active={{@tab == "data"}} groups={{data_groups(@socket, @api, @resource, @action)}} />
               </div>
             </div>
@@ -42,10 +43,13 @@ defmodule AshAdmin.Components.Resource.Nav do
   end
 
   defp data_groups(socket, api, resource, current_action) do
+    show_actions = AshAdmin.Resource.get_actions(resource)
+
     [
       resource
-      |> Ash.Resource.actions()
+      |> Ash.Resource.Info.actions()
       |> Enum.filter(&(&1.type == :read))
+      |> Enum.reject(&(&1.name in show_actions))
       |> Enum.map(fn action ->
         %{
           text: action_name(action),
@@ -58,7 +62,7 @@ defmodule AshAdmin.Components.Resource.Nav do
 
   defp has_create_action?(resource) do
     resource
-    |> Ash.Resource.actions()
+    |> Ash.Resource.Info.actions()
     |> Enum.any?(&(&1.type == :create))
   end
 

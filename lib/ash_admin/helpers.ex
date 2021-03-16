@@ -96,6 +96,22 @@ defmodule AshAdmin.Helpers do
     )
   end
 
+  def ash_update_path(socket, api, resource, record, action_name) do
+    route =
+      String.to_atom(
+        String.downcase(
+          AshAdmin.Api.name(api) <>
+            AshAdmin.Resource.name(resource) <> to_string(action_name) <> "update_path"
+        )
+      )
+
+    apply(
+      socket.router.__helpers__(),
+      route,
+      [socket, :resource_page, encode_primary_key(record)]
+    )
+  end
+
   def ash_action_path(socket, api, resource, action_type, action_name) do
     route =
       String.to_atom(
@@ -112,8 +128,24 @@ defmodule AshAdmin.Helpers do
     )
   end
 
+  def ash_show_path(socket, api, resource, record, action_name) do
+    route =
+      String.to_atom(
+        String.downcase(
+          AshAdmin.Api.name(api) <>
+            AshAdmin.Resource.name(resource) <> "_show" <> "_#{action_name}" <> "_path"
+        )
+      )
+
+    apply(
+      socket.router.__helpers__(),
+      route,
+      [socket, :show_page, encode_primary_key(record)]
+    )
+  end
+
   def encode_primary_key(record) do
-    pkey = Ash.Resource.primary_key(record.__struct__)
+    pkey = Ash.Resource.Info.primary_key(record.__struct__)
 
     if Enum.count(pkey) == 1 and simple_type?(record.__struct__, Enum.at(pkey, 0)) do
       Map.get(record, Enum.at(pkey, 0))
@@ -126,7 +158,7 @@ defmodule AshAdmin.Helpers do
   end
 
   def decode_primary_key(resource, string) do
-    pkey = Ash.Resource.primary_key(resource)
+    pkey = Ash.Resource.Info.primary_key(resource)
 
     if Enum.count(pkey) == 1 and simple_type?(resource, Enum.at(pkey, 0)) do
       {:ok, [{Enum.at(pkey, 0), string}]}
@@ -148,6 +180,6 @@ defmodule AshAdmin.Helpers do
   ]
 
   defp simple_type?(resource, field) do
-    Ash.Resource.attribute(resource, field).type in @simple_types
+    Ash.Resource.Info.attribute(resource, field).type in @simple_types
   end
 end

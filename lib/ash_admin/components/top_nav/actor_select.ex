@@ -55,7 +55,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
 
   defp render_actor_link(assigns, [{api, resource}]) do
     ~H"""
-    <LiveRedirect to={{ ash_action_path(@socket, api, resource, :read, Ash.Resource.primary_action(resource, :read).name) }}>
+    <LiveRedirect to={{ ash_action_path(@socket, api, resource, :read, Ash.Resource.Info.primary_action(resource, :read).name) }}>
       Set {{ AshAdmin.Resource.name(resource) }}
     </LiveRedirect>
     """
@@ -66,7 +66,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
     <a href="#" id="actor-banner" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Set actor</a>
     <div aria-labelledby="actor-banner">
       <LiveRedirect
-        to={{ash_action_path(@socket, api, resource, :read, Ash.Resource.primary_action(resource, :read).name)}}
+        to={{ash_action_path(@socket, api, resource, :read, Ash.Resource.Info.primary_action(resource, :read).name)}}
         :for={{ {api, resource} <- apis_and_resources }}>
         {{AshAdmin.Resource.name(resource)}}
       </LiveRedirect>
@@ -77,7 +77,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
   defp user_display(actor) do
     name = AshAdmin.Resource.name(actor.__struct__)
 
-    case Ash.Resource.primary_key(actor.__struct__) do
+    case Ash.Resource.Info.primary_key(actor.__struct__) do
       [field] ->
         "#{name}: #{Map.get(actor, field)}"
 

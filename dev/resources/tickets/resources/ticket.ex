@@ -3,7 +3,14 @@ defmodule Demo.Tickets.Ticket do
     data_layer: AshPostgres.DataLayer,
     authorizers: [
       AshPolicyAuthorizer.Authorizer
+    ],
+    extensions: [
+      AshAdmin.Resource
     ]
+
+  admin do
+    show_action :read
+  end
 
   policies do
     bypass always() do
@@ -61,10 +68,7 @@ defmodule Demo.Tickets.Ticket do
   end
 
   attributes do
-    attribute :id, :uuid do
-      primary_key? true
-      default &Ecto.UUID.generate/0
-    end
+    uuid_primary_key :id
 
     attribute :subject, :string do
       allow_nil? false

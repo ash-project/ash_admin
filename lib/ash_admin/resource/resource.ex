@@ -4,12 +4,11 @@ defmodule AshAdmin.Resource do
     name: :field,
     schema: AshAdmin.Resource.Field.schema(),
     target: AshAdmin.Resource.Field,
-    args: [:name, :type]
+    args: [:name]
   }
 
   @form %Ash.Dsl.Section{
-    describe:
-      "Configure the appearance of fields in admin forms. Also can be used to define the order of fields",
+    describe: "Configure the appearance of fields in admin forms.",
     name: :form,
     entities: [
       @field
@@ -30,6 +29,16 @@ defmodule AshAdmin.Resource do
       actor?: [
         type: :boolean,
         doc: "Whether or not this resource can be used as the actor for requests"
+      ],
+      show_action: [
+        type: :atom,
+        doc:
+          "The action to use when linking to the resource/viewing a single record. Defaults to the primary read action."
+      ],
+      get_actions: [
+        type: {:list, :atom},
+        doc:
+          "A list of read actions that can be used to show resource details. These actions should accept arguments that produce one record e.g `get_user_by_id`."
       ]
     ]
   }
@@ -45,6 +54,21 @@ defmodule AshAdmin.Resource do
 
   def actor?(resource) do
     Ash.Dsl.Extension.get_opt(resource, [:admin], :actor?, false, true)
+  end
+
+  def get_actions(resource) do
+    Ash.Dsl.Extension.get_opt(resource, [:admin], :get_actions, false, []) || []
+  end
+
+  def show_action(resource) do
+    action = Ash.Dsl.Extension.get_opt(resource, [:admin], :show_action, false, [])
+
+    if action do
+      action
+    else
+      action = Ash.Resource.Info.primary_action(resource, :read)
+      action && action.name
+    end
   end
 
   def fields(resource) do

@@ -3,8 +3,8 @@ defmodule AshAdmin.Components.Resource.RelationshipTable do
   import AshAdmin.Helpers
   alias Surface.Components.LiveRedirect
 
-  prop resource, :any, required: true
-  prop api, :any, required: true
+  prop(resource, :any, required: true)
+  prop(api, :any, required: true)
 
   def render(assigns) do
     ~H"""
@@ -40,7 +40,7 @@ defmodule AshAdmin.Components.Resource.RelationshipTable do
 
   defp relationships(resource) do
     resource
-    |> Ash.Resource.relationships()
+    |> Ash.Resource.Info.relationships()
     |> Enum.sort_by(& &1.private?)
   end
 end

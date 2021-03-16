@@ -15,22 +15,6 @@ defmodule AshAdmin.PageLive do
     {:ok, socket}
   end
 
-  %{
-    "action_name" => nil,
-    "action_type" => nil,
-    "actor_action" => nil,
-    "actor_api" => nil,
-    "actor_authorizing" => nil,
-    "actor_paused" => nil,
-    "actor_primary_key" => nil,
-    "actor_resource" => nil,
-    "api" => Demo.Accounts.Api,
-    "apis" => [Demo.Accounts.Api, Demo.Tickets.Api],
-    "resource" => nil,
-    "tab" => nil,
-    "tenant" => nil
-  }
-
   @impl true
   def mount(
         _params,
@@ -53,7 +37,7 @@ defmodule AshAdmin.PageLive do
 
     action =
       if action_type && action_name && resource do
-        Ash.Resource.action(resource, action_name, action_type)
+        Ash.Resource.Info.action(resource, action_name, action_type)
       end
 
     {:ok,
@@ -121,7 +105,7 @@ defmodule AshAdmin.PageLive do
     |> Enum.flat_map(fn api ->
       api
       |> Ash.Api.resources()
-      |> Enum.filter(&Ash.Resource.primary_action(&1, :read))
+      |> Enum.filter(&Ash.Resource.Info.primary_action(&1, :read))
       |> Enum.filter(&AshAdmin.Resource.actor?/1)
       |> Enum.map(fn resource -> {api, resource} end)
     end)
@@ -178,8 +162,9 @@ defmodule AshAdmin.PageLive do
               socket.assigns.resource
               |> Ash.Query.filter(^primary_key)
               |> socket.assigns.api.read_one(
-                action: Ash.Resource.primary_action!(socket.assigns.resource, :read),
-                actor: actor
+                action: Ash.Resource.Info.primary_action!(socket.assigns.resource, :read),
+                actor: actor,
+                authorize?: socket.assigns.authorizing
               )
 
             socket
@@ -246,12 +231,13 @@ defmodule AshAdmin.PageLive do
         "set_actor",
         %{"resource" => resource, "api" => api, "action" => action, "pkey" => primary_key},
         socket
-      ) do
+      )
+      when not is_nil(resource) and not is_nil(api) do
     case decode_primary_key(socket.assigns.resource, primary_key) do
       {:ok, pkey_filter} ->
         api = Module.concat([api])
         resource = Module.concat([resource])
-        action = Ash.Resource.action(resource, String.to_existing_atom(action), :read)
+        action = Ash.Resource.Info.action(resource, String.to_existing_atom(action), :read)
 
         actor =
           resource

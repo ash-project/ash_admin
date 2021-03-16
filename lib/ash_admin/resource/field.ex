@@ -1,5 +1,5 @@
 defmodule AshAdmin.Resource.Field do
-  defstruct [:name, :type]
+  defstruct [:name, :type, :default]
 
   @schema [
     name: [

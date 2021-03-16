@@ -59,13 +59,14 @@ defmodule AshAdmin.ActorPlug do
         "actor_api" => api,
         "actor_primary_key" => primary_key,
         "actor_action" => action
-      }) do
+      })
+      when not is_nil(resource) and not is_nil(api) do
     resource = Module.concat([resource])
     api = Module.concat([api])
 
     action =
       if action do
-        Ash.Resource.action(resource, String.to_existing_atom(action), :read)
+        Ash.Resource.Info.action(resource, String.to_existing_atom(action), :read)
       end
 
     case decode_primary_key(resource, primary_key) do

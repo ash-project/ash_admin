@@ -4,21 +4,21 @@ defmodule AshAdmin.Components.TopNav do
   alias Surface.Components.LiveRedirect
   alias AshAdmin.Components.TopNav.{ActorSelect, DrawerDropdown, TenantForm, Dropdown}
 
-  data nav_collapsed, :boolean, default: true
+  data(nav_collapsed, :boolean, default: true)
 
-  prop api, :any, required: true
-  prop resource, :any, required: true
-  prop actor_resources, :any, required: true
-  prop apis, :any, required: true
-  prop tenant, :any, required: true
-  prop clear_tenant, :event
-  prop set_tenant, :event
-  prop toggle_authorizing, :event, required: true
-  prop toggle_actor_paused, :event, required: true
-  prop clear_actor, :event, required: true
-  prop authorizing, :boolean, required: true
-  prop actor_paused, :boolean, required: true
-  prop actor, :any, required: true
+  prop(api, :any, required: true)
+  prop(resource, :any, required: true)
+  prop(actor_resources, :any, required: true)
+  prop(apis, :any, required: true)
+  prop(tenant, :any, required: true)
+  prop(clear_tenant, :event)
+  prop(set_tenant, :event)
+  prop(toggle_authorizing, :event, required: true)
+  prop(toggle_actor_paused, :event, required: true)
+  prop(clear_actor, :event, required: true)
+  prop(authorizing, :boolean, required: true)
+  prop(actor_paused, :boolean, required: true)
+  prop(actor, :any, required: true)
 
   def render(assigns) do
     ~H"""
@@ -124,7 +124,7 @@ defmodule AshAdmin.Components.TopNav do
       api
       |> Ash.Api.resources()
       |> Enum.any?(fn resource ->
-        Ash.Resource.multitenancy_strategy(resource)
+        Ash.Resource.Info.multitenancy_strategy(resource)
       end)
     end)
   end

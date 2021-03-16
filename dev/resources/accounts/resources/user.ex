@@ -12,8 +12,8 @@ defmodule Demo.Accounts.User do
     actor? true
 
     form do
-      field :first_name, :short_text
-      field :last_name, :short_text
+      field :first_name, type: :short_text
+      field :last_name, type: :short_text
     end
   end
 
@@ -31,7 +31,8 @@ defmodule Demo.Accounts.User do
     read :me, filter: [id: actor(:id)]
     read :read, primary?: true
     create :create
-    update :update
+    update :update, primary?: true
+    update :update2
     destroy :destroy
   end
 
@@ -45,10 +46,7 @@ defmodule Demo.Accounts.User do
   end
 
   attributes do
-    attribute :id, :uuid do
-      primary_key? true
-      default &Ecto.UUID.generate/0
-    end
+    uuid_primary_key :id
 
     attribute :first_name, :string do
       constraints min_length: 1
