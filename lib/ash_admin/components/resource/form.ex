@@ -271,17 +271,26 @@ defmodule AshAdmin.Components.Resource.Form do
         end
       )
 
-    {:noreply,
-     push_patch(socket,
-       to:
-         ash_update_path(
-           socket,
-           socket.assigns.api,
-           socket.assigns.resource,
-           socket.assigns.record,
-           action.name
-         )
-     )}
+    case action.type do
+      :create ->
+        {:noreply,
+         push_redirect(socket,
+           to: ash_create_path(socket, socket.assigns.api, socket.assigns.resource)
+         )}
+
+      :update ->
+        {:noreply,
+         push_redirect(socket,
+           to:
+             ash_update_path(
+               socket,
+               socket.assigns.api,
+               socket.assigns.resource,
+               socket.assigns.record,
+               action.name
+             )
+         )}
+    end
   end
 
   def handle_event("save", data, socket) do
