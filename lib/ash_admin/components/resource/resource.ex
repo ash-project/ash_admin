@@ -1,11 +1,9 @@
 defmodule AshAdmin.Components.Resource do
   use Surface.LiveComponent
 
-  import AshAdmin.Helpers
   require Ash.Query
 
   alias AshAdmin.Components.Resource.{Show, Form, Info, Nav, DataTable}
-  alias Surface.Components.LiveRedirect
 
   # prop hide_filter, :boolean, default: true
   prop resource, :any, required: true
@@ -56,10 +54,6 @@ defmodule AshAdmin.Components.Resource do
 
   defp create_id(resource) do
     "#{resource}_create"
-  end
-
-  defp show_id(resource) do
-    "#{resource}_show"
   end
 
   defp update_id(resource) do

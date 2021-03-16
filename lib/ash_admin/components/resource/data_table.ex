@@ -75,7 +75,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
         <tbody>
           <tr :for={{record <- data(@data)}}  class="text-left border-b-2">
             <td :for={{attribute <- Ash.Resource.Info.attributes(@resource)}} class="px-4 py-3">
-              {{render_attribute(assigns, record, attribute)}}
+              {{render_attribute(record, attribute)}}
             </td>
             <td :if={{actions?(@resource)}}>
               <div class="flex h-max justify-items-center">
@@ -112,7 +112,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
     end
   end
 
-  defp render_attribute(assigns, record, attribute) do
+  defp render_attribute(record, attribute) do
     if Ash.Type.embedded_type?(attribute.type) do
       "..."
     else
