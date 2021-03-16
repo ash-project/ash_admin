@@ -16,23 +16,29 @@ defmodule AshAdmin.Components.Resource.Nav do
         <div class="flex items-center justify-between h-16 w-full">
           <div class="flex items-center w-full">
             <div class="flex-shrink-0">
-              <h3 class="text-white text-lg ">
-                <LiveRedirect to={{ash_admin_path(@socket, @api, @resource)}}>
-                  {{AshAdmin.Resource.name(@resource)}}
+              <h3 class="text-white text-lg">
+                <LiveRedirect to={{ ash_admin_path(@socket, @api, @resource) }}>
+                  {{ AshAdmin.Resource.name(@resource) }}
                 </LiveRedirect>
               </h3>
             </div>
             <div class="w-full">
               <div class="ml-12 flex items-center space-x-1">
-                <div :if={{has_create_action?(@resource)}} class="relative">
+                <div :if={{ has_create_action?(@resource) }} class="relative">
                   <LiveRedirect
-                    to={{ash_create_path(@socket, @api, @resource)}}
-                    class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
-                  Create
+                    to={{ ash_create_path(@socket, @api, @resource) }}
+                    class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
+                  >
+                    Create
                   </LiveRedirect>
                 </div>
 
-                <Dropdown name="Read" id={{"#{@resource}_data_dropdown"}} active={{@tab == "data"}} groups={{data_groups(@socket, @api, @resource, @action)}} />
+                <Dropdown
+                  name="Read"
+                  id={{ "#{@resource}_data_dropdown" }}
+                  active={{ @tab == "data" }}
+                  groups={{ data_groups(@socket, @api, @resource, @action) }}
+                />
               </div>
             </div>
           </div>

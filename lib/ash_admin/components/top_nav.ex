@@ -27,8 +27,8 @@ defmodule AshAdmin.Components.TopNav do
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center w-full">
             <div class="flex-shrink-0">
-              <h3 class="text-white text-lg ">
-                <LiveRedirect to={{ash_admin_path(@socket)}}>
+              <h3 class="text-white text-lg">
+                <LiveRedirect to={{ ash_admin_path(@socket) }}>
                   Admin
                 </LiveRedirect>
               </h3>
@@ -37,15 +37,16 @@ defmodule AshAdmin.Components.TopNav do
               <div class="flex justify-between">
                 <div class="ml-10 flex items-center">
                   <Dropdown
-                  :for={{api <- @apis}}
-                  active={{api == @api}}
-                  id={{AshAdmin.Api.name(api) <> "_api_nav"}}
-                  name={{AshAdmin.Api.name(api)}}
-                  groups={{ dropdown_groups(@socket, @resource, api)}}/>
+                    :for={{ api <- @apis }}
+                    active={{ api == @api }}
+                    id={{ AshAdmin.Api.name(api) <> "_api_nav" }}
+                    name={{ AshAdmin.Api.name(api) }}
+                    groups={{ dropdown_groups(@socket, @resource, api) }}
+                  />
                 </div>
                 <div class="ml-10 flex items-center">
                   <ActorSelect
-                    :if={{show_actor_select?(@actor_resources)}}
+                    :if={{ show_actor_select?(@actor_resources) }}
                     actor_resources={{ @actor_resources }}
                     authorizing={{ @authorizing }}
                     actor_paused={{ @actor_paused }}
@@ -53,22 +54,40 @@ defmodule AshAdmin.Components.TopNav do
                     toggle_authorizing={{ @toggle_authorizing }}
                     toggle_actor_paused={{ @toggle_actor_paused }}
                     clear_actor={{ @clear_actor }}
-                    />
+                  />
                   <TenantForm
-                  :if={{ show_tenant_form?(@apis) }}
-                  tenant={{ @tenant }}
-                  id="tenant_editor"
-                  set_tenant={{ @set_tenant }}
-                  clear_tenant={{ @clear_tenant }}/>
+                    :if={{ show_tenant_form?(@apis) }}
+                    tenant={{ @tenant }}
+                    id="tenant_editor"
+                    set_tenant={{ @set_tenant }}
+                    clear_tenant={{ @clear_tenant }}
+                  />
                 </div>
               </div>
             </div>
           </div>
           <div class="-mr-2 flex md:hidden">
-            <button @click="navOpen = !navOpen" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:bg-gray-700 focus:text-white">
+            <button
+              @click="navOpen = !navOpen"
+              class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:bg-gray-700 focus:text-white"
+            >
               <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                <path :class="{'hidden': navOpen, 'inline-flex': !navOpen }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                <path :class="{'hidden': !navOpen, 'inline-flex': navOpen }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <path
+                  :class="{'hidden': navOpen, 'inline-flex': !navOpen }"
+                  class="inline-flex"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+                <path
+                  :class="{'hidden': !navOpen, 'inline-flex': navOpen }"
+                  class="hidden"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -78,7 +97,7 @@ defmodule AshAdmin.Components.TopNav do
         <div class="relative px-2 pt-2 pb-3 sm:px-3">
           <div class="block px-4 py-2 text-sm">
             <ActorSelect
-              :if={{show_actor_select?(@actor_resources)}}
+              :if={{ show_actor_select?(@actor_resources) }}
               actor_resources={{ @actor_resources }}
               authorizing={{ @authorizing }}
               actor_paused={{ @actor_paused }}
@@ -86,17 +105,23 @@ defmodule AshAdmin.Components.TopNav do
               toggle_authorizing={{ @toggle_authorizing }}
               toggle_actor_paused={{ @toggle_actor_paused }}
               clear_actor={{ @clear_actor }}
-              />
+            />
           </div>
           <div class="block px-4 py-2 text-sm">
             <TenantForm
-            :if={{ show_tenant_form?(@apis) }}
-            tenant={{ @tenant }}
-            id="tenant_editor_drawer"
-            set_tenant={{ @set_tenant }}
-            clear_tenant={{ @clear_tenant }}/>
+              :if={{ show_tenant_form?(@apis) }}
+              tenant={{ @tenant }}
+              id="tenant_editor_drawer"
+              set_tenant={{ @set_tenant }}
+              clear_tenant={{ @clear_tenant }}
+            />
           </div>
-          <DrawerDropdown :for={{api <- @apis}} id={{AshAdmin.Api.name(api) <> "_api_nav_drawer"}} name={{AshAdmin.Api.name(api)}} groups={{ dropdown_groups(@socket, @resource, api)}}/>
+          <DrawerDropdown
+            :for={{ api <- @apis }}
+            id={{ AshAdmin.Api.name(api) <> "_api_nav_drawer" }}
+            name={{ AshAdmin.Api.name(api) }}
+            groups={{ dropdown_groups(@socket, @resource, api) }}
+          />
         </div>
       </div>
     </nav>

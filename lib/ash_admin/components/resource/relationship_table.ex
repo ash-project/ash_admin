@@ -8,7 +8,7 @@ defmodule AshAdmin.Components.Resource.RelationshipTable do
 
   def render(assigns) do
     ~H"""
-    <div class="w-full" :if={{Enum.any?(relationships(@resource))}}>
+    <div class="w-full" :if={{ Enum.any?(relationships(@resource)) }}>
       <h1 class="text-center text-3xl rounded-t py-8">
         Relationships
       </h1>
@@ -22,15 +22,21 @@ defmodule AshAdmin.Components.Resource.RelationshipTable do
           </tr>
         </thead>
         <tbody>
-          <tr class={{"h-10", "bg-gray-200": rem(index, 2) == 0}} :for.with_index={{{relationship, index} <- relationships(@resource)}}>
-            <th scope="row"> {{relationship.name}} </th>
-            <td class="text-center"> {{relationship.type}}</td>
+          <tr
+            class={{ "h-10", "bg-gray-200": rem(index, 2) == 0 }}
+            :for.with_index={{ {relationship, index} <- relationships(@resource) }}
+          >
+            <th scope="row">
+              {{ relationship.name }}
+            </th>
             <td class="text-center">
-              <LiveRedirect to={{ash_admin_path(@socket, @api, relationship.destination)}}>
-                {{AshAdmin.Resource.name(relationship.destination)}}
+              {{ relationship.type }}</td>
+            <td class="text-center">
+              <LiveRedirect to={{ ash_admin_path(@socket, @api, relationship.destination) }}>
+                {{ AshAdmin.Resource.name(relationship.destination) }}
               </LiveRedirect>
             </td>
-            <td class="text-center max-w-sm min-w-sm">{{relationship.description}}</td>
+            <td class="text-center max-w-sm min-w-sm">{{ relationship.description }}</td>
           </tr>
         </tbody>
       </table>

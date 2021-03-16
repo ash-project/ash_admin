@@ -9,10 +9,8 @@ defmodule AshAdmin.Components.Resource.Info do
   def render(assigns) do
     ~H"""
     <div class="relative mx-12">
-      <AttributeTable resource={{@resource}}/>
-      <RelationshipTable
-        api={{@api}}
-        resource={{@resource}}/>
+      <AttributeTable resource={{ @resource }} />
+      <RelationshipTable api={{ @api }} resource={{ @resource }} />
     </div>
     """
   end

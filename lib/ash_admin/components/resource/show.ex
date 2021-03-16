@@ -39,38 +39,66 @@ defmodule AshAdmin.Components.Resource.Show do
         <div class="mt-5 md:mt-0 md:col-span-2">
           <div class="shadow overflow-hidden sm:rounded-md">
             <div class="px-4 py-5 bg-white sm:p-6">
-              {{{attributes, flags, bottom_attributes} = AshAdmin.Components.Resource.Form.attributes(@resource, :show); nil}}
+              {{ {attributes, flags, bottom_attributes} =
+                AshAdmin.Components.Resource.Form.attributes(@resource, :show)
+              
+              nil }}
               <div class="grid grid-cols-6 gap-6">
-                <div :for={{attribute <- attributes}} class={{"col-span-6", "sm:col-span-2": short_text?(@resource, attribute), "sm:col-span-3": !long_text?(@resource, attribute)}}>
-                  <dt class="block text-sm font-medium text-gray-700">{{to_name(attribute.name)}}</dt>
-                  <dd>{{Map.get(@record, attribute.name)}}</dd>
+                <div
+                  :for={{ attribute <- attributes }}
+                  class={{
+                    "col-span-6",
+                    "sm:col-span-2": short_text?(@resource, attribute),
+                    "sm:col-span-3": !long_text?(@resource, attribute)
+                  }}
+                >
+                  <dt class="block text-sm font-medium text-gray-700">{{ to_name(attribute.name) }}</dt>
+                  <dd>{{ Map.get(@record, attribute.name) }}</dd>
                 </div>
               </div>
-              <div :if={{!Enum.empty?(flags)}} class="hidden sm:block" aria-hidden="true">
+              <div :if={{ !Enum.empty?(flags) }} class="hidden sm:block" aria-hidden="true">
                 <div class="py-5">
-                  <div class="border-t border-gray-200"></div>
+                  <div class="border-t border-gray-200" />
                 </div>
               </div>
-              <div class="grid grid-cols-6 gap-6" :if={{!Enum.empty?(bottom_attributes)}}>
-                <div :for={{attribute <- flags}} class={{"col-span-6", "sm:col-span-2": short_text?(@resource, attribute), "sm:col-span-3": !long_text?(@resource, attribute)}}>
-                  <dt class="block text-sm font-medium text-gray-700">{{to_name(attribute.name)}}</dt>
-                  <dd>{{Map.get(@record, attribute.name)}}</dd>
+              <div class="grid grid-cols-6 gap-6" :if={{ !Enum.empty?(bottom_attributes) }}>
+                <div
+                  :for={{ attribute <- flags }}
+                  class={{
+                    "col-span-6",
+                    "sm:col-span-2": short_text?(@resource, attribute),
+                    "sm:col-span-3": !long_text?(@resource, attribute)
+                  }}
+                >
+                  <dt class="block text-sm font-medium text-gray-700">{{ to_name(attribute.name) }}</dt>
+                  <dd>{{ Map.get(@record, attribute.name) }}</dd>
                 </div>
               </div>
-              <div :if={{!Enum.empty?(bottom_attributes)}} class="hidden sm:block" aria-hidden="true">
+              <div :if={{ !Enum.empty?(bottom_attributes) }} class="hidden sm:block" aria-hidden="true">
                 <div class="py-5">
-                  <div class="border-t border-gray-200"></div>
+                  <div class="border-t border-gray-200" />
                 </div>
               </div>
-              <div class="grid grid-cols-6 gap-6" :if={{!Enum.empty?(bottom_attributes)}}>
-                <div :for={{attribute <- bottom_attributes}} class={{"col-span-6", "sm:col-span-2": short_text?(@resource, attribute), "sm:col-span-3": !long_text?(@resource, attribute)}}>
-                  <dt class="block text-sm font-medium text-gray-700">{{to_name(attribute.name)}}</dt>
-                  <dd>{{Map.get(@record, attribute.name)}}</dd>
+              <div class="grid grid-cols-6 gap-6" :if={{ !Enum.empty?(bottom_attributes) }}>
+                <div
+                  :for={{ attribute <- bottom_attributes }}
+                  class={{
+                    "col-span-6",
+                    "sm:col-span-2": short_text?(@resource, attribute),
+                    "sm:col-span-3": !long_text?(@resource, attribute)
+                  }}
+                >
+                  <dt class="block text-sm font-medium text-gray-700">{{ to_name(attribute.name) }}</dt>
+                  <dd>{{ Map.get(@record, attribute.name) }}</dd>
                 </div>
               </div>
             </div>
 
-            <LiveRedirect to={{ash_update_path(@socket, @api, @resource, @record)}} :if={{update?(@resource)}} class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mb-4 ml-4">
+            <LiveRedirect
+              to={{ ash_update_path(@socket, @api, @resource, @record) }}
+              :if={{ update?(@resource) }}
+              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mb-4 ml-4"
+            >
               Update
             </LiveRedirect>
           </div>

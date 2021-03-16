@@ -58,36 +58,37 @@ defmodule AshAdmin.Components.Resource.DataTable do
   def render(assigns) do
     ~H"""
     <div class="flex justify-center h-full w-full mt-8">
-      <div :if={{match?({:error, _}, @data)}}>
-        {{{:error, %{query: query}} = @data; nil}}
+      <div :if={{ match?({:error, _}, @data) }}>
+        {{ {:error, %{query: query}} = @data
+        nil }}
         <ul>
-          <li :for={{error <- query.errors}}>
-            {{message(error)}}
+          <li :for={{ error <- query.errors }}>
+            {{ message(error) }}
           </li>
         </ul>
       </div>
-      <table :if={{match?({:ok, _data}, @data)}} class="rounded-t-lg m-5 w-5/6 mx-auto">
+      <table :if={{ match?({:ok, _data}, @data) }} class="rounded-t-lg m-5 w-5/6 mx-auto">
         <thead class="text-left border-b-2">
-          <th :for={{attribute <- Ash.Resource.Info.attributes(@resource)}}>
-            {{to_name(attribute.name)}}
+          <th :for={{ attribute <- Ash.Resource.Info.attributes(@resource) }}>
+            {{ to_name(attribute.name) }}
           </th>
         </thead>
         <tbody>
-          <tr :for={{record <- data(@data)}}  class="text-left border-b-2">
-            <td :for={{attribute <- Ash.Resource.Info.attributes(@resource)}} class="px-4 py-3">
-              {{render_attribute(record, attribute)}}
+          <tr :for={{ record <- data(@data) }} class="text-left border-b-2">
+            <td :for={{ attribute <- Ash.Resource.Info.attributes(@resource) }} class="px-4 py-3">
+              {{ render_attribute(record, attribute) }}
             </td>
-            <td :if={{actions?(@resource)}}>
+            <td :if={{ actions?(@resource) }}>
               <div class="flex h-max justify-items-center">
-                <div :if={{AshAdmin.Resource.show_action(@resource)}}>
-                  <LiveRedirect to={{ash_show_path(@socket, @api, @resource, record, AshAdmin.Resource.show_action(@resource))}}>
-                    {{{:safe, Heroicons.Solid.information_circle(class: "h-5 w-5 text-gray-500")}}}
+                <div :if={{ AshAdmin.Resource.show_action(@resource) }}>
+                  <LiveRedirect to={{ ash_show_path(@socket, @api, @resource, record, AshAdmin.Resource.show_action(@resource)) }}>
+                    {{ {:safe, Heroicons.Solid.information_circle(class: "h-5 w-5 text-gray-500")} }}
                   </LiveRedirect>
                 </div>
 
-                <div :if={{Ash.Resource.Info.primary_action(@resource, :update)}}>
-                  <LiveRedirect to={{ash_update_path(@socket, @api, @resource, record)}}>
-                    {{{:safe, Heroicons.Solid.pencil(class: "h-5 w-5 text-gray-500")}}}
+                <div :if={{ Ash.Resource.Info.primary_action(@resource, :update) }}>
+                  <LiveRedirect to={{ ash_update_path(@socket, @api, @resource, record) }}>
+                    {{ {:safe, Heroicons.Solid.pencil(class: "h-5 w-5 text-gray-500")} }}
                   </LiveRedirect>
                 </div>
               </div>

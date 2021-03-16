@@ -27,7 +27,7 @@ defmodule AshAdmin.Components.Resource.Form do
     <div class="mt-10 sm:mt-0">
       <div class="md:grid md:grid-cols-3 md:gap-6 mx-16 mt-10">
         <div class="mt-5 md:mt-0 md:col-span-2">
-          {{render_form(assigns)}}
+          {{ render_form(assigns) }}
         </div>
       </div>
     </div>
@@ -37,61 +37,97 @@ defmodule AshAdmin.Components.Resource.Form do
   defp render_form(assigns, path \\ nil) do
     ~H"""
     <div class="shadow overflow-hidden sm:rounded-md">
-      <Form as="action" for={{:action}} change="change_action">
-        <div :if={{is_nil(path) && Enum.count(actions(@resource, @type)) > 1}} class="col-span-6 mr-4 mt-2 float-right overflow-auto">
+      <Form as="action" for={{ :action }} change="change_action">
+        <div
+          :if={{ is_nil(path) && Enum.count(actions(@resource, @type)) > 1 }}
+          class="col-span-6 mr-4 mt-2 float-right overflow-auto"
+        >
           <FieldContext name="action">
             <Label>Action</Label>
-            <Select selected={{to_string(@action.name)}} options={{ actions(@resource, @type) }} />
+            <Select selected={{ to_string(@action.name) }} options={{ actions(@resource, @type) }} />
           </FieldContext>
         </div>
-        <h1 class="text-lg mt-2 ml-4"> {{String.capitalize(to_string(@action.type))}}</h1>
+        <h1 class="text-lg mt-2 ml-4">
+          {{ String.capitalize(to_string(@action.type)) }}</h1>
       </Form>
       <div class="px-4 py-5 bg-white sm:p-6">
-      <Form as="change" for={{ @changeset }} change="validate" submit="save" opts={{autocomplete: false}} :let={{form: form}}>
-            {{{attributes, flags, bottom_attributes} = attributes(@resource, @action); nil}}
-            <div class="grid grid-cols-6 gap-6">
-              <div :for={{attribute <- attributes}} class={{"col-span-6", "sm:col-span-2": short_text?(@resource, attribute), "sm:col-span-3": !long_text?(@resource, attribute)}}>
-                <FieldContext name={{attribute.name}}>
-                  <Label class="block text-sm font-medium text-gray-700">{{to_name(attribute.name)}}</Label>
-                  {{render_attribute_input(assigns, attribute, form)}}
-                  <ErrorTag field={{attribute.name}}/>
-                </FieldContext>
-              </div>
+        <Form
+          as="change"
+          for={{ @changeset }}
+          change="validate"
+          submit="save"
+          opts={{ autocomplete: false }}
+          :let={{ form: form }}
+        >
+          {{ {attributes, flags, bottom_attributes} = attributes(@resource, @action)
+          nil }}
+          <div class="grid grid-cols-6 gap-6">
+            <div
+              :for={{ attribute <- attributes }}
+              class={{
+                "col-span-6",
+                "sm:col-span-2": short_text?(@resource, attribute),
+                "sm:col-span-3": !long_text?(@resource, attribute)
+              }}
+            >
+              <FieldContext name={{ attribute.name }}>
+                <Label class="block text-sm font-medium text-gray-700">{{ to_name(attribute.name) }}</Label>
+                {{ render_attribute_input(assigns, attribute, form) }}
+                <ErrorTag field={{ attribute.name }} />
+              </FieldContext>
             </div>
-            <div :if={{!Enum.empty?(flags)}} class="hidden sm:block" aria-hidden="true">
-              <div class="py-5">
-                <div class="border-t border-gray-200"></div>
-              </div>
+          </div>
+          <div :if={{ !Enum.empty?(flags) }} class="hidden sm:block" aria-hidden="true">
+            <div class="py-5">
+              <div class="border-t border-gray-200" />
             </div>
-            <div class="grid grid-cols-6 gap-6" :if={{!Enum.empty?(bottom_attributes)}}>
-              <div :for={{attribute <- flags}} class={{"col-span-6", "sm:col-span-2": short_text?(@resource, attribute), "sm:col-span-3": !long_text?(@resource, attribute)}}>
-                <FieldContext name={{attribute.name}}>
-                  <Label class="block text-sm font-medium text-gray-700">{{to_name(attribute.name)}}</Label>
-                  {{render_attribute_input(assigns, attribute, form)}}
-                  <ErrorTag field={{attribute.name}}/>
-                </FieldContext>
-              </div>
+          </div>
+          <div class="grid grid-cols-6 gap-6" :if={{ !Enum.empty?(bottom_attributes) }}>
+            <div
+              :for={{ attribute <- flags }}
+              class={{
+                "col-span-6",
+                "sm:col-span-2": short_text?(@resource, attribute),
+                "sm:col-span-3": !long_text?(@resource, attribute)
+              }}
+            >
+              <FieldContext name={{ attribute.name }}>
+                <Label class="block text-sm font-medium text-gray-700">{{ to_name(attribute.name) }}</Label>
+                {{ render_attribute_input(assigns, attribute, form) }}
+                <ErrorTag field={{ attribute.name }} />
+              </FieldContext>
             </div>
-            <div :if={{!Enum.empty?(bottom_attributes)}} class="hidden sm:block" aria-hidden="true">
-              <div class="py-5">
-                <div class="border-t border-gray-200"></div>
-              </div>
+          </div>
+          <div :if={{ !Enum.empty?(bottom_attributes) }} class="hidden sm:block" aria-hidden="true">
+            <div class="py-5">
+              <div class="border-t border-gray-200" />
             </div>
-            <div class="grid grid-cols-6 gap-6" :if={{!Enum.empty?(bottom_attributes)}}>
-              <div :for={{attribute <- bottom_attributes}} class={{"col-span-6", "sm:col-span-2": short_text?(@resource, attribute), "sm:col-span-3": !long_text?(@resource, attribute)}}>
-                <FieldContext name={{attribute.name}}>
-                  <Label class="block text-sm font-medium text-gray-700">{{to_name(attribute.name)}}</Label>
-                  {{render_attribute_input(assigns, attribute, form)}}
-                  <ErrorTag field={{attribute.name}}/>
-                </FieldContext>
-              </div>
-          <div :if={{is_nil(path)}} class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              {{String.capitalize(to_string(@type))}}
+          </div>
+          <div class="grid grid-cols-6 gap-6" :if={{ !Enum.empty?(bottom_attributes) }}>
+            <div
+              :for={{ attribute <- bottom_attributes }}
+              class={{
+                "col-span-6",
+                "sm:col-span-2": short_text?(@resource, attribute),
+                "sm:col-span-3": !long_text?(@resource, attribute)
+              }}
+            >
+              <FieldContext name={{ attribute.name }}>
+                <Label class="block text-sm font-medium text-gray-700">{{ to_name(attribute.name) }}</Label>
+                {{ render_attribute_input(assigns, attribute, form) }}
+                <ErrorTag field={{ attribute.name }} />
+              </FieldContext>
+            </div>
+          </div>
+          <div :if={{ is_nil(path) }} class="px-4 py-3 text-right sm:px-6">
+            <button
+              type="submit"
+              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              {{ String.capitalize(to_string(@type)) }}
             </button>
           </div>
-        </div>
-      </Form>
+        </Form>
       </div>
     </div>
     """
@@ -127,7 +163,11 @@ defmodule AshAdmin.Components.Resource.Form do
         form
       ) do
     ~H"""
-    <Checkbox form={{form}} field={{name}} class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"/>
+    <Checkbox
+      form={{ form }}
+      field={{ name }}
+      class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+    />
     """
   end
 
@@ -140,7 +180,7 @@ defmodule AshAdmin.Components.Resource.Form do
         form
       ) do
     ~H"""
-    <Select form={{form}} field={{name}} options={{ "Nil": nil, "True": "true", "False": "false"}}/>
+    <Select form={{ form }} field={{ name }} options={{ Nil: nil, True: "true", False: "false" }} />
     """
   end
 
@@ -156,11 +196,11 @@ defmodule AshAdmin.Components.Resource.Form do
       when type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID] do
     ~H"""
     <TextInput
-      form={{form}}
-      field={{name}}
-      opts={{type: text_input_type(attribute)}}
+      form={{ form }}
+      field={{ name }}
+      opts={{ type: text_input_type(attribute) }}
       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-      />
+    />
     """
   end
 
@@ -177,12 +217,12 @@ defmodule AshAdmin.Components.Resource.Form do
              is_binary(default) do
     ~H"""
     <TextInput
-      form={{form}}
-      field={{name}}
-      value={{default}}
-      opts={{type: text_input_type(attribute)}}
+      form={{ form }}
+      field={{ name }}
+      value={{ default }}
+      opts={{ type: text_input_type(attribute) }}
       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-      />
+    />
     """
   end
 
@@ -200,9 +240,9 @@ defmodule AshAdmin.Components.Resource.Form do
              (is_function(default) or generated?) do
     ~H"""
     <TextInput
-      form={{form}}
-      field={{name}}
-      opts={{placeholder: "DEFAULT", type: text_input_type(attribute)}}
+      form={{ form }}
+      field={{ name }}
+      opts={{ placeholder: "DEFAULT", type: text_input_type(attribute) }}
       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
     />
     """
@@ -211,9 +251,9 @@ defmodule AshAdmin.Components.Resource.Form do
   def render_attribute_input(assigns, attribute, form) do
     ~H"""
     <TextInput
-      form={{form}}
-      field={{attribute.name}}
-      opts={{type: text_input_type(attribute)}}
+      form={{ form }}
+      field={{ attribute.name }}
+      opts={{ type: text_input_type(attribute) }}
       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
     />
     """
