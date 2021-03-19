@@ -166,7 +166,9 @@ defmodule AshAdmin.Router do
                   |> String.to_atom()
 
                 live(
-                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(api)}/update/#{action.name}/:primary_key",
+                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/update/#{
+                    action.name
+                  }/:primary_key",
                   AshAdmin.PageLive,
                   :resource_page,
                   AshAdmin.Router.__options__(opts, as, %{

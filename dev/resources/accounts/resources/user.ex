@@ -30,6 +30,14 @@ defmodule Demo.Accounts.User do
   actions do
     read :me, filter: [id: actor(:id)]
     read :read, primary?: true
+
+    read :by_name do
+      argument :first_name, :string, allow_nil?: false
+      argument :last_name, :string, allow_nil?: false
+
+      filter expr(first_name == ^arg(:first_name) and last_name == ^arg(:last_name))
+    end
+
     create :create
     update :update, primary?: true
     update :update2
@@ -39,6 +47,7 @@ defmodule Demo.Accounts.User do
   postgres do
     table "users"
     repo Demo.Repo
+    foreign_key_names [{:id, "tickets_reporter_id_fkey", "user still has reported tickets"}, {:id, "tickets_representative_id_fkey", "user still has assigned tickets"}]
   end
 
   validations do

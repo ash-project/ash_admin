@@ -27,6 +27,7 @@ defmodule AshAdmin.Components.Resource.Form do
   prop(actor, :any, default: nil)
   prop(tenant, :any, default: nil)
   prop(authorizing, :boolean, default: false)
+  prop(set_actor, :event, required: true)
   prop(action, :any)
 
   def update(assigns, socket) do
@@ -58,6 +59,13 @@ defmodule AshAdmin.Components.Resource.Form do
   defp render_form(assigns) do
     ~H"""
     <div class="shadow-lg overflow-hidden sm:rounded-md bg-white">
+      <div :if={{@changeset.action_failed?}} class="ml-4 mt-4 text-red-500">
+        <ul>
+          <li :for={{{field, message} <- AshPhoenix.errors_for(@changeset, as: :simple)}}>
+            {{to_name(field)}}: {{message}}
+          </li>
+        </ul>
+      </div>
       <Form as="action" for={{ :action }} change="change_action">
         <div
           :if={{ Enum.count(actions(@resource, @type)) > 1 }}
@@ -100,7 +108,7 @@ defmodule AshAdmin.Components.Resource.Form do
   defp save_button_text(:update), do: "Save"
   defp save_button_text(type), do: type |> to_string() |> String.capitalize()
 
-  defp render_attributes(assigns, resource, action, form, exactly \\ nil) do
+  def render_attributes(assigns, resource, action, form, exactly \\ nil) do
     ~H"""
     {{ {attributes, flags, bottom_attributes} = attributes(resource, action, exactly)
     nil }}
@@ -380,15 +388,20 @@ defmodule AshAdmin.Components.Resource.Form do
         } = attribute,
         form
       )
-      when type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID] do
+      when type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID, Ash.Type.Atom] do
     cond do
+      type == Ash.Type.Atom && attribute.constraints[:one_of] ->
+        ~H"""
+        <Select form={{ form }} field={{ name }} options={{ Enum.map(attribute.constraints[:one_of], &{to_name(&1), &1})}} />
+        """
+
       long_text?(form.source.resource, attribute) ->
         ~H"""
         <TextArea
           form={{ form }}
           field={{ name }}
           opts={{ type: text_input_type(attribute), placeholder: placeholder(default) }}
-          class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+          class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md resize-y"
         />
         """
 
@@ -678,7 +691,7 @@ defmodule AshAdmin.Components.Resource.Form do
           Ash.Changeset.for_destroy(
             socket.assigns.record,
             socket.assigns.action.name,
-            data["change"],
+            data["change"] || %{},
             actor: socket.assigns[:actor],
             tenant: socket.assigns[:tenant]
           )
@@ -688,6 +701,8 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def relationships(resource, action, exactly \\ nil)
+
+  def relationships(_resource, %{type: :read}, _), do: []
 
   def relationships(resource, nil, exactly) when not is_nil(exactly) do
     resource
@@ -721,6 +736,10 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def attributes(resource, action, exactly \\ nil)
+
+  def attributes(resource, %{type: :read, arguments: arguments}, _) do
+    sort_attributes(arguments, resource)
+  end
 
   def attributes(resource, nil, exactly) when not is_nil(exactly) do
     resource
@@ -799,6 +818,7 @@ defmodule AshAdmin.Components.Resource.Form do
     {auto_sorted, flags, sorted_defaults}
   end
 
+  defp only_accepted(attributes, %{type: :read}), do: attributes
   defp only_accepted(attributes, %{accept: nil}), do: attributes
 
   defp only_accepted(attributes, %{accept: accept}) do

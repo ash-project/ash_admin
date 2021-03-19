@@ -10,6 +10,9 @@ defmodule Demo.Tickets.Ticket do
 
   admin do
     show_action :read
+    form do
+      field :description, type: :long_text
+    end
   end
 
   policies do

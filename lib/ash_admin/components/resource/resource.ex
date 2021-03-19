@@ -41,6 +41,7 @@ defmodule AshAdmin.Components.Resource do
           api={{ @api }}
           id={{ update_id(@resource) }}
           actor={{@actor}}
+          set_actor={{@set_actor}}
           authorizing={{@authorizing}}
           tenant={{@tenant}}
         />
@@ -53,6 +54,7 @@ defmodule AshAdmin.Components.Resource do
           record={{ record }}
           resource={{ @resource }}
           action={{ @action }}
+          set_actor={{@set_actor}}
           api={{ @api }}
           id={{ destroy_id(@resource) }}
           actor={{@actor}}
@@ -77,6 +79,7 @@ defmodule AshAdmin.Components.Resource do
         type={{ :create }}
         resource={{ @resource }}
         api={{ @api }}
+        set_actor={{@set_actor}}
         action={{ @action }}
         id={{ create_id(@resource) }}
         actor={{@actor}}
@@ -89,6 +92,8 @@ defmodule AshAdmin.Components.Resource do
         action={{ @action }}
         actor={{@actor}}
         api={{ @api }}
+        url_path={{@url_path}}
+        params={{@params}}
         set_actor={{ @set_actor }}
         id={{ data_table_id(@resource) }}
         authorizing={{@authorizing}}

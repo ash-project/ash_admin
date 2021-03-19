@@ -65,7 +65,7 @@ defmodule AshAdmin.Components.Resource.Show do
     """
   end
 
-  defp render_relationships(assigns, record, resource) do
+  defp render_relationships(assigns, _record, resource) do
     ~H"""
     <div :for={{relationship <- AshAdmin.Components.Resource.Form.relationships(resource, :show)}} class="shadow-lg overflow-hidden sm:rounded-md mb-2 bg-white">
       <div class="px-4 py-5 mt-2">
@@ -223,7 +223,7 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   end
 
-  defp render_attribute(assigns, resource, record, %{name: name, type: Ash.Type.Boolean}, _) do
+  defp render_attribute(assigns, _resource, record, %{name: name, type: Ash.Type.Boolean}, _) do
     case Map.get(record, name) do
       true ->
         ~H"""

@@ -99,7 +99,6 @@ defmodule AshAdmin.PageLive do
       action={{ @action }}
       tenant={{ @tenant }}
       actor={{ unless @actor_paused, do: @actor }}
-      recover_filter={{ @recover_filter }}
       authorizing={{ @authorizing }}
     />
     """
@@ -191,7 +190,7 @@ defmodule AshAdmin.PageLive do
     {:noreply,
      socket
      |> assign(:url_path, url.path)
-     |> assign(:params, %{})}
+     |> assign(:params, params)}
   end
 
   defp to_one_relationships(resource) do
@@ -293,6 +292,7 @@ defmodule AshAdmin.PageLive do
     {:noreply,
      socket
      |> push_patch(
+       replace: true,
        to:
          self_path(socket.assigns.url_path, socket.assigns.params, %{
            filter: filter_query

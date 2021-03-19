@@ -3,8 +3,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
   import AshAdmin.Helpers
   import AshPhoenix.LiveView
-  alias AshAdmin.Components.Resource.DestroyModal
-  alias Surface.Components.LiveRedirect
+  alias Surface.Components.Form
   alias AshAdmin.Components.Resource.Table
 
   prop(resource, :atom)
@@ -13,15 +12,26 @@ defmodule AshAdmin.Components.Resource.DataTable do
   prop(authorizing, :boolean)
   prop(set_actor, :event, required: true)
   prop(actor, :any)
+  prop(url_path, :any)
+  prop(params, :any)
 
   data(initialized, :boolean, default: false)
   data(data, :any)
+  data(query, :any, default: nil)
 
   def update(assigns, socket) do
     if assigns[:initialized] do
       {:ok, socket}
     else
       socket = assign(socket, assigns)
+      arguments = socket.assigns[:params]["args"] || %{}
+
+      query =
+        socket.assigns[:resource]
+        |> Ash.Query.for_read(socket.assigns.action.name, arguments)
+        |> AshPhoenix.hide_errors()
+
+      socket = assign(socket, :query, query)
 
       socket =
         if assigns[:action].pagination do
@@ -29,7 +39,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
             socket,
             :data,
             fn socket, page_opts ->
-              assigns[:api].read(socket.assigns[:resource],
+              assigns[:api].read(socket.assigns.query,
                 action: socket.assigns[:action].name,
                 actor: socket.assigns[:actor],
                 authorize?: socket.assigns[:authorizing],
@@ -43,7 +53,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
             socket,
             :data,
             fn socket ->
-              assigns[:api].read(socket.assigns[:resource],
+              assigns[:api].read(socket.assigns.query,
                 action: socket.assigns[:action],
                 actor: socket.assigns[:actor],
                 authorize?: socket.assigns[:authorizing]
@@ -61,17 +71,40 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
   def render(assigns) do
     ~H"""
-    <div class="h-full mt-8 overflow-scroll">
-      <div :if={{ match?({:error, _}, @data) }}>
-        {{ {:error, %{query: query}} = @data
-        nil }}
-        <ul>
-          <li :for={{ error <- query.errors }}>
-            {{ message(error) }}
-          </li>
-        </ul>
+    <div class="pt-10 sm:mt-0 bg-gray-300 min-h-screen">
+      <div class="md:grid md:grid-cols-3 md:gap-6 mx-16 mt-10">
+        <div class="mt-5 md:mt-0 md:col-span-2">
+          <div :if={{@action.arguments != []}} class="shadow-lg overflow-hidden sm:rounded-md bg-white">
+            <div class="px-4 py-5 sm:p-6">
+              <Form :if={{@query}} as="query" for={{@query}} change="validate" submit="save" :let={{form: form}}>
+                {{AshAdmin.Components.Resource.Form.render_attributes(assigns, @resource, @action, form)}}
+                <div class="px-4 py-3 text-right sm:px-6">
+                  <button
+                    type="submit"
+                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Run Query
+                  </button>
+                </div>
+              </Form>
+            </div>
+          </div>
+        </div>
       </div>
-      <Table :if={{ match?({:ok, _data}, @data) }} data={{data(@data)}} resource={{@resource}} api={{@api}} set_actor={{@set_actor}}/>
+      <div :if={{@action.arguments == [] || @params["args"]}} class="h-full mt-8 overflow-scroll">
+        <div class="shadow-lg overflow-hidden sm:rounded-md bg-white">
+          <div :if={{ match?({:error, _}, @data) }}>
+            {{ {:error, %{query: query}} = @data
+            nil }}
+            <ul>
+              <li :for={{ error <- query.errors }}>
+                {{ message(error) }}
+              </li>
+            </ul>
+          </div>
+          <Table :if={{ match?({:ok, _data}, @data) }} data={{data(@data)}} resource={{@resource}} api={{@api}} set_actor={{@set_actor}}/>
+        </div>
+      </div>
     </div>
     """
   end
@@ -82,6 +115,20 @@ defmodule AshAdmin.Components.Resource.DataTable do
     else
       inspect(error)
     end
+  end
+
+  def handle_event("validate", %{"query" => query}, socket) do
+    query = Ash.Query.for_read(socket.assigns.resource, socket.assigns.action.name, query)
+
+    {:noreply, assign(socket, query: query)}
+  end
+
+  def handle_event("save", %{"query" => query_params}, socket) do
+    {:noreply,
+     push_redirect(
+       socket,
+       to: self_path(socket.assigns.url_path, socket.assigns.params, %{"args" => query_params})
+     )}
   end
 
   #  defp middle_page_num(num, trailing_page_nums) do

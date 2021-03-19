@@ -10,7 +10,6 @@ defmodule AshAdmin.Components.Resource.Table do
   prop(actions, :boolean, default: true)
   prop(api, :any, required: true)
   prop(set_actor, :event, required: true)
-  prop(open_destroy_modal, :event, required: true)
 
   def render(assigns) do
     ~H"""
