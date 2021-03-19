@@ -133,6 +133,37 @@ defmodule AshAdmin.Helpers do
     )
   end
 
+  def ash_destroy_path(socket, api, resource, record) do
+    route =
+      String.to_atom(
+        String.downcase(
+          AshAdmin.Api.name(api) <> AshAdmin.Resource.name(resource) <> "destroy_path"
+        )
+      )
+
+    apply(
+      socket.router.__helpers__(),
+      route,
+      [socket, :resource_page, encode_primary_key(record)]
+    )
+  end
+
+  def ash_destroy_path(socket, api, resource, record, action_name) do
+    route =
+      String.to_atom(
+        String.downcase(
+          AshAdmin.Api.name(api) <>
+            AshAdmin.Resource.name(resource) <> to_string(action_name) <> "destroy_path"
+        )
+      )
+
+    apply(
+      socket.router.__helpers__(),
+      route,
+      [socket, :resource_page, encode_primary_key(record)]
+    )
+  end
+
   def ash_action_path(socket, api, resource, action_type, action_name) do
     route =
       String.to_atom(

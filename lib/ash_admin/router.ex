@@ -181,6 +181,57 @@ defmodule AshAdmin.Router do
               end
             end
 
+            if Enum.any?(Ash.Resource.Info.actions(resource), &(&1.type == :destroy)) do
+              as =
+                api
+                |> AshAdmin.Api.name()
+                |> Kernel.<>(AshAdmin.Resource.name(resource))
+                |> Kernel.<>("destroy")
+                |> String.downcase()
+                |> String.to_atom()
+
+              live(
+                "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/destroy/:primary_key",
+                AshAdmin.PageLive,
+                :resource_page,
+                AshAdmin.Router.__options__(opts, as, %{
+                  "apis" => apis,
+                  "api" => api,
+                  "resource" => resource,
+                  "tab" => "destroy",
+                  "action_type" => :destroy,
+                  "action_name" => Ash.Resource.Info.primary_action!(resource, :destroy).name
+                })
+              )
+
+              for %{type: :destroy} = action <- Ash.Resource.Info.actions(resource) do
+                as =
+                  api
+                  |> AshAdmin.Api.name()
+                  |> Kernel.<>(AshAdmin.Resource.name(resource))
+                  |> Kernel.<>(to_string(action.name))
+                  |> Kernel.<>("destroy")
+                  |> String.downcase()
+                  |> String.to_atom()
+
+                live(
+                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(api)}/destroy/#{
+                    action.name
+                  }/:primary_key",
+                  AshAdmin.PageLive,
+                  :resource_page,
+                  AshAdmin.Router.__options__(opts, as, %{
+                    "apis" => apis,
+                    "api" => api,
+                    "resource" => resource,
+                    "tab" => "destroy",
+                    "action_type" => :destroy,
+                    "action_name" => action.name
+                  })
+                )
+              end
+            end
+
             show_action = AshAdmin.Resource.show_action(resource)
 
             if show_action do

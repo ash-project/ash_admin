@@ -7,10 +7,11 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
   prop groups, :list, required: true
   prop id, :string, required: true
   prop active, :boolean, required: true
+  prop class, :css_class
 
   def render(assigns) do
     ~H"""
-    <div class="relative">
+    <div class={{"relative", @class}}>
       <div x-data="{isOpen: false}">
         <button
           type="button"

@@ -53,6 +53,7 @@ defmodule AshAdmin.PageLive do
      |> assign(:actor_resources, actor_resources(apis))
      |> assign(:tenant, session["tenant"])
      |> assign(:actor, AshAdmin.ActorPlug.actor_from_session(session))
+     |> assign(:actor_api, AshAdmin.ActorPlug.actor_api_from_session(session))
      |> assign(
        :authorizing,
        AshAdmin.ActorPlug.session_bool(session["actor_authorizing"]) || false
@@ -69,6 +70,7 @@ defmodule AshAdmin.PageLive do
       id="top_nav"
       apis={{ @apis }}
       api={{ @api }}
+      actor_api={{@actor_api}}
       resource={{ @resource }}
       tenant={{ @tenant }}
       actor_resources={{ @actor_resources }}
@@ -98,7 +100,7 @@ defmodule AshAdmin.PageLive do
       tenant={{ @tenant }}
       actor={{ unless @actor_paused, do: @actor }}
       recover_filter={{ @recover_filter }}
-      authorize={{ @authorizing }}
+      authorizing={{ @authorizing }}
     />
     """
   end
@@ -164,6 +166,7 @@ defmodule AshAdmin.PageLive do
             record =
               socket.assigns.resource
               |> Ash.Query.filter(^primary_key)
+              |> Ash.Query.load(to_one_relationships(socket.assigns.resource))
               |> socket.assigns.api.read_one(
                 action: Ash.Resource.Info.primary_action!(socket.assigns.resource, :read),
                 actor: actor,
@@ -189,6 +192,13 @@ defmodule AshAdmin.PageLive do
      socket
      |> assign(:url_path, url.path)
      |> assign(:params, %{})}
+  end
+
+  defp to_one_relationships(resource) do
+    resource
+    |> Ash.Resource.Info.relationships()
+    |> Enum.filter(&(&1.cardinality == :one))
+    |> Enum.map(& &1.name)
   end
 
   defp page_num_from_page_params(params) do
@@ -259,7 +269,7 @@ defmodule AshAdmin.PageLive do
              api: to_string(api)
            }
          )
-         |> assign(:actor, actor)}
+         |> assign(actor: actor, actor_api: api)}
     end
   end
 

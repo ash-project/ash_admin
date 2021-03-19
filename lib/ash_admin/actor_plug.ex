@@ -54,6 +54,10 @@ defmodule AshAdmin.ActorPlug do
 
   def actor_session(conn, _), do: conn
 
+  def actor_api_from_session(%{"actor_api" => api}) do
+    Module.concat([api])
+  end
+
   def actor_from_session(%{
         "actor_resource" => resource,
         "actor_api" => api,

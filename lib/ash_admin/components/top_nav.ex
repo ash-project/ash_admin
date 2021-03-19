@@ -19,6 +19,7 @@ defmodule AshAdmin.Components.TopNav do
   prop(authorizing, :boolean, required: true)
   prop(actor_paused, :boolean, required: true)
   prop(actor, :any, required: true)
+  prop(actor_api, :any, required: true)
 
   def render(assigns) do
     ~H"""
@@ -39,6 +40,7 @@ defmodule AshAdmin.Components.TopNav do
                   <Dropdown
                     :for={{ api <- @apis }}
                     active={{ api == @api }}
+                    class="mr-1"
                     id={{ AshAdmin.Api.name(api) <> "_api_nav" }}
                     name={{ AshAdmin.Api.name(api) }}
                     groups={{ dropdown_groups(@socket, @resource, api) }}
@@ -54,6 +56,8 @@ defmodule AshAdmin.Components.TopNav do
                     toggle_authorizing={{ @toggle_authorizing }}
                     toggle_actor_paused={{ @toggle_actor_paused }}
                     clear_actor={{ @clear_actor }}
+                    actor_api={{@actor_api}}
+                    api={{@api}}
                   />
                   <TenantForm
                     :if={{ show_tenant_form?(@apis) }}
@@ -105,6 +109,8 @@ defmodule AshAdmin.Components.TopNav do
               toggle_authorizing={{ @toggle_authorizing }}
               toggle_actor_paused={{ @toggle_actor_paused }}
               clear_actor={{ @clear_actor }}
+              actor_api={{@actor_api}}
+              api={{@api}}
             />
           </div>
           <div class="block px-4 py-2 text-sm">

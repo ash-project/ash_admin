@@ -12,7 +12,7 @@ defmodule AshAdmin.Components.Resource do
   prop(action, :any)
   prop(actor, :any, required: true)
   prop(set_actor, :event, required: true)
-  prop(authorize, :boolean, required: true)
+  prop(authorizing, :boolean, required: true)
   prop(tenant, :string, required: true)
   prop(recover_filter, :any)
   prop(page_params, :any, default: [])
@@ -41,7 +41,22 @@ defmodule AshAdmin.Components.Resource do
           api={{ @api }}
           id={{ update_id(@resource) }}
           actor={{@actor}}
-          authorize={{@authorize}}
+          authorizing={{@authorizing}}
+          tenant={{@tenant}}
+        />
+      </div>
+      <div :if={{ @record && match?({:ok, record} when not is_nil(record), @record) && @tab == "destroy" }}>
+        {{ {:ok, record} = @record
+        nil }}
+        <Form
+          type={{ :destroy }}
+          record={{ record }}
+          resource={{ @resource }}
+          action={{ @action }}
+          api={{ @api }}
+          id={{ destroy_id(@resource) }}
+          actor={{@actor}}
+          authorizing={{@authorizing}}
           tenant={{@tenant}}
         />
       </div>
@@ -49,7 +64,12 @@ defmodule AshAdmin.Components.Resource do
         :if={{ @tab == "read" && match?({:ok, %_{}}, @record) }}
         resource={{ @resource }}
         api={{ @api }}
+        id={{show_id(@resource)}}
         record={{ unwrap(@record) }}
+        actor={{@actor}}
+        authorizing={{@authorizing}}
+        tenant={{@tenant}}
+        set_actor={{@set_actor}}
       />
       <Info :if={{ @tab == "info" }} resource={{ @resource }} api={{ @api }} />
       <Form
@@ -60,7 +80,7 @@ defmodule AshAdmin.Components.Resource do
         action={{ @action }}
         id={{ create_id(@resource) }}
         actor={{@actor}}
-        authorize={{@authorize}}
+        authorizing={{@authorizing}}
         tenant={{@tenant}}
       />
       <DataTable
@@ -71,7 +91,7 @@ defmodule AshAdmin.Components.Resource do
         api={{ @api }}
         set_actor={{ @set_actor }}
         id={{ data_table_id(@resource) }}
-        authorize={{ @authorize }}
+        authorizing={{@authorizing}}
       />
     </div>
     """
@@ -89,5 +109,13 @@ defmodule AshAdmin.Components.Resource do
 
   defp update_id(resource) do
     "#{resource}_update"
+  end
+
+  defp destroy_id(resource) do
+    "#{resource}_destroy"
+  end
+
+  defp show_id(resource) do
+    "#{resource}_show"
   end
 end

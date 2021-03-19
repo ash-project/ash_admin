@@ -12,6 +12,8 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
   prop toggle_authorizing, :event, required: true
   prop toggle_actor_paused, :event, required: true
   prop clear_actor, :event, required: true
+  prop api, :any, required: true
+  prop actor_api, :any, required: true
 
   def render(assigns) do
     ~H"""
@@ -68,7 +70,9 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
               <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z" />
             </svg>
           </button>
-          {{ user_display(@actor) }}
+          <LiveRedirect class="hover:text-blue-400 hover:underline" to={{ ash_show_path(@socket, @actor_api, @actor.__struct__, @actor, AshAdmin.Resource.show_action(@actor.__struct__)) }}>
+            {{ user_display(@actor) }}
+          </LiveRedirect>
           <button :on-click={{ @clear_actor }} type="button">
             <svg width="1em" height="1em" viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg">
               <path

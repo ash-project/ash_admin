@@ -3,12 +3,14 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
   import AshAdmin.Helpers
   import AshPhoenix.LiveView
+  alias AshAdmin.Components.Resource.DestroyModal
   alias Surface.Components.LiveRedirect
+  alias AshAdmin.Components.Resource.Table
 
   prop(resource, :atom)
   prop(api, :atom)
   prop(action, :any)
-  prop(authorize, :boolean)
+  prop(authorizing, :boolean)
   prop(set_actor, :event, required: true)
   prop(actor, :any)
 
@@ -30,7 +32,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
               assigns[:api].read(socket.assigns[:resource],
                 action: socket.assigns[:action].name,
                 actor: socket.assigns[:actor],
-                authorize?: socket.assigns[:authorize],
+                authorize?: socket.assigns[:authorizing],
                 page: page_opts || []
               )
             end,
@@ -44,7 +46,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
               assigns[:api].read(socket.assigns[:resource],
                 action: socket.assigns[:action],
                 actor: socket.assigns[:actor],
-                authorize?: socket.assigns[:authorize]
+                authorize?: socket.assigns[:authorizing]
               )
             end,
             load_until_connected?: true
@@ -59,7 +61,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
   def render(assigns) do
     ~H"""
-    <div class="flex justify-center h-full w-full mt-8">
+    <div class="h-full mt-8 overflow-scroll">
       <div :if={{ match?({:error, _}, @data) }}>
         {{ {:error, %{query: query}} = @data
         nil }}
@@ -69,52 +71,9 @@ defmodule AshAdmin.Components.Resource.DataTable do
           </li>
         </ul>
       </div>
-      <table :if={{ match?({:ok, _data}, @data) }} class="rounded-t-lg m-5 w-5/6 mx-auto">
-        <thead class="text-left border-b-2">
-          <th :for={{ attribute <- Ash.Resource.Info.attributes(@resource) }}>
-            {{ to_name(attribute.name) }}
-          </th>
-        </thead>
-        <tbody>
-          <tr :for={{ record <- data(@data) }} class="text-left border-b-2">
-            <td :for={{ attribute <- Ash.Resource.Info.attributes(@resource) }} class="px-4 py-3">
-              {{ render_attribute(record, attribute) }}
-            </td>
-            <td :if={{ actions?(@resource) }}>
-              <div class="flex h-max justify-items-center">
-                <div :if={{ AshAdmin.Resource.show_action(@resource) }}>
-                  <LiveRedirect to={{ ash_show_path(@socket, @api, @resource, record, AshAdmin.Resource.show_action(@resource)) }}>
-                    {{ {:safe, Heroicons.Solid.information_circle(class: "h-5 w-5 text-gray-500")} }}
-                  </LiveRedirect>
-                </div>
-
-                <div :if={{ Ash.Resource.Info.primary_action(@resource, :update) }}>
-                  <LiveRedirect to={{ ash_update_path(@socket, @api, @resource, record) }}>
-                    {{ {:safe, Heroicons.Solid.pencil(class: "h-5 w-5 text-gray-500")} }}
-                  </LiveRedirect>
-                </div>
-
-                <button
-                  :if={{ AshAdmin.Resource.actor?(@resource) }}
-                  :on-click={{ @set_actor }}
-                  phx-value-resource={{ @resource }}
-                  phx-value-api={{ @api }}
-                  phx-value-pkey={{ encode_primary_key(record) }}
-                >
-                  {{ {:safe, Heroicons.Solid.key(class: "h-5 w-5 text-gray-500")} }}
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <Table :if={{ match?({:ok, _data}, @data) }} data={{data(@data)}} resource={{@resource}} api={{@api}} set_actor={{@set_actor}}/>
     </div>
     """
-  end
-
-  defp actions?(resource) do
-    Ash.Resource.Info.primary_action(resource, :update) || AshAdmin.Resource.show_action(resource) ||
-      AshAdmin.Resource.actor?(resource)
   end
 
   defp message(error) do
@@ -123,19 +82,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
     else
       inspect(error)
     end
-  end
-
-  defp render_attribute(record, attribute) do
-    if Ash.Type.embedded_type?(attribute.type) do
-      "..."
-    else
-      record
-      |> Map.get(attribute.name)
-      |> Phoenix.HTML.Safe.to_iodata()
-    end
-  rescue
-    _ ->
-      "..."
   end
 
   #  defp middle_page_num(num, trailing_page_nums) do
@@ -255,7 +201,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   #         page: page_params,
   #         action: context.action.name,
   #         actor: context.actor,
-  #         authorize?: context.authorize?
+  #         authorize?: context.authorizing?
   #       )
   #     end
 end

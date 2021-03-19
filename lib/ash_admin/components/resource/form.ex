@@ -45,6 +45,12 @@ defmodule AshAdmin.Components.Resource.Form do
           {{ render_form(assigns) }}
         </div>
       </div>
+
+      <div :if={{@type != :create}} class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
+        <div class="mt-5 md:mt-0 md:col-span-2">
+         {{AshAdmin.Components.Resource.Show.render_show(assigns, @record, @resource, "Original Record", false)}}
+        </div>
+      </div>
     </div>
     """
   end
@@ -195,7 +201,7 @@ defmodule AshAdmin.Components.Resource.Form do
   defp render_relationship_input(assigns, %{cardinality: :one} = relationship, form) do
     ~H"""
     <div :if={{loaded?(form.source, relationship.name)}}>
-      <Inputs form={{ form }} for={{ relationship.name }} :let={{ form: inner_form }} opts={{use_data?: true}}>
+      <Inputs form={{ form }} for={{ relationship.name }} :let={{ form: inner_form }} opts={{use_data?: true, type: :query}}>
         <button
           type="button"
           :on-click="remove_related"
@@ -241,7 +247,7 @@ defmodule AshAdmin.Components.Resource.Form do
   defp render_relationship_input(assigns, %{cardinality: :many} = relationship, form) do
     ~H"""
     <div :if={{loaded?(form.source, relationship.name)}}>
-      <Inputs form={{ form }} for={{ relationship.name }} :let={{ form: inner_form }} opts={{use_data?: true}}>
+      <Inputs form={{ form }} for={{ relationship.name }} :let={{ form: inner_form }} opts={{use_data?: true, type: :query}}>
         <button
           type="button"
           :on-click="remove_related"
@@ -381,7 +387,6 @@ defmodule AshAdmin.Components.Resource.Form do
         <TextArea
           form={{ form }}
           field={{ name }}
-          value={{string_default(default)}}
           opts={{ type: text_input_type(attribute), placeholder: placeholder(default) }}
           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
         />
@@ -392,7 +397,6 @@ defmodule AshAdmin.Components.Resource.Form do
         <TextInput
           form={{ form }}
           field={{ name }}
-          value={{string_default(default)}}
           opts={{ type: text_input_type(attribute), placeholder: placeholder(default) }}
           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
         />
@@ -403,7 +407,6 @@ defmodule AshAdmin.Components.Resource.Form do
         <TextInput
           form={{ form }}
           field={{ name }}
-          value={{string_default(default)}}
           opts={{ type: text_input_type(attribute), placeholder: placeholder(default) }}
           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
         />
@@ -452,9 +455,6 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp placeholder(_), do: nil
-
-  defp string_default(default) when is_binary(default), do: default
-  defp string_default(_), do: nil
 
   defp text_input_type(%{sensitive?: true}), do: "password"
   defp text_input_type(_), do: "text"
@@ -583,18 +583,19 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def handle_event("save", data, socket) do
-    IO.inspect(data)
-
     case socket.assigns.action.type do
       :create ->
-        socket.assigns.resource
-        |> Ash.Changeset.for_create(
-          socket.assigns.action.name,
-          data["change"],
-          actor: socket.assigns[:actor],
-          tenant: socket.assigns[:tenant],
-          relationships: replace_all_loaded(socket.assigns.resource)
-        )
+        changeset =
+          socket.assigns.resource
+          |> Ash.Changeset.for_create(
+            socket.assigns.action.name,
+            data["change"],
+            actor: socket.assigns[:actor],
+            tenant: socket.assigns[:tenant],
+            relationships: replace_all_loaded(socket.assigns.resource)
+          )
+
+        changeset
         |> socket.assigns.api.create()
         |> case do
           {:ok, created} ->
@@ -624,7 +625,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
       :destroy ->
         socket.assigns.record
-        |> Ash.Changeset.for_create(
+        |> Ash.Changeset.for_destroy(
           socket.assigns.action.name,
           data["change"],
           actor: socket.assigns[:actor],
@@ -645,8 +646,6 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def handle_event("validate", data, socket) do
-    IO.inspect(data)
-
     case socket.assigns.action.type do
       :create ->
         changeset =
@@ -688,10 +687,20 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
+  def relationships(resource, action, exactly \\ nil)
+
   def relationships(resource, nil, exactly) when not is_nil(exactly) do
     resource
     |> Ash.Resource.Info.relationships()
     |> Enum.filter(&(&1.name in exactly))
+  end
+
+  def relationships(resource, :show, _) do
+    Ash.Resource.Info.relationships(resource)
+  end
+
+  def relationships(_resource, %{type: :destroy}, _) do
+    []
   end
 
   def relationships(resource, action, nil) do
@@ -767,7 +776,7 @@ defmodule AshAdmin.Components.Resource.Form do
       Enum.sort_by(rest, fn attribute ->
         {
           # Non-primary keys go to the bottom
-          not attribute.primary_key?,
+          !Map.get(attribute, :primary_key?),
           # Things with a default go at the bottom
           not is_nil(attribute.default),
           # Long text goes at the bottom
