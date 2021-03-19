@@ -3,6 +3,26 @@ defmodule AshAdmin.Router do
   Provides LiveView routing for AshAdmin.
   """
 
+  @doc """
+  Can be used to create a `:browser` pipeline easily if you don't have one.
+
+  By default it is called `:browser`, but you can rename it by supplying an argument,
+  for example:
+
+  ```elixir
+  defmodule MyAppWeb.Router do
+    use Phoenix.Router
+    admin_browser_pipeline :something
+
+    scope "/" do
+
+      pipe_through [:something]
+      ash_admin "/admin",
+        apis: [MyApp.Api1, MyApp.Api2]
+    end
+  end
+  ```
+  """
   defmacro admin_browser_pipeline(name \\ :browser) do
     quote do
       import Phoenix.LiveView.Router
@@ -31,7 +51,10 @@ defmodule AshAdmin.Router do
         scope "/" do
           import AshAdmin.Router
 
+          # Make sure you are piping through the browser pipeline
+          # If you don't have one, see `admin_browser_pipeline/1`
           pipe_through [:browser]
+
           ash_admin "/admin",
             apis: [MyApp.Api1, MyApp.Api2]
         end
