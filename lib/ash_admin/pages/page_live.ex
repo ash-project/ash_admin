@@ -53,7 +53,10 @@ defmodule AshAdmin.PageLive do
      |> assign(:actor_resources, actor_resources(apis))
      |> assign(:tenant, session["tenant"])
      |> assign(:actor, AshAdmin.ActorPlug.actor_from_session(session))
-     |> assign(:authorizing, AshAdmin.ActorPlug.session_bool(session["actor_authorizing"]))
+     |> assign(
+       :authorizing,
+       AshAdmin.ActorPlug.session_bool(session["actor_authorizing"]) || false
+     )
      |> assign(:recover_filter, nil)
      |> assign(:actor_paused, actor_paused)
      |> assign(:page_num, 1)}
@@ -234,8 +237,6 @@ defmodule AshAdmin.PageLive do
       )
       when not is_nil(resource) and not is_nil(api) do
     resource = Module.concat([resource])
-
-    IO.inspect("here")
 
     case decode_primary_key(resource, primary_key) do
       {:ok, pkey_filter} ->

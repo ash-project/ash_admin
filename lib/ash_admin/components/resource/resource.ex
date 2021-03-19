@@ -40,6 +40,9 @@ defmodule AshAdmin.Components.Resource do
           action={{ @action }}
           api={{ @api }}
           id={{ update_id(@resource) }}
+          actor={{@actor}}
+          authorize={{@authorize}}
+          tenant={{@tenant}}
         />
       </div>
       <Show
@@ -56,11 +59,15 @@ defmodule AshAdmin.Components.Resource do
         api={{ @api }}
         action={{ @action }}
         id={{ create_id(@resource) }}
+        actor={{@actor}}
+        authorize={{@authorize}}
+        tenant={{@tenant}}
       />
       <DataTable
         :if={{ @tab == "data" }}
         resource={{ @resource }}
         action={{ @action }}
+        actor={{@actor}}
         api={{ @api }}
         set_actor={{ @set_actor }}
         id={{ data_table_id(@resource) }}

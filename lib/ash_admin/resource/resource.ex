@@ -72,7 +72,7 @@ defmodule AshAdmin.Resource do
   end
 
   def fields(resource) do
-    Ash.Dsl.Extension.get_entities(resource, [:form])
+    Ash.Dsl.Extension.get_entities(resource, [:admin, :form])
   end
 
   def field(resource, name) do

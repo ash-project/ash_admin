@@ -73,5 +73,10 @@ defmodule Demo.Accounts.User do
       allow_nil? false
       default false
     end
+
+    attribute :profile, Demo.Accounts.Profile
+    attribute :alternate_profiles, {:array, Demo.Accounts.Profile}
+
+    timestamps()
   end
 end

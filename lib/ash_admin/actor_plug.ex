@@ -47,7 +47,7 @@ defmodule AshAdmin.ActorPlug do
     |> Plug.Conn.put_session(:actor_authorizing, authorizing)
     |> Plug.Conn.put_session(:actor_paused, actor_paused)
     |> Plug.Conn.assign(:actor, actor)
-    |> Plug.Conn.assign(:authorizing, authorizing)
+    |> Plug.Conn.assign(:authorizing, authorizing || false)
     |> Plug.Conn.assign(:actor_paused, actor_paused)
     |> Plug.Conn.assign(:authorizing, authorizing)
   end

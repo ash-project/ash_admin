@@ -84,6 +84,8 @@ defmodule Demo.Tickets.Ticket do
       default "new"
       constraints one_of: [:new, :investigating, :closed]
     end
+
+    timestamps()
   end
 
   relationships do

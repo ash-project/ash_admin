@@ -3,15 +3,30 @@ defmodule AshAdmin.Components.Resource.Form do
 
   import AshAdmin.Helpers
 
-  alias Surface.Components.Form
-  alias Surface.Components.Form.{Checkbox, ErrorTag, FieldContext, Label, Select, TextInput}
+  alias Surface.Components.{Context, Form}
+
+  alias Surface.Components.Form.{
+    Checkbox,
+    ErrorTag,
+    FieldContext,
+    HiddenInputs,
+    Inputs,
+    Label,
+    Select,
+    TextArea,
+    TextInput
+  }
 
   data(changeset, :any)
+  data(load_errors, :map, default: %{})
 
   prop(resource, :any, required: true)
   prop(api, :any, required: true)
   prop(record, :any, default: nil)
   prop(type, :atom, default: nil)
+  prop(actor, :any, default: nil)
+  prop(tenant, :any, default: nil)
+  prop(authorizing, :boolean, default: false)
   prop(action, :any)
 
   def update(assigns, socket) do
@@ -24,7 +39,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
   def render(assigns) do
     ~H"""
-    <div class="mt-10 sm:mt-0">
+    <div class="pt-10 sm:mt-0 bg-gray-300 min-h-screen">
       <div class="md:grid md:grid-cols-3 md:gap-6 mx-16 mt-10">
         <div class="mt-5 md:mt-0 md:col-span-2">
           {{ render_form(assigns) }}
@@ -34,12 +49,12 @@ defmodule AshAdmin.Components.Resource.Form do
     """
   end
 
-  defp render_form(assigns, path \\ nil) do
+  defp render_form(assigns) do
     ~H"""
-    <div class="shadow overflow-hidden sm:rounded-md">
+    <div class="shadow-lg overflow-hidden sm:rounded-md bg-white">
       <Form as="action" for={{ :action }} change="change_action">
         <div
-          :if={{ is_nil(path) && Enum.count(actions(@resource, @type)) > 1 }}
+          :if={{ Enum.count(actions(@resource, @type)) > 1 }}
           class="col-span-6 mr-4 mt-2 float-right overflow-auto"
         >
           <FieldContext name="action">
@@ -50,7 +65,7 @@ defmodule AshAdmin.Components.Resource.Form do
         <h1 class="text-lg mt-2 ml-4">
           {{ String.capitalize(to_string(@action.type)) }}</h1>
       </Form>
-      <div class="px-4 py-5 bg-white sm:p-6">
+      <div class="px-4 py-5 sm:p-6">
         <Form
           as="change"
           for={{ @changeset }}
@@ -59,78 +74,244 @@ defmodule AshAdmin.Components.Resource.Form do
           opts={{ autocomplete: false }}
           :let={{ form: form }}
         >
-          {{ {attributes, flags, bottom_attributes} = attributes(@resource, @action)
-          nil }}
-          <div class="grid grid-cols-6 gap-6">
-            <div
-              :for={{ attribute <- attributes }}
-              class={{
-                "col-span-6",
-                "sm:col-span-2": short_text?(@resource, attribute),
-                "sm:col-span-3": !long_text?(@resource, attribute)
-              }}
-            >
-              <FieldContext name={{ attribute.name }}>
-                <Label class="block text-sm font-medium text-gray-700">{{ to_name(attribute.name) }}</Label>
-                {{ render_attribute_input(assigns, attribute, form) }}
-                <ErrorTag field={{ attribute.name }} />
-              </FieldContext>
-            </div>
-          </div>
-          <div :if={{ !Enum.empty?(flags) }} class="hidden sm:block" aria-hidden="true">
-            <div class="py-5">
-              <div class="border-t border-gray-200" />
-            </div>
-          </div>
-          <div class="grid grid-cols-6 gap-6" :if={{ !Enum.empty?(bottom_attributes) }}>
-            <div
-              :for={{ attribute <- flags }}
-              class={{
-                "col-span-6",
-                "sm:col-span-2": short_text?(@resource, attribute),
-                "sm:col-span-3": !long_text?(@resource, attribute)
-              }}
-            >
-              <FieldContext name={{ attribute.name }}>
-                <Label class="block text-sm font-medium text-gray-700">{{ to_name(attribute.name) }}</Label>
-                {{ render_attribute_input(assigns, attribute, form) }}
-                <ErrorTag field={{ attribute.name }} />
-              </FieldContext>
-            </div>
-          </div>
-          <div :if={{ !Enum.empty?(bottom_attributes) }} class="hidden sm:block" aria-hidden="true">
-            <div class="py-5">
-              <div class="border-t border-gray-200" />
-            </div>
-          </div>
-          <div class="grid grid-cols-6 gap-6" :if={{ !Enum.empty?(bottom_attributes) }}>
-            <div
-              :for={{ attribute <- bottom_attributes }}
-              class={{
-                "col-span-6",
-                "sm:col-span-2": short_text?(@resource, attribute),
-                "sm:col-span-3": !long_text?(@resource, attribute)
-              }}
-            >
-              <FieldContext name={{ attribute.name }}>
-                <Label class="block text-sm font-medium text-gray-700">{{ to_name(attribute.name) }}</Label>
-                {{ render_attribute_input(assigns, attribute, form) }}
-                <ErrorTag field={{ attribute.name }} />
-              </FieldContext>
-            </div>
-          </div>
-          <div :if={{ is_nil(path) }} class="px-4 py-3 text-right sm:px-6">
+          <input hidden phx-hook="FormChange" id="resource_form"/>
+          <HiddenInputs/>
+          {{ render_attributes(assigns, @resource, @action, form) }}
+          <div class="px-4 py-3 text-right sm:px-6">
             <button
               type="submit"
               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              {{ String.capitalize(to_string(@type)) }}
+              {{ save_button_text(@type) }}
             </button>
           </div>
         </Form>
       </div>
     </div>
     """
+  end
+
+  defp save_button_text(:update), do: "Save"
+  defp save_button_text(type), do: type |> to_string() |> String.capitalize()
+
+  defp render_attributes(assigns, resource, action, form, exactly \\ nil) do
+    ~H"""
+    {{ {attributes, flags, bottom_attributes} = attributes(resource, action, exactly)
+    nil }}
+    <Context put={{ Form, form: form }}>
+      <div class="grid grid-cols-6 gap-6">
+        <div
+          :for={{ attribute <- attributes }}
+          class={{
+            "col-span-6",
+            "sm:col-span-2": short_text?(resource, attribute),
+            "sm:col-span-3": !long_text?(resource, attribute)
+          }}
+        >
+          <FieldContext name={{ attribute.name }}>
+            <Label class="block text-sm font-medium text-gray-700">{{ to_name(attribute.name) }}</Label>
+            {{ render_attribute_input(assigns, attribute, form) }}
+            <ErrorTag field={{ attribute.name }} />
+          </FieldContext>
+        </div>
+      </div>
+      <div :if={{ !Enum.empty?(flags) }} class="hidden sm:block" aria-hidden="true">
+        <div class="py-5">
+          <div class="border-t border-gray-200" />
+        </div>
+      </div>
+      <div class="grid grid-cols-6 gap-6" :if={{ !Enum.empty?(flags) }}>
+        <div
+          :for={{ attribute <- flags }}
+          class={{
+            "col-span-6",
+            "sm:col-span-2": short_text?(resource, attribute),
+            "sm:col-span-3": !long_text?(resource, attribute)
+          }}
+        >
+          <FieldContext name={{ attribute.name }}>
+            <Label class="block text-sm font-medium text-gray-700">{{ to_name(attribute.name) }}</Label>
+            {{ render_attribute_input(assigns, attribute, form) }}
+            <ErrorTag field={{ attribute.name }} />
+          </FieldContext>
+        </div>
+      </div>
+      <div :if={{ !Enum.empty?(bottom_attributes) }} class="hidden sm:block" aria-hidden="true">
+        <div class="py-5">
+          <div class="border-t border-gray-200" />
+        </div>
+      </div>
+      <div class="grid grid-cols-6 gap-6" :if={{ !Enum.empty?(bottom_attributes) }}>
+        <div
+          :for={{ attribute <- bottom_attributes }}
+          class={{
+            "col-span-6",
+            "sm:col-span-2": short_text?(resource, attribute),
+            "sm:col-span-3": !(long_text?(resource, attribute) || Ash.Type.embedded_type?(attribute.type))
+          }}
+        >
+          <FieldContext name={{ attribute.name }}>
+            <Label class="block text-sm font-medium text-gray-700">{{ to_name(attribute.name) }}</Label>
+            {{ render_attribute_input(assigns, attribute, form) }}
+            <ErrorTag field={{ attribute.name }} />
+          </FieldContext>
+        </div>
+      </div>
+        <div :for={{relationship <- relationships(resource, action, exactly)}}>
+          <FieldContext name={{ relationship.name }}>
+            <Label class="block text-sm font-medium text-gray-700">{{ to_name(relationship.name) }}</Label>
+              {{render_relationship_input(assigns, relationship, form)}}
+            <ErrorTag field={{ relationship.name }} />
+          </FieldContext>
+      </div>
+    </Context>
+    """
+  end
+
+  # defp render_relationship_input(assigns, %{cardinality: :many} = relationship, form) do
+  #   ~H"""
+  #   <Inputs form={{ form }} for={{ relationship.name }} :let={{ form: inner_form }}>
+  #     <button
+  #       type="button"
+  #       :on-click="remove_embed"
+  #       phx-value-path={{ inner_form.name }}
+  #       class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+  #     >
+  #       {{ {:safe, Heroicons.Solid.minus(class: "h-4 w-4 text-gray-500")} }}
+  #     </button>
+
+  #   </Inputs>
+  #   <button
+  #     type="button"
+  #     :on-click="append_embed"
+  #     phx-value-path={{ form.name <> "[#{relationship.name}]" }}
+  #     class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+  #   >
+  #     {{ {:safe, Heroicons.Solid.plus(class: "h-4 w-4 text-gray-500")} }}
+  #   </button>
+  #   """
+  # end
+
+  defp render_relationship_input(assigns, %{cardinality: :one} = relationship, form) do
+    ~H"""
+    <div :if={{loaded?(form.source, relationship.name)}}>
+      <Inputs form={{ form }} for={{ relationship.name }} :let={{ form: inner_form }} opts={{use_data?: true}}>
+        <button
+          type="button"
+          :on-click="remove_related"
+          phx-value-path={{ inner_form.name }}
+          class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+        >
+          {{ {:safe, Heroicons.Solid.minus(class: "h-4 w-4 text-gray-500")} }}
+        </button>
+          <div :for={{%{primary_key?: true} = attribute <- Ash.Resource.Info.attributes(relationship.destination)}}>
+            <Label class="block text-sm font-medium text-gray-700">{{ to_name(relationship.name) }}: {{to_name(attribute.name)}} </Label>
+            {{render_attribute_input(assigns, %{attribute | default: nil, update_default: nil, allow_nil?: false}, inner_form)}}
+          </div>
+      </Inputs>
+      <button
+        type="button"
+        :on-click="append_related"
+        :if={{!relationship_set?(form.source, relationship.name, relationship.name)}}
+        phx-value-path={{ form.name <> "[#{relationship.name}]" }}
+        class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+      >
+        {{ {:safe, Heroicons.Solid.plus(class: "h-4 w-4 text-gray-500")} }}
+      </button>
+    </div>
+    <div :if={{loaded?(form.source, relationship.name)}}>
+      <button :on-click="unload" phx-value-relationship={{relationship.name}} type="button" class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center">
+        Unload
+      </button>
+    </div>
+    <div :if={{!loaded?(form.source, relationship.name)}}>
+      <button :on-click="load" phx-value-relationship={{relationship.name}} type="button" class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center">
+        Load
+      </button>
+      <div :if={{is_exception(@load_errors[relationship.name])}}>
+        {{Exception.message(@load_errors[relationship.name])}}
+      </div>
+      <div :if={{@load_errors[relationship.name] && !is_exception(@load_errors[relationship.name])}}>
+        {{inspect(@load_errors[relationship.name])}}
+      </div>
+    </div>
+    """
+  end
+
+  defp render_relationship_input(assigns, %{cardinality: :many} = relationship, form) do
+    ~H"""
+    <div :if={{loaded?(form.source, relationship.name)}}>
+      <Inputs form={{ form }} for={{ relationship.name }} :let={{ form: inner_form }} opts={{use_data?: true}}>
+        <button
+          type="button"
+          :on-click="remove_related"
+          :if={{relationship_set?(form.source, relationship.name, relationship.name)}}
+          phx-value-path={{ inner_form.name }}
+          class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+        >
+          {{ {:safe, Heroicons.Solid.minus(class: "h-4 w-4 text-gray-500")} }}
+        </button>
+          <div :for={{%{primary_key?: true} = attribute <- Ash.Resource.Info.attributes(relationship.destination)}}>
+            <Label class="block text-sm font-medium text-gray-700">{{ to_name(relationship.name) }}: {{to_name(attribute.name)}} </Label>
+            {{render_attribute_input(assigns, %{attribute | default: nil, update_default: nil, allow_nil?: false}, inner_form)}}
+          </div>
+      </Inputs>
+      <button
+        type="button"
+        :on-click="append_related"
+        phx-value-path={{ form.name <> "[#{relationship.name}]" }}
+        class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+      >
+        {{ {:safe, Heroicons.Solid.plus(class: "h-4 w-4 text-gray-500")} }}
+      </button>
+    </div>
+    <div :if={{loaded?(form.source, relationship.name)}}>
+      <button :on-click="unload" phx-value-relationship={{relationship.name}} type="button" class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center">
+        Unload
+      </button>
+    </div>
+    <div :if={{!loaded?(form.source, relationship.name)}}>
+      <button :on-click="load" phx-value-relationship={{relationship.name}} type="button" class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center">
+        Load
+      </button>
+      <div :if={{is_exception(@load_errors[relationship.name])}}>
+        {{Exception.message(@load_errors[relationship.name])}}
+      </div>
+      <div :if={{@load_errors[relationship.name] && !is_exception(@load_errors[relationship.name])}}>
+        {{inspect(@load_errors[relationship.name])}}
+      </div>
+    </div>
+    """
+  end
+
+  defp loaded?(%{action_type: :create}, _), do: true
+
+  defp loaded?(%{data: record}, relationship) do
+    case Map.get(record, relationship) do
+      %Ash.NotLoaded{} -> false
+      _ -> true
+    end
+  end
+
+  defp relationship_set?(%{action_type: :create} = changeset, relationship, id) do
+    changeset.relationships
+    |> Map.get(relationship, [])
+    |> Enum.any?(fn {manage, opts} ->
+      if opts[:meta][:id] == id do
+        manage not in [[], nil]
+      end
+    end)
+  end
+
+  defp relationship_set?(changeset, relationship, id) do
+    changeset.relationships
+    |> Map.get(relationship, [])
+    |> Enum.any?(fn {manage, opts} ->
+      if opts[:meta][:id] == id do
+        manage not in [[], nil]
+      end
+    end)
+    |> Kernel.||(Map.get(changeset.data, relationship) not in [nil, []])
   end
 
   defp short_text?(resource, attribute) do
@@ -189,78 +370,119 @@ defmodule AshAdmin.Components.Resource.Form do
         %{
           type: type,
           name: name,
-          default: nil
-        } = attribute,
-        form
-      )
-      when type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID] do
-    ~H"""
-    <TextInput
-      form={{ form }}
-      field={{ name }}
-      opts={{ type: text_input_type(attribute) }}
-      class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-    />
-    """
-  end
-
-  def render_attribute_input(
-        assigns,
-        %{
-          type: type,
-          name: name,
           default: default
         } = attribute,
         form
       )
-      when type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID] and
-             is_binary(default) do
-    ~H"""
-    <TextInput
-      form={{ form }}
-      field={{ name }}
-      value={{ default }}
-      opts={{ type: text_input_type(attribute) }}
-      class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-    />
-    """
-  end
+      when type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID] do
+    cond do
+      long_text?(form.source.resource, attribute) ->
+        ~H"""
+        <TextArea
+          form={{ form }}
+          field={{ name }}
+          value={{string_default(default)}}
+          opts={{ type: text_input_type(attribute), placeholder: placeholder(default) }}
+          class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+        />
+        """
 
-  def render_attribute_input(
-        assigns,
-        %{
-          type: type,
-          name: name,
-          default: default,
-          generated?: generated?
-        } = attribute,
-        form
-      )
-      when type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID] and
-             (is_function(default) or generated?) do
-    ~H"""
-    <TextInput
-      form={{ form }}
-      field={{ name }}
-      opts={{ placeholder: "DEFAULT", type: text_input_type(attribute) }}
-      class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-    />
-    """
+      short_text?(form.source.resource, attribute) ->
+        ~H"""
+        <TextInput
+          form={{ form }}
+          field={{ name }}
+          value={{string_default(default)}}
+          opts={{ type: text_input_type(attribute), placeholder: placeholder(default) }}
+          class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+        />
+        """
+
+      true ->
+        ~H"""
+        <TextInput
+          form={{ form }}
+          field={{ name }}
+          value={{string_default(default)}}
+          opts={{ type: text_input_type(attribute), placeholder: placeholder(default) }}
+          class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+        />
+        """
+    end
   end
 
   def render_attribute_input(assigns, attribute, form) do
-    ~H"""
-    <TextInput
-      form={{ form }}
-      field={{ attribute.name }}
-      opts={{ type: text_input_type(attribute) }}
-      class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-    />
-    """
+    if Ash.Type.embedded_type?(attribute.type) do
+      ~H"""
+      <Inputs form={{ form }} for={{ attribute.name }} :let={{ form: inner_form }}>
+        <button
+          type="button"
+          :on-click="remove_embed"
+          phx-value-path={{ inner_form.name }}
+          class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+        >
+          {{ {:safe, Heroicons.Solid.minus(class: "h-4 w-4 text-gray-500")} }}
+        </button>
+
+        {{ render_attributes(assigns, inner_form.source.resource, inner_form.source.action, inner_form) }}
+      </Inputs>
+      <button
+        type="button"
+        :on-click="append_embed"
+        phx-value-path={{ form.name <> "[#{attribute.name}]" }}
+        class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+      >
+        {{ {:safe, Heroicons.Solid.plus(class: "h-4 w-4 text-gray-500")} }}
+      </button>
+      """
+    else
+      ~H"""
+      <TextInput
+        form={{ form }}
+        field={{ attribute.name }}
+        opts={{ type: text_input_type(attribute), placeholder: placeholder(attribute.default) }}
+        class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+      />
+      """
+    end
   end
+
+  defp placeholder(value) when is_function(value) do
+    "DEFAULT"
+  end
+
+  defp placeholder(_), do: nil
+
+  defp string_default(default) when is_binary(default), do: default
+  defp string_default(_), do: nil
 
   defp text_input_type(%{sensitive?: true}), do: "password"
   defp text_input_type(_), do: "text"
+
+  defp redirect_to(socket, record) do
+    show_action = AshAdmin.Resource.show_action(socket.assigns.resource)
+
+    if show_action do
+      {:noreply,
+       socket
+       |> redirect(
+         to:
+           ash_show_path(
+             socket,
+             socket.assigns.api,
+             socket.assigns.resource,
+             record,
+             show_action
+           )
+       )}
+    else
+      {:noreply,
+       socket
+       |> redirect(
+         to: ash_update_path(socket, socket.assigns.api, socket.assigns.resource, record)
+       )}
+    end
+  end
 
   def handle_event("change_action", %{"action" => %{"action" => new_action}}, socket) do
     action =
@@ -293,7 +515,76 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
+  def handle_event("change_action", _, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("unload", %{"relationship" => relationship}, socket) do
+    record = socket.assigns.record
+    changeset = socket.assigns.changeset
+    relationship = String.to_existing_atom(relationship)
+
+    unloaded = Map.put(record, relationship, Map.get(record.__struct__.__struct__, relationship))
+
+    socket = push_event(socket, "form_change", %{})
+
+    {:noreply, assign(socket, changeset: %{changeset | data: unloaded}, record: unloaded)}
+  end
+
+  def handle_event("load", %{"relationship" => relationship}, socket) do
+    record = socket.assigns.record
+    changeset = socket.assigns.changeset
+    api = socket.assigns.api
+    relationship = String.to_existing_atom(relationship)
+
+    case api.load(
+           record,
+           relationship,
+           actor: socket.assigns[:actor],
+           authorize?: socket.assigns[:authorizing]
+         ) do
+      {:ok, loaded} ->
+        socket = push_event(socket, "form_change", %{})
+        {:noreply, assign(socket, changeset: %{changeset | data: loaded}, record: loaded)}
+
+      {:error, errors} ->
+        {:noreply,
+         assign(socket, load_errors: Map.put(socket.assigns.load_errors, relationship, errors))}
+    end
+  end
+
+  def handle_event("append_related", %{"path" => path}, socket) do
+    {:noreply,
+     assign(socket,
+       changeset: AshPhoenix.add_related(socket.assigns.changeset, path, "change")
+     )}
+  end
+
+  def handle_event("remove_related", %{"path" => path}, socket) do
+    {record, changeset} = AshPhoenix.remove_related(socket.assigns.changeset, path, "change")
+
+    {:noreply,
+     assign(socket,
+       record: record,
+       changeset: %{changeset | data: record}
+     )}
+  end
+
+  def handle_event("append_embed", %{"path" => path}, socket) do
+    {:noreply,
+     assign(socket, changeset: AshPhoenix.add_embed(socket.assigns.changeset, path, "change"))}
+  end
+
+  def handle_event("remove_embed", %{"path" => path}, socket) do
+    {:noreply,
+     assign(socket,
+       changeset: AshPhoenix.remove_embed(socket.assigns.changeset, path, "change")
+     )}
+  end
+
   def handle_event("save", data, socket) do
+    IO.inspect(data)
+
     case socket.assigns.action.type do
       :create ->
         socket.assigns.resource
@@ -301,7 +592,8 @@ defmodule AshAdmin.Components.Resource.Form do
           socket.assigns.action.name,
           data["change"],
           actor: socket.assigns[:actor],
-          tenant: socket.assigns[:tenant]
+          tenant: socket.assigns[:tenant],
+          relationships: replace_all_loaded(socket.assigns.resource)
         )
         |> socket.assigns.api.create()
         |> case do
@@ -318,7 +610,8 @@ defmodule AshAdmin.Components.Resource.Form do
           socket.assigns.action.name,
           data["change"],
           actor: socket.assigns[:actor],
-          tenant: socket.assigns[:tenant]
+          tenant: socket.assigns[:tenant],
+          relationships: replace_all_loaded(socket.assigns.resource, socket.assigns.record)
         )
         |> socket.assigns.api.update()
         |> case do
@@ -335,7 +628,8 @@ defmodule AshAdmin.Components.Resource.Form do
           socket.assigns.action.name,
           data["change"],
           actor: socket.assigns[:actor],
-          tenant: socket.assigns[:tenant]
+          tenant: socket.assigns[:tenant],
+          relationships: replace_all_loaded(socket.assigns.resource)
         )
         |> socket.assigns.api.destroy()
         |> case do
@@ -350,32 +644,9 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
-  defp redirect_to(socket, record) do
-    show_action = AshAdmin.Resource.show_action(socket.assigns.resource)
-
-    if show_action do
-      {:noreply,
-       socket
-       |> redirect(
-         to:
-           ash_show_path(
-             socket,
-             socket.assigns.api,
-             socket.assigns.resource,
-             record,
-             show_action
-           )
-       )}
-    else
-      {:noreply,
-       socket
-       |> redirect(
-         to: ash_update_path(socket, socket.assigns.api, socket.assigns.resource, record)
-       )}
-    end
-  end
-
   def handle_event("validate", data, socket) do
+    IO.inspect(data)
+
     case socket.assigns.action.type do
       :create ->
         changeset =
@@ -384,7 +655,8 @@ defmodule AshAdmin.Components.Resource.Form do
             socket.assigns.action.name,
             data["change"],
             actor: socket.assigns[:actor],
-            tenant: socket.assigns[:tenant]
+            tenant: socket.assigns[:tenant],
+            relationships: replace_all_loaded(socket.assigns.resource)
           )
 
         {:noreply, assign(socket, :changeset, changeset)}
@@ -396,7 +668,8 @@ defmodule AshAdmin.Components.Resource.Form do
             socket.assigns.action.name,
             data["change"],
             actor: socket.assigns[:actor],
-            tenant: socket.assigns[:tenant]
+            tenant: socket.assigns[:tenant],
+            relationships: replace_all_loaded(socket.assigns.resource, socket.assigns.record)
           )
 
         {:noreply, assign(socket, :changeset, changeset)}
@@ -415,30 +688,58 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
-  def attributes(resource, :show) do
+  def relationships(resource, nil, exactly) when not is_nil(exactly) do
+    resource
+    |> Ash.Resource.Info.relationships()
+    |> Enum.filter(&(&1.name in exactly))
+  end
+
+  def relationships(resource, action, nil) do
+    resource
+    |> Ash.Resource.Info.relationships()
+    |> Enum.filter(& &1.writable?)
+    |> Enum.reject(& &1.private?)
+    |> only_accepted(action)
+    |> sort_relationships()
+  end
+
+  defp sort_relationships(relationships) do
+    [:belongs_to, :has_one, :has_many, :many_to_many]
+    |> Enum.map(fn type ->
+      Enum.filter(relationships, &(&1.type == type))
+    end)
+    |> Enum.concat()
+  end
+
+  def attributes(resource, action, exactly \\ nil)
+
+  def attributes(resource, nil, exactly) when not is_nil(exactly) do
     resource
     |> Ash.Resource.Info.attributes()
+    |> Enum.filter(&(&1.name in exactly))
     |> sort_attributes(resource)
   end
 
-  def attributes(resource, %{type: :read} = action) do
+  def attributes(resource, :show, _) do
+    resource
+    |> Ash.Resource.Info.attributes()
+    |> Enum.reject(&(&1.name == :autogenerated_id))
+    |> sort_attributes(resource)
+  end
+
+  def attributes(resource, %{type: :destroy} = action, _) do
     action.arguments
     |> Enum.reject(& &1.private?)
     |> sort_attributes(resource)
   end
 
-  def attributes(resource, %{type: :destroy} = action) do
-    action.arguments
-    |> Enum.reject(& &1.private?)
-    |> sort_attributes(resource)
-  end
-
-  def attributes(resource, action) do
+  def attributes(resource, action, _) do
     attributes =
       resource
       |> Ash.Resource.Info.attributes()
       |> Enum.filter(& &1.writable?)
       |> Enum.reject(& &1.private?)
+      |> Enum.reject(&(&1.name == :autogenerated_id))
       |> only_accepted(action)
 
     arguments =
@@ -458,12 +759,15 @@ defmodule AshAdmin.Components.Resource.Form do
 
     {defaults, rest} =
       Enum.split_with(rest, fn attribute ->
-        attribute.default
+        Ash.Type.embedded_type?(attribute.type) ||
+          (not is_nil(attribute.default) && !attribute.primary_key?)
       end)
 
     auto_sorted =
       Enum.sort_by(rest, fn attribute ->
         {
+          # Non-primary keys go to the bottom
+          not attribute.primary_key?,
           # Things with a default go at the bottom
           not is_nil(attribute.default),
           # Long text goes at the bottom
@@ -475,7 +779,13 @@ defmodule AshAdmin.Components.Resource.Form do
         }
       end)
 
-    sorted_defaults = Enum.sort_by(defaults, &(!&1.type == Ash.Type.Boolean))
+    sorted_defaults =
+      Enum.sort_by(
+        defaults,
+        fn attribute ->
+          {!Ash.Type.embedded_type?(attribute.type), attribute.type != Ash.Type.Boolean}
+        end
+      )
 
     {auto_sorted, flags, sorted_defaults}
   end

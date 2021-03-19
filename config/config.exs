@@ -13,6 +13,10 @@ config :ash_admin,
     Demo.Tickets.Api
   ]
 
+config :surface, :components, [
+  {Surface.Components.Form.ErrorTag, default_class: "invalid-feedback"}
+]
+
 config :ash_admin, DemoWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "Hu4qQN3iKzTV4fJxhorPQlA/osH9fAMtbtjVS58PFgfw3ja5Z18Q/WSNR9wP4OfW",

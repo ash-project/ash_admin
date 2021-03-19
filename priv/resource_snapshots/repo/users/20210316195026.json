@@ -1,0 +1,85 @@
+{
+  "attributes": [
+    {
+      "allow_nil?": true,
+      "default": "false",
+      "generated?": false,
+      "name": "admin",
+      "primary_key?": false,
+      "references": null,
+      "type": "boolean"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "name": "alternate_profiles",
+      "primary_key?": false,
+      "references": null,
+      "type": [
+        "array",
+        "map"
+      ]
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "name": "first_name",
+      "primary_key?": false,
+      "references": null,
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"uuid_generate_v4()\")",
+      "name": "id",
+      "primary_key?": true,
+      "references": null,
+      "type": "binary_id"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "name": "last_name",
+      "primary_key?": false,
+      "references": null,
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "name": "profile",
+      "primary_key?": false,
+      "references": null,
+      "type": "map"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "name": "representative",
+      "primary_key?": false,
+      "references": null,
+      "type": "boolean"
+    }
+  ],
+  "base_filter": null,
+  "hash": "5B37D2DE8D4E87A94BEB677D5C265C5CC2D3467F74A56D3A0E9630A743EC0E1F",
+  "identities": [
+    {
+      "base_filter": "representative = true",
+      "keys": [
+        "first_name",
+        "last_name"
+      ],
+      "name": "representative_name"
+    }
+  ],
+  "multitenancy": {
+    "attribute": null,
+    "global": null,
+    "strategy": null
+  },
+  "repo": "Elixir.Demo.Repo",
+  "table": "users"
+}

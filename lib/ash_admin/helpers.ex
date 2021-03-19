@@ -1,6 +1,27 @@
 defmodule AshAdmin.Helpers do
   @moduledoc false
 
+  def replace_all_loaded(resource, data \\ nil) do
+    resource
+    |> Ash.Resource.Info.relationships()
+    |> Enum.filter(fn relationship ->
+      is_nil(data) ||
+        not match?(%Ash.NotLoaded{}, Map.get(data, relationship.name))
+    end)
+    |> Enum.map(fn rel ->
+      {rel.name,
+       {:manage,
+        on_lookup: :relate,
+        on_no_match: :error,
+        on_match: :ignore,
+        on_missing: :unrelate,
+        authorize?: false,
+        meta: [
+          id: rel.name
+        ]}}
+    end)
+  end
+
   def ash_admin_path(socket) do
     apply(socket.router.__helpers__(), :ash_admin_path, [socket, :page])
   end

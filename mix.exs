@@ -46,7 +46,8 @@ defmodule AshAdmin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ash, "~> 1.36"},
+      # {:ash, "~> 1.36"},
+      {:ash, path: "../ash", override: true},
       {:surface, "~> 0.3.1"},
       {:ash_phoenix, path: "../ash_phoenix"},
       {:phoenix_live_view, "~> 0.15.4"},

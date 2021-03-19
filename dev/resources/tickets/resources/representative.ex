@@ -13,11 +13,6 @@ defmodule Demo.Tickets.Representative do
     end
   end
 
-  multitenancy do
-    strategy :attribute
-    attribute :first_name
-  end
-
   postgres do
     table "users"
     repo Demo.Repo
@@ -43,6 +38,11 @@ defmodule Demo.Tickets.Representative do
 
     read :me do
       filter id: actor(:id)
+    end
+
+    update :update do
+      primary? true
+      accept [:assigned_tickets]
     end
   end
 
