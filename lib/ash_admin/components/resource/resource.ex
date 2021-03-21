@@ -15,8 +15,6 @@ defmodule AshAdmin.Components.Resource do
   prop(authorizing, :boolean, required: true)
   prop(tenant, :string, required: true)
   prop(recover_filter, :any)
-  prop(page_params, :any, default: [])
-  prop(page_num, :integer, default: 1)
   prop(url_path, :string, default: "")
   prop(params, :map, default: %{})
   prop(primary_key, :any, default: nil)

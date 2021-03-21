@@ -4,7 +4,7 @@ defmodule AshAdmin.Components.Resource.Table do
   import AshAdmin.Helpers
   alias Surface.Components.LiveRedirect
 
-  prop(attributes, :list, default: nil)
+  prop(attributes, :any, default: nil)
   prop(data, :list, default: nil)
   prop(resource, :any, required: true)
   prop(actions, :boolean, default: true)
@@ -14,17 +14,15 @@ defmodule AshAdmin.Components.Resource.Table do
   def render(assigns) do
     ~H"""
     <div>
-      <table class="rounded-t-lg m-5 w-5/6 mx-auto">
+      <table class="rounded-t-lg m-5 w-5/6 mx-auto text-left">
         <thead class="text-left border-b-2">
-          <th :for={{ attribute <- Ash.Resource.Info.attributes(@resource) |> Enum.filter(&(is_nil(@attributes) || &1 in @attributes)) }}>
+          <th :for={{ attribute <- attributes(@resource, @attributes) }}>
             {{ to_name(attribute.name) }}
           </th>
         </thead>
         <tbody>
-          <tr :for={{ record <- @data }} class="text-left border-b-2">
-            <td :for={{ attribute <- Ash.Resource.Info.attributes(@resource) |> Enum.filter(&(is_nil(@attributes) || &1 in @attributes)) }} class="px-4 py-3">
-              {{ render_attribute(record, attribute) }}
-            </td>
+          <tr :for={{ record <- @data }} class="border-b-2">
+            <td :for={{ attribute <- attributes(@resource, @attributes) }} class="py-3">{{ render_attribute(record, attribute) }}</td>
             <td :if={{@actions && actions?(@resource)}}>
               <div class="flex h-max justify-items-center">
                 <div :if={{ AshAdmin.Resource.show_action(@resource) }}>
@@ -61,6 +59,16 @@ defmodule AshAdmin.Components.Resource.Table do
       </table>
     </div>
     """
+  end
+
+  defp attributes(resource, nil) do
+    Ash.Resource.Info.attributes(resource)
+  end
+
+  defp attributes(resource, attributes) do
+    attributes
+    |> Enum.map(&Ash.Resource.Info.attribute(resource, &1))
+    |> Enum.filter(& &1)
   end
 
   defp render_attribute(record, attribute) do

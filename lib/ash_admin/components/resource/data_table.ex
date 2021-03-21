@@ -18,13 +18,16 @@ defmodule AshAdmin.Components.Resource.DataTable do
   data(initialized, :boolean, default: false)
   data(data, :any)
   data(query, :any, default: nil)
+  data(page_params, :any, default: nil)
+  data(page_num, :any, default: nil)
 
   def update(assigns, socket) do
     if assigns[:initialized] do
       {:ok, socket}
     else
       socket = assign(socket, assigns)
-      arguments = socket.assigns[:params]["args"] || %{}
+      params = socket.assigns[:params] || %{}
+      arguments = params["args"] || %{}
 
       query =
         socket.assigns[:resource]
@@ -34,16 +37,58 @@ defmodule AshAdmin.Components.Resource.DataTable do
       socket = assign(socket, :query, query)
 
       socket =
+        if params["page"] do
+          default_limit =
+            (socket.assigns[:action] && socket.assigns.action.pagination &&
+               socket.assigns.action.pagination.default_limit) ||
+              socket.assigns.action.pagination.max_page_size || 25
+
+          count? =
+            socket.assigns[:action] && socket.assigns.action.pagination &&
+              socket.assigns.action.pagination.countable
+
+          page_params =
+            AshPhoenix.LiveView.page_from_params(params["page"], default_limit, !!count?)
+
+          socket
+          |> assign(
+            :page_params,
+            page_params
+          )
+          |> assign(
+            :page_num,
+            page_num_from_page_params(page_params)
+          )
+        else
+          socket
+          |> assign(:page_params, nil)
+          |> assign(:page_num, 1)
+        end
+
+      socket =
         if assigns[:action].pagination do
           keep_live(
             socket,
             :data,
-            fn socket, page_opts ->
+            fn socket ->
+              default_limit =
+                socket.assigns[:action].pagination.default_limit ||
+                  socket.assigns[:action].pagination.max_page_size || 25
+
+              count? = socket.assigns[:action].pagination.countable
+
+              page_params =
+                if socket.assigns[:params]["page"] do
+                  page_from_params(socket.assigns[:params]["page"], default_limit, !!count?)
+                else
+                  []
+                end
+
               assigns[:api].read(socket.assigns.query,
                 action: socket.assigns[:action].name,
                 actor: socket.assigns[:actor],
                 authorize?: socket.assigns[:authorizing],
-                page: page_opts || []
+                page: page_params
               )
             end,
             load_until_connected?: true
@@ -71,11 +116,11 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
   def render(assigns) do
     ~H"""
-    <div class="pt-10 sm:mt-0 bg-gray-300 min-h-screen">
-      <div class="md:grid md:grid-cols-3 md:gap-6 mx-16 mt-10">
-        <div class="mt-5 md:mt-0 md:col-span-2">
-          <div :if={{@action.arguments != []}} class="shadow-lg overflow-hidden sm:rounded-md bg-white">
-            <div class="px-4 py-5 sm:p-6">
+    <div class="sm:mt-0 bg-gray-300 min-h-screen">
+      <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10">
+        <div class="md:mt-0 md:col-span-2">
+          <div :if={{@action.arguments != []}} class="shadow-lg overflow-hidden pt-2 sm:rounded-md bg-white">
+            <div class="px-4 sm:p-6">
               <Form :if={{@query}} as="query" for={{@query}} change="validate" submit="save" :let={{form: form}}>
                 {{AshAdmin.Components.Resource.Form.render_attributes(assigns, @resource, @action, form)}}
                 <div class="px-4 py-3 text-right sm:px-6">
@@ -91,8 +136,8 @@ defmodule AshAdmin.Components.Resource.DataTable do
           </div>
         </div>
       </div>
-      <div :if={{@action.arguments == [] || @params["args"]}} class="h-full mt-8 overflow-scroll">
-        <div class="shadow-lg overflow-hidden sm:rounded-md bg-white">
+      <div :if={{@action.arguments == [] || @params["args"]}} class="h-full overflow-scroll">
+        <div class="shadow-lg overflow-scroll sm:rounded-md bg-white">
           <div :if={{ match?({:error, _}, @data) }}>
             {{ {:error, %{query: query}} = @data
             nil }}
@@ -102,19 +147,36 @@ defmodule AshAdmin.Components.Resource.DataTable do
               </li>
             </ul>
           </div>
-          <Table :if={{ match?({:ok, _data}, @data) }} data={{data(@data)}} resource={{@resource}} api={{@api}} set_actor={{@set_actor}}/>
+          <div class="px-2">
+            {{render_pagination_links(assigns, :top)}}
+            <Table :if={{ match?({:ok, _data}, @data) }} data={{data(@data)}} resource={{@resource}} api={{@api}} set_actor={{@set_actor}} attributes={{AshAdmin.Resource.table_columns(@resource)}}/>
+            {{render_pagination_links(assigns, :bottom)}}
+          </div>
         </div>
       </div>
     </div>
     """
   end
 
-  defp message(error) do
-    if is_exception(error) do
-      Exception.message(error)
-    else
-      inspect(error)
-    end
+  def handle_event("next_page", _, socket) do
+    params = %{"page" => page_link_params(socket.assigns.data, "next")}
+
+    {:noreply,
+     push_patch(socket, to: self_path(socket.assigns.url_path, socket.assigns.params, params))}
+  end
+
+  def handle_event("prev_page", _, socket) do
+    params = %{"page" => page_link_params(socket.assigns.data, "prev")}
+
+    {:noreply,
+     push_patch(socket, to: self_path(socket.assigns.url_path, socket.assigns.params, params))}
+  end
+
+  def handle_event("specific_page", %{"page" => page}, socket) do
+    params = %{"page" => page_link_params(socket.assigns.data, String.to_integer(page))}
+
+    {:noreply,
+     push_patch(socket, to: self_path(socket.assigns.url_path, socket.assigns.params, params))}
   end
 
   def handle_event("validate", %{"query" => query}, socket) do
@@ -131,74 +193,176 @@ defmodule AshAdmin.Components.Resource.DataTable do
      )}
   end
 
-  #  defp middle_page_num(num, trailing_page_nums) do
-  #     if num in trailing_page_nums || num <= 3 do
-  #       "..."
-  #     else
-  #       "...#{num}..."
-  #     end
-  #   end
+  defp render_pagination_links(assigns, placement) do
+    ~H"""
+    <div :if={{(offset?(@data) || keyset?(@data)) && show_pagination_links?(@data, placement)}} class="w-5/6 mx-auto">
+      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+        <div class="flex-1 flex justify-between sm:hidden">
+          <button :if={{!(keyset?(@data) && is_nil(@params["page"])) && prev_page?(@data)}} :on-click="prev_page" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500">
+            Previous
+          </button>
+          {{render_pagination_information(assigns, true)}}
+          <button :if={{next_page?(@data)}} :on-click="next_page" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500">
+            Next
+          </button>
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+          {{render_pagination_information(assigns)}}
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <button :if={{!(keyset?(@data) && is_nil(@params["page"])) && prev_page?(@data)}} :on-click="prev_page" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <span class="sr-only">Previous</span>
+                <!-- Heroicon name: solid/chevron-left -->
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              <span :if={{offset?(@data)}}>
+                {{render_page_links(assigns, leading_page_nums(@data))}}
+                {{render_middle_page_num(assigns, @page_num, trailing_page_nums(@data))}}
+                {{render_page_links(assigns, trailing_page_nums(@data))}}
+              </span>
+              <button :if={{next_page?(@data)}} :on-click="next_page" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <span class="sr-only">Next</span>
+                <!-- Heroicon name: solid/chevron-right -->
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
 
-  #   defp page_link_params({:ok, page}, target), do: page_link_params(page, target)
+  defp render_page_links(assigns, page_nums) do
+    ~H"""
+    <button :on-click="specific_page" phx-value-page={{i}} :for={{i <- page_nums}} class={{"relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50", "bg-gray-300": @page_num == i}}>
+      {{i}}
+    </button>
+    """
+  end
 
-  #   defp page_link_params(page, target) do
-  #     case AshPhoenix.LiveView.page_link_params(page, target) do
-  #       :invalid ->
-  #         nil
+  defp render_pagination_information(assigns, small? \\ false) do
+    ~H"""
+      <p class={{"text-sm text-gray-700", "sm:hidden": small?}}>
+      <span :if={{offset?(@data)}}>
+        Showing
+        <span class="font-medium">{{first(@data)}}</span>
+        to
+        <span class="font-medium">{{last(@data)}}</span>
+          of
+      </span>
+      <span :if={{count(@data)}}>
+        <span class="font-medium">{{count(@data)}}</span>
+      results
+      </span>
+    </p>
+    """
+  end
 
-  #       params ->
-  #         [page: params]
-  #     end
-  #   end
+  defp page_num_from_page_params(params) do
+    cond do
+      !params[:offset] || params[:after] || params[:before] ->
+        1
 
-  #   defp show_ellipses?(%Ash.Page.Offset{count: count, limit: limit}) when not is_nil(count) do
-  #     page_nums =
-  #       count
-  #       |> Kernel./(limit)
-  #       |> Float.ceil()
-  #       |> trunc()
+      params[:offset] && params[:limit] ->
+        trunc(Float.ceil(params[:offset] / params[:limit])) + 1
 
-  #     page_nums > 6
-  #   end
+      true ->
+        nil
+    end
+  end
 
-  #   defp show_ellipses?({:ok, data}), do: show_ellipses?(data)
-  #   defp show_ellipses?(_), do: false
+  defp show_pagination_links?({:ok, _page}, :bottom), do: true
+  defp show_pagination_links?({:ok, page}, :top), do: page.limit >= 20
+  defp show_pagination_links?(_, _), do: false
 
-  #   def leading_page_nums({:ok, data}), do: leading_page_nums(data)
-  #   def leading_page_nums(%Ash.Page.Offset{count: nil}), do: []
+  defp first({:ok, %Ash.Page.Offset{offset: offset}}) do
+    (offset || 0) + 1
+  end
 
-  #   def leading_page_nums(%Ash.Page.Offset{limit: limit, count: count}) do
-  #     page_nums =
-  #       count
-  #       |> Kernel./(limit)
-  #       |> Float.ceil()
-  #       |> trunc()
+  defp first(_), do: nil
 
-  #     1..min(3, page_nums)
-  #   end
+  defp last({:ok, %Ash.Page.Offset{offset: offset, results: results}}) do
+    Enum.count(results) + offset
+  end
 
-  #   def leading_page_nums(_), do: []
+  defp last(_), do: nil
 
-  #   def trailing_page_nums({:ok, data}), do: trailing_page_nums(data)
-  #   def trailing_page_nums(%Ash.Page.Offset{count: nil}), do: []
+  defp message(error) do
+    if is_exception(error) do
+      Exception.message(error)
+    else
+      inspect(error)
+    end
+  end
 
-  #   def trailing_page_nums(%Ash.Page.Offset{limit: limit, count: count}) do
-  #     page_nums =
-  #       count
-  #       |> Kernel./(limit)
-  #       |> Float.ceil()
-  #       |> trunc()
+  defp render_middle_page_num(assigns, num, trailing_page_nums) do
+    ellipsis? = num in trailing_page_nums || num <= 3
 
-  #     if page_nums > 3 do
-  #       max(page_nums - 2, 0)..page_nums
-  #     else
-  #       []
-  #     end
-  #   end
+    ~H"""
+    <span
+      :if={{show_ellipses?(@data)}}
+      class={{"relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700", "bg-gray-300": !ellipsis?}}>
+      <span :if={{ellipsis?}}>
+        ...
+      </span>
+      <span :if={{!ellipsis?}}>
+        {{num}}
+      </span>
+    </span>
+    """
+  end
 
-  #   def handle_event("toggle_filter", _, socket) do
-  #     {:noreply, assign(socket, :filter_open, !socket.assigns.filter_open)}
-  #   end
+  defp show_ellipses?(%Ash.Page.Offset{count: count, limit: limit}) when not is_nil(count) do
+    page_nums =
+      count
+      |> Kernel./(limit)
+      |> Float.ceil()
+      |> trunc()
+
+    page_nums > 6
+  end
+
+  defp show_ellipses?({:ok, data}), do: show_ellipses?(data)
+  defp show_ellipses?(_), do: false
+
+  def leading_page_nums({:ok, data}), do: leading_page_nums(data)
+  def leading_page_nums(%Ash.Page.Offset{count: nil}), do: []
+
+  def leading_page_nums(%Ash.Page.Offset{limit: limit, count: count}) do
+    page_nums =
+      count
+      |> Kernel./(limit)
+      |> Float.ceil()
+      |> trunc()
+
+    1..min(3, page_nums)
+  end
+
+  def leading_page_nums(_), do: []
+
+  def trailing_page_nums({:ok, data}), do: trailing_page_nums(data)
+  def trailing_page_nums(%Ash.Page.Offset{count: nil}), do: []
+
+  def trailing_page_nums(%Ash.Page.Offset{limit: limit, count: count}) do
+    page_nums =
+      count
+      |> Kernel./(limit)
+      |> Float.ceil()
+      |> trunc()
+
+    if page_nums > 3 do
+      max(page_nums - 2, 4)..page_nums
+    else
+      []
+    end
+  end
 
   defp data({:ok, data}), do: data(data)
   defp data({:error, _}), do: []
@@ -206,49 +370,15 @@ defmodule AshAdmin.Components.Resource.DataTable do
   defp data(%Ash.Page.Keyset{results: results}), do: results
   defp data(data), do: data
 
-  #   defp offset?({:ok, data}), do: offset?(data)
-  #   defp offset?(%Ash.Page.Offset{}), do: true
-  #   defp offset?(_), do: false
+  defp offset?({:ok, data}), do: offset?(data)
+  defp offset?(%Ash.Page.Offset{}), do: true
+  defp offset?(_), do: false
 
-  #   defp keyset?({:ok, data}), do: keyset?(data)
-  #   defp keyset?(%Ash.Page.Keyset{}), do: true
-  #   defp keyset?(_), do: false
+  defp keyset?({:ok, data}), do: keyset?(data)
+  defp keyset?(%Ash.Page.Keyset{}), do: true
+  defp keyset?(_), do: false
 
-  #   defp offset({:ok, data}), do: offset(data)
-  #   defp offset(%Ash.Page.Offset{offset: offset}), do: offset
-  #   defp offset(_), do: 0
-
-  #   defp limit({:ok, data}), do: limit(data)
-  #   defp limit(%Ash.Page.Offset{limit: limit}), do: limit
-  #   defp limit(_), do: 0
-
-  #   defp count({:ok, %{count: count}}), do: count
-  #   defp count(%{count: count}), do: count
-  #   defp count(_), do: nil
-  #   defp run_query() do
-  #     fn filter, sort, fields, context ->
-  #       page_params =
-  #         case context.action.pagination do
-  #           false ->
-  #             false
-
-  #           %{offset?: true} ->
-  #             context[:page_params] || [offset: 0]
-
-  #           _ ->
-  #             context[:page_params]
-  #         end
-
-  #       context.resource
-  #       |> Ash.Query.filter(^filter)
-  #       |> Ash.Query.sort(sort)
-  #       |> Ash.Query.load(fields)
-  #       |> Ash.Query.set_tenant(context.tenant)
-  #       |> context.api.read(
-  #         page: page_params,
-  #         action: context.action.name,
-  #         actor: context.actor,
-  #         authorize?: context.authorizing?
-  #       )
-  #     end
+  defp count({:ok, %{count: count}}), do: count
+  defp count(%{count: count}), do: count
+  defp count(_), do: nil
 end

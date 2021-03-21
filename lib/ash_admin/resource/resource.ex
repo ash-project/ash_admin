@@ -39,11 +39,19 @@ defmodule AshAdmin.Resource do
         type: {:list, :atom},
         doc:
           "A list of read actions that can be used to show resource details. These actions should accept arguments that produce one record e.g `get_user_by_id`."
+      ],
+      table_columns: [
+        type: {:list, :atom},
+        doc: "The list of attributes to render on the table view."
       ]
     ]
   }
 
   use Ash.Dsl.Extension, sections: [@admin]
+
+  def table_columns(resource) do
+    Ash.Dsl.Extension.get_opt(resource, [:admin], :table_columns, nil, true)
+  end
 
   def name(resource) do
     Ash.Dsl.Extension.get_opt(resource, [:admin], :name, nil, true) ||

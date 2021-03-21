@@ -59,8 +59,7 @@ defmodule AshAdmin.PageLive do
        AshAdmin.ActorPlug.session_bool(session["actor_authorizing"]) || false
      )
      |> assign(:recover_filter, nil)
-     |> assign(:actor_paused, actor_paused)
-     |> assign(:page_num, 1)}
+     |> assign(:actor_paused, actor_paused)}
   end
 
   @impl true
@@ -94,8 +93,6 @@ defmodule AshAdmin.PageLive do
       tab={{ @tab }}
       url_path={{ @url_path }}
       params={{ @params }}
-      page_params={{ @page_params }}
-      page_num={{ @page_num }}
       action={{ @action }}
       tenant={{ @tenant }}
       actor={{ unless @actor_paused, do: @actor }}
@@ -124,31 +121,6 @@ defmodule AshAdmin.PageLive do
         assign(socket, :recover_filter, params["filter"])
       else
         socket
-      end
-
-    socket =
-      if params["page"] do
-        default_limit =
-          socket.assigns[:action] && socket.assigns.action.pagination &&
-            socket.assigns.action.pagination.default_limit
-
-        count? =
-          socket.assigns[:action] && socket.assigns.action.pagination &&
-            socket.assigns.action.pagination.countable
-
-        page_params =
-          AshPhoenix.LiveView.page_from_params(params["page"], default_limit, !!count?)
-
-        socket
-        |> assign(
-          :page_params,
-          page_params
-        )
-        |> assign(:page_num, page_num_from_page_params(page_params))
-      else
-        socket
-        |> assign(:page_params, nil)
-        |> assign(:page_num, 1)
       end
 
     socket =
@@ -198,19 +170,6 @@ defmodule AshAdmin.PageLive do
     |> Ash.Resource.Info.relationships()
     |> Enum.filter(&(&1.cardinality == :one))
     |> Enum.map(& &1.name)
-  end
-
-  defp page_num_from_page_params(params) do
-    cond do
-      !params[:offset] || params[:after] || params[:before] ->
-        1
-
-      params[:offset] && params[:limit] ->
-        trunc(Float.ceil(params[:offset] / params[:limit])) + 1
-
-      true ->
-        nil
-    end
   end
 
   @impl true

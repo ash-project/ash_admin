@@ -40,8 +40,8 @@ defmodule AshAdmin.Components.Resource.Form do
 
   def render(assigns) do
     ~H"""
-    <div class="pt-10 sm:mt-0 bg-gray-300 min-h-screen">
-      <div class="md:grid md:grid-cols-3 md:gap-6 mx-16 mt-10">
+    <div class="md:pt-10 sm:mt-0 bg-gray-300 min-h-screen">
+      <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
         <div class="mt-5 md:mt-0 md:col-span-2">
           {{ render_form(assigns) }}
         </div>
@@ -400,7 +400,7 @@ defmodule AshAdmin.Components.Resource.Form do
         <TextArea
           form={{ form }}
           field={{ name }}
-          opts={{ type: text_input_type(attribute), placeholder: placeholder(default) }}
+          opts={{ type: text_input_type(attribute), placeholder: placeholder(default), phx_hook: "MaintainAttrs", data_attrs: "style" }}
           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md resize-y"
         />
         """

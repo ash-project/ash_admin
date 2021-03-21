@@ -27,10 +27,6 @@ defmodule AshAdmin.Helpers do
   end
 
   def self_path(url_path, socket_params, new_params) do
-    IO.inspect(url_path)
-    IO.inspect(socket_params)
-    IO.inspect(new_params)
-
     url_path <>
       "?" <>
       Plug.Conn.Query.encode(Map.merge(socket_params || %{}, Enum.into(new_params, %{})))

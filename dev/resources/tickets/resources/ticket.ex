@@ -10,6 +10,7 @@ defmodule Demo.Tickets.Ticket do
 
   admin do
     show_action :read
+    table_columns [:id, :representative_id, :reporter_id, :subject, :status]
     form do
       field :description, type: :long_text
     end
@@ -47,8 +48,15 @@ defmodule Demo.Tickets.Ticket do
       pagination [
         offset?: true,
         keyset?: true,
-        default_limit: 20,
+        default_limit: 10,
         countable: :by_default
+      ]
+    end
+
+    read :keyset do
+      pagination [
+        keyset?: true,
+        default_limit: 10
       ]
     end
 
