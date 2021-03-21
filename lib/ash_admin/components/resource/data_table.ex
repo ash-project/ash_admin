@@ -116,41 +116,44 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
   def render(assigns) do
     ~H"""
-    <div class="sm:mt-0 bg-gray-300 min-h-screen">
-      <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10">
-        <div class="md:mt-0 md:col-span-2">
-          <div :if={{@action.arguments != []}} class="shadow-lg overflow-hidden pt-2 sm:rounded-md bg-white">
-            <div class="px-4 sm:p-6">
-              <Form :if={{@query}} as="query" for={{@query}} change="validate" submit="save" :let={{form: form}}>
-                {{AshAdmin.Components.Resource.Form.render_attributes(assigns, @resource, @action, form)}}
-                <div class="px-4 py-3 text-right sm:px-6">
-                  <button
-                    type="submit"
-                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Run Query
-                  </button>
-                </div>
-              </Form>
+    <div>
+      <div class="sm:mt-0 bg-gray-300 min-h-screen">
+        <div  :if={{@action.arguments != []}} class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10">
+          <div class="md:mt-0 md:col-span-2">
+            <div class="shadow-lg overflow-hidden pt-2 sm:rounded-md bg-white">
+              <div class="px-4 sm:p-6">
+                <Form :if={{@query}} as="query" for={{@query}} change="validate" submit="save" :let={{form: form}}>
+                  {{AshAdmin.Components.Resource.Form.render_attributes(assigns, @resource, @action, form)}}
+                  <div class="px-4 py-3 text-right sm:px-6">
+                    <button
+                      type="submit"
+                      class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                      Run Query
+                    </button>
+                  </div>
+                </Form>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div :if={{@action.arguments == [] || @params["args"]}} class="h-full overflow-scroll">
-        <div class="shadow-lg overflow-scroll sm:rounded-md bg-white">
-          <div :if={{ match?({:error, _}, @data) }}>
-            {{ {:error, %{query: query}} = @data
-            nil }}
-            <ul>
-              <li :for={{ error <- query.errors }}>
-                {{ message(error) }}
-              </li>
-            </ul>
-          </div>
-          <div class="px-2">
-            {{render_pagination_links(assigns, :top)}}
-            <Table :if={{ match?({:ok, _data}, @data) }} data={{data(@data)}} resource={{@resource}} api={{@api}} set_actor={{@set_actor}} attributes={{AshAdmin.Resource.table_columns(@resource)}}/>
-            {{render_pagination_links(assigns, :bottom)}}
+
+        <div :if={{@action.arguments == [] || @params["args"]}} class="h-full overflow-scroll md:mx-4">
+          <div class="shadow-lg overflow-scroll sm:rounded-md bg-white">
+            <div :if={{ match?({:error, _}, @data) }}>
+              {{ {:error, %{query: query}} = @data
+              nil }}
+              <ul>
+                <li :for={{ error <- query.errors }}>
+                  {{ message(error) }}
+                </li>
+              </ul>
+            </div>
+            <div class="px-2">
+              {{render_pagination_links(assigns, :top)}}
+              <Table :if={{ match?({:ok, _data}, @data) }} data={{data(@data)}} resource={{@resource}} api={{@api}} set_actor={{@set_actor}} attributes={{AshAdmin.Resource.table_columns(@resource)}}/>
+              {{render_pagination_links(assigns, :bottom)}}
+            </div>
           </div>
         </div>
       </div>

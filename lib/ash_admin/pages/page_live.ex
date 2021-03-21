@@ -58,7 +58,6 @@ defmodule AshAdmin.PageLive do
        :authorizing,
        AshAdmin.ActorPlug.session_bool(session["actor_authorizing"]) || false
      )
-     |> assign(:recover_filter, nil)
      |> assign(:actor_paused, actor_paused)}
   end
 
@@ -115,13 +114,6 @@ defmodule AshAdmin.PageLive do
   @impl true
   def handle_params(params, url, socket) do
     url = URI.parse(url)
-
-    socket =
-      if params["filter"] && socket.assigns[:resource] do
-        assign(socket, :recover_filter, params["filter"])
-      else
-        socket
-      end
 
     socket =
       if params["primary_key"] do

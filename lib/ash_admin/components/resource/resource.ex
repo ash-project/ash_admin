@@ -14,7 +14,6 @@ defmodule AshAdmin.Components.Resource do
   prop(set_actor, :event, required: true)
   prop(authorizing, :boolean, required: true)
   prop(tenant, :string, required: true)
-  prop(recover_filter, :any)
   prop(url_path, :string, default: "")
   prop(params, :map, default: %{})
   prop(primary_key, :any, default: nil)

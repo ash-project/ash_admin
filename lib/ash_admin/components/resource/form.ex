@@ -826,7 +826,20 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp actions(resource, type) do
-    for %{type: ^type} = action <- Ash.Resource.Info.actions(resource) do
+    action_names =
+      case type do
+        :create ->
+          AshAdmin.Resource.create_actions(resource)
+
+        :update ->
+          AshAdmin.Resource.update_actions(resource)
+
+        :destroy ->
+          AshAdmin.Resource.destroy_actions(resource)
+      end
+
+    for %{type: ^type, name: name} = action <- Ash.Resource.Info.actions(resource),
+        is_nil(action_names) || name in action_names do
       {to_name(action.name), to_string(action.name)}
     end
   end

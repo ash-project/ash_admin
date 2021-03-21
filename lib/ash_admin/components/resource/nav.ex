@@ -49,13 +49,13 @@ defmodule AshAdmin.Components.Resource.Nav do
   end
 
   defp data_groups(socket, api, resource, current_action) do
-    show_actions = AshAdmin.Resource.get_actions(resource)
+    read_actions = AshAdmin.Resource.read_actions(resource)
 
     [
       resource
       |> Ash.Resource.Info.actions()
       |> Enum.filter(&(&1.type == :read))
-      |> Enum.reject(&(&1.name in show_actions))
+      |> Enum.filter(&(is_nil(read_actions) || &1.name in read_actions))
       |> Enum.map(fn action ->
         %{
           text: action_name(action),

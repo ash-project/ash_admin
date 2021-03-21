@@ -110,7 +110,6 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
 
   defp render_actor_link(assigns, apis_and_resources) do
     ~H"""
-    <a href="#" id="actor-banner" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Set actor</a>
     <div aria-labelledby="actor-banner">
       <LiveRedirect
         to={{ash_action_path(
@@ -120,9 +119,12 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
           :read,
           Ash.Resource.Info.primary_action(resource, :read).name
         )}}
-        :for={{ {api, resource} <- apis_and_resources }}
+        :for.with_index={{ {{api, resource}, i} <- apis_and_resources }}
       >
-        {{ AshAdmin.Resource.name(resource) }}
+          Set {{ AshAdmin.Resource.name(resource) }}
+        <span :if={{i != (Enum.count(apis_and_resources) - 1)}}>
+        |
+        </span>
       </LiveRedirect>
     </div>
     """

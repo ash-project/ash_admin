@@ -35,10 +35,25 @@ defmodule AshAdmin.Resource do
         doc:
           "The action to use when linking to the resource/viewing a single record. Defaults to the primary read action."
       ],
-      get_actions: [
+      read_actions: [
         type: {:list, :atom},
         doc:
-          "A list of read actions that can be used to show resource details. These actions should accept arguments that produce one record e.g `get_user_by_id`."
+          "A list of read actions that can be used to show resource details. By default, all actions are included"
+      ],
+      create_actions: [
+        type: {:list, :atom},
+        doc:
+          "A list of create actions that can be create records. By default, all actions are included"
+      ],
+      update_actions: [
+        type: {:list, :atom},
+        doc:
+          "A list of update actions that can be update records. By default, all actions are included"
+      ],
+      destroy_actions: [
+        type: {:list, :atom},
+        doc:
+          "A list of destroy actions that can be destroy records. By default, all actions are included"
       ],
       table_columns: [
         type: {:list, :atom},
@@ -64,8 +79,20 @@ defmodule AshAdmin.Resource do
     Ash.Dsl.Extension.get_opt(resource, [:admin], :actor?, false, true)
   end
 
-  def get_actions(resource) do
-    Ash.Dsl.Extension.get_opt(resource, [:admin], :get_actions, false, []) || []
+  def read_actions(resource) do
+    Ash.Dsl.Extension.get_opt(resource, [:admin], :read_actions, nil, true)
+  end
+
+  def create_actions(resource) do
+    Ash.Dsl.Extension.get_opt(resource, [:admin], :create_actions, nil, true)
+  end
+
+  def update_actions(resource) do
+    Ash.Dsl.Extension.get_opt(resource, [:admin], :update_actions, nil, true)
+  end
+
+  def destroy_actions(resource) do
+    Ash.Dsl.Extension.get_opt(resource, [:admin], :destroy_actions, nil, true)
   end
 
   def show_action(resource) do
