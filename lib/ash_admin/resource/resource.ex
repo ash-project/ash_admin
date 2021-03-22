@@ -22,7 +22,7 @@ defmodule AshAdmin.Resource do
       relationships: [
         type: {:list, :atom},
         doc:
-          "The list of relationships to show in forms. If not set, all relationships are shown."
+          "The list of relationships to allow editing in forms. If not set, all public relationships are accepted."
       ]
     ]
   }
