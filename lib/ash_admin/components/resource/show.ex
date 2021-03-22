@@ -15,6 +15,7 @@ defmodule AshAdmin.Components.Resource.Show do
   prop(tenant, :any)
   prop(set_actor, :event, required: true)
   prop(table, :any, required: true)
+  prop(prefix, :any, required: true)
 
   data(load_errors, :map, default: %{})
 
@@ -55,7 +56,7 @@ defmodule AshAdmin.Components.Resource.Show do
           <div :if={{ buttons? }} class="px-4 py-3 text-right sm:px-6">
             <LiveRedirect
               to={{ash_destroy_path(
-                @socket,
+                @prefix,
                 @api,
                 @resource,
                 @record,
@@ -70,7 +71,7 @@ defmodule AshAdmin.Components.Resource.Show do
 
             <LiveRedirect
               to={{ash_update_path(
-                @socket,
+                @prefix,
                 @api,
                 @resource,
                 @record,
@@ -144,11 +145,10 @@ defmodule AshAdmin.Components.Resource.Show do
             <LiveRedirect
               :if={{ AshAdmin.Resource.show_action(destination) }}
               to={{ash_show_path(
-                @socket,
+                @prefix,
                 @api,
                 destination,
                 record,
-                AshAdmin.Resource.show_action(destination),
                 context[:data_layer][:table]
               )}}
               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -178,6 +178,7 @@ defmodule AshAdmin.Components.Resource.Show do
         api={{ @api }}
         set_actor={{ @set_actor }}
         table={{ context[:data_layer][:table] }}
+        prefix={{ @prefix }}
       />
     </div>
     """
@@ -187,7 +188,7 @@ defmodule AshAdmin.Components.Resource.Show do
     ~H"""
     {{ {attributes, flags, bottom_attributes} =
       AshAdmin.Components.Resource.Form.attributes(resource, :show)
-
+    
     nil }}
     <div class="grid grid-cols-6 gap-6">
       <div

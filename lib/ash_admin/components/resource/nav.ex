@@ -10,6 +10,7 @@ defmodule AshAdmin.Components.Resource.Nav do
   prop(tab, :string, required: true)
   prop(action, :any)
   prop(table, :any, default: nil)
+  prop(prefix, :any, default: nil)
 
   def render(assigns) do
     ~H"""
@@ -19,7 +20,7 @@ defmodule AshAdmin.Components.Resource.Nav do
           <div class="flex items-center w-full">
             <div class="flex-shrink-0">
               <h3 class="text-white text-lg">
-                <LiveRedirect to={{ ash_admin_path(@socket, @api, @resource) }}>
+                <LiveRedirect to={{ ash_admin_path(@prefix, @api, @resource) }}>
                   {{ AshAdmin.Resource.name(@resource) }}
                 </LiveRedirect>
               </h3>
@@ -29,7 +30,7 @@ defmodule AshAdmin.Components.Resource.Nav do
                 <div :if={{ has_create_action?(@resource) }} class="relative">
                   <LiveRedirect
                     to={{ash_create_path(
-                      @socket,
+                      @prefix,
                       @api,
                       @resource,
                       Ash.Resource.Info.primary_action(@resource, :create).name,
@@ -45,7 +46,7 @@ defmodule AshAdmin.Components.Resource.Nav do
                   name="Read"
                   id={{ "#{@resource}_data_dropdown" }}
                   active={{ @tab == "data" }}
-                  groups={{ data_groups(@socket, @api, @resource, @action, @table) }}
+                  groups={{ data_groups(@prefix, @api, @resource, @action, @table) }}
                 />
               </div>
             </div>
@@ -56,7 +57,7 @@ defmodule AshAdmin.Components.Resource.Nav do
     """
   end
 
-  defp data_groups(socket, api, resource, current_action, table) do
+  defp data_groups(prefix, api, resource, current_action, table) do
     read_actions = AshAdmin.Resource.read_actions(resource)
 
     [
@@ -67,7 +68,7 @@ defmodule AshAdmin.Components.Resource.Nav do
       |> Enum.map(fn action ->
         %{
           text: action_name(action),
-          to: ash_action_path(socket, api, resource, :read, action.name, table),
+          to: ash_action_path(prefix, api, resource, :read, action.name, table),
           active: current_action == action
         }
       end)

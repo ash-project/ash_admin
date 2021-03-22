@@ -6,6 +6,7 @@ defmodule AshAdmin.Components.Resource.RelationshipTable do
 
   prop(resource, :any, required: true)
   prop(api, :any, required: true)
+  prop(prefix, :any, required: true)
 
   def render(assigns) do
     ~H"""
@@ -33,7 +34,7 @@ defmodule AshAdmin.Components.Resource.RelationshipTable do
             <td class="text-center">
               {{ relationship.type }}</td>
             <td class="text-center">
-              <LiveRedirect to={{ ash_admin_path(@socket, @api, relationship.destination) }}>
+              <LiveRedirect to={{ ash_admin_path(@prefix, @api, relationship.destination) }}>
                 {{ AshAdmin.Resource.name(relationship.destination) }}
               </LiveRedirect>
             </td>

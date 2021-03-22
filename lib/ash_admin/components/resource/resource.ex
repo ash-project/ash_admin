@@ -21,6 +21,7 @@ defmodule AshAdmin.Components.Resource do
   prop(record, :any, default: nil)
   prop(table, :any, default: nil)
   prop(tables, :any, default: nil)
+  prop(prefix, :any, default: nil)
 
   data(filter_open, :boolean, default: false)
   slot(default)
@@ -34,6 +35,7 @@ defmodule AshAdmin.Components.Resource do
         tab={{ @tab }}
         action={{ @action }}
         table={{ @table }}
+        prefix={{ @prefix }}
       />
       <div class="mx-24 relative grid grid-cols-1 justify-items-center">
       </div>
@@ -54,6 +56,7 @@ defmodule AshAdmin.Components.Resource do
           tenant={{ @tenant }}
           table={{ @table }}
           tables={{ @tables }}
+          prefix={{ @prefix }}
         />
       </div>
       <div :if={{ @record && match?({:ok, record} when not is_nil(record), @record) && @tab == "destroy" }}>
@@ -72,6 +75,7 @@ defmodule AshAdmin.Components.Resource do
           tenant={{ @tenant }}
           table={{ @table }}
           tables={{ @tables }}
+          prefix={{ @prefix }}
         />
       </div>
       <Show
@@ -85,8 +89,9 @@ defmodule AshAdmin.Components.Resource do
         tenant={{ @tenant }}
         set_actor={{ @set_actor }}
         table={{ @table }}
+        prefix={{ @prefix }}
       />
-      <Info :if={{ @tab == "info" }} resource={{ @resource }} api={{ @api }} />
+      <Info :if={{ @tab == "info" }} resource={{ @resource }} api={{ @api }} prefix={{ @prefix }} />
       <Form
         :if={{ @tab == "create" }}
         type={{ :create }}
@@ -100,6 +105,7 @@ defmodule AshAdmin.Components.Resource do
         tenant={{ @tenant }}
         table={{ @table }}
         tables={{ @tables }}
+        prefix={{ @prefix }}
       />
       <DataTable
         :if={{ @tab == "data" }}
@@ -114,6 +120,7 @@ defmodule AshAdmin.Components.Resource do
         authorizing={{ @authorizing }}
         table={{ @table }}
         tables={{ @tables }}
+        prefix={{ @prefix }}
       />
     </div>
     """

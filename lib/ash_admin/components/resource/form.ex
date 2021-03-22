@@ -32,6 +32,7 @@ defmodule AshAdmin.Components.Resource.Form do
   prop(action, :any, required: true)
   prop(table, :any, required: true)
   prop(tables, :any, required: true)
+  prop(prefix, :any, required: true)
 
   def update(assigns, socket) do
     {:ok,
@@ -70,8 +71,13 @@ defmodule AshAdmin.Components.Resource.Form do
     <div class="shadow-lg overflow-hidden sm:rounded-md bg-white">
       <div :if={{ @changeset.action_failed? }} class="ml-4 mt-4 text-red-500">
         <ul>
-          <li :for={{ {field, message} <- AshPhoenix.errors_for(@changeset, as: :simple) }}>
-            {{ to_name(field) }}: {{ message }}
+          <li :for={{ {field, message} <- errors_for(@changeset) }}>
+            <span :if={{field}}>
+              {{ to_name(field) }}:
+            </span>
+            <span>
+              {{message}}
+            </span>
           </li>
         </ul>
       </div>
@@ -121,6 +127,18 @@ defmodule AshAdmin.Components.Resource.Form do
       </div>
     </div>
     """
+  end
+
+  defp errors_for(changeset) do
+    changeset
+    |> AshPhoenix.transform_errors(fn
+      _, %{class: :forbidden} ->
+        {nil, "Forbidden", []}
+
+      _, other ->
+        other
+    end)
+    |> AshPhoenix.errors_for(as: :simple)
   end
 
   defp save_button_text(:update), do: "Save"
@@ -560,19 +578,16 @@ defmodule AshAdmin.Components.Resource.Form do
   defp text_input_type(_), do: "text"
 
   defp redirect_to(socket, record) do
-    show_action = AshAdmin.Resource.show_action(socket.assigns.resource)
-
-    if show_action do
+    if AshAdmin.Resource.show_action(socket.assigns.resource) do
       {:noreply,
        socket
        |> redirect(
          to:
            ash_show_path(
-             socket,
+             socket.assigns.prefix,
              socket.assigns.api,
              socket.assigns.resource,
              record,
-             show_action,
              socket.assigns.table
            )
        )}
@@ -580,7 +595,10 @@ defmodule AshAdmin.Components.Resource.Form do
       case Ash.Resource.Info.primary_action(socket.assigns.resource, :update) do
         nil ->
           {:noreply,
-           redirect(socket, to: ash_admin_path(socket.assigns.api, socket.assigns.resource))}
+           redirect(socket,
+             to:
+               ash_admin_path(socket.assigns.prefix, socket.assigns.api, socket.assigns.resource)
+           )}
 
         update ->
           {:noreply,
@@ -588,7 +606,7 @@ defmodule AshAdmin.Components.Resource.Form do
            |> redirect(
              to:
                ash_update_path(
-                 socket,
+                 socket.assigns.prefix,
                  socket.assigns.api,
                  socket.assigns.resource,
                  record,
@@ -607,7 +625,7 @@ defmodule AshAdmin.Components.Resource.Form do
          push_redirect(socket,
            to:
              ash_create_path(
-               socket,
+               socket.assigns.prefix,
                socket.assigns.api,
                socket.assigns.resource,
                socket.assigns.action.name,
@@ -620,7 +638,7 @@ defmodule AshAdmin.Components.Resource.Form do
          push_redirect(socket,
            to:
              ash_update_path(
-               socket,
+               socket.assigns.prefix,
                socket.assigns.api,
                socket.assigns.resource,
                socket.assigns.record,
@@ -634,7 +652,7 @@ defmodule AshAdmin.Components.Resource.Form do
          push_redirect(socket,
            to:
              ash_destroy_path(
-               socket,
+               socket.assigns.prefix,
                socket.assigns.api,
                socket.assigns.resource,
                socket.assigns.record,
@@ -664,7 +682,7 @@ defmodule AshAdmin.Components.Resource.Form do
          push_redirect(socket,
            to:
              ash_create_path(
-               socket,
+               socket.assigns.prefix,
                socket.assigns.api,
                socket.assigns.resource,
                action.name,
@@ -677,7 +695,21 @@ defmodule AshAdmin.Components.Resource.Form do
          push_redirect(socket,
            to:
              ash_update_path(
-               socket,
+               socket.assigns.prefix,
+               socket.assigns.api,
+               socket.assigns.resource,
+               socket.assigns.record,
+               action.name,
+               socket.assigns.table
+             )
+         )}
+
+      :destroy ->
+        {:noreply,
+         push_redirect(socket,
+           to:
+             ash_destroy_path(
+               socket.assigns.prefix,
                socket.assigns.api,
                socket.assigns.resource,
                socket.assigns.record,
@@ -775,7 +807,7 @@ defmodule AshAdmin.Components.Resource.Form do
           {:ok, created} ->
             redirect_to(socket, created)
 
-          {:error, %{changeset: changeset}} ->
+          {:error, %{changeset: changeset} = error} ->
             {:noreply, assign(socket, :changeset, changeset)}
         end
 
@@ -813,7 +845,14 @@ defmodule AshAdmin.Components.Resource.Form do
           :ok ->
             {:noreply,
              socket
-             |> redirect(to: ash_admin_path(socket, socket.assigns.api, socket.assigns.resource))}
+             |> redirect(
+               to:
+                 ash_admin_path(
+                   socket.assigns.prefix,
+                   socket.assigns.api,
+                   socket.assigns.resource
+                 )
+             )}
 
           {:error, %{changeset: changeset}} ->
             {:noreply, assign(socket, :changeset, changeset)}

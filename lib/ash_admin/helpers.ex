@@ -47,10 +47,6 @@ defmodule AshAdmin.Helpers do
     Ash.Changeset.set_context(changeset, %{data_layer: %{table: table}})
   end
 
-  def ash_admin_path(socket) do
-    apply(socket.router.__helpers__(), :ash_admin_path, [socket, :page])
-  end
-
   def self_path(url_path, socket_params, new_params) do
     url_path <>
       "?" <>
@@ -88,238 +84,135 @@ defmodule AshAdmin.Helpers do
     end
   end
 
-  @doc """
-  TODO
-  """
-  def ash_admin_path(socket, api) do
-    apply(
-      socket.router.__helpers__(),
-      String.to_existing_atom(String.downcase(AshAdmin.Api.name(api) <> "_path")),
-      [socket, :api_page]
+  defp prefix(nil, path), do: path
+  defp prefix(prefix, path), do: prefix <> path
+
+  def ash_admin_path(prefix) do
+    prefix(prefix, "/")
+  end
+
+  def ash_admin_path(prefix, api) do
+    prefix(prefix, "/#{AshAdmin.Api.name(api)}")
+  end
+
+  def ash_admin_path(prefix, api, resource) do
+    prefix(
+      prefix,
+      "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}"
     )
   end
 
-  def ash_admin_path(socket, api, resource) do
-    route =
-      String.to_existing_atom(
-        String.downcase(AshAdmin.Api.name(api) <> AshAdmin.Resource.name(resource) <> "_path")
-      )
-
-    apply(
-      socket.router.__helpers__(),
-      route,
-      [socket, :resource_page]
+  def ash_create_path(prefix, api, resource) do
+    prefix(
+      prefix,
+      "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/create"
     )
   end
 
-  def ash_create_path(socket, api, resource) do
-    route =
-      String.to_existing_atom(
-        String.downcase(
-          AshAdmin.Api.name(api) <> AshAdmin.Resource.name(resource) <> "create_path"
-        )
-      )
-
-    apply(
-      socket.router.__helpers__(),
-      route,
-      [socket, :resource_page]
+  def ash_create_path(prefix, api, resource, action_name, nil) do
+    prefix(
+      prefix,
+      "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/create/#{action_name}"
     )
   end
 
-  def ash_create_path(socket, api, resource, action_name, nil) do
-    route =
-      String.to_existing_atom(
-        String.downcase(
-          AshAdmin.Api.name(api) <>
-            AshAdmin.Resource.name(resource) <> "create" <> to_string(action_name) <> "_path"
-        )
-      )
-
-    apply(
-      socket.router.__helpers__(),
-      route,
-      [socket, :resource_page]
+  def ash_create_path(prefix, api, resource, action_name, table) do
+    prefix(
+      prefix,
+      "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/#{table}/create/#{
+        action_name
+      }"
     )
   end
 
-  def ash_create_path(socket, api, resource, action_name, table) do
-    route =
-      String.to_existing_atom(
-        String.downcase(
-          AshAdmin.Api.name(api) <>
-            AshAdmin.Resource.name(resource) <>
-            table <>
-            "create" <> to_string(action_name) <> "_path"
-        )
-      )
-
-    apply(
-      socket.router.__helpers__(),
-      route,
-      [socket, :resource_page]
+  def ash_update_path(prefix, api, resource, record) do
+    prefix(
+      prefix,
+      "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/update/#{
+        encode_primary_key(record)
+      }"
     )
   end
 
-  def ash_update_path(socket, api, resource, record) do
-    route =
-      String.to_existing_atom(
-        String.downcase(
-          AshAdmin.Api.name(api) <> AshAdmin.Resource.name(resource) <> "update_path"
-        )
-      )
-
-    apply(
-      socket.router.__helpers__(),
-      route,
-      [socket, :resource_page, encode_primary_key(record)]
+  def ash_update_path(prefix, api, resource, record, action_name, nil) do
+    prefix(
+      prefix,
+      "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/update/#{action_name}/#{
+        encode_primary_key(record)
+      }"
     )
   end
 
-  def ash_update_path(socket, api, resource, record, action_name, nil) do
-    route =
-      String.to_existing_atom(
-        String.downcase(
-          AshAdmin.Api.name(api) <>
-            AshAdmin.Resource.name(resource) <> "update" <> to_string(action_name) <> "_path"
-        )
-      )
-
-    apply(
-      socket.router.__helpers__(),
-      route,
-      [socket, :resource_page, encode_primary_key(record)]
+  def ash_update_path(prefix, api, resource, record, action_name, table) do
+    prefix(
+      prefix,
+      "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/#{table}/update/#{
+        action_name
+      }/#{encode_primary_key(record)}"
     )
   end
 
-  def ash_update_path(socket, api, resource, record, action_name, table) do
-    route =
-      String.to_existing_atom(
-        String.downcase(
-          AshAdmin.Api.name(api) <>
-            AshAdmin.Resource.name(resource) <>
-            table <> "update" <> to_string(action_name) <> "_path"
-        )
-      )
-
-    apply(
-      socket.router.__helpers__(),
-      route,
-      [socket, :resource_page, encode_primary_key(record)]
+  def ash_destroy_path(prefix, api, resource, record) do
+    prefix(
+      prefix,
+      "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/destroy/#{
+        encode_primary_key(record)
+      }"
     )
   end
 
-  def ash_destroy_path(socket, api, resource, record) do
-    route =
-      String.to_existing_atom(
-        String.downcase(
-          AshAdmin.Api.name(api) <> AshAdmin.Resource.name(resource) <> "destroy_path"
-        )
-      )
-
-    apply(
-      socket.router.__helpers__(),
-      route,
-      [socket, :resource_page, encode_primary_key(record)]
+  def ash_destroy_path(prefix, api, resource, record, action_name, nil) do
+    prefix(
+      prefix,
+      "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/destroy/#{action_name}/#{
+        encode_primary_key(record)
+      }"
     )
   end
 
-  def ash_destroy_path(socket, api, resource, record, action_name, nil) do
-    route =
-      String.to_existing_atom(
-        String.downcase(
-          AshAdmin.Api.name(api) <>
-            AshAdmin.Resource.name(resource) <> "destroy" <> to_string(action_name) <> "_path"
-        )
-      )
-
-    apply(
-      socket.router.__helpers__(),
-      route,
-      [socket, :resource_page, encode_primary_key(record)]
+  def ash_destroy_path(prefix, api, resource, record, action_name, table) do
+    prefix(
+      prefix,
+      "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/#{table}/destroy/#{
+        action_name
+      }#{encode_primary_key(record)}"
     )
   end
 
-  def ash_destroy_path(socket, api, resource, record, action_name, table) do
-    route =
-      String.to_existing_atom(
-        String.downcase(
-          AshAdmin.Api.name(api) <>
-            AshAdmin.Resource.name(resource) <>
-            table <> "destroy" <> to_string(action_name) <> "_path"
-        )
-      )
-
-    apply(
-      socket.router.__helpers__(),
-      route,
-      [socket, :resource_page, encode_primary_key(record)]
+  def ash_action_path(prefix, api, resource, action_type, action_name, nil) do
+    prefix(
+      prefix,
+      "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/#{action_type}/#{
+        action_name
+      }"
     )
   end
 
-  def ash_action_path(socket, api, resource, action_type, action_name, nil) do
-    route =
-      String.to_existing_atom(
-        String.downcase(
-          AshAdmin.Api.name(api) <>
-            AshAdmin.Resource.name(resource) <> "_#{action_type}" <> "_#{action_name}" <> "_path"
-        )
-      )
-
-    apply(
-      socket.router.__helpers__(),
-      route,
-      [socket, :resource_page]
-    )
-  end
-
-  def ash_action_path(socket, api, resource, action_type, action_name, table) do
-    route =
-      String.to_existing_atom(
-        String.downcase(
-          AshAdmin.Api.name(api) <>
-            AshAdmin.Resource.name(resource) <>
-            table <> "_#{action_type}" <> "_#{action_name}" <> "_path"
-        )
-      )
-
-    apply(
-      socket.router.__helpers__(),
-      route,
-      [socket, :resource_page]
+  def ash_action_path(prefix, api, resource, action_type, action_name, table) do
+    prefix(
+      prefix,
+      "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/#{table}/#{action_type}/#{
+        action_name
+      }"
     )
   end
 
   # sobelow_skip ["DOS.StringToAtom"]
-  def ash_show_path(socket, api, resource, record, action_name, nil) do
-    route =
-      String.to_existing_atom(
-        String.downcase(
-          AshAdmin.Api.name(api) <>
-            AshAdmin.Resource.name(resource) <> "_show" <> "_#{action_name}" <> "_path"
-        )
-      )
-
-    apply(
-      socket.router.__helpers__(),
-      route,
-      [socket, :show_page, encode_primary_key(record)]
+  def ash_show_path(prefix, api, resource, record, nil) do
+    prefix(
+      prefix,
+      "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/show/#{
+        encode_primary_key(record)
+      }"
     )
   end
 
-  def ash_show_path(socket, api, resource, record, action_name, table) do
-    route =
-      String.to_existing_atom(
-        String.downcase(
-          AshAdmin.Api.name(api) <>
-            AshAdmin.Resource.name(resource) <> table <> "_show" <> "_#{action_name}" <> "_path"
-        )
-      )
-
-    apply(
-      socket.router.__helpers__(),
-      route,
-      [socket, :show_page, encode_primary_key(record)]
+  def ash_show_path(prefix, api, resource, record, table) do
+    prefix(
+      prefix,
+      "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/#{table}/show/#{
+        encode_primary_key(record)
+      }"
     )
   end
 

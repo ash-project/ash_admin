@@ -12,6 +12,7 @@ defmodule AshAdmin.Components.Resource.Table do
   prop(api, :any, required: true)
   prop(set_actor, :event, required: true)
   prop(table, :any, required: true)
+  prop(prefix, :any, required: true)
 
   def render(assigns) do
     ~H"""
@@ -28,14 +29,14 @@ defmodule AshAdmin.Components.Resource.Table do
             <td :if={{ @actions && actions?(@resource) }}>
               <div class="flex h-max justify-items-center">
                 <div :if={{ AshAdmin.Resource.show_action(@resource) }}>
-                  <LiveRedirect to={{ ash_show_path(@socket, @api, @resource, record, AshAdmin.Resource.show_action(@resource), @table) }}>
+                  <LiveRedirect to={{ ash_show_path(@prefix, @api, @resource, record, @table) }}>
                     {{ {:safe, Heroicons.Solid.information_circle(class: "h-5 w-5 text-gray-500")} }}
                   </LiveRedirect>
                 </div>
 
                 <div :if={{ Ash.Resource.Info.primary_action(@resource, :update) }}>
                   <LiveRedirect to={{ash_update_path(
-                    @socket,
+                    @prefix,
                     @api,
                     @resource,
                     record,
@@ -48,7 +49,7 @@ defmodule AshAdmin.Components.Resource.Table do
 
                 <div :if={{ Ash.Resource.Info.primary_action(@resource, :destroy) }}>
                   <LiveRedirect to={{ash_destroy_path(
-                    @socket,
+                    @prefix,
                     @api,
                     @resource,
                     record,

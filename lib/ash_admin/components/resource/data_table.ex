@@ -17,6 +17,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   prop(params, :any)
   prop(table, :any, required: true)
   prop(tables, :any, required: true)
+  prop(prefix, :any, required: true)
 
   data(initialized, :boolean, default: false)
   data(data, :any)
@@ -202,6 +203,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 api={{ @api }}
                 set_actor={{ @set_actor }}
                 attributes={{ AshAdmin.Resource.table_columns(@resource) }}
+                prefix={{ @prefix }}
               />
               {{ render_pagination_links(assigns, :bottom) }}
             </div>

@@ -19,6 +19,7 @@ defmodule AshAdmin.PageLive do
   def mount(
         _params,
         %{
+          "prefix" => prefix,
           "api" => api,
           "apis" => apis,
           "tab" => tab,
@@ -28,6 +29,8 @@ defmodule AshAdmin.PageLive do
         } = session,
         socket
       ) do
+    socket = assign(socket, :prefix, prefix)
+
     actor_paused =
       if is_nil(session["actor_paused"]) do
         true
@@ -48,6 +51,7 @@ defmodule AshAdmin.PageLive do
     {:ok,
      socket
      |> Surface.init()
+     |> assign(:prefix, prefix)
      |> assign(:api, api)
      |> assign(:apis, apis)
      |> assign(:resource, resource)
@@ -87,6 +91,7 @@ defmodule AshAdmin.PageLive do
       toggle_authorizing="toggle_authorizing"
       toggle_actor_paused="toggle_actor_paused"
       clear_actor="clear_actor"
+      prefix={{ @prefix }}
     />
     <Resource
       :if={{ @resource }}
@@ -105,6 +110,7 @@ defmodule AshAdmin.PageLive do
       authorizing={{ @authorizing }}
       table={{ @table }}
       tables={{ @tables }}
+      prefix={{ @prefix }}
     />
     """
   end

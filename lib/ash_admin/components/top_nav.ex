@@ -21,6 +21,7 @@ defmodule AshAdmin.Components.TopNav do
   prop(actor_paused, :boolean, required: true)
   prop(actor, :any, required: true)
   prop(actor_api, :any, required: true)
+  prop(prefix, :any, required: true)
 
   def render(assigns) do
     ~H"""
@@ -30,7 +31,7 @@ defmodule AshAdmin.Components.TopNav do
           <div class="flex items-center w-full">
             <div class="flex-shrink-0">
               <h3 class="text-white text-lg">
-                <LiveRedirect to={{ ash_admin_path(@socket) }}>
+                <LiveRedirect to={{ ash_admin_path(@prefix) }}>
                   Admin
                 </LiveRedirect>
               </h3>
@@ -44,7 +45,7 @@ defmodule AshAdmin.Components.TopNav do
                     class="mr-1"
                     id={{ AshAdmin.Api.name(api) <> "_api_nav" }}
                     name={{ AshAdmin.Api.name(api) }}
-                    groups={{ dropdown_groups(@socket, @resource, api) }}
+                    groups={{ dropdown_groups(@prefix, @resource, api) }}
                   />
                 </div>
                 <div class="ml-10 flex items-center">
@@ -59,6 +60,7 @@ defmodule AshAdmin.Components.TopNav do
                     clear_actor={{ @clear_actor }}
                     actor_api={{ @actor_api }}
                     api={{ @api }}
+                    prefix={{ @prefix }}
                   />
                   <TenantForm
                     :if={{ show_tenant_form?(@apis) }}
@@ -112,6 +114,7 @@ defmodule AshAdmin.Components.TopNav do
               clear_actor={{ @clear_actor }}
               actor_api={{ @actor_api }}
               api={{ @api }}
+              prefix={{ @prefix }}
             />
           </div>
           <div class="block px-4 py-2 text-sm">
@@ -127,7 +130,7 @@ defmodule AshAdmin.Components.TopNav do
             :for={{ api <- @apis }}
             id={{ AshAdmin.Api.name(api) <> "_api_nav_drawer" }}
             name={{ AshAdmin.Api.name(api) }}
-            groups={{ dropdown_groups(@socket, @resource, api) }}
+            groups={{ dropdown_groups(@prefix, @resource, api) }}
           />
         </div>
       </div>
@@ -135,12 +138,12 @@ defmodule AshAdmin.Components.TopNav do
     """
   end
 
-  defp dropdown_groups(socket, current_resource, api) do
+  defp dropdown_groups(prefix, current_resource, api) do
     [
       for resource <- Ash.Api.resources(api) do
         %{
           text: AshAdmin.Resource.name(resource),
-          to: ash_admin_path(socket, api, resource),
+          to: ash_admin_path(prefix, api, resource),
           active: resource == current_resource
         }
       end

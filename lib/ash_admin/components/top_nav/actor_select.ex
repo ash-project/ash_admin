@@ -15,6 +15,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
   prop(clear_actor, :event, required: true)
   prop(api, :any, required: true)
   prop(actor_api, :any, required: true)
+  prop(prefix, :any, required: true)
 
   def render(assigns) do
     ~H"""
@@ -74,11 +75,10 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
           <LiveRedirect
             class="hover:text-blue-400 hover:underline"
             to={{ash_show_path(
-              @socket,
+              @prefix,
               @actor_api,
               @actor.__struct__,
               @actor,
-              AshAdmin.Resource.show_action(@actor.__struct__),
               nil
             )}}
           >
@@ -108,7 +108,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
   defp render_actor_link(assigns, [{api, resource}]) do
     ~H"""
     <LiveRedirect to={{ash_action_path(
-      @socket,
+      @prefix,
       api,
       resource,
       :read,
@@ -125,7 +125,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
     <div aria-labelledby="actor-banner">
       <LiveRedirect
         to={{ash_action_path(
-          @socket,
+          @prefix,
           api,
           resource,
           :read,

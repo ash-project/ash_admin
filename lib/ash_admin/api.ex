@@ -23,9 +23,18 @@ defmodule AshAdmin.Api do
   """
 
   def name(api) do
-    Ash.Dsl.Extension.get_opt(api, [:admin], :name, nil, true) ||
-      api
-      |> Module.split()
-      |> Enum.at(-2)
+    Ash.Dsl.Extension.get_opt(api, [:admin], :name, nil, true) || default_name(api)
+  end
+
+  defp default_name(api) do
+    split = api |> Module.split()
+
+    case List.last(split) do
+      "Api" ->
+        Enum.at(split, -2)
+
+      last ->
+        last
+    end
   end
 end
