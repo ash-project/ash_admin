@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.1.1](https://github.com/ash-project/ash_admin/compare/v0.1.0...v0.1.1) (2021-03-22)
+
+
+
+
+### Bug Fixes:
+
+* use static routes
+
 ## [v0.1.0](https://github.com/ash-project/ash_admin/compare/v0.1.0...v0.1.0) (2021-03-22)
 
 
