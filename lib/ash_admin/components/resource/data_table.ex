@@ -254,7 +254,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
      push_redirect(socket,
        to:
          ash_action_path(
-           socket,
+           socket.assigns.prefix,
            socket.assigns.api,
            socket.assigns.resource,
            socket.assigns.action.type,

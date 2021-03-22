@@ -188,7 +188,7 @@ defmodule AshAdmin.Components.Resource.Show do
     ~H"""
     {{ {attributes, flags, bottom_attributes} =
       AshAdmin.Components.Resource.Form.attributes(resource, :show)
-    
+
     nil }}
     <div class="grid grid-cols-6 gap-6">
       <div

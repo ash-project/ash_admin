@@ -807,7 +807,7 @@ defmodule AshAdmin.Components.Resource.Form do
           {:ok, created} ->
             redirect_to(socket, created)
 
-          {:error, %{changeset: changeset} = error} ->
+          {:error, %{changeset: changeset}} ->
             {:noreply, assign(socket, :changeset, changeset)}
         end
 
