@@ -12,7 +12,7 @@ An admin UI for Ash resources. Built with Phoenix Liveview.
 First, ensure you've added ash_admin to your `mix.exs` file.
 
 ```elixir
-{:ash_admin, "~> 0.1.1"}
+{:ash_admin, "~> 0.1.2"}
 ```
 
 ## Setup
