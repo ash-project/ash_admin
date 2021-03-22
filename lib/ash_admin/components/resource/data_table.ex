@@ -14,6 +14,8 @@ defmodule AshAdmin.Components.Resource.DataTable do
   prop(actor, :any)
   prop(url_path, :any)
   prop(params, :any)
+  prop(table, :any, required: true)
+  prop(tables, :any, required: true)
 
   data(initialized, :boolean, default: false)
   data(data, :any)
@@ -84,12 +86,19 @@ defmodule AshAdmin.Components.Resource.DataTable do
                   []
                 end
 
-              assigns[:api].read(socket.assigns.query,
-                action: socket.assigns[:action].name,
-                actor: socket.assigns[:actor],
-                authorize?: socket.assigns[:authorizing],
-                page: page_params
-              )
+              if AshAdmin.Resource.polymorphic?(socket.assigns.resource) &&
+                   !socket.assigns[:table] do
+                {:ok, []}
+              else
+                socket.assigns.query
+                |> set_table(socket.assigns[:table])
+                |> assigns[:api].read(
+                  action: socket.assigns[:action].name,
+                  actor: socket.assigns[:actor],
+                  authorize?: socket.assigns[:authorizing],
+                  page: page_params
+                )
+              end
             end,
             load_until_connected?: true
           )
@@ -98,11 +107,18 @@ defmodule AshAdmin.Components.Resource.DataTable do
             socket,
             :data,
             fn socket ->
-              assigns[:api].read(socket.assigns.query,
-                action: socket.assigns[:action],
-                actor: socket.assigns[:actor],
-                authorize?: socket.assigns[:authorizing]
-              )
+              if AshAdmin.Resource.polymorphic?(socket.assigns.resource) &&
+                   !socket.assigns[:table] do
+                {:ok, []}
+              else
+                socket.assigns.query
+                |> set_table(socket.assigns[:table])
+                |> assigns[:api].read(
+                  action: socket.assigns[:action],
+                  actor: socket.assigns[:actor],
+                  authorize?: socket.assigns[:authorizing]
+                )
+              end
             end,
             load_until_connected?: true
           )
@@ -118,12 +134,22 @@ defmodule AshAdmin.Components.Resource.DataTable do
     ~H"""
     <div>
       <div class="sm:mt-0 bg-gray-300 min-h-screen">
-        <div  :if={{@action.arguments != []}} class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10">
+        <div
+          :if={{ @action.arguments != [] }}
+          class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10"
+        >
           <div class="md:mt-0 md:col-span-2">
             <div class="shadow-lg overflow-hidden pt-2 sm:rounded-md bg-white">
               <div class="px-4 sm:p-6">
-                <Form :if={{@query}} as="query" for={{@query}} change="validate" submit="save" :let={{form: form}}>
-                  {{AshAdmin.Components.Resource.Form.render_attributes(assigns, @resource, @action, form)}}
+                <Form
+                  :if={{ @query }}
+                  as="query"
+                  for={{ @query }}
+                  change="validate"
+                  submit="save"
+                  :let={{ form: form }}
+                >
+                  {{ AshAdmin.Components.Resource.Form.render_attributes(assigns, @resource, @action, form) }}
                   <div class="px-4 py-3 text-right sm:px-6">
                     <button
                       type="submit"
@@ -138,7 +164,23 @@ defmodule AshAdmin.Components.Resource.DataTable do
           </div>
         </div>
 
-        <div :if={{@action.arguments == [] || @params["args"]}} class="h-full overflow-scroll md:mx-4">
+        <div
+          :if={{ AshAdmin.Resource.polymorphic?(@resource) }}
+          class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10"
+        >
+          <div class="md:mt-0 md:col-span-2">
+            <div class="px-4 sm:p-6">
+              <AshAdmin.Components.Resource.SelectTable
+                resource={{ @resource }}
+                on_change="change_table"
+                table={{ @table }}
+                tables={{ @tables }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div :if={{ @action.arguments == [] || @params["args"] }} class="h-full overflow-scroll md:mx-4">
           <div class="shadow-lg overflow-scroll sm:rounded-md bg-white">
             <div :if={{ match?({:error, _}, @data) }}>
               {{ {:error, %{query: query}} = @data
@@ -150,9 +192,17 @@ defmodule AshAdmin.Components.Resource.DataTable do
               </ul>
             </div>
             <div class="px-2">
-              {{render_pagination_links(assigns, :top)}}
-              <Table :if={{ match?({:ok, _data}, @data) }} data={{data(@data)}} resource={{@resource}} api={{@api}} set_actor={{@set_actor}} attributes={{AshAdmin.Resource.table_columns(@resource)}}/>
-              {{render_pagination_links(assigns, :bottom)}}
+              {{ render_pagination_links(assigns, :top) }}
+              <Table
+                :if={{ match?({:ok, _data}, @data) }}
+                table={{ @table }}
+                data={{ data(@data) }}
+                resource={{ @resource }}
+                api={{ @api }}
+                set_actor={{ @set_actor }}
+                attributes={{ AshAdmin.Resource.table_columns(@resource) }}
+              />
+              {{ render_pagination_links(assigns, :bottom) }}
             </div>
           </div>
         </div>
@@ -196,42 +246,96 @@ defmodule AshAdmin.Components.Resource.DataTable do
      )}
   end
 
+  def handle_event("change_table", %{"table" => %{"table" => table}}, socket) do
+    {:noreply,
+     push_redirect(socket,
+       to:
+         ash_action_path(
+           socket,
+           socket.assigns.api,
+           socket.assigns.resource,
+           socket.assigns.action.type,
+           socket.assigns.action.name,
+           table
+         )
+     )}
+  end
+
   defp render_pagination_links(assigns, placement) do
     ~H"""
-    <div :if={{(offset?(@data) || keyset?(@data)) && show_pagination_links?(@data, placement)}} class="w-5/6 mx-auto">
+    <div
+      :if={{ (offset?(@data) || keyset?(@data)) && show_pagination_links?(@data, placement) }}
+      class="w-5/6 mx-auto"
+    >
       <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
         <div class="flex-1 flex justify-between sm:hidden">
-          <button :if={{!(keyset?(@data) && is_nil(@params["page"])) && prev_page?(@data)}} :on-click="prev_page" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500">
+          <button
+            :if={{ !(keyset?(@data) && is_nil(@params["page"])) && prev_page?(@data) }}
+            :on-click="prev_page"
+            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
+          >
             Previous
           </button>
-          {{render_pagination_information(assigns, true)}}
-          <button :if={{next_page?(@data)}} :on-click="next_page" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500">
+          {{ render_pagination_information(assigns, true) }}
+          <button
+            :if={{ next_page?(@data) }}
+            :on-click="next_page"
+            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
+          >
             Next
           </button>
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-          {{render_pagination_information(assigns)}}
+            {{ render_pagination_information(assigns) }}
           </div>
           <div>
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-              <button :if={{!(keyset?(@data) && is_nil(@params["page"])) && prev_page?(@data)}} :on-click="prev_page" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+              <button
+                :if={{ !(keyset?(@data) && is_nil(@params["page"])) && prev_page?(@data) }}
+                :on-click="prev_page"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
                 <span class="sr-only">Previous</span>
-                <!-- Heroicon name: solid/chevron-left -->
-                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+
+                <svg
+                  class="h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  />
                 </svg>
               </button>
-              <span :if={{offset?(@data)}}>
-                {{render_page_links(assigns, leading_page_nums(@data))}}
-                {{render_middle_page_num(assigns, @page_num, trailing_page_nums(@data))}}
-                {{render_page_links(assigns, trailing_page_nums(@data))}}
+              <span :if={{ offset?(@data) }}>
+                {{ render_page_links(assigns, leading_page_nums(@data)) }}
+                {{ render_middle_page_num(assigns, @page_num, trailing_page_nums(@data)) }}
+                {{ render_page_links(assigns, trailing_page_nums(@data)) }}
               </span>
-              <button :if={{next_page?(@data)}} :on-click="next_page" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+              <button
+                :if={{ next_page?(@data) }}
+                :on-click="next_page"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
                 <span class="sr-only">Next</span>
-                <!-- Heroicon name: solid/chevron-right -->
-                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+
+                <svg
+                  class="h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clip-rule="evenodd"
+                  />
                 </svg>
               </button>
             </nav>
@@ -244,25 +348,33 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
   defp render_page_links(assigns, page_nums) do
     ~H"""
-    <button :on-click="specific_page" phx-value-page={{i}} :for={{i <- page_nums}} class={{"relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50", "bg-gray-300": @page_num == i}}>
-      {{i}}
+    <button
+      :on-click="specific_page"
+      phx-value-page={{ i }}
+      :for={{ i <- page_nums }}
+      class={{
+        "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50",
+        "bg-gray-300": @page_num == i
+      }}
+    >
+      {{ i }}
     </button>
     """
   end
 
   defp render_pagination_information(assigns, small? \\ false) do
     ~H"""
-      <p class={{"text-sm text-gray-700", "sm:hidden": small?}}>
-      <span :if={{offset?(@data)}}>
+    <p class={{ "text-sm text-gray-700", "sm:hidden": small? }}>
+      <span :if={{ offset?(@data) }}>
         Showing
-        <span class="font-medium">{{first(@data)}}</span>
+        <span class="font-medium">{{ first(@data) }}</span>
         to
-        <span class="font-medium">{{last(@data)}}</span>
-          of
+        <span class="font-medium">{{ last(@data) }}</span>
+        of
       </span>
-      <span :if={{count(@data)}}>
-        <span class="font-medium">{{count(@data)}}</span>
-      results
+      <span :if={{ count(@data) }}>
+        <span class="font-medium">{{ count(@data) }}</span>
+        results
       </span>
     </p>
     """
@@ -310,13 +422,17 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
     ~H"""
     <span
-      :if={{show_ellipses?(@data)}}
-      class={{"relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700", "bg-gray-300": !ellipsis?}}>
-      <span :if={{ellipsis?}}>
+      :if={{ show_ellipses?(@data) }}
+      class={{
+        "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700",
+        "bg-gray-300": !ellipsis?
+      }}
+    >
+      <span :if={{ ellipsis? }}>
         ...
       </span>
-      <span :if={{!ellipsis?}}>
-        {{num}}
+      <span :if={{ !ellipsis? }}>
+        {{ num }}
       </span>
     </span>
     """

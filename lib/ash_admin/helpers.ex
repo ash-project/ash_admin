@@ -2,6 +2,8 @@ defmodule AshAdmin.Helpers do
   @moduledoc false
 
   def replace_all_loaded(resource, data \\ nil) do
+    managed = AshAdmin.Resource.manage_related(resource) || []
+
     resource
     |> Ash.Resource.Info.relationships()
     |> Enum.filter(fn relationship ->
@@ -9,17 +11,40 @@ defmodule AshAdmin.Helpers do
         not match?(%Ash.NotLoaded{}, Map.get(data, relationship.name))
     end)
     |> Enum.map(fn rel ->
-      {rel.name,
-       {:manage,
-        on_lookup: :relate,
-        on_no_match: :error,
-        on_match: :ignore,
-        on_missing: :unrelate,
-        authorize?: false,
-        meta: [
-          id: rel.name
-        ]}}
+      if rel.name in managed do
+        {rel.name,
+         {:manage,
+          on_lookup: :relate,
+          on_no_match: :create,
+          on_match: :update,
+          on_missing: :destroy,
+          authorize?: true,
+          meta: [
+            id: rel.name
+          ]}}
+      else
+        {rel.name,
+         {:manage,
+          on_lookup: :relate,
+          on_no_match: :error,
+          on_match: :ignore,
+          on_missing: :unrelate,
+          authorize?: true,
+          meta: [
+            id: rel.name
+          ]}}
+      end
     end)
+  end
+
+  def set_table(changeset_or_query, nil), do: changeset_or_query
+
+  def set_table(%Ash.Query{} = query, table) do
+    Ash.Query.set_context(query, %{data_layer: %{table: table}})
+  end
+
+  def set_table(%Ash.Changeset{} = changeset, table) do
+    Ash.Changeset.set_context(changeset, %{data_layer: %{table: table}})
   end
 
   def ash_admin_path(socket) do
@@ -102,6 +127,40 @@ defmodule AshAdmin.Helpers do
     )
   end
 
+  def ash_create_path(socket, api, resource, action_name, nil) do
+    route =
+      String.to_atom(
+        String.downcase(
+          AshAdmin.Api.name(api) <>
+            AshAdmin.Resource.name(resource) <> "create" <> to_string(action_name) <> "_path"
+        )
+      )
+
+    apply(
+      socket.router.__helpers__(),
+      route,
+      [socket, :resource_page]
+    )
+  end
+
+  def ash_create_path(socket, api, resource, action_name, table) do
+    route =
+      String.to_atom(
+        String.downcase(
+          AshAdmin.Api.name(api) <>
+            AshAdmin.Resource.name(resource) <>
+            table <>
+            "create" <> to_string(action_name) <> "_path"
+        )
+      )
+
+    apply(
+      socket.router.__helpers__(),
+      route,
+      [socket, :resource_page]
+    )
+  end
+
   def ash_update_path(socket, api, resource, record) do
     route =
       String.to_atom(
@@ -117,12 +176,29 @@ defmodule AshAdmin.Helpers do
     )
   end
 
-  def ash_update_path(socket, api, resource, record, action_name) do
+  def ash_update_path(socket, api, resource, record, action_name, nil) do
     route =
       String.to_atom(
         String.downcase(
           AshAdmin.Api.name(api) <>
-            AshAdmin.Resource.name(resource) <> to_string(action_name) <> "update_path"
+            AshAdmin.Resource.name(resource) <> "update" <> to_string(action_name) <> "_path"
+        )
+      )
+
+    apply(
+      socket.router.__helpers__(),
+      route,
+      [socket, :resource_page, encode_primary_key(record)]
+    )
+  end
+
+  def ash_update_path(socket, api, resource, record, action_name, table) do
+    route =
+      String.to_atom(
+        String.downcase(
+          AshAdmin.Api.name(api) <>
+            AshAdmin.Resource.name(resource) <>
+            table <> "update" <> to_string(action_name) <> "_path"
         )
       )
 
@@ -148,12 +224,12 @@ defmodule AshAdmin.Helpers do
     )
   end
 
-  def ash_destroy_path(socket, api, resource, record, action_name) do
+  def ash_destroy_path(socket, api, resource, record, action_name, nil) do
     route =
       String.to_atom(
         String.downcase(
           AshAdmin.Api.name(api) <>
-            AshAdmin.Resource.name(resource) <> to_string(action_name) <> "destroy_path"
+            AshAdmin.Resource.name(resource) <> "destroy" <> to_string(action_name) <> "_path"
         )
       )
 
@@ -164,7 +240,24 @@ defmodule AshAdmin.Helpers do
     )
   end
 
-  def ash_action_path(socket, api, resource, action_type, action_name) do
+  def ash_destroy_path(socket, api, resource, record, action_name, table) do
+    route =
+      String.to_atom(
+        String.downcase(
+          AshAdmin.Api.name(api) <>
+            AshAdmin.Resource.name(resource) <>
+            table <> "destroy" <> to_string(action_name) <> "_path"
+        )
+      )
+
+    apply(
+      socket.router.__helpers__(),
+      route,
+      [socket, :resource_page, encode_primary_key(record)]
+    )
+  end
+
+  def ash_action_path(socket, api, resource, action_type, action_name, nil) do
     route =
       String.to_atom(
         String.downcase(
@@ -180,12 +273,45 @@ defmodule AshAdmin.Helpers do
     )
   end
 
-  def ash_show_path(socket, api, resource, record, action_name) do
+  def ash_action_path(socket, api, resource, action_type, action_name, table) do
+    route =
+      String.to_atom(
+        String.downcase(
+          AshAdmin.Api.name(api) <>
+            AshAdmin.Resource.name(resource) <>
+            table <> "_#{action_type}" <> "_#{action_name}" <> "_path"
+        )
+      )
+
+    apply(
+      socket.router.__helpers__(),
+      route,
+      [socket, :resource_page]
+    )
+  end
+
+  def ash_show_path(socket, api, resource, record, action_name, nil) do
     route =
       String.to_atom(
         String.downcase(
           AshAdmin.Api.name(api) <>
             AshAdmin.Resource.name(resource) <> "_show" <> "_#{action_name}" <> "_path"
+        )
+      )
+
+    apply(
+      socket.router.__helpers__(),
+      route,
+      [socket, :show_page, encode_primary_key(record)]
+    )
+  end
+
+  def ash_show_path(socket, api, resource, record, action_name, table) do
+    route =
+      String.to_atom(
+        String.downcase(
+          AshAdmin.Api.name(api) <>
+            AshAdmin.Resource.name(resource) <> table <> "_show" <> "_#{action_name}" <> "_path"
         )
       )
 

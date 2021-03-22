@@ -13,6 +13,7 @@ defmodule AshAdmin.Components.Resource.Show do
   prop(actor, :any)
   prop(tenant, :any)
   prop(set_actor, :event, required: true)
+  prop(table, :any, required: true)
 
   data(load_errors, :map, default: %{})
 
@@ -26,7 +27,7 @@ defmodule AshAdmin.Components.Resource.Show do
       </div>
       <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
         <div class="mt-5 md:mt-0 md:col-span-2">
-         {{render_relationships(assigns, @record, @resource)}}
+          {{ render_relationships(assigns, @record, @resource) }}
         </div>
       </div>
     </div>
@@ -36,26 +37,48 @@ defmodule AshAdmin.Components.Resource.Show do
   def render_show(assigns, record, resource, title \\ nil, buttons? \\ true) do
     ~H"""
     <div class="shadow-lg overflow-hidden sm:rounded-md bg-white">
-    <h1 :if={{title}} class="pt-2 pl-4 text-lg">{{title}}</h1>
-    <button
-      :if={{ AshAdmin.Resource.actor?(@resource) }}
-      class="float-right pt-4 pr-4"
-      :on-click={{ @set_actor }}
-      phx-value-resource={{ @resource }}
-      phx-value-api={{ @api }}
-      phx-value-pkey={{ encode_primary_key(@record) }}
-    >
-      {{ {:safe, Heroicons.Solid.key(class: "h-5 w-5 text-gray-500")} }}
-    </button>
+      <h1 :if={{ title }} class="pt-2 pl-4 text-lg">{{ title }}</h1>
+      <button
+        :if={{ AshAdmin.Resource.actor?(@resource) }}
+        class="float-right pt-4 pr-4"
+        :on-click={{ @set_actor }}
+        phx-value-resource={{ @resource }}
+        phx-value-api={{ @api }}
+        phx-value-pkey={{ encode_primary_key(@record) }}
+      >
+        {{ {:safe, Heroicons.Solid.key(class: "h-5 w-5 text-gray-500")} }}
+      </button>
       <div class="px-4 py-5 sm:p-6">
         <div>
           {{ render_attributes(assigns, record, resource) }}
-          <div :if={{buttons?}} class="px-4 py-3 text-right sm:px-6">
+          <div :if={{ buttons? }} class="px-4 py-3 text-right sm:px-6">
+            <LiveRedirect
+              to={{ash_destroy_path(
+                @socket,
+                @api,
+                @resource,
+                @record,
+                Ash.Resource.Info.primary_action(@resource, :destroy).name,
+                @table
+              )}}
+              :if={{ destroy?(@resource) }}
+              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Destroy
+            </LiveRedirect>
 
             <LiveRedirect
-              to={{ ash_update_path(@socket, @api, @resource, @record) }}
+              to={{ash_update_path(
+                @socket,
+                @api,
+                @resource,
+                @record,
+                Ash.Resource.Info.primary_action(@resource, :update).name,
+                @table
+              )}}
               :if={{ update?(@resource) }}
-              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
               Update
             </LiveRedirect>
           </div>
@@ -67,19 +90,34 @@ defmodule AshAdmin.Components.Resource.Show do
 
   defp render_relationships(assigns, _record, resource) do
     ~H"""
-    <div :for={{relationship <- AshAdmin.Components.Resource.Form.relationships(resource, :show)}} class="shadow-lg overflow-hidden sm:rounded-md mb-2 bg-white">
+    <div
+      :for={{ relationship <- AshAdmin.Components.Resource.Form.relationships(resource, :show) }}
+      class="shadow-lg overflow-hidden sm:rounded-md mb-2 bg-white"
+    >
       <div class="px-4 py-5 mt-2">
         <div>
-          {{to_name(relationship.name)}}
-          <button :if={{!loaded?(@record, relationship.name)}} :on-click="load" phx-value-relationship={{relationship.name}} type="button" class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center">
+          {{ to_name(relationship.name) }}
+          <button
+            :if={{ !loaded?(@record, relationship.name) }}
+            :on-click="load"
+            phx-value-relationship={{ relationship.name }}
+            type="button"
+            class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+          >
             Load
           </button>
-          <button :if={{loaded?(@record, relationship.name) && relationship.cardinality == :many}} :on-click="unload" phx-value-relationship={{relationship.name}} type="button" class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center">
+          <button
+            :if={{ loaded?(@record, relationship.name) && relationship.cardinality == :many }}
+            :on-click="unload"
+            phx-value-relationship={{ relationship.name }}
+            type="button"
+            class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+          >
             Unload
           </button>
 
-          <div :if={{loaded?(@record, relationship.name)}}>
-            {{render_relationship_data(assigns, @record, relationship)}}
+          <div :if={{ loaded?(@record, relationship.name) }}>
+            {{ render_relationship_data(assigns, @record, relationship) }}
           </div>
         </div>
       </div>
@@ -90,7 +128,8 @@ defmodule AshAdmin.Components.Resource.Show do
   defp render_relationship_data(assigns, record, %{
          cardinality: :one,
          name: name,
-         destination: destination
+         destination: destination,
+         context: context
        }) do
     case Map.get(record, name) do
       nil ->
@@ -99,12 +138,20 @@ defmodule AshAdmin.Components.Resource.Show do
       record ->
         ~H"""
         <div class="mb-10">
-          {{render_attributes(assigns, record, destination)}}
+          {{ render_attributes(assigns, record, destination) }}
           <div class="px-4 py-3 text-right sm:px-6">
             <LiveRedirect
-              :if={{AshAdmin.Resource.show_action(destination)}}
-              to={{ ash_show_path(@socket, @api, destination, record, AshAdmin.Resource.show_action(destination)) }}
-              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              :if={{ AshAdmin.Resource.show_action(destination) }}
+              to={{ash_show_path(
+                @socket,
+                @api,
+                destination,
+                record,
+                AshAdmin.Resource.show_action(destination),
+                context[:data_layer][:table]
+              )}}
+              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
               Show
             </LiveRedirect>
           </div>
@@ -116,13 +163,21 @@ defmodule AshAdmin.Components.Resource.Show do
   defp render_relationship_data(assigns, record, %{
          cardinality: :many,
          name: name,
-         destination: destination
+         destination: destination,
+         context: context
        }) do
     data = Map.get(record, name)
 
     ~H"""
     <div class="mb-10 overflow-scroll">
-      <Table data={{data}} resource={{destination}} api={{@api}} set_actor={{@set_actor}}/>
+      <Table
+        table={{ @table }}
+        data={{ data }}
+        resource={{ destination }}
+        api={{ @api }}
+        set_actor={{ @set_actor }}
+        table={{ context[:data_layer][:table] }}
+      />
     </div>
     """
   end
@@ -131,7 +186,7 @@ defmodule AshAdmin.Components.Resource.Show do
     ~H"""
     {{ {attributes, flags, bottom_attributes} =
       AshAdmin.Components.Resource.Form.attributes(resource, :show)
-
+    
     nil }}
     <div class="grid grid-cols-6 gap-6">
       <div
@@ -204,7 +259,7 @@ defmodule AshAdmin.Components.Resource.Show do
       if nested? do
         ~H"""
         <ul>
-          <li :for={{ value <- List.wrap(Map.get(record, name)) }} class={{all_classes}}>
+          <li :for={{ value <- List.wrap(Map.get(record, name)) }} class={{ all_classes }}>
             {{ render_attribute(assigns, resource, Map.put(record, name, value), %{attribute | type: type}, true) }}
           </li>
         </ul>
@@ -213,7 +268,7 @@ defmodule AshAdmin.Components.Resource.Show do
         ~H"""
         <div class="shadow-md border mt-4 mb-4 ml-4">
           <ul>
-            <li :for={{ value <- List.wrap(Map.get(record, name)) }} class={{"my-4", all_classes}}>
+            <li :for={{ value <- List.wrap(Map.get(record, name)) }} class={{ "my-4", all_classes }}>
               {{ render_attribute(assigns, resource, Map.put(record, name, value), %{attribute | type: type}, true) }}
             </li>
           </ul>
@@ -253,13 +308,13 @@ defmodule AshAdmin.Components.Resource.Show do
       else
         if nested? do
           ~H"""
-          <div class={{both_classes}}>
-          {{ render_attributes(assigns, Map.get(record, attribute.name), attribute.type) }}
+          <div class={{ both_classes }}>
+            {{ render_attributes(assigns, Map.get(record, attribute.name), attribute.type) }}
           </div>
           """
         else
           ~H"""
-          <div class={{"shadow-md border mt-4 mb-4 ml-2 rounded py-2 px-2", both_classes}}>
+          <div class={{ "shadow-md border mt-4 mb-4 ml-2 rounded py-2 px-2", both_classes }}>
             {{ render_attributes(assigns, Map.get(record, attribute.name), attribute.type) }}
           </div>
           """
@@ -275,15 +330,25 @@ defmodule AshAdmin.Components.Resource.Show do
 
           long_text?(resource, attribute) ->
             ~H"""
-            <textarea rows="3" cols="40" disabled class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-              {{value!(Map.get(record, attribute.name))}}
+            <textarea
+              rows="3"
+              cols="40"
+              disabled
+              class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+            >
+              {{ value!(Map.get(record, attribute.name)) }}
             </textarea>
             """
 
           true ->
             ~H"""
-            <textarea rows="1" cols="20" disabled class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-              {{value!(Map.get(record, attribute.name))}}
+            <textarea
+              rows="1"
+              cols="20"
+              disabled
+              class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+            >
+              {{ value!(Map.get(record, attribute.name)) }}
             </textarea>
             """
         end
@@ -356,6 +421,12 @@ defmodule AshAdmin.Components.Resource.Show do
       _ ->
         false
     end
+  end
+
+  defp destroy?(resource) do
+    resource
+    |> Ash.Resource.Info.actions()
+    |> Enum.any?(&(&1.type == :destroy))
   end
 
   defp update?(resource) do

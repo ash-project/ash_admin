@@ -36,6 +36,7 @@ config :ash_admin, DemoWeb.Endpoint,
     ]
   ],
   live_reload: [
+    iframe_attrs: [class: "hidden"],
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"lib/ash_admin/(components|pages)/.*(ex)$"

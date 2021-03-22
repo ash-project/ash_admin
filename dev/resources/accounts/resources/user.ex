@@ -30,6 +30,11 @@ defmodule Demo.Accounts.User do
   actions do
     read :me, filter: [id: actor(:id)]
     read :read, primary?: true
+    read :by_id do
+      argument :id, :uuid
+
+      filter expr(id == ^arg(:id))
+    end
 
     read :by_name do
       argument :first_name, :string, allow_nil?: false

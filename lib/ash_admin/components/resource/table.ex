@@ -10,6 +10,7 @@ defmodule AshAdmin.Components.Resource.Table do
   prop(actions, :boolean, default: true)
   prop(api, :any, required: true)
   prop(set_actor, :event, required: true)
+  prop(table, :any, required: true)
 
   def render(assigns) do
     ~H"""
@@ -23,22 +24,36 @@ defmodule AshAdmin.Components.Resource.Table do
         <tbody>
           <tr :for={{ record <- @data }} class="border-b-2">
             <td :for={{ attribute <- attributes(@resource, @attributes) }} class="py-3">{{ render_attribute(record, attribute) }}</td>
-            <td :if={{@actions && actions?(@resource)}}>
+            <td :if={{ @actions && actions?(@resource) }}>
               <div class="flex h-max justify-items-center">
                 <div :if={{ AshAdmin.Resource.show_action(@resource) }}>
-                  <LiveRedirect to={{ ash_show_path(@socket, @api, @resource, record, AshAdmin.Resource.show_action(@resource)) }}>
+                  <LiveRedirect to={{ ash_show_path(@socket, @api, @resource, record, AshAdmin.Resource.show_action(@resource), @table) }}>
                     {{ {:safe, Heroicons.Solid.information_circle(class: "h-5 w-5 text-gray-500")} }}
                   </LiveRedirect>
                 </div>
 
                 <div :if={{ Ash.Resource.Info.primary_action(@resource, :update) }}>
-                  <LiveRedirect to={{ ash_update_path(@socket, @api, @resource, record) }}>
+                  <LiveRedirect to={{ash_update_path(
+                    @socket,
+                    @api,
+                    @resource,
+                    record,
+                    Ash.Resource.Info.primary_action(@resource, :update).name,
+                    @table
+                  )}}>
                     {{ {:safe, Heroicons.Solid.pencil(class: "h-5 w-5 text-gray-500")} }}
                   </LiveRedirect>
                 </div>
 
-                <div :if={{ Ash.Resource.Info.primary_action(@resource, :destroy) }} >
-                  <LiveRedirect to={{ ash_destroy_path(@socket, @api, @resource, record) }}>
+                <div :if={{ Ash.Resource.Info.primary_action(@resource, :destroy) }}>
+                  <LiveRedirect to={{ash_destroy_path(
+                    @socket,
+                    @api,
+                    @resource,
+                    record,
+                    Ash.Resource.Info.primary_action(@resource, :destroy).name,
+                    @table
+                  )}}>
                     {{ {:safe, Heroicons.Solid.x_circle(class: "h-5 w-5 text-gray-500")} }}
                   </LiveRedirect>
                 </div>

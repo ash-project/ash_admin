@@ -70,7 +70,17 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
               <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z" />
             </svg>
           </button>
-          <LiveRedirect class="hover:text-blue-400 hover:underline" to={{ ash_show_path(@socket, @actor_api, @actor.__struct__, @actor, AshAdmin.Resource.show_action(@actor.__struct__)) }}>
+          <LiveRedirect
+            class="hover:text-blue-400 hover:underline"
+            to={{ash_show_path(
+              @socket,
+              @actor_api,
+              @actor.__struct__,
+              @actor,
+              AshAdmin.Resource.show_action(@actor.__struct__),
+              nil
+            )}}
+          >
             {{ user_display(@actor) }}
           </LiveRedirect>
           <button :on-click={{ @clear_actor }} type="button">
@@ -101,7 +111,8 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
       api,
       resource,
       :read,
-      Ash.Resource.Info.primary_action(resource, :read).name
+      Ash.Resource.Info.primary_action(resource, :read).name,
+      nil
     )}}>
       Set {{ AshAdmin.Resource.name(resource) }}
     </LiveRedirect>
@@ -117,13 +128,14 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
           api,
           resource,
           :read,
-          Ash.Resource.Info.primary_action(resource, :read).name
+          Ash.Resource.Info.primary_action(resource, :read).name,
+          nil
         )}}
         :for.with_index={{ {{api, resource}, i} <- apis_and_resources }}
       >
-          Set {{ AshAdmin.Resource.name(resource) }}
-        <span :if={{i != (Enum.count(apis_and_resources) - 1)}}>
-        |
+        Set {{ AshAdmin.Resource.name(resource) }}
+        <span :if={{ i != Enum.count(apis_and_resources) - 1 }}>
+          |
         </span>
       </LiveRedirect>
     </div>

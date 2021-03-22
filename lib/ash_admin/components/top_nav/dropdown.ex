@@ -11,7 +11,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
 
   def render(assigns) do
     ~H"""
-    <div class={{"relative", @class}}>
+    <div class={{ "relative", @class }}>
       <div x-data="{isOpen: false}">
         <button
           type="button"

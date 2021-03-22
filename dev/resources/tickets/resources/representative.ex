@@ -3,7 +3,16 @@ defmodule Demo.Tickets.Representative do
     data_layer: AshPostgres.DataLayer,
     authorizers: [
       AshPolicyAuthorizer.Authorizer
+    ],
+    extensions: [
+      AshAdmin.Resource
     ]
+
+  admin do
+    form do
+      manage_related [:comments]
+    end
+  end
 
   resource do
     base_filter representative: true
@@ -65,6 +74,11 @@ defmodule Demo.Tickets.Representative do
   relationships do
     has_many :assigned_tickets, Demo.Tickets.Ticket do
       destination_field :representative_id
+    end
+
+    has_many :comments, Demo.Tickets.Comment do
+      context %{data_layer: %{table: "representative_comments"}}
+      destination_field :resource_id
     end
   end
 end

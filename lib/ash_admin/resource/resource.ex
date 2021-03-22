@@ -12,6 +12,18 @@ defmodule AshAdmin.Resource do
     name: :form,
     entities: [
       @field
+    ],
+    schema: [
+      manage_related: [
+        type: {:list, :atom},
+        doc:
+          "Which relationships to fully manage in this resource's form. Records will be created, deleted, and updated based on the input."
+      ],
+      relationships: [
+        type: {:list, :atom},
+        doc:
+          "The list of relationships to show in forms. If not set, all relationships are shown."
+      ]
     ]
   }
 
@@ -55,6 +67,13 @@ defmodule AshAdmin.Resource do
         doc:
           "A list of destroy actions that can be destroy records. By default, all actions are included"
       ],
+      polymorphic_tables: [
+        type: {:list, :string},
+        doc: """
+        For resources that use ash_postgres's polymorphism capabilities, you can provide a list of tables that should be available to
+        select. These will be added to the list of derivable tables based on scanning all Apis + resources provided to ash_admin.
+        """
+      ],
       table_columns: [
         type: {:list, :atom},
         doc: "The list of attributes to render on the table view."
@@ -63,6 +82,29 @@ defmodule AshAdmin.Resource do
   }
 
   use Ash.Dsl.Extension, sections: [@admin]
+
+  if Code.ensure_compiled(AshPostgres) do
+    def polymorphic?(resource) do
+      AshPostgres.polymorphic?(resource)
+    end
+  else
+    def polymorphic?(_), do: false
+  end
+
+  def polymorphic_tables(resource, apis) do
+    resource
+    |> Ash.Dsl.Extension.get_opt([:admin], :polymorphic_tables, [], true)
+    |> Enum.concat(find_polymorphic_tables(resource, apis))
+    |> Enum.uniq()
+  end
+
+  def manage_related(resource) do
+    Ash.Dsl.Extension.get_opt(resource, [:admin, :form], :manage_related, [], true)
+  end
+
+  def relationships(resource) do
+    Ash.Dsl.Extension.get_opt(resource, [:admin, :form], :relationships, nil, true)
+  end
 
   def table_columns(resource) do
     Ash.Dsl.Extension.get_opt(resource, [:admin], :table_columns, nil, true)
@@ -116,5 +158,15 @@ defmodule AshAdmin.Resource do
     |> Enum.find(fn field ->
       field.name == name
     end)
+  end
+
+  defp find_polymorphic_tables(resource, apis) do
+    apis
+    |> Enum.flat_map(&Ash.Api.resources/1)
+    |> Enum.flat_map(&Ash.Resource.Info.relationships/1)
+    |> Enum.filter(&(&1.destination == resource))
+    |> Enum.map(& &1.context[:data_layer][:table])
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
   end
 end

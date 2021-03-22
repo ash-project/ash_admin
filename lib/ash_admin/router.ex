@@ -110,88 +110,102 @@ defmodule AshAdmin.Router do
           )
 
           for resource <- Ash.Api.resources(api) do
-            as =
-              api
-              |> AshAdmin.Api.name()
-              |> Kernel.<>(AshAdmin.Resource.name(resource))
-              |> String.downcase()
-              |> String.to_atom()
-
-            live(
-              "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}",
-              AshAdmin.PageLive,
-              :resource_page,
-              AshAdmin.Router.__options__(opts, as, %{
-                "apis" => apis,
-                "api" => api,
-                "tab" => "info",
-                "resource" => resource,
-                "action_type" => nil,
-                "action_name" => nil
-              })
-            )
-
-            if Enum.any?(Ash.Resource.Info.actions(resource), &(&1.type == :create)) do
+            for {table, alias_part, polymorphic_part} <-
+                  AshAdmin.Router.polymorphic_parts(resource, apis) do
               as =
                 api
                 |> AshAdmin.Api.name()
                 |> Kernel.<>(AshAdmin.Resource.name(resource))
-                |> Kernel.<>("create")
+                |> Kernel.<>(alias_part)
                 |> String.downcase()
                 |> String.to_atom()
 
               live(
-                "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/create",
+                "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{polymorphic_part}",
                 AshAdmin.PageLive,
                 :resource_page,
                 AshAdmin.Router.__options__(opts, as, %{
                   "apis" => apis,
                   "api" => api,
+                  "tab" => "info",
                   "resource" => resource,
-                  "tab" => "create",
-                  "action_type" => :create,
-                  "action_name" => Ash.Resource.Info.primary_action!(resource, :create).name
-                })
-              )
-            end
-
-            if Enum.any?(Ash.Resource.Info.actions(resource), &(&1.type == :update)) do
-              as =
-                api
-                |> AshAdmin.Api.name()
-                |> Kernel.<>(AshAdmin.Resource.name(resource))
-                |> Kernel.<>("update")
-                |> String.downcase()
-                |> String.to_atom()
-
-              live(
-                "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/update/:primary_key",
-                AshAdmin.PageLive,
-                :resource_page,
-                AshAdmin.Router.__options__(opts, as, %{
-                  "apis" => apis,
-                  "api" => api,
-                  "resource" => resource,
-                  "tab" => "update",
-                  "action_type" => :update,
-                  "action_name" => Ash.Resource.Info.primary_action!(resource, :update).name
+                  "action_type" => nil,
+                  "action_name" => nil,
+                  "table" => table
                 })
               )
 
-              for %{type: :update} = action <- Ash.Resource.Info.actions(resource) do
+              if Enum.any?(Ash.Resource.Info.actions(resource), &(&1.type == :create)) do
                 as =
                   api
                   |> AshAdmin.Api.name()
                   |> Kernel.<>(AshAdmin.Resource.name(resource))
+                  |> Kernel.<>(alias_part)
+                  |> Kernel.<>("create")
+                  |> String.downcase()
+                  |> String.to_atom()
+
+                live(
+                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
+                    polymorphic_part
+                  }/create",
+                  AshAdmin.PageLive,
+                  :resource_page,
+                  AshAdmin.Router.__options__(opts, as, %{
+                    "apis" => apis,
+                    "api" => api,
+                    "resource" => resource,
+                    "tab" => "create",
+                    "action_type" => :create,
+                    "action_name" => Ash.Resource.Info.primary_action!(resource, :create).name,
+                    "table" => table
+                  })
+                )
+              end
+
+              for %{type: :create} = action <- Ash.Resource.Info.actions(resource) do
+                as =
+                  api
+                  |> AshAdmin.Api.name()
+                  |> Kernel.<>(AshAdmin.Resource.name(resource))
+                  |> Kernel.<>(alias_part)
+                  |> Kernel.<>("create")
                   |> Kernel.<>(to_string(action.name))
+                  |> String.downcase()
+                  |> String.to_atom()
+
+                live(
+                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
+                    polymorphic_part
+                  }/create/#{action.name}",
+                  AshAdmin.PageLive,
+                  :resource_page,
+                  AshAdmin.Router.__options__(opts, as, %{
+                    "apis" => apis,
+                    "api" => api,
+                    "resource" => resource,
+                    "tab" => "create",
+                    "action_type" => :create,
+                    "action_name" => action.name,
+                    "table" => table
+                  })
+                )
+              end
+
+              if Enum.any?(Ash.Resource.Info.actions(resource), &(&1.type == :update)) do
+                as =
+                  api
+                  |> AshAdmin.Api.name()
+                  |> Kernel.<>(AshAdmin.Resource.name(resource))
+                  |> Kernel.<>(alias_part)
                   |> Kernel.<>("update")
                   |> String.downcase()
                   |> String.to_atom()
 
                 live(
-                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/update/#{
-                    action.name
-                  }/:primary_key",
+                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
+                    polymorphic_part
+                  }/update/:primary_key",
                   AshAdmin.PageLive,
                   :resource_page,
                   AshAdmin.Router.__options__(opts, as, %{
@@ -200,49 +214,55 @@ defmodule AshAdmin.Router do
                     "resource" => resource,
                     "tab" => "update",
                     "action_type" => :update,
-                    "action_name" => action.name
+                    "action_name" => Ash.Resource.Info.primary_action!(resource, :update).name,
+                    "table" => table
                   })
                 )
+
+                for %{type: :update} = action <- Ash.Resource.Info.actions(resource) do
+                  as =
+                    api
+                    |> AshAdmin.Api.name()
+                    |> Kernel.<>(AshAdmin.Resource.name(resource))
+                    |> Kernel.<>(alias_part)
+                    |> Kernel.<>("update")
+                    |> Kernel.<>(to_string(action.name))
+                    |> String.downcase()
+                    |> String.to_atom()
+
+                  live(
+                    "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
+                      polymorphic_part
+                    }/update/#{action.name}/:primary_key",
+                    AshAdmin.PageLive,
+                    :resource_page,
+                    AshAdmin.Router.__options__(opts, as, %{
+                      "apis" => apis,
+                      "api" => api,
+                      "resource" => resource,
+                      "tab" => "update",
+                      "action_type" => :update,
+                      "action_name" => action.name,
+                      "table" => table
+                    })
+                  )
+                end
               end
-            end
 
-            if Enum.any?(Ash.Resource.Info.actions(resource), &(&1.type == :destroy)) do
-              as =
-                api
-                |> AshAdmin.Api.name()
-                |> Kernel.<>(AshAdmin.Resource.name(resource))
-                |> Kernel.<>("destroy")
-                |> String.downcase()
-                |> String.to_atom()
-
-              live(
-                "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/destroy/:primary_key",
-                AshAdmin.PageLive,
-                :resource_page,
-                AshAdmin.Router.__options__(opts, as, %{
-                  "apis" => apis,
-                  "api" => api,
-                  "resource" => resource,
-                  "tab" => "destroy",
-                  "action_type" => :destroy,
-                  "action_name" => Ash.Resource.Info.primary_action!(resource, :destroy).name
-                })
-              )
-
-              for %{type: :destroy} = action <- Ash.Resource.Info.actions(resource) do
+              if Enum.any?(Ash.Resource.Info.actions(resource), &(&1.type == :destroy)) do
                 as =
                   api
                   |> AshAdmin.Api.name()
                   |> Kernel.<>(AshAdmin.Resource.name(resource))
-                  |> Kernel.<>(to_string(action.name))
+                  |> Kernel.<>(alias_part)
                   |> Kernel.<>("destroy")
                   |> String.downcase()
                   |> String.to_atom()
 
                 live(
-                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(api)}/destroy/#{
-                    action.name
-                  }/:primary_key",
+                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
+                    polymorphic_part
+                  }/destroy/:primary_key",
                   AshAdmin.PageLive,
                   :resource_page,
                   AshAdmin.Router.__options__(opts, as, %{
@@ -251,66 +271,103 @@ defmodule AshAdmin.Router do
                     "resource" => resource,
                     "tab" => "destroy",
                     "action_type" => :destroy,
-                    "action_name" => action.name
+                    "action_name" => Ash.Resource.Info.primary_action!(resource, :destroy).name,
+                    "table" => table
+                  })
+                )
+
+                for %{type: :destroy} = action <- Ash.Resource.Info.actions(resource) do
+                  as =
+                    api
+                    |> AshAdmin.Api.name()
+                    |> Kernel.<>(AshAdmin.Resource.name(resource))
+                    |> Kernel.<>(alias_part)
+                    |> Kernel.<>("destroy")
+                    |> Kernel.<>(to_string(action.name))
+                    |> String.downcase()
+                    |> String.to_atom()
+
+                  live(
+                    "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
+                      polymorphic_part
+                    }/destroy/#{action.name}/:primary_key",
+                    AshAdmin.PageLive,
+                    :resource_page,
+                    AshAdmin.Router.__options__(opts, as, %{
+                      "apis" => apis,
+                      "api" => api,
+                      "resource" => resource,
+                      "tab" => "destroy",
+                      "action_type" => :destroy,
+                      "action_name" => action.name,
+                      "table" => table
+                    })
+                  )
+                end
+              end
+
+              show_action = AshAdmin.Resource.show_action(resource)
+
+              if show_action do
+                action =
+                  Ash.Resource.Info.action(resource, AshAdmin.Resource.show_action(resource))
+
+                as =
+                  api
+                  |> AshAdmin.Api.name()
+                  |> Kernel.<>(AshAdmin.Resource.name(resource))
+                  |> Kernel.<>(alias_part)
+                  |> Kernel.<>("_show")
+                  |> Kernel.<>("_#{action.name}")
+                  |> String.downcase()
+                  |> String.to_atom()
+
+                live(
+                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
+                    polymorphic_part
+                  }/show/:primary_key",
+                  AshAdmin.PageLive,
+                  :show_page,
+                  AshAdmin.Router.__options__(opts, as, %{
+                    "apis" => apis,
+                    "api" => api,
+                    "resource" => resource,
+                    "tab" => "read",
+                    "action_type" => :read,
+                    "action_name" => action.name,
+                    "table" => table
                   })
                 )
               end
-            end
 
-            show_action = AshAdmin.Resource.show_action(resource)
+              for %{type: :read} = action <- Ash.Resource.Info.actions(resource) do
+                as =
+                  api
+                  |> AshAdmin.Api.name()
+                  |> Kernel.<>(AshAdmin.Resource.name(resource))
+                  |> Kernel.<>(alias_part)
+                  |> Kernel.<>("_read")
+                  |> Kernel.<>("_#{action.name}")
+                  |> String.downcase()
+                  |> String.to_atom()
 
-            if show_action do
-              action = Ash.Resource.Info.action(resource, AshAdmin.Resource.show_action(resource))
-
-              as =
-                api
-                |> AshAdmin.Api.name()
-                |> Kernel.<>(AshAdmin.Resource.name(resource))
-                |> Kernel.<>("_show")
-                |> Kernel.<>("_#{action.name}")
-                |> String.downcase()
-                |> String.to_atom()
-
-              live(
-                "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/show/:primary_key",
-                AshAdmin.PageLive,
-                :show_page,
-                AshAdmin.Router.__options__(opts, as, %{
-                  "apis" => apis,
-                  "api" => api,
-                  "resource" => resource,
-                  "tab" => "read",
-                  "action_type" => :read,
-                  "action_name" => action.name
-                })
-              )
-            end
-
-            for %{type: :read} = action <- Ash.Resource.Info.actions(resource) do
-              as =
-                api
-                |> AshAdmin.Api.name()
-                |> Kernel.<>(AshAdmin.Resource.name(resource))
-                |> Kernel.<>("_#{action.type}")
-                |> Kernel.<>("_#{action.name}")
-                |> String.downcase()
-                |> String.to_atom()
-
-              live(
-                "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}/#{action.type}/#{
-                  action.name
-                }",
-                AshAdmin.PageLive,
-                :resource_page,
-                AshAdmin.Router.__options__(opts, as, %{
-                  "apis" => apis,
-                  "api" => api,
-                  "resource" => resource,
-                  "tab" => "data",
-                  "action_type" => :read,
-                  "action_name" => action.name
-                })
-              )
+                live(
+                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
+                    polymorphic_part
+                  }/#{action.type}/#{action.name}",
+                  AshAdmin.PageLive,
+                  :resource_page,
+                  AshAdmin.Router.__options__(opts, as, %{
+                    "apis" => apis,
+                    "api" => api,
+                    "resource" => resource,
+                    "tab" => "data",
+                    "action_type" => :read,
+                    "action_name" => action.name,
+                    "table" => table
+                  })
+                )
+              end
             end
           end
         end
@@ -318,6 +375,7 @@ defmodule AshAdmin.Router do
     end
   end
 
+  @doc false
   def __options__(options, as, session) do
     live_socket_path = Keyword.get(options, :live_socket_path, "/live")
 
@@ -339,6 +397,7 @@ defmodule AshAdmin.Router do
     "actor_paused"
   ]
 
+  @doc false
   def __session__(conn, session) do
     Enum.reduce(@cookies_to_replicate, session, fn cookie, session ->
       case conn.req_cookies[cookie] do
@@ -349,5 +408,16 @@ defmodule AshAdmin.Router do
           Map.put(session, cookie, value)
       end
     end)
+  end
+
+  @doc false
+  def polymorphic_parts(resource, apis) do
+    case AshAdmin.Resource.polymorphic_tables(resource, apis) do
+      [] ->
+        [{nil, "", ""}]
+
+      tables ->
+        [{nil, "", ""} | Enum.map(tables, &{&1, &1, "/#{&1}"})]
+    end
   end
 end

@@ -46,8 +46,10 @@ defmodule AshAdmin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ash, "~> 1.36 and >= 1.36.12"},
-      {:ash_phoenix, "~> 0.4 and >= 0.4.3"},
+      # {:ash, "~> 1.36 and >= 1.36.12"},
+      {:ash, path: "../ash", override: true},
+      # {:ash_phoenix, "~> 0.4 and >= 0.4.3"},
+      {:ash_phoenix, path: "../ash_phoenix"},
       {:surface, "~> 0.3.1"},
       {:phoenix_live_view, "~> 0.15.4"},
       {:phoenix_html, "~> 2.14.1 or ~> 2.15"},
@@ -57,7 +59,8 @@ defmodule AshAdmin.MixProject do
       {:surface_formatter, "~> 0.3.1", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
-      {:ash_postgres, "~> 0.35.3", only: [:dev, :test]},
+      # {:ash_postgres, "~> 0.35.3", only: [:dev, :test]},
+      {:ash_postgres, path: "../ash_postgres", only: [:dev, :test]},
       {:ash_policy_authorizer, "~> 0.16.0", only: [:dev, :test]}
     ]
   end

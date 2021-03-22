@@ -13,6 +13,7 @@ defmodule Demo.Tickets.Ticket do
     table_columns [:id, :representative_id, :reporter_id, :subject, :status]
     form do
       field :description, type: :long_text
+      manage_related [:comments]
     end
   end
 
@@ -103,5 +104,10 @@ defmodule Demo.Tickets.Ticket do
     belongs_to :reporter, Demo.Tickets.Customer
 
     belongs_to :representative, Demo.Tickets.Representative
+
+    has_many :comments, Demo.Tickets.Comment do
+      context %{data_layer: %{table: "ticket_comments"}}
+      destination_field :resource_id
+    end
   end
 end

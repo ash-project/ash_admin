@@ -18,15 +18,25 @@ defmodule AshAdmin.Components.Resource do
   prop(params, :map, default: %{})
   prop(primary_key, :any, default: nil)
   prop(record, :any, default: nil)
+  prop(table, :any, default: nil)
+  prop(tables, :any, default: nil)
 
   data(filter_open, :boolean, default: false)
+  slot default
 
   def render(assigns) do
     ~H"""
     <div class="content-center h-screen">
-      <Nav resource={{ @resource }} api={{ @api }} tab={{ @tab }} action={{ @action }} />
+      <Nav
+        resource={{ @resource }}
+        api={{ @api }}
+        tab={{ @tab }}
+        action={{ @action }}
+        table={{ @table }}
+      />
       <div class="mx-24 relative grid grid-cols-1 justify-items-center">
       </div>
+      <slot />
       <div :if={{ @record && match?({:ok, record} when not is_nil(record), @record) && @tab == "update" }}>
         {{ {:ok, record} = @record
         nil }}
@@ -37,10 +47,12 @@ defmodule AshAdmin.Components.Resource do
           action={{ @action }}
           api={{ @api }}
           id={{ update_id(@resource) }}
-          actor={{@actor}}
-          set_actor={{@set_actor}}
-          authorizing={{@authorizing}}
-          tenant={{@tenant}}
+          actor={{ @actor }}
+          set_actor={{ @set_actor }}
+          authorizing={{ @authorizing }}
+          tenant={{ @tenant }}
+          table={{ @table }}
+          tables={{ @tables }}
         />
       </div>
       <div :if={{ @record && match?({:ok, record} when not is_nil(record), @record) && @tab == "destroy" }}>
@@ -51,24 +63,27 @@ defmodule AshAdmin.Components.Resource do
           record={{ record }}
           resource={{ @resource }}
           action={{ @action }}
-          set_actor={{@set_actor}}
+          set_actor={{ @set_actor }}
           api={{ @api }}
           id={{ destroy_id(@resource) }}
-          actor={{@actor}}
-          authorizing={{@authorizing}}
-          tenant={{@tenant}}
+          actor={{ @actor }}
+          authorizing={{ @authorizing }}
+          tenant={{ @tenant }}
+          table={{ @table }}
+          tables={{ @tables }}
         />
       </div>
       <Show
         :if={{ @tab == "read" && match?({:ok, %_{}}, @record) }}
         resource={{ @resource }}
         api={{ @api }}
-        id={{show_id(@resource)}}
+        id={{ show_id(@resource) }}
         record={{ unwrap(@record) }}
-        actor={{@actor}}
-        authorizing={{@authorizing}}
-        tenant={{@tenant}}
-        set_actor={{@set_actor}}
+        actor={{ @actor }}
+        authorizing={{ @authorizing }}
+        tenant={{ @tenant }}
+        set_actor={{ @set_actor }}
+        table={{ @table }}
       />
       <Info :if={{ @tab == "info" }} resource={{ @resource }} api={{ @api }} />
       <Form
@@ -76,24 +91,28 @@ defmodule AshAdmin.Components.Resource do
         type={{ :create }}
         resource={{ @resource }}
         api={{ @api }}
-        set_actor={{@set_actor}}
+        set_actor={{ @set_actor }}
         action={{ @action }}
         id={{ create_id(@resource) }}
-        actor={{@actor}}
-        authorizing={{@authorizing}}
-        tenant={{@tenant}}
+        actor={{ @actor }}
+        authorizing={{ @authorizing }}
+        tenant={{ @tenant }}
+        table={{ @table }}
+        tables={{ @tables }}
       />
       <DataTable
         :if={{ @tab == "data" }}
         resource={{ @resource }}
         action={{ @action }}
-        actor={{@actor}}
+        actor={{ @actor }}
         api={{ @api }}
-        url_path={{@url_path}}
-        params={{@params}}
+        url_path={{ @url_path }}
+        params={{ @params }}
         set_actor={{ @set_actor }}
         id={{ data_table_id(@resource) }}
-        authorizing={{@authorizing}}
+        authorizing={{ @authorizing }}
+        table={{ @table }}
+        tables={{ @tables }}
       />
     </div>
     """

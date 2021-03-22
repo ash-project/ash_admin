@@ -40,6 +40,11 @@ defmodule AshAdmin.PageLive do
         Ash.Resource.Info.action(resource, action_name, action_type)
       end
 
+    tables =
+      if resource do
+        AshAdmin.Resource.polymorphic_tables(resource, apis)
+      end
+
     {:ok,
      socket
      |> Surface.init()
@@ -58,7 +63,9 @@ defmodule AshAdmin.PageLive do
        :authorizing,
        AshAdmin.ActorPlug.session_bool(session["actor_authorizing"]) || false
      )
-     |> assign(:actor_paused, actor_paused)}
+     |> assign(:actor_paused, actor_paused)
+     |> assign(:tables, tables)
+     |> assign(:table, session["table"] || Enum.at(tables || [], 0))}
   end
 
   @impl true
@@ -68,7 +75,7 @@ defmodule AshAdmin.PageLive do
       id="top_nav"
       apis={{ @apis }}
       api={{ @api }}
-      actor_api={{@actor_api}}
+      actor_api={{ @actor_api }}
       resource={{ @resource }}
       tenant={{ @tenant }}
       actor_resources={{ @actor_resources }}
@@ -96,6 +103,8 @@ defmodule AshAdmin.PageLive do
       tenant={{ @tenant }}
       actor={{ unless @actor_paused, do: @actor }}
       authorizing={{ @authorizing }}
+      table={{ @table }}
+      tables={{ @tables }}
     />
     """
   end
