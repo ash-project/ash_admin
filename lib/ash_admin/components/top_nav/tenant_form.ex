@@ -1,4 +1,5 @@
 defmodule AshAdmin.Components.TopNav.TenantForm do
+  @moduledoc false
   use Surface.LiveComponent
 
   data(editing_tenant, :boolean, default: false)

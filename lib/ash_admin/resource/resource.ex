@@ -83,6 +83,17 @@ defmodule AshAdmin.Resource do
 
   use Ash.Dsl.Extension, sections: [@admin]
 
+  @moduledoc """
+  An Api extension to alter the behavior of a resource in the admin ui.
+
+  Table of Contents:
+  #{Ash.Dsl.Extension.doc_index([@admin])}
+
+  DSL Docs:
+
+  #{Ash.Dsl.Extension.doc([@admin])}
+  """
+
   if Code.ensure_compiled(AshPostgres) do
     def polymorphic?(resource) do
       AshPostgres.polymorphic?(resource)

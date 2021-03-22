@@ -1,4 +1,5 @@
 defmodule AshAdmin.Components.Resource do
+  @moduledoc false
   use Surface.LiveComponent
 
   require Ash.Query

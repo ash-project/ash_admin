@@ -1,4 +1,5 @@
 defmodule AshAdmin.SessionPlug do
+  @moduledoc false
   @behaviour Plug
 
   @cookies_to_replicate [

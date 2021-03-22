@@ -1,4 +1,7 @@
 defmodule AshAdmin.Resource.Field do
+  @moduledoc """
+  The representation of a configured field in the admin ui
+  """
   defstruct [:name, :type, :default]
 
   @schema [

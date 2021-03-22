@@ -1,4 +1,5 @@
 defmodule AshAdmin.Components.Resource.DataTable do
+  @moduledoc false
   use Surface.LiveComponent
 
   import AshAdmin.Helpers

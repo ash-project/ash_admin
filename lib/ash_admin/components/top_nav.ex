@@ -1,4 +1,5 @@
 defmodule AshAdmin.Components.TopNav do
+  @moduledoc false
   use Surface.LiveComponent
   import AshAdmin.Helpers
   alias Surface.Components.LiveRedirect

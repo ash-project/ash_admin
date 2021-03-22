@@ -1,4 +1,5 @@
 defmodule AshAdmin.Components.Resource.AttributeTable do
+  @moduledoc false
   use Surface.Component
 
   prop(resource, :any, required: true)

@@ -1,4 +1,5 @@
 defmodule AshAdmin.Components.Resource.RelationshipTable do
+  @moduledoc false
   use Surface.Component
   import AshAdmin.Helpers
   alias Surface.Components.LiveRedirect

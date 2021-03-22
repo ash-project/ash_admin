@@ -1,4 +1,5 @@
 defmodule Demo.Tickets.Api do
+  @moduledoc false
   use Ash.Api
 
   alias Demo.Tickets.{Comment, Customer, Representative, Ticket}

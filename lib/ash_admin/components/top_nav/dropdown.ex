@@ -1,4 +1,5 @@
 defmodule AshAdmin.Components.TopNav.Dropdown do
+  @moduledoc false
   use Surface.Component
 
   alias Surface.Components.LiveRedirect

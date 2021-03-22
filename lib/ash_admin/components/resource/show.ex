@@ -1,4 +1,5 @@
 defmodule AshAdmin.Components.Resource.Show do
+  @moduledoc false
   use Surface.LiveComponent
 
   alias Surface.Components.LiveRedirect

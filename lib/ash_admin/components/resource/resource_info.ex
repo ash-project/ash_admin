@@ -1,4 +1,5 @@
 defmodule AshAdmin.Components.Resource.Info do
+  @moduledoc false
   use Surface.Component
 
   alias AshAdmin.Components.Resource.{RelationshipTable, AttributeTable}

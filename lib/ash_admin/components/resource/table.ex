@@ -1,4 +1,5 @@
 defmodule AshAdmin.Components.Resource.Table do
+  @moduledoc false
   use Surface.Component
 
   import AshAdmin.Helpers

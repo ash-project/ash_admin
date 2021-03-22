@@ -1,4 +1,5 @@
 defmodule AshAdmin.Components.Resource.Form do
+  @moduledoc false
   use Surface.LiveComponent
 
   import AshAdmin.Helpers

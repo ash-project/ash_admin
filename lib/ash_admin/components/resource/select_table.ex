@@ -1,4 +1,5 @@
 defmodule AshAdmin.Components.Resource.SelectTable do
+  @moduledoc false
   use Surface.Component
 
   alias Surface.Components.Form
