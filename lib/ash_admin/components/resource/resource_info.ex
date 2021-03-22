@@ -3,8 +3,8 @@ defmodule AshAdmin.Components.Resource.Info do
 
   alias AshAdmin.Components.Resource.{RelationshipTable, AttributeTable}
 
-  prop resource, :any, required: true
-  prop api, :any, required: true
+  prop(resource, :any, required: true)
+  prop(api, :any, required: true)
 
   def render(assigns) do
     ~H"""

@@ -94,14 +94,14 @@ defmodule AshAdmin.Helpers do
   def ash_admin_path(socket, api) do
     apply(
       socket.router.__helpers__(),
-      String.to_atom(String.downcase(AshAdmin.Api.name(api) <> "_path")),
+      String.to_existing_atom(String.downcase(AshAdmin.Api.name(api) <> "_path")),
       [socket, :api_page]
     )
   end
 
   def ash_admin_path(socket, api, resource) do
     route =
-      String.to_atom(
+      String.to_existing_atom(
         String.downcase(AshAdmin.Api.name(api) <> AshAdmin.Resource.name(resource) <> "_path")
       )
 
@@ -114,7 +114,7 @@ defmodule AshAdmin.Helpers do
 
   def ash_create_path(socket, api, resource) do
     route =
-      String.to_atom(
+      String.to_existing_atom(
         String.downcase(
           AshAdmin.Api.name(api) <> AshAdmin.Resource.name(resource) <> "create_path"
         )
@@ -129,7 +129,7 @@ defmodule AshAdmin.Helpers do
 
   def ash_create_path(socket, api, resource, action_name, nil) do
     route =
-      String.to_atom(
+      String.to_existing_atom(
         String.downcase(
           AshAdmin.Api.name(api) <>
             AshAdmin.Resource.name(resource) <> "create" <> to_string(action_name) <> "_path"
@@ -145,7 +145,7 @@ defmodule AshAdmin.Helpers do
 
   def ash_create_path(socket, api, resource, action_name, table) do
     route =
-      String.to_atom(
+      String.to_existing_atom(
         String.downcase(
           AshAdmin.Api.name(api) <>
             AshAdmin.Resource.name(resource) <>
@@ -163,7 +163,7 @@ defmodule AshAdmin.Helpers do
 
   def ash_update_path(socket, api, resource, record) do
     route =
-      String.to_atom(
+      String.to_existing_atom(
         String.downcase(
           AshAdmin.Api.name(api) <> AshAdmin.Resource.name(resource) <> "update_path"
         )
@@ -178,7 +178,7 @@ defmodule AshAdmin.Helpers do
 
   def ash_update_path(socket, api, resource, record, action_name, nil) do
     route =
-      String.to_atom(
+      String.to_existing_atom(
         String.downcase(
           AshAdmin.Api.name(api) <>
             AshAdmin.Resource.name(resource) <> "update" <> to_string(action_name) <> "_path"
@@ -194,7 +194,7 @@ defmodule AshAdmin.Helpers do
 
   def ash_update_path(socket, api, resource, record, action_name, table) do
     route =
-      String.to_atom(
+      String.to_existing_atom(
         String.downcase(
           AshAdmin.Api.name(api) <>
             AshAdmin.Resource.name(resource) <>
@@ -211,7 +211,7 @@ defmodule AshAdmin.Helpers do
 
   def ash_destroy_path(socket, api, resource, record) do
     route =
-      String.to_atom(
+      String.to_existing_atom(
         String.downcase(
           AshAdmin.Api.name(api) <> AshAdmin.Resource.name(resource) <> "destroy_path"
         )
@@ -226,7 +226,7 @@ defmodule AshAdmin.Helpers do
 
   def ash_destroy_path(socket, api, resource, record, action_name, nil) do
     route =
-      String.to_atom(
+      String.to_existing_atom(
         String.downcase(
           AshAdmin.Api.name(api) <>
             AshAdmin.Resource.name(resource) <> "destroy" <> to_string(action_name) <> "_path"
@@ -242,7 +242,7 @@ defmodule AshAdmin.Helpers do
 
   def ash_destroy_path(socket, api, resource, record, action_name, table) do
     route =
-      String.to_atom(
+      String.to_existing_atom(
         String.downcase(
           AshAdmin.Api.name(api) <>
             AshAdmin.Resource.name(resource) <>
@@ -259,7 +259,7 @@ defmodule AshAdmin.Helpers do
 
   def ash_action_path(socket, api, resource, action_type, action_name, nil) do
     route =
-      String.to_atom(
+      String.to_existing_atom(
         String.downcase(
           AshAdmin.Api.name(api) <>
             AshAdmin.Resource.name(resource) <> "_#{action_type}" <> "_#{action_name}" <> "_path"
@@ -275,7 +275,7 @@ defmodule AshAdmin.Helpers do
 
   def ash_action_path(socket, api, resource, action_type, action_name, table) do
     route =
-      String.to_atom(
+      String.to_existing_atom(
         String.downcase(
           AshAdmin.Api.name(api) <>
             AshAdmin.Resource.name(resource) <>
@@ -290,9 +290,10 @@ defmodule AshAdmin.Helpers do
     )
   end
 
+  # sobelow_skip ["DOS.StringToAtom"]
   def ash_show_path(socket, api, resource, record, action_name, nil) do
     route =
-      String.to_atom(
+      String.to_existing_atom(
         String.downcase(
           AshAdmin.Api.name(api) <>
             AshAdmin.Resource.name(resource) <> "_show" <> "_#{action_name}" <> "_path"
@@ -308,7 +309,7 @@ defmodule AshAdmin.Helpers do
 
   def ash_show_path(socket, api, resource, record, action_name, table) do
     route =
-      String.to_atom(
+      String.to_existing_atom(
         String.downcase(
           AshAdmin.Api.name(api) <>
             AshAdmin.Resource.name(resource) <> table <> "_show" <> "_#{action_name}" <> "_path"

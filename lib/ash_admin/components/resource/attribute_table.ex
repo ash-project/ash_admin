@@ -1,7 +1,7 @@
 defmodule AshAdmin.Components.Resource.AttributeTable do
   use Surface.Component
 
-  prop resource, :any, required: true
+  prop(resource, :any, required: true)
 
   def render(assigns) do
     ~H"""

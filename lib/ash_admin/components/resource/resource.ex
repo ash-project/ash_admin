@@ -22,7 +22,7 @@ defmodule AshAdmin.Components.Resource do
   prop(tables, :any, default: nil)
 
   data(filter_open, :boolean, default: false)
-  slot default
+  slot(default)
 
   def render(assigns) do
     ~H"""

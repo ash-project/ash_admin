@@ -1,12 +1,32 @@
 defmodule AshAdmin.MixProject do
   use Mix.Project
 
+  @description """
+  An admin UI for Ash Framework
+  """
+
+  @version "0.1.0"
+
   def project do
     [
       app: :ash_admin,
+      version: @version,
+      description: @description,
       version: "0.1.0",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
+      test_coverage: [tool: ExCoveralls],
+      docs: docs(),
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.github": :test
+      ],
+      dialyzer: [
+        plt_add_apps: [:ex_unit]
+      ],
+      package: package(),
+      source_url: "https://github.com/ash-project/ash_admin",
+      homepage_url: "https://github.com/ash-project/ash_admin",
       deps: deps(),
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix] ++ Mix.compilers(),
@@ -22,6 +42,27 @@ defmodule AshAdmin.MixProject do
     ["lib"]
   end
 
+  def package do
+    [
+      name: :ash_admin,
+      licenses: ["MIT"],
+      links: %{
+        GitHub: "https://github.com/ash-project/ash_admin"
+      }
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      source_ref: "v#{@version}",
+      logo: "logos/small-logo.png",
+      extras: [
+        "README.md"
+      ]
+    ]
+  end
+
   defp aliases() do
     [
       generate_migrations:
@@ -31,7 +72,9 @@ defmodule AshAdmin.MixProject do
         "ecto.migrate --migrations-path dev/repo/tenant_migrations"
       ],
       setup: ["deps.get", "cmd npm install --prefix assets"],
-      dev: "run --no-halt dev.exs --config config"
+      dev: "run --no-halt dev.exs --config config",
+      sobelow: "sobelow --ignore XSS.Raw",
+      "ash.formatter": "ash.formatter --extensions AshAdmin.Api,AshAdmin.Resource"
     ]
   end
 
@@ -46,10 +89,8 @@ defmodule AshAdmin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:ash, "~> 1.36 and >= 1.36.12"},
-      {:ash, path: "../ash", override: true},
-      # {:ash_phoenix, "~> 0.4 and >= 0.4.3"},
-      {:ash_phoenix, path: "../ash_phoenix"},
+      {:ash, "~> 1.36 and >= 1.36.17"},
+      {:ash_phoenix, "~> 0.4 and >= 0.4.4"},
       {:surface, "~> 0.3.1"},
       {:phoenix_live_view, "~> 0.15.4"},
       {:phoenix_html, "~> 2.14.1 or ~> 2.15"},
@@ -59,9 +100,15 @@ defmodule AshAdmin.MixProject do
       {:surface_formatter, "~> 0.3.1", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
-      # {:ash_postgres, "~> 0.35.3", only: [:dev, :test]},
-      {:ash_postgres, path: "../ash_postgres", only: [:dev, :test]},
-      {:ash_policy_authorizer, "~> 0.16.0", only: [:dev, :test]}
+      {:ash_postgres, "~> 0.35.4", only: [:dev, :test]},
+      {:ash_policy_authorizer, "~> 0.16.0", only: [:dev, :test]},
+      {:git_ops, "~> 2.0.1", only: [:dev, :test]},
+      {:ex_doc, "~> 0.23", only: [:dev, :test], runtime: false},
+      {:ex_check, "~> 0.12.0", only: [:dev, :test]},
+      {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
+      {:dialyxir, ">= 0.0.0", only: [:dev, :test], runtime: false},
+      {:sobelow, ">= 0.0.0", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.13.0", only: [:dev, :test]}
     ]
   end
 end

@@ -5,15 +5,15 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
 
   import AshAdmin.Helpers
 
-  prop authorizing, :boolean, required: true
-  prop actor_paused, :boolean, required: true
-  prop actor, :any, required: true
-  prop actor_resources, :any, required: true
-  prop toggle_authorizing, :event, required: true
-  prop toggle_actor_paused, :event, required: true
-  prop clear_actor, :event, required: true
-  prop api, :any, required: true
-  prop actor_api, :any, required: true
+  prop(authorizing, :boolean, required: true)
+  prop(actor_paused, :boolean, required: true)
+  prop(actor, :any, required: true)
+  prop(actor_resources, :any, required: true)
+  prop(toggle_authorizing, :event, required: true)
+  prop(toggle_actor_paused, :event, required: true)
+  prop(clear_actor, :event, required: true)
+  prop(api, :any, required: true)
+  prop(actor_api, :any, required: true)
 
   def render(assigns) do
     ~H"""

@@ -4,11 +4,11 @@ defmodule AshAdmin.Components.Resource.Nav do
   alias AshAdmin.Components.TopNav.Dropdown
   import AshAdmin.Helpers
 
-  prop resource, :any, required: true
-  prop api, :any, required: true
-  prop tab, :string, required: true
-  prop action, :any
-  prop table, :any, default: nil
+  prop(resource, :any, required: true)
+  prop(api, :any, required: true)
+  prop(tab, :string, required: true)
+  prop(action, :any)
+  prop(table, :any, default: nil)
 
   def render(assigns) do
     ~H"""

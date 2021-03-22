@@ -1,11 +1,11 @@
 defmodule AshAdmin.Components.TopNav.TenantForm do
   use Surface.LiveComponent
 
-  data editing_tenant, :boolean, default: false
+  data(editing_tenant, :boolean, default: false)
 
-  prop tenant, :string, required: true
-  prop clear_tenant, :event, required: true
-  prop set_tenant, :event, required: true
+  prop(tenant, :string, required: true)
+  prop(clear_tenant, :event, required: true)
+  prop(set_tenant, :event, required: true)
 
   def render(assigns) do
     ~H"""

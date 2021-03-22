@@ -1,46 +1,46 @@
-name: Ash CI
+name: Elixir CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     tags-ignore: ["v*"]
   pull_request:
-    branches: [master]
+    branches: [main]
   create:
+    branches: main
     tags: ["v*"]
-    branches: master
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
+    name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}} / Ash ${{matrix.ash}}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - elixir: 1.11.0
-            otp: 23.0.3
+        otp: ["23"]
+        elixir: ["1.11.0"]
+        ash: ["master", "1.36.12"]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ASH_VERSION: ${{matrix.ash}}
     steps:
       - run: sudo apt-get install --yes erlang-dev
       - uses: actions/checkout@v2
       - uses: actions/setup-elixir@v1.5
         with:
-          experimental-otp: true
           otp-version: ${{matrix.otp}}
           elixir-version: ${{matrix.elixir}}
       - uses: actions/cache@v1
         id: cache-deps
         with:
           path: deps
-          key: otp-${{matrix.otp}}-elixir-${{matrix.elixir}}-deps-2-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
-          restore-keys: otp-${{matrix.otp}}-elixir-${{matrix.elixir}}-deps-2-
+          key: otp-${{matrix.otp}}-elixir-${{matrix.elixir}}-deps-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+          restore-keys: otp-${{matrix.otp}}-elixir-${{matrix.elixir}}-deps-
       - uses: actions/cache@v1
         id: cache-build
         with:
           path: _build
-          key: otp-${{matrix.otp}}-elixir-${{matrix.elixir}}-build-2-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
-          restore-keys: otp-${{matrix.otp}}-elixir-${{matrix.elixir}}-build-2-
+          key: otp-${{matrix.otp}}-elixir-${{matrix.elixir}}-build-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+          restore-keys: otp-${{matrix.otp}}-elixir-${{matrix.elixir}}-build-
       - run: mix deps.get
       - run: mix check --except dialyzer
         if: startsWith(github.ref, 'refs/tags/v')
@@ -61,7 +61,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-elixir@v1.5
         with:
-          experimental-otp: true
           otp-version: ${{matrix.otp}}
           elixir-version: ${{matrix.elixir}}
       - uses: actions/cache@v1
@@ -88,7 +87,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-elixir@v1.5
         with:
-          experimental-otp: true
           otp-version: ${{matrix.otp}}
           elixir-version: ${{matrix.elixir}}
       - uses: actions/cache@v1
@@ -109,72 +107,13 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           status: |
-            Alpha version "${{ steps.tagName.outputs.tag }}" of Ash released!
+            Alpha version "${{ steps.tagName.outputs.tag }}" of AshAdmin released!
 
             #myelixirstatus
 
             See the changelog for more info:
-            https://github.com/ash-project/ash/blob/master/CHANGELOG.md
+            https://github.com/ash-project/ash_phoenix/blob/main/CHANGELOG.md
           consumer-key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
           consumer-secret: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
           access-token: ${{ secrets.TWITTER_ACCESS_TOKEN }}
           access-token-secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
-  test-subprojects:
-    runs-on: ubuntu-latest
-    name: Subproject-${{matrix.project}} - OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
-    strategy:
-      fail-fast: false
-      matrix:
-        project: [
-            # We can't reasonably test ash_postgres without including database configuration here, which is a bit much at the moment
-            # "ash_postgres",
-            "ash_csv",
-            "ash_graphql",
-            "ash_json_api",
-            "ash_policy_authorizer",
-          ]
-        otp: ["23"]
-        elixir: ["1.11.0"]
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      ASH_CI: true
-      ASH_VERSION: local
-    steps:
-      - run: sudo apt-get install --yes erlang-dev
-      - uses: actions/checkout@v2
-        with:
-          repository: ash-project/ash
-          path: ash
-      - uses: actions/checkout@v2
-        with:
-          repository: ash-project/${{matrix.project}}
-          path: ${{matrix.project}}
-          ref: master
-      - uses: actions/setup-elixir@v1.5
-        with:
-          experimental-otp: true
-          otp-version: ${{matrix.otp}}
-          elixir-version: ${{matrix.elixir}}
-      - uses: actions/cache@v1
-        id: cache-deps
-        with:
-          path: ${{matrix.project}}/deps
-          key: ${{matrix.project}}-otp-${{matrix.otp}}-elixir-${{matrix.elixir}}-deps-2-${{ hashFiles(format('{0}{1}', github.workspace, '/ash/mix.lock')) }}
-          restore-keys: ${{matrix.project}}-otp-${{matrix.otp}}-elixir-${{matrix.elixir}}-deps-2-
-      - uses: actions/cache@v1
-        id: cache-build
-        with:
-          path: ${{matrix.project}}/_build
-          key: ${{matrix.project}}-otp-${{matrix.otp}}-elixir-${{matrix.elixir}}-build-2-${{ hashFiles(format('{0}{1}', github.workspace, '/ash/mix.lock')) }}
-          restore-keys: ${{matrix.project}}-otp-${{matrix.otp}}-elixir-${{matrix.elixir}}-build-2-
-      - name: mix deps.get inside ./${{matrix.project}}
-        run: mix deps.get
-        working-directory: ./${{matrix.project}}
-      - name: mix compile --force --warnings-as-errors inside ./${{matrix.project}}
-        run: mix compile --force --warnings-as-errors
-        env:
-          MIX_ENV: test
-        working-directory: ./${{matrix.project}}
-      - name: mix test inside ./${{matrix.project}}
-        run: mix test
-        working-directory: ./${{matrix.project}}

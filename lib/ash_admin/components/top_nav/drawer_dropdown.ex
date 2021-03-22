@@ -3,9 +3,9 @@ defmodule AshAdmin.Components.TopNav.DrawerDropdown do
 
   alias Surface.Components.LiveRedirect
 
-  prop name, :string, required: true
-  prop groups, :list, required: true
-  prop id, :string, required: true
+  prop(name, :string, required: true)
+  prop(groups, :list, required: true)
+  prop(id, :string, required: true)
 
   def render(assigns) do
     ~H"""

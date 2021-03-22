@@ -4,10 +4,10 @@ defmodule AshAdmin.Components.Resource.SelectTable do
   alias Surface.Components.Form
   alias Surface.Components.Form.{FieldContext, Label, Select}
 
-  prop resource, :any, required: true
-  prop on_change, :event, required: true
-  prop table, :any, required: true
-  prop tables, :any, required: true
+  prop(resource, :any, required: true)
+  prop(on_change, :event, required: true)
+  prop(table, :any, required: true)
+  prop(tables, :any, required: true)
 
   def render(assigns) do
     ~H"""

@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+A clear and concise description of what the bug is. If you are not sure if the bug is related to `ash` or an extension, log it with [ash](https://github.com/ash-project/ash/issues/new) and we will move it.
 
 **To Reproduce**
 A minimal set of resource definitions and calls that can reproduce the bug.
