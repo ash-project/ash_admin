@@ -21,13 +21,15 @@ First, ensure you've added ash_admin to your `mix.exs` file.
 defmodule MyAppWeb.Router do
   use Phoenix.Router
 
+  import AshAdmin.Router
+
   # Use your `:browser` pipeline, or use `admin_browser_pipeline` to create one. Only necessary
   # if you don't already have a functioning liveview `:browser` pipeline
-  admin_browser_pipeline :something
+  admin_browser_pipeline :browser
 
   scope "/" do
     # Pipe it through your browser pipeline
-    pipe_through [:something]
+    pipe_through [:browser]
 
     ash_admin "/admin",
       apis: [MyApp.Api1, MyApp.Api2]
