@@ -34,6 +34,8 @@ defmodule AshAdmin.Components.Resource.Form do
   prop(tables, :any, required: true)
   prop(prefix, :any, required: true)
 
+  data(targets, :any, default: [])
+
   def update(assigns, socket) do
     {:ok,
      socket
@@ -96,6 +98,7 @@ defmodule AshAdmin.Components.Resource.Form do
           for={{ :action }}
           change="change_action"
           :if={{ Enum.count(actions(@resource, @type)) > 1 }}
+          opts={{id: @id <> "_action_form"}}
         >
           <FieldContext name="action">
             <Label>Action</Label>
@@ -109,7 +112,7 @@ defmodule AshAdmin.Components.Resource.Form do
           for={{ @changeset }}
           change="validate"
           submit="save"
-          opts={{ autocomplete: false }}
+          opts={{ autocomplete: false, id: @id <> "_form" }}
           :let={{ form: form }}
         >
           <input hidden phx-hook="FormChange" id="resource_form">
@@ -619,6 +622,8 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def handle_event("change_table", %{"table" => %{"table" => table}}, socket) do
+    socket = assign(socket, targets: [])
+
     case socket.assigns.action.type do
       :create ->
         {:noreply,
@@ -676,6 +681,8 @@ defmodule AshAdmin.Components.Resource.Form do
         end
       )
 
+    socket = assign(socket, targets: [])
+
     case action.type do
       :create ->
         {:noreply,
@@ -725,6 +732,11 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def handle_event("unload", %{"relationship" => relationship}, socket) do
+    socket =
+      assign(socket,
+        targets: Enum.filter(socket.assigns.target, &List.starts_with?(&1, [relationship]))
+      )
+
     record = socket.assigns.record
     changeset = socket.assigns.changeset
     relationship = String.to_existing_atom(relationship)
@@ -788,13 +800,15 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def handle_event("save", data, socket) do
+    params = params(data || %{}, socket)
+
     case socket.assigns.action.type do
       :create ->
         changeset =
           socket.assigns.resource
           |> Ash.Changeset.for_create(
             socket.assigns.action.name,
-            data["change"],
+            params,
             actor: socket.assigns[:actor],
             tenant: socket.assigns[:tenant],
             relationships: replace_all_loaded(socket.assigns.resource)
@@ -815,7 +829,7 @@ defmodule AshAdmin.Components.Resource.Form do
         socket.assigns.record
         |> Ash.Changeset.for_update(
           socket.assigns.action.name,
-          data["change"],
+          params,
           actor: socket.assigns[:actor],
           tenant: socket.assigns[:tenant],
           relationships: replace_all_loaded(socket.assigns.resource, socket.assigns.record)
@@ -834,7 +848,7 @@ defmodule AshAdmin.Components.Resource.Form do
         socket.assigns.record
         |> Ash.Changeset.for_destroy(
           socket.assigns.action.name,
-          data["change"],
+          params,
           actor: socket.assigns[:actor],
           tenant: socket.assigns[:tenant],
           relationships: replace_all_loaded(socket.assigns.resource)
@@ -861,13 +875,18 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def handle_event("validate", data, socket) do
+    socket = assign(socket, :targets, (socket.assigns[:targets] || []) ++ [data["_target"]])
+    IO.inspect(data)
+    IO.inspect(socket.assigns.targets)
+    params = params(data || %{}, socket) |> IO.inspect()
+
     case socket.assigns.action.type do
       :create ->
         changeset =
           Ash.Changeset.for_create(
             socket.assigns.resource,
             socket.assigns.action.name,
-            data["change"],
+            params,
             actor: socket.assigns[:actor],
             tenant: socket.assigns[:tenant],
             relationships: replace_all_loaded(socket.assigns.resource)
@@ -880,7 +899,7 @@ defmodule AshAdmin.Components.Resource.Form do
           Ash.Changeset.for_update(
             socket.assigns.record,
             socket.assigns.action.name,
-            data["change"],
+            params,
             actor: socket.assigns[:actor],
             tenant: socket.assigns[:tenant],
             relationships: replace_all_loaded(socket.assigns.resource, socket.assigns.record)
@@ -893,13 +912,55 @@ defmodule AshAdmin.Components.Resource.Form do
           Ash.Changeset.for_destroy(
             socket.assigns.record,
             socket.assigns.action.name,
-            data["change"] || %{},
+            params
             actor: socket.assigns[:actor],
             tenant: socket.assigns[:tenant]
           )
 
         {:noreply, assign(socket, :changeset, changeset)}
     end
+  end
+
+  defp params(params, socket) do
+    targets = socket.assigns[:targets] || []
+
+    take_targets(params, targets)["change"]
+  end
+
+  defp take_targets(params, []), do: params
+
+  defp take_targets(params, targets) when is_map(params) do
+    Enum.reduce(targets, %{}, fn
+      [key | rest], acc ->
+        case Map.fetch(params, key) do
+          {:ok, fetched} ->
+            Map.put(acc, key, take_targets(fetched, [rest]))
+
+          :error ->
+            acc
+        end
+
+      _, acc ->
+        acc
+    end)
+  end
+
+  defp take_targets(params, targets) when is_list(params) do
+    params
+    |> Enum.with_index()
+    |> Enum.map(fn {param, i} ->
+      case Enum.find(targets, &List.starts_with?(&1, i)) do
+        [_ | rest] ->
+          take_targets(param, [rest])
+
+        _ ->
+          param
+      end
+    end)
+  end
+
+  defp take_targets(params, _) do
+    params
   end
 
   def relationships(resource, action, exactly \\ nil)
