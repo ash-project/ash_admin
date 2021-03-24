@@ -876,9 +876,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
   def handle_event("validate", data, socket) do
     socket = assign(socket, :targets, (socket.assigns[:targets] || []) ++ [data["_target"]])
-    IO.inspect(data)
-    IO.inspect(socket.assigns.targets)
-    params = params(data || %{}, socket) |> IO.inspect()
+    params = params(data || %{}, socket)
 
     case socket.assigns.action.type do
       :create ->
@@ -912,7 +910,7 @@ defmodule AshAdmin.Components.Resource.Form do
           Ash.Changeset.for_destroy(
             socket.assigns.record,
             socket.assigns.action.name,
-            params
+            params,
             actor: socket.assigns[:actor],
             tenant: socket.assigns[:tenant]
           )
