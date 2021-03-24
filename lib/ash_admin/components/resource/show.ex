@@ -165,20 +165,21 @@ defmodule AshAdmin.Components.Resource.Show do
          cardinality: :many,
          name: name,
          destination: destination,
-         context: context
+         context: context,
+         destination_field: destination_field
        }) do
     data = Map.get(record, name)
 
     ~H"""
     <div class="mb-10 overflow-scroll">
       <Table
-        table={{ @table }}
         data={{ data }}
         resource={{ destination }}
         api={{ @api }}
         set_actor={{ @set_actor }}
         table={{ context[:data_layer][:table] }}
         prefix={{ @prefix }}
+        skip={{ [destination_field] }}
       />
     </div>
     """
@@ -337,9 +338,7 @@ defmodule AshAdmin.Components.Resource.Show do
               cols="40"
               disabled
               class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-            >
-              {{ value!(Map.get(record, attribute.name)) }}
-            </textarea>
+            >{{ value!(Map.get(record, attribute.name)) }}</textarea>
             """
 
           true ->
@@ -349,15 +348,11 @@ defmodule AshAdmin.Components.Resource.Show do
               cols="20"
               disabled
               class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-            >
-              {{ value!(Map.get(record, attribute.name)) }}
-            </textarea>
+            >{{ value!(Map.get(record, attribute.name)) }}</textarea>
             """
         end
       else
-        ~H"""
-        {{ value!(Map.get(record, attribute.name)) }}
-        """
+        ~H"{{ value!(Map.get(record, attribute.name)) }}"
       end
     end
   end

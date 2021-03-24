@@ -13,19 +13,20 @@ defmodule AshAdmin.Components.Resource.Table do
   prop(set_actor, :event, required: true)
   prop(table, :any, required: true)
   prop(prefix, :any, required: true)
+  prop(skip, :list, default: [])
 
   def render(assigns) do
     ~H"""
     <div>
       <table class="rounded-t-lg m-5 w-5/6 mx-auto text-left">
         <thead class="text-left border-b-2">
-          <th :for={{ attribute <- attributes(@resource, @attributes) }}>
+          <th :for={{ attribute <- attributes(@resource, @attributes, @skip) }}>
             {{ to_name(attribute.name) }}
           </th>
         </thead>
         <tbody>
           <tr :for={{ record <- @data }} class="border-b-2">
-            <td :for={{ attribute <- attributes(@resource, @attributes) }} class="py-3">{{ render_attribute(record, attribute) }}</td>
+            <td :for={{ attribute <- attributes(@resource, @attributes, @skip) }} class="py-3">{{ render_attribute(record, attribute) }}</td>
             <td :if={{ @actions && actions?(@resource) }}>
               <div class="flex h-max justify-items-center">
                 <div :if={{ AshAdmin.Resource.show_action(@resource) }}>
@@ -78,14 +79,17 @@ defmodule AshAdmin.Components.Resource.Table do
     """
   end
 
-  defp attributes(resource, nil) do
-    Ash.Resource.Info.attributes(resource)
+  defp attributes(resource, nil, skip) do
+    resource
+    |> Ash.Resource.Info.attributes()
+    |> Enum.reject(&(&1.name in skip))
   end
 
-  defp attributes(resource, attributes) do
+  defp attributes(resource, attributes, skip) do
     attributes
     |> Enum.map(&Ash.Resource.Info.attribute(resource, &1))
     |> Enum.filter(& &1)
+    |> Enum.reject(&(&1.name in skip))
   end
 
   defp render_attribute(record, attribute) do
