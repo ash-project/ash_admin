@@ -18,6 +18,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   prop(table, :any, required: true)
   prop(tables, :any, required: true)
   prop(prefix, :any, required: true)
+  prop(tenant, :any, required: true)
 
   data(initialized, :boolean, default: false)
   data(data, :any)
@@ -32,10 +33,12 @@ defmodule AshAdmin.Components.Resource.DataTable do
       socket = assign(socket, assigns)
       params = socket.assigns[:params] || %{}
       arguments = params["args"] || %{}
+      IO.inspect(socket.assigns)
 
       query =
         socket.assigns[:resource]
         |> Ash.Query.for_read(socket.assigns.action.name, arguments)
+        |> Ash.Query.set_tenant(socket.assigns[:tenant])
         |> AshPhoenix.hide_errors()
 
       socket = assign(socket, :query, query)
@@ -236,7 +239,10 @@ defmodule AshAdmin.Components.Resource.DataTable do
   end
 
   def handle_event("validate", %{"query" => query}, socket) do
-    query = Ash.Query.for_read(socket.assigns.resource, socket.assigns.action.name, query)
+    query =
+      Ash.Query.for_read(socket.assigns.resource, socket.assigns.action.name, query,
+        tenant: socket.assigns[:tenant]
+      )
 
     {:noreply, assign(socket, query: query)}
   end

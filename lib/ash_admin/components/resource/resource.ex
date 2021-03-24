@@ -121,6 +121,7 @@ defmodule AshAdmin.Components.Resource do
         table={{ @table }}
         tables={{ @tables }}
         prefix={{ @prefix }}
+        tenant={{ @tenant }}
       />
     </div>
     """
