@@ -5,6 +5,17 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.1.5](https://github.com/ash-project/ash_admin/compare/v0.1.4...v0.1.5) (2021-03-24)
+
+
+
+
+### Bug Fixes:
+
+* remove IO.inspect
+
+* properly only provide changing fields to actions
+
 ## [v0.1.4](https://github.com/ash-project/ash_admin/compare/v0.1.3...v0.1.4) (2021-03-24)
 
 
