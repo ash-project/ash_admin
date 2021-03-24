@@ -90,7 +90,7 @@ defmodule AshAdmin.MixProject do
     [
       {:ash, "~> 1.36 and >= 1.36.19"},
       {:ash_phoenix, "~> 0.4 and >= 0.4.5"},
-      {:surface, "~> 0.3.1"},
+      {:surface, "~> 0.3.2"},
       {:phoenix_live_view, "~> 0.15.4"},
       {:phoenix_html, "~> 2.14.1 or ~> 2.15"},
       {:jason, "~> 1.0"},
