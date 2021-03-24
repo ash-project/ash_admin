@@ -921,44 +921,35 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp params(params, socket) do
     targets = socket.assigns[:targets] || []
-
     take_targets(params, targets)["change"]
   end
 
   defp take_targets(params, []), do: params
 
   defp take_targets(params, targets) when is_map(params) do
-    Enum.reduce(targets, %{}, fn
-      [key | rest], acc ->
-        case Map.fetch(params, key) do
-          {:ok, fetched} ->
-            Map.put(acc, key, take_targets(fetched, [rest]))
+    Enum.reduce(params, %{}, fn {key, value}, acc ->
+      case Integer.parse(key) do
+        {_integer, ""} ->
+          Map.put(acc, key, take_targets(value, targets_for(targets, key)))
 
-          :error ->
+        :error ->
+          if targets_for(targets, key) != [] do
+            Map.put(acc, key, take_targets(value, targets_for(targets, key)))
+          else
             acc
-        end
-
-      _, acc ->
-        acc
-    end)
-  end
-
-  defp take_targets(params, targets) when is_list(params) do
-    params
-    |> Enum.with_index()
-    |> Enum.map(fn {param, i} ->
-      case Enum.find(targets, &List.starts_with?(&1, i)) do
-        [_ | rest] ->
-          take_targets(param, [rest])
-
-        _ ->
-          param
+          end
       end
     end)
   end
 
   defp take_targets(params, _) do
     params
+  end
+
+  defp targets_for(targets, key) do
+    targets
+    |> Enum.filter(&List.starts_with?(&1, [key]))
+    |> Enum.map(&Enum.drop(&1, 1))
   end
 
   def relationships(resource, action, exactly \\ nil)

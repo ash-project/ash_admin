@@ -33,7 +33,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
       socket = assign(socket, assigns)
       params = socket.assigns[:params] || %{}
       arguments = params["args"] || %{}
-      IO.inspect(socket.assigns)
 
       query =
         socket.assigns[:resource]
