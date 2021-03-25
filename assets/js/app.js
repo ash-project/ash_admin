@@ -69,7 +69,6 @@ Hooks.Tenant = {
 Hooks.FormChange = {
   mounted() {
     this.handleEvent('form_change', () => {
-      console.log("here!")
       this.el.dispatchEvent(new Event('change', { 'bubbles': true }))
     })
   }

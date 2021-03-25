@@ -12,18 +12,6 @@ defmodule AshAdmin.Resource do
     name: :form,
     entities: [
       @field
-    ],
-    schema: [
-      manage_related: [
-        type: {:list, :atom},
-        doc:
-          "Which relationships to fully manage in this resource's form. Records will be created, deleted, and updated based on the input."
-      ],
-      relationships: [
-        type: {:list, :atom},
-        doc:
-          "The list of relationships to allow editing in forms. If not set, all public relationships are accepted."
-      ]
     ]
   }
 
@@ -107,14 +95,6 @@ defmodule AshAdmin.Resource do
     |> Ash.Dsl.Extension.get_opt([:admin], :polymorphic_tables, [], true)
     |> Enum.concat(find_polymorphic_tables(resource, apis))
     |> Enum.uniq()
-  end
-
-  def manage_related(resource) do
-    Ash.Dsl.Extension.get_opt(resource, [:admin, :form], :manage_related, [], true)
-  end
-
-  def relationships(resource) do
-    Ash.Dsl.Extension.get_opt(resource, [:admin, :form], :relationships, nil, true)
   end
 
   def table_columns(resource) do

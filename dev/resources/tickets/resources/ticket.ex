@@ -13,7 +13,6 @@ defmodule Demo.Tickets.Ticket do
     table_columns [:id, :representative_id, :reporter_id, :subject, :status]
     form do
       field :description, type: :long_text
-      manage_related [:comments]
     end
   end
 

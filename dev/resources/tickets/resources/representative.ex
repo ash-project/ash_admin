@@ -8,12 +8,6 @@ defmodule Demo.Tickets.Representative do
       AshAdmin.Resource
     ]
 
-  admin do
-    form do
-      manage_related [:comments]
-    end
-  end
-
   resource do
     base_filter representative: true
 

@@ -187,7 +187,7 @@ defmodule AshAdmin.Components.Resource.Show do
 
   defp render_attributes(assigns, record, resource) do
     ~H"""
-    {{ {attributes, flags, bottom_attributes} =
+    {{ {attributes, flags, bottom_attributes, _} =
       AshAdmin.Components.Resource.Form.attributes(resource, :show)
 
     nil }}

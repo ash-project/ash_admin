@@ -1,42 +1,6 @@
 defmodule AshAdmin.Helpers do
   @moduledoc false
 
-  def replace_all_loaded(resource, data \\ nil) do
-    managed = AshAdmin.Resource.manage_related(resource) || []
-
-    resource
-    |> Ash.Resource.Info.relationships()
-    |> Enum.filter(fn relationship ->
-      is_nil(data) ||
-        not match?(%Ash.NotLoaded{}, Map.get(data, relationship.name))
-    end)
-    |> Enum.map(fn rel ->
-      if rel.name in managed do
-        {rel.name,
-         {:manage,
-          on_lookup: :relate,
-          on_no_match: :create,
-          on_match: :update,
-          on_missing: :destroy,
-          authorize?: true,
-          meta: [
-            id: rel.name
-          ]}}
-      else
-        {rel.name,
-         {:manage,
-          on_lookup: :relate,
-          on_no_match: :error,
-          on_match: :ignore,
-          on_missing: :unrelate,
-          authorize?: true,
-          meta: [
-            id: rel.name
-          ]}}
-      end
-    end)
-  end
-
   def set_table(changeset_or_query, nil), do: changeset_or_query
 
   def set_table(%Ash.Query{} = query, table) do

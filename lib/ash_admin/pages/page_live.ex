@@ -145,6 +145,7 @@ defmodule AshAdmin.PageLive do
               socket.assigns.resource
               |> Ash.Query.filter(^primary_key)
               |> Ash.Query.load(to_one_relationships(socket.assigns.resource))
+              |> Ash.Query.set_tenant(socket.assigns[:tenant])
               |> socket.assigns.api.read_one(
                 action: Ash.Resource.Info.primary_action!(socket.assigns.resource, :read),
                 actor: actor,

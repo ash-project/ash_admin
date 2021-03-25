@@ -10,6 +10,7 @@ defmodule AshAdmin.Components.Resource.Form do
     Checkbox,
     ErrorTag,
     FieldContext,
+    HiddenInput,
     HiddenInputs,
     Inputs,
     Label,
@@ -20,6 +21,8 @@ defmodule AshAdmin.Components.Resource.Form do
 
   data(changeset, :any)
   data(load_errors, :map, default: %{})
+  data(targets, :any, default: MapSet.new())
+  data(loaded, :any, default: MapSet.new())
 
   prop(resource, :any, required: true)
   prop(api, :any, required: true)
@@ -33,8 +36,6 @@ defmodule AshAdmin.Components.Resource.Form do
   prop(table, :any, required: true)
   prop(tables, :any, required: true)
   prop(prefix, :any, required: true)
-
-  data(targets, :any, default: [])
 
   def update(assigns, socket) do
     {:ok,
@@ -84,7 +85,7 @@ defmodule AshAdmin.Components.Resource.Form do
         </ul>
       </div>
       <h1 class="text-lg mt-2 ml-4">
-        {{ String.capitalize(to_string(@action.type)) }}
+        {{ String.capitalize(to_string(@action.type)) }} {{AshAdmin.Resource.name(@resource)}}
       </h1>
       <div class="flex justify-between col-span-6 mr-4 mt-2 overflow-auto px-4">
         <AshAdmin.Components.Resource.SelectTable
@@ -116,7 +117,7 @@ defmodule AshAdmin.Components.Resource.Form do
           :let={{ form: form }}
         >
           <input hidden phx-hook="FormChange" id="resource_form">
-          <HiddenInputs />
+          <HiddenInputs for={{form}}/>
           {{ render_attributes(assigns, @resource, @action, form) }}
           <div class="px-4 py-3 text-right sm:px-6">
             <button
@@ -154,10 +155,10 @@ defmodule AshAdmin.Components.Resource.Form do
         form,
         exactly \\ nil,
         skip \\ [],
-        relationships? \\ true
+        relationship_path \\ "change"
       ) do
     ~H"""
-    {{ {attributes, flags, bottom_attributes} = attributes(resource, action, exactly)
+    {{ {attributes, flags, bottom_attributes, relationship_args} = attributes(resource, action, exactly)
     nil }}
     <Context put={{ Form, form: form }}>
       <div class="grid grid-cols-6 gap-6">
@@ -218,26 +219,34 @@ defmodule AshAdmin.Components.Resource.Form do
           </FieldContext>
         </div>
       </div>
-      <div :if={{ relationships? }} :for={{ relationship <- relationships(resource, action, exactly) }}>
-        <FieldContext name={{ relationship.name }}>
-          <Label class="block text-sm font-medium text-gray-700">{{ to_name(relationship.name) }}</Label>
-          {{ render_relationship_input(assigns, relationship, form) }}
-          <ErrorTag field={{ relationship.name }} />
+      <div :for={{{relationship, argument, opts} <- relationship_args}}>
+        <FieldContext name={{argument.name}} :if={{relationship not in skip and argument.name not in skip}}>
+          <Label class="block text-sm font-medium text-gray-700">{{ to_name(argument.name)}}</Label>
+          {{ render_relationship_input(assigns, Ash.Resource.Info.relationship(form.source.resource, relationship), form, argument.name, relationship_path <> "[#{relationship}]", opts) }}
+          <ErrorTag field={{ relationship }} />
         </FieldContext>
       </div>
     </Context>
     """
   end
 
-  defp render_relationship_input(assigns, %{cardinality: :one} = relationship, form) do
+  defp render_relationship_input(
+         assigns,
+         %{cardinality: :one} = relationship,
+         form,
+         as,
+         relationship_path,
+         opts
+       ) do
     ~H"""
     <div :if={{ loaded?(form.source, relationship.name) }}>
       <Inputs
         form={{ form }}
         for={{ relationship.name }}
         :let={{ form: inner_form }}
-        opts={{ use_data?: true, type: :query }}
+        opts={{ use_data?: true, as: form.name <> "[#{as}]" }}
       >
+        <HiddenInputs for={{inner_form}} />
         <button
           type="button"
           :on-click="remove_related"
@@ -246,81 +255,59 @@ defmodule AshAdmin.Components.Resource.Form do
         >
           {{ {:safe, Heroicons.Solid.minus(class: "h-4 w-4 text-gray-500")} }}
         </button>
-        <div
-          :if={{ !managed?(relationship, @resource) }}
-          :for={{ %{primary_key?: true} = attribute <- Ash.Resource.Info.attributes(relationship.destination) }}
-        >
-          <Label class="block text-sm font-medium text-gray-700">{{ to_name(relationship.name) }}: {{ to_name(attribute.name) }}
-          </Label>
-          {{ render_attribute_input(
+        <div class="shadow-lg p-4" :for={{{new_form, fields} <- relationship_forms(inner_form, relationship, opts, @actor) }}>
+          {{ render_attributes(
             assigns,
-            %{attribute | default: nil, update_default: nil, allow_nil?: false},
-            inner_form
+            relationship.destination,
+            new_form.source.action,
+            new_form,
+            fields,
+            [],
+            relationship_path
           ) }}
-        </div>
-
-        <div :if={{ managed?(relationship, @resource) }}>
-          <div class="shadow-lg p-4">
-            {{ render_attributes(
-              assigns,
-              relationship.destination,
-              inner_form.source.action,
-              inner_form,
-              nil,
-              [relationship.destination_field],
-              false
-            ) }}
-          </div>
         </div>
       </Inputs>
       <button
         type="button"
         :on-click="append_related"
-        :if={{ !relationship_set?(form.source, relationship.name, relationship.name) }}
-        phx-value-path={{ form.name <> "[#{relationship.name}]" }}
+        :if={{ could_lookup?(opts) && !relationship_set?(form.source, relationship.name, relationship.name) }}
+        phx-value-path={{ form.name <> "[#{as}]" }}
+        phx-value-type={{ "lookup" }}
+        class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+      >
+        {{ {:safe, Heroicons.Solid.search_circle(class: "h-4 w-4 text-gray-500")} }}
+      </button>
+      <button
+        type="button"
+        :on-click="append_related"
+        :if={{ could_create?(opts) && !relationship_set?(form.source, relationship.name, relationship.name) }}
+        phx-value-path={{ form.name <> "[#{as}]" }}
+        phx-value-type={{ "create" }}
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
         {{ {:safe, Heroicons.Solid.plus(class: "h-4 w-4 text-gray-500")} }}
       </button>
     </div>
-    <div :if={{ loaded?(form.source, relationship.name) }}>
-      <button
-        :on-click="unload"
-        phx-value-relationship={{ relationship.name }}
-        type="button"
-        class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
-      >
-        Unload
-      </button>
-    </div>
-    <div :if={{ !loaded?(form.source, relationship.name) }}>
-      <button
-        :on-click="load"
-        phx-value-relationship={{ relationship.name }}
-        type="button"
-        class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
-      >
-        Load
-      </button>
-      <div :if={{ is_exception(@load_errors[relationship.name]) }}>
-        {{ Exception.message(@load_errors[relationship.name]) }}
-      </div>
-      <div :if={{ @load_errors[relationship.name] && !is_exception(@load_errors[relationship.name]) }}>
-        {{ inspect(@load_errors[relationship.name]) }}
-      </div>
-    </div>
     """
   end
 
-  defp render_relationship_input(assigns, %{cardinality: :many} = relationship, form) do
+  defp render_relationship_input(
+         assigns,
+         %{cardinality: :many} = relationship,
+         form,
+         as,
+         relationship_path,
+         opts
+       ) do
     ~H"""
-    <div :if={{ loaded?(form.source, relationship.name) }}>
+    <div :if={{ !needs_to_load?(opts) || loaded?(form.source, relationship.name) }}>
       <Inputs
         form={{ form }}
         for={{ relationship.name }}
         :let={{ form: inner_form }}
-        opts={{ use_data?: true, type: :query }}
+        opts={{ use_data?: true, as: form.name <> "[#{as}]" }}
       >
+        <HiddenInputs for={{inner_form}} />
         <button
           type="button"
           :on-click="remove_related"
@@ -330,54 +317,45 @@ defmodule AshAdmin.Components.Resource.Form do
         >
           {{ {:safe, Heroicons.Solid.minus(class: "h-4 w-4 text-gray-500")} }}
         </button>
-        <div
-          :if={{ !managed?(relationship, @resource) }}
-          :for={{ %{primary_key?: true} = attribute <- Ash.Resource.Info.attributes(relationship.destination) }}
-        >
-          <Label class="block text-sm font-medium text-gray-700">{{ to_name(relationship.name) }}: {{ to_name(attribute.name) }}
-          </Label>
-          {{ render_attribute_input(
-            assigns,
-            %{attribute | default: nil, update_default: nil, allow_nil?: false},
-            inner_form
-          ) }}
-        </div>
-
-        <div :if={{ managed?(relationship, @resource) }} class="shadow-md m-4">
+        <div class="shadow-lg p-4" :for={{{new_form, fields} <- relationship_forms(inner_form, relationship, opts, @actor) }}>
+          <HiddenInput form={{inner_form}} :if={{inner_form.source.params["_lookup"] == "true"}} field="_lookup" value="true"/>
           {{ render_attributes(
             assigns,
             relationship.destination,
-            inner_form.source.action,
-            inner_form,
-            nil,
-            [relationship.destination_field],
-            false
+            new_form.source.action,
+            new_form,
+            fields,
+            [],
+            relationship_path
           ) }}
         </div>
       </Inputs>
       <button
         type="button"
         :on-click="append_related"
-        phx-value-path={{ form.name <> "[#{relationship.name}]" }}
+        :if={{ could_lookup?(opts) }}
+        phx-value-path={{ form.name <> "[#{as}]" }}
+        phx-value-type={{ "lookup" }}
+        class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+      >
+        {{ {:safe, Heroicons.Solid.search_circle(class: "h-4 w-4 text-gray-500")} }}
+      </button>
+      <button
+        type="button"
+        :on-click="append_related"
+        :if={{ could_create?(opts) }}
+        phx-value-path={{ form.name <> "[#{as}]" }}
+        phx-value-type={{ "create" }}
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
         {{ {:safe, Heroicons.Solid.plus(class: "h-4 w-4 text-gray-500")} }}
       </button>
     </div>
-    <div :if={{ loaded?(form.source, relationship.name) }}>
-      <button
-        :on-click="unload"
-        phx-value-relationship={{ relationship.name }}
-        type="button"
-        class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
-      >
-        Unload
-      </button>
-    </div>
-    <div :if={{ !loaded?(form.source, relationship.name) }}>
+    <div :if={{ needs_to_load?(opts) && !loaded?(form.source, relationship.name) }}>
       <button
         :on-click="load"
-        phx-value-relationship={{ relationship.name }}
+        phx-value-relationship={{ relationship_path }}
+        phx-value-path={{form.name <> "[#{as}]"}}
         type="button"
         class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
@@ -393,8 +371,145 @@ defmodule AshAdmin.Components.Resource.Form do
     """
   end
 
-  defp managed?(relationship, resource) do
-    relationship.name in AshAdmin.Resource.manage_related(resource)
+  defp relationship_forms(form, relationship, opts, actor) do
+    forms =
+      cond do
+        form.source.params["_lookup"] == "true" ->
+          relationship_forms_for_lookup(form, relationship, opts, actor)
+
+        form.source.action_type == :update ->
+          relationship_forms_for_update(form, relationship, opts, actor)
+
+        form.source.action_type == :create ->
+          relationship_forms_for_create(form, relationship, opts, actor)
+      end
+
+    List.wrap(forms)
+  end
+
+  defp relationship_forms_for_lookup(form, relationship, opts, actor) do
+    case opts[:on_lookup] do
+      {key, create, read, fields} when relationship.type == :many_to_many ->
+        query =
+          relationship.destination
+          |> Ash.Query.for_read(read, form.source.params, actor: actor)
+          |> Phoenix.HTML.FormData.to_form(as: form.name)
+
+        changeset =
+          relationship.through
+          |> Ash.Changeset.for_create(create, form.source.params, actor: actor)
+          |> Phoenix.HTML.FormData.to_form(as: form.name)
+
+        [{query, Ash.Resource.Info.primary_key(relationship.destination)}, {changeset, fields}] ++
+          lookup_update(key, form, relationship, opts, actor)
+
+      {key, _update, read} ->
+        query =
+          relationship.destination
+          |> Ash.Query.for_read(read, form.source.params, actor: actor)
+          |> Phoenix.HTML.FormData.to_form(as: form.name)
+
+        [{query, Ash.Resource.Info.primary_key(relationship.destination)}] ++
+          lookup_update(key, form, relationship, opts, actor)
+
+      {key, create, read, fields} ->
+        query =
+          relationship.destination
+          |> Ash.Query.for_read(read, form.source.params, actor: actor)
+          |> Phoenix.HTML.FormData.to_form(as: form.name)
+
+        changeset =
+          relationship.through
+          |> Ash.Changeset.for_create(create, form.source.params, actor: actor)
+          |> Phoenix.HTML.FormData.to_form(as: form.name)
+
+        [{query, Ash.Resource.Info.primary_key(relationship.destination)}, {changeset, fields}] ++
+          lookup_update(key, form, relationship, opts, actor)
+    end
+  end
+
+  defp lookup_update(:relate_and_update, form, relationship, opts, actor) do
+    relationship_forms_for_update(form, relationship, opts, actor)
+  end
+
+  defp lookup_update(_, _, _, _, _), do: []
+
+  defp relationship_forms_for_create(form, relationship, opts, actor) do
+    case opts[:on_no_match] do
+      {:create, action_name, join_action_name, fields} ->
+        join_form =
+          relationship.through
+          |> Ash.Changeset.for_create(join_action_name, form.source.params, actor: actor)
+          |> Phoenix.HTML.FormData.to_form(as: form.name)
+
+        destination_form =
+          relationship.destination
+          |> Ash.Changeset.for_create(action_name, form.source.params, actor: actor)
+          |> Phoenix.HTML.FormData.to_form(as: form.name)
+
+        [{destination_form, nil}, {join_form, fields}]
+
+      {:create, action_name} ->
+        destination_form =
+          relationship.destination
+          |> Ash.Changeset.for_create(action_name, form.source.params, actor: actor)
+          |> Phoenix.HTML.FormData.to_form(as: form.name)
+
+        [{destination_form, nil}]
+
+      :error ->
+        []
+    end
+  end
+
+  defp relationship_forms_for_update(form, relationship, opts, actor) do
+    case opts[:on_match] do
+      {:update, update, join_update, fields} ->
+        join_form =
+          form.source.data
+          |> Ash.Changeset.for_update(update, form.source.params, actor: actor)
+          |> Phoenix.HTML.FormData.to_form(as: form.name)
+
+        destination_form =
+          relationship.through.__struct__
+          |> Ash.Changeset.for_update(join_update, form.source.params, actor: actor)
+          |> Phoenix.HTML.FormData.to_form(as: form.name)
+
+        [{destination_form, nil}, {join_form, fields}]
+
+      {:update, action_name} ->
+        destination_form =
+          form.source.data
+          |> Ash.Changeset.for_update(action_name, form.source.params, actor: actor)
+          |> Phoenix.HTML.FormData.to_form(as: form.name)
+
+        [{destination_form, nil}]
+
+      {:unrelate, _action} ->
+        changeset =
+          form.source.data
+          |> Ash.Changeset.new()
+          |> Map.put(:params, form.source.params)
+          |> Phoenix.HTML.FormData.to_form(as: form.name)
+
+        {changeset, Ash.Resource.Info.primary_key(relationship.destination)}
+
+      value when value in [:ignore, :error] ->
+        changeset =
+          form.source.data
+          |> Ash.Changeset.new()
+          |> Map.put(:params, form.source.params)
+          |> Phoenix.HTML.FormData.to_form(as: form.name)
+
+        {changeset, Ash.Resource.Info.primary_key(relationship.destination)}
+
+      _ ->
+        relationship_forms_for_create(form, relationship, opts, actor)
+    end
+  end
+
+  defp needs_to_load?(opts) do
+    Ash.Changeset.ManagedRelationshipHelpers.must_load?(opts)
   end
 
   defp loaded?(%{action_type: :create}, _), do: true
@@ -408,6 +523,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp relationship_set?(%{action_type: :create} = changeset, relationship, id) do
     changeset.relationships
+    |> Kernel.||(%{})
     |> Map.get(relationship, [])
     |> Enum.any?(fn {manage, opts} ->
       if opts[:meta][:id] == id do
@@ -418,6 +534,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp relationship_set?(changeset, relationship, id) do
     changeset.relationships
+    |> Kernel.||(%{})
     |> Map.get(relationship, [])
     |> Enum.any?(fn {manage, opts} ->
       if opts[:meta][:id] == id do
@@ -425,6 +542,14 @@ defmodule AshAdmin.Components.Resource.Form do
       end
     end)
     |> Kernel.||(Map.get(changeset.data, relationship) not in [nil, []])
+  end
+
+  defp could_lookup?(opts) do
+    Ash.Changeset.ManagedRelationshipHelpers.could_lookup?(opts)
+  end
+
+  defp could_create?(opts) do
+    opts[:on_no_match] not in [:ignore, :error]
   end
 
   defp short_text?(resource, attribute) do
@@ -539,6 +664,7 @@ defmodule AshAdmin.Components.Resource.Form do
     if Ash.Type.embedded_type?(attribute.type) do
       ~H"""
       <Inputs form={{ form }} for={{ attribute.name }} :let={{ form: inner_form }}>
+        <HiddenInputs for={{inner_form}} />
         <button
           type="button"
           :on-click="remove_embed"
@@ -622,8 +748,6 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def handle_event("change_table", %{"table" => %{"table" => table}}, socket) do
-    socket = assign(socket, targets: [])
-
     case socket.assigns.action.type do
       :create ->
         {:noreply,
@@ -681,7 +805,7 @@ defmodule AshAdmin.Components.Resource.Form do
         end
       )
 
-    socket = assign(socket, targets: [])
+    socket = assign(socket, targets: MapSet.new())
 
     case action.type do
       :create ->
@@ -731,53 +855,77 @@ defmodule AshAdmin.Components.Resource.Form do
     {:noreply, socket}
   end
 
-  def handle_event("unload", %{"relationship" => relationship}, socket) do
-    socket =
-      assign(socket,
-        targets: Enum.filter(socket.assigns.target, &List.starts_with?(&1, [relationship]))
-      )
-
+  def handle_event("load", %{"relationship" => relationship, "path" => path}, socket) do
     record = socket.assigns.record
     changeset = socket.assigns.changeset
-    relationship = String.to_existing_atom(relationship)
+    ["change" | load_path] = AshPhoenix.decode_path(relationship)
+    path = AshPhoenix.decode_path(path)
 
-    unloaded = Map.put(record, relationship, Map.get(record.__struct__.__struct__, relationship))
+    case load(record, load_path, socket) do
+      {:ok, record, loaded} ->
+        socket =
+          cond do
+            is_nil(record) || record == [] ->
+              socket
 
-    socket = push_event(socket, "form_change", %{})
+            is_list(record) ->
+              resource = Enum.at(record, 0).__struct__
 
-    {:noreply, assign(socket, changeset: %{changeset | data: unloaded}, record: unloaded)}
-  end
+              resource
+              |> Ash.Resource.Info.primary_key()
+              |> Enum.map(&to_string/1)
+              |> Enum.reduce(socket, fn key, socket ->
+                add_target(socket, path ++ ["~", key])
+              end)
 
-  def handle_event("load", %{"relationship" => relationship}, socket) do
-    record = socket.assigns.record
-    changeset = socket.assigns.changeset
-    api = socket.assigns.api
-    relationship = String.to_existing_atom(relationship)
+            true ->
+              resource = record.__struct__
 
-    case api.load(
-           record,
-           relationship,
-           actor: socket.assigns[:actor],
-           authorize?: socket.assigns[:authorizing]
-         ) do
-      {:ok, loaded} ->
+              resource
+              |> Ash.Resource.Info.primary_key()
+              |> Enum.map(&to_string/1)
+              |> Enum.reduce(socket, fn key, socket ->
+                socket
+                |> add_target(path ++ ["~", key])
+                |> add_target(path ++ [key])
+              end)
+          end
+
         socket = push_event(socket, "form_change", %{})
         {:noreply, assign(socket, changeset: %{changeset | data: loaded}, record: loaded)}
 
-      {:error, errors} ->
+      {:error, _, errors} ->
         {:noreply,
          assign(socket, load_errors: Map.put(socket.assigns.load_errors, relationship, errors))}
     end
   end
 
-  def handle_event("append_related", %{"path" => path}, socket) do
+  def handle_event("append_related", %{"path" => path, "type" => type}, socket) do
+    decoded_path = AshPhoenix.decode_path(path)
+
+    socket =
+      socket
+      |> add_target(decoded_path)
+      |> add_target(decoded_path ++ ["~", "_lookup"])
+
+    # |> add_target(decoded_path ++ ["*"])
+
+    initial =
+      if type == "lookup" do
+        %{"_lookup" => "true"}
+      else
+        %{}
+      end
+
     {:noreply,
-     assign(socket,
-       changeset: AshPhoenix.add_related(socket.assigns.changeset, path, "change")
+     socket
+     |> assign(
+       changeset: AshPhoenix.add_related(socket.assigns.changeset, path, "change", add: initial)
      )}
   end
 
   def handle_event("remove_related", %{"path" => path}, socket) do
+    socket = add_target(socket, AshPhoenix.decode_path(path))
     {record, changeset} = AshPhoenix.remove_related(socket.assigns.changeset, path, "change")
 
     {:noreply,
@@ -810,8 +958,7 @@ defmodule AshAdmin.Components.Resource.Form do
             socket.assigns.action.name,
             params,
             actor: socket.assigns[:actor],
-            tenant: socket.assigns[:tenant],
-            relationships: replace_all_loaded(socket.assigns.resource)
+            tenant: socket.assigns[:tenant]
           )
 
         changeset
@@ -831,8 +978,7 @@ defmodule AshAdmin.Components.Resource.Form do
           socket.assigns.action.name,
           params,
           actor: socket.assigns[:actor],
-          tenant: socket.assigns[:tenant],
-          relationships: replace_all_loaded(socket.assigns.resource, socket.assigns.record)
+          tenant: socket.assigns[:tenant]
         )
         |> set_table(socket.assigns.table)
         |> socket.assigns.api.update()
@@ -850,8 +996,7 @@ defmodule AshAdmin.Components.Resource.Form do
           socket.assigns.action.name,
           params,
           actor: socket.assigns[:actor],
-          tenant: socket.assigns[:tenant],
-          relationships: replace_all_loaded(socket.assigns.resource)
+          tenant: socket.assigns[:tenant]
         )
         |> set_table(socket.assigns.table)
         |> socket.assigns.api.destroy()
@@ -875,7 +1020,7 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def handle_event("validate", data, socket) do
-    socket = assign(socket, :targets, (socket.assigns[:targets] || []) ++ [data["_target"]])
+    socket = add_target(socket, data["_target"])
     params = params(data || %{}, socket)
 
     case socket.assigns.action.type do
@@ -886,8 +1031,7 @@ defmodule AshAdmin.Components.Resource.Form do
             socket.assigns.action.name,
             params,
             actor: socket.assigns[:actor],
-            tenant: socket.assigns[:tenant],
-            relationships: replace_all_loaded(socket.assigns.resource)
+            tenant: socket.assigns[:tenant]
           )
 
         {:noreply, assign(socket, :changeset, changeset)}
@@ -899,8 +1043,7 @@ defmodule AshAdmin.Components.Resource.Form do
             socket.assigns.action.name,
             params,
             actor: socket.assigns[:actor],
-            tenant: socket.assigns[:tenant],
-            relationships: replace_all_loaded(socket.assigns.resource, socket.assigns.record)
+            tenant: socket.assigns[:tenant]
           )
 
         {:noreply, assign(socket, :changeset, changeset)}
@@ -919,18 +1062,81 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
+  defp add_target(socket, target) do
+    old_targets = socket.assigns[:targets] || MapSet.new()
+    assign(socket, :targets, MapSet.put(old_targets, Enum.map(target, &to_string/1)))
+  end
+
   defp params(params, socket) do
-    targets = socket.assigns[:targets] || []
+    targets = socket.assigns[:targets] || MapSet.new()
+
     take_targets(params, targets)["change"]
   end
+
+  defp load(record_or_records, [path], socket) when is_binary(path) do
+    path = String.to_existing_atom(path)
+
+    case socket.assigns.api.load(record_or_records, [path], actor: socket.assigns.actor) do
+      {:ok, loaded} ->
+        {:ok, Map.get(loaded, path), loaded}
+
+      {:error, error} ->
+        {:error, [path], error}
+    end
+  end
+
+  defp load(records, [item | rest], socket) when is_list(records) and is_integer(item) do
+    record = Enum.at(records, item)
+
+    if record do
+      case load(record, rest, socket) do
+        {:ok, records, loaded} ->
+          {:ok, records, List.replace_at(records, item, loaded)}
+
+        {:error, path, error} ->
+          {:error, [item | path], error}
+      end
+    else
+      {:ok, nil, records}
+    end
+  end
+
+  defp load(record, [item | rest], socket) when is_binary(item) and is_map(record) do
+    key = String.to_existing_atom(item)
+
+    case Map.get(record, key) do
+      {:ok, value} ->
+        case load(value, rest, socket) do
+          {:ok, records, loaded} ->
+            {:ok, records, Map.put(record, key, loaded)}
+
+          {:error, path, error} ->
+            {:error, [item | path], error}
+        end
+
+      :error ->
+        {:ok, nil, record}
+    end
+  end
+
+  defp load(value, _, _), do: {:ok, nil, value}
 
   defp take_targets(params, []), do: params
 
   defp take_targets(params, targets) when is_map(params) do
+    # if Enum.any?(targets, &List.starts_with?(&1, ["*"])) do
+    #   params
+    # else
     Enum.reduce(params, %{}, fn {key, value}, acc ->
       case Integer.parse(key) do
-        {_integer, ""} ->
-          Map.put(acc, key, take_targets(value, targets_for(targets, key)))
+        {integer, ""} ->
+          case targets_for(targets, integer) do
+            [] ->
+              Map.put(acc, key, value)
+
+            targets ->
+              Map.put(acc, key, take_targets(value, targets))
+          end
 
         :error ->
           if targets_for(targets, key) != [] do
@@ -940,10 +1146,24 @@ defmodule AshAdmin.Components.Resource.Form do
           end
       end
     end)
+
+    # end
   end
 
   defp take_targets(params, _) do
     params
+  end
+
+  defp targets_for(targets, key) when is_integer(key) do
+    targets
+    |> Enum.filter(fn
+      [first | _] ->
+        first == "~" || to_string(key) == first
+
+      _ ->
+        false
+    end)
+    |> Enum.map(&Enum.drop(&1, 1))
   end
 
   defp targets_for(targets, key) do
@@ -965,7 +1185,6 @@ defmodule AshAdmin.Components.Resource.Form do
   def relationships(resource, :show, _) do
     resource
     |> Ash.Resource.Info.relationships()
-    |> only_configured(resource)
   end
 
   def relationships(_resource, %{type: :destroy}, _) do
@@ -978,18 +1197,7 @@ defmodule AshAdmin.Components.Resource.Form do
     |> Enum.filter(& &1.writable?)
     |> Enum.reject(& &1.private?)
     |> only_accepted(action)
-    |> only_configured(resource)
     |> sort_relationships()
-  end
-
-  defp only_configured(relationships, resource) do
-    configured = AshAdmin.Resource.relationships(resource)
-
-    if configured do
-      Enum.filter(relationships, &(&1.name in configured))
-    else
-      relationships
-    end
   end
 
   defp sort_relationships(relationships) do
@@ -1001,6 +1209,18 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def attributes(resource, action, exactly \\ nil)
+
+  def attributes(resource, %{type: :read, arguments: arguments}, exactly)
+      when not is_nil(exactly) do
+    resource
+    |> Ash.Resource.Info.attributes()
+    |> Enum.map(fn attribute ->
+      %{attribute | default: nil}
+    end)
+    |> Enum.concat(arguments)
+    |> Enum.filter(&(&1.name in exactly))
+    |> sort_attributes(resource)
+  end
 
   def attributes(resource, %{type: :read, arguments: arguments}, _) do
     sort_attributes(arguments, resource)
@@ -1023,7 +1243,7 @@ defmodule AshAdmin.Components.Resource.Form do
   def attributes(resource, %{type: :destroy} = action, _) do
     action.arguments
     |> Enum.reject(& &1.private?)
-    |> sort_attributes(resource)
+    |> sort_attributes(resource, action)
   end
 
   def attributes(resource, action, _) do
@@ -1041,12 +1261,57 @@ defmodule AshAdmin.Components.Resource.Form do
 
     attributes
     |> Enum.concat(arguments)
-    |> sort_attributes(resource)
+    |> sort_attributes(resource, action)
   end
 
-  defp sort_attributes(attributes, resource) do
+  defp sort_attributes(attributes, resource, action \\ nil) do
+    {relationship_args, rest} =
+      attributes
+      |> Enum.map(fn
+        %Ash.Resource.Actions.Argument{} = argument ->
+          if action do
+            case manages_relationship(argument, action) do
+              nil ->
+                argument
+
+              {relationship, opts} ->
+                opts = opts || []
+                relationship = Ash.Resource.Info.relationship(resource, relationship)
+
+                manage_opts =
+                  if opts[:type] do
+                    defaults = Ash.Changeset.manage_relationship_opts(opts[:type])
+
+                    Enum.reduce(defaults, Ash.Changeset.manage_relationship_schema(), fn {key,
+                                                                                          value},
+                                                                                         manage_opts ->
+                      Ash.OptionsHelpers.set_default!(manage_opts, key, value)
+                    end)
+                  else
+                    Ash.Changeset.manage_relationship_schema()
+                  end
+
+                manage_opts = Ash.OptionsHelpers.validate!(opts, manage_opts)
+
+                opts =
+                  Ash.Changeset.ManagedRelationshipHelpers.sanitize_opts(
+                    relationship,
+                    manage_opts
+                  )
+
+                {relationship.name, argument, opts}
+            end
+          else
+            argument
+          end
+
+        attribute ->
+          attribute
+      end)
+      |> Enum.split_with(&is_tuple/1)
+
     {flags, rest} =
-      Enum.split_with(attributes, fn attribute ->
+      Enum.split_with(rest, fn attribute ->
         attribute.type == Ash.Type.Boolean
       end)
 
@@ -1080,14 +1345,33 @@ defmodule AshAdmin.Components.Resource.Form do
         end
       )
 
-    {auto_sorted, flags, sorted_defaults}
+    {auto_sorted, flags, sorted_defaults, relationship_args}
+  end
+
+  defp manages_relationship(argument, action) do
+    if action.changes do
+      Enum.find_value(action.changes, fn
+        %{change: {Ash.Resource.Change.ManageRelationship, opts}} ->
+          if opts[:argument] == argument.name do
+            {opts[:relationship], opts[:opts]}
+          end
+
+        _ ->
+          false
+      end)
+    end
   end
 
   defp only_accepted(attributes, %{type: :read}), do: attributes
-  defp only_accepted(attributes, %{accept: nil}), do: attributes
 
-  defp only_accepted(attributes, %{accept: accept}) do
-    Enum.filter(attributes, &(&1.name in accept))
+  defp only_accepted(attributes, %{accept: nil, reject: reject}) do
+    Enum.filter(attributes, &(&1.name not in reject || []))
+  end
+
+  defp only_accepted(attributes, %{accept: accept, reject: reject}) do
+    attributes
+    |> Enum.filter(&(&1.name in accept))
+    |> Enum.filter(&(&1.name not in reject || []))
   end
 
   defp actions(resource, type) do
