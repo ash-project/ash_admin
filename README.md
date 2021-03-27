@@ -7,6 +7,10 @@
 
 An admin UI for Ash resources. Built with Phoenix LiveView.
 
+## Demo
+
+https://www.youtube.com/watch?v=aFMLz3cpQ8c
+
 ## Usage
 
 First, ensure you've added ash_admin to your `mix.exs` file.
