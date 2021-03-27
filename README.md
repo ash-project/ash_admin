@@ -2,7 +2,7 @@
 
 ![Elixir CI](https://github.com/ash-project/ash_admin/workflows/Elixir%20CI/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Coverage Status](https://coveralls.io/repos/github/ash-project/ash_admin/badge.svg?branch=master)](https://coveralls.io/github/ash-project/ash_admin?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/ash-project/ash_admin/badge.svg?branch=main)](https://coveralls.io/github/ash-project/ash_admin?branch=main)
 [![Hex version badge](https://img.shields.io/hexpm/v/ash_admin.svg)](https://hex.pm/packages/ash_admin)
 
 An admin UI for Ash resources. Built with Phoenix LiveView.
