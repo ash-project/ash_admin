@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.1](https://github.com/ash-project/ash_admin/compare/v0.2.0...v0.2.1) (2021-03-28)
+
+
+
+
+### Bug Fixes:
+
+* update ash_admin dependency
+
 ## [v0.2.0](https://github.com/ash-project/ash_admin/compare/v0.1.6...v0.2.0) (2021-03-28)
 
 
