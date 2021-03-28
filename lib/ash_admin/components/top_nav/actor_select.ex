@@ -19,9 +19,9 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
 
   def render(assigns) do
     ~H"""
-    <div id="actor-hook" class="relative mr-5 text-white" phx-hook="Actor">
-      <div :if={{ @actor }}>
-        <span :if={{ @actor }}>
+    <div id="actor-hook" class="flex items-center mr-5 text-white" phx-hook="Actor">
+      <div>
+        <span>
           <button :on-click={{ @toggle_authorizing }} type="button">
             <svg
               :if={{ @authorizing }}
@@ -50,7 +50,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
               />
             </svg>
           </button>
-          <button :on-click={{ @toggle_actor_paused }} type="button">
+          <button :if={{@actor}} :on-click={{ @toggle_actor_paused }} type="button">
             <svg
               :if={{ @actor_paused }}
               width="1em"
@@ -73,6 +73,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
             </svg>
           </button>
           <LiveRedirect
+            :if={{@actor}}
             class="hover:text-blue-400 hover:underline"
             to={{ash_show_path(
               @prefix,
@@ -84,7 +85,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
           >
             {{ user_display(@actor) }}
           </LiveRedirect>
-          <button :on-click={{ @clear_actor }} type="button">
+          <button :if={{@actor}} :on-click={{ @clear_actor }} type="button">
             <svg width="1em" height="1em" viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg">
               <path
                 fill-rule="evenodd"

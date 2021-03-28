@@ -15,6 +15,7 @@ defmodule Demo.Accounts.User do
       field :first_name, type: :short_text
       field :last_name, type: :short_text
     end
+    table_columns [:id, :first_name, :last_name, :representative, :admin]
   end
 
   policies do

@@ -45,7 +45,7 @@ defmodule Demo.Tickets.Representative do
 
     update :update do
       primary? true
-      accept [:first_name, :last_name, :assigned_tickets]
+      accept [:first_name, :last_name]
     end
   end
 

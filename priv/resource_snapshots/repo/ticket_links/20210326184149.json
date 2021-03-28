@@ -1,0 +1,57 @@
+{
+  "attributes": [
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "name": "destination_id",
+      "primary_key?": true,
+      "references": {
+        "destination_field": "id",
+        "multitenancy": {
+          "attribute": null,
+          "global": null,
+          "strategy": null
+        },
+        "table": "tickets"
+      },
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "name": "source_id",
+      "primary_key?": true,
+      "references": {
+        "destination_field": "id",
+        "multitenancy": {
+          "attribute": null,
+          "global": null,
+          "strategy": null
+        },
+        "table": "tickets"
+      },
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "name": "type",
+      "primary_key?": false,
+      "references": null,
+      "type": "text"
+    }
+  ],
+  "base_filter": null,
+  "hash": "DF68E19931FD501968359AD5E18F6366F494A39E658968C708E2522B3BC9C81C",
+  "identities": [],
+  "multitenancy": {
+    "attribute": null,
+    "global": null,
+    "strategy": null
+  },
+  "repo": "Elixir.Demo.Repo",
+  "table": "ticket_links"
+}

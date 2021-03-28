@@ -74,6 +74,8 @@ defmodule AshAdmin.Router do
             path
           end
 
+        prefix = String.trim_trailing(prefix, "/")
+
         apis = opts[:apis]
         Enum.each(apis, &Code.ensure_compiled/1)
         api = List.first(opts[:apis])

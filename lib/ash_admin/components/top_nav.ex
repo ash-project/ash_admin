@@ -50,7 +50,7 @@ defmodule AshAdmin.Components.TopNav do
                 </div>
                 <div class="ml-10 flex items-center">
                   <ActorSelect
-                    :if={{ show_actor_select?(@actor_resources) }}
+                    :if={{ @actor_resources != []}}
                     actor_resources={{ @actor_resources }}
                     authorizing={{ @authorizing }}
                     actor_paused={{ @actor_paused }}
@@ -104,7 +104,7 @@ defmodule AshAdmin.Components.TopNav do
         <div class="relative px-2 pt-2 pb-3 sm:px-3">
           <div class="block px-4 py-2 text-sm">
             <ActorSelect
-              :if={{ show_actor_select?(@actor_resources) }}
+              :if={{ @actor_resources != [] }}
               actor_resources={{ @actor_resources }}
               authorizing={{ @authorizing }}
               actor_paused={{ @actor_paused }}
@@ -163,7 +163,4 @@ defmodule AshAdmin.Components.TopNav do
       end)
     end)
   end
-
-  defp show_actor_select?([]), do: false
-  defp show_actor_select?(_), do: true
 end

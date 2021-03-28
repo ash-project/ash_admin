@@ -61,13 +61,47 @@ defmodule Demo.Tickets.Ticket do
     end
 
     create :open do
-      accept [:subject, :reporter]
+      accept [:subject]
+      primary? true
+      argument :representative, :map, allow_nil?: false
+      argument :tickets, {:array, :map}, allow_nil?: false
+
+      change manage_relationship(:representative, type: :append)
+      change manage_relationship(:tickets, :source_links, on_lookup: {:relate_and_update, :create, :read, :all})
     end
 
     update :update, primary?: true
 
     update :assign do
-      accept [:representative]
+      accept []
+      argument :representative, :map
+      argument :reassignment_comment, :map, allow_nil?: false
+
+      change manage_relationship(:representative, type: :append)
+      change manage_relationship(:reassignment_comment, :comments, type: :create)
+    end
+
+    update :link do
+      accept []
+      argument :tickets, {:array, :map}, allow_nil?: false
+      argument :link_comment, :map, type: :create
+
+      # Uses the defult create action of the join table, which accepts the `type`
+      change manage_relationship(:tickets, :source_links, on_lookup: {:relate_and_update, :create, :read, :all})
+      change manage_relationship(:link_comment, :comments, type: :create)
+    end
+
+    update :nested_example do
+      accept [:subject]
+      argument :tickets, {:array, :map}
+
+      change manage_relationship(
+        :tickets,
+        :source_links,
+        type: :direct_control,
+        on_match: {:update, :nested_example, :update, [:type]},
+        on_no_match: {:create, :nested_example, :update, [:type]}
+      )
     end
 
     destroy :destroy
@@ -107,6 +141,18 @@ defmodule Demo.Tickets.Ticket do
     has_many :comments, Demo.Tickets.Comment do
       context %{data_layer: %{table: "ticket_comments"}}
       destination_field :resource_id
+    end
+
+    many_to_many :source_links, Demo.Tickets.Ticket do
+      through Demo.Tickets.TicketLink
+      source_field_on_join_table :source_id
+      destination_field_on_join_table :destination_id
+    end
+
+    many_to_many :destination_links, Demo.Tickets.Ticket do
+      through Demo.Tickets.TicketLink
+      source_field_on_join_table :destination_id
+      destination_field_on_join_table :source_id
     end
   end
 end
