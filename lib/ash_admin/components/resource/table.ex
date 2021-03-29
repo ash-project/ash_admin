@@ -4,6 +4,7 @@ defmodule AshAdmin.Components.Resource.Table do
 
   import AshAdmin.Helpers
   alias Surface.Components.LiveRedirect
+  alias AshAdmin.Components.HeroIcon
 
   prop(attributes, :any, default: nil)
   prop(data, :list, default: nil)
@@ -31,7 +32,7 @@ defmodule AshAdmin.Components.Resource.Table do
               <div class="flex h-max justify-items-center">
                 <div :if={{ AshAdmin.Resource.show_action(@resource) }}>
                   <LiveRedirect to={{ ash_show_path(@prefix, @api, @resource, record, @table) }}>
-                    {{ {:safe, Heroicons.Solid.information_circle(class: "h-5 w-5 text-gray-500")} }}
+                    <HeroIcon name="information-circle" class="h-5 w-5 text-gray-500" />
                   </LiveRedirect>
                 </div>
 
@@ -44,7 +45,7 @@ defmodule AshAdmin.Components.Resource.Table do
                     Ash.Resource.Info.primary_action(@resource, :update).name,
                     @table
                   )}}>
-                    {{ {:safe, Heroicons.Solid.pencil(class: "h-5 w-5 text-gray-500")} }}
+                    <HeroIcon name="pencil" class="h-5 w-5 text-gray-500" />
                   </LiveRedirect>
                 </div>
 
@@ -57,7 +58,7 @@ defmodule AshAdmin.Components.Resource.Table do
                     Ash.Resource.Info.primary_action(@resource, :destroy).name,
                     @table
                   )}}>
-                    {{ {:safe, Heroicons.Solid.x_circle(class: "h-5 w-5 text-gray-500")} }}
+                    <HeroIcon name="x-circle" class="h-5 w-5 text-gray-500" />
                   </LiveRedirect>
                 </div>
 
@@ -68,7 +69,7 @@ defmodule AshAdmin.Components.Resource.Table do
                   phx-value-api={{ @api }}
                   phx-value-pkey={{ encode_primary_key(record) }}
                 >
-                  {{ {:safe, Heroicons.Solid.key(class: "h-5 w-5 text-gray-500")} }}
+                  <HeroIcon name="key" class="h-5 w-5 text-gray-500" />
                 </button>
               </div>
             </td>

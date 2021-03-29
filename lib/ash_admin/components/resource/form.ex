@@ -18,6 +18,8 @@ defmodule AshAdmin.Components.Resource.Form do
     TextInput
   }
 
+  alias AshAdmin.Components.HeroIcon
+
   data(changeset, :any)
   data(load_errors, :map, default: %{})
   data(targets, :any, default: MapSet.new())
@@ -252,7 +254,7 @@ defmodule AshAdmin.Components.Resource.Form do
           phx-value-path={{ inner_form.name }}
           class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
         >
-          {{ {:safe, Heroicons.Solid.minus(class: "h-4 w-4 text-gray-500")} }}
+          <HeroIcon name="minus" class="h-4 w-4 text-gray-500" />
         </button>
         <div class="shadow-lg p-4">
           <div :for={{{inner_form, field_limit, relationship} <- relationship_forms(form, inner_form, relationship, opts, @actor)}}>
@@ -275,7 +277,7 @@ defmodule AshAdmin.Components.Resource.Form do
         phx-value-path={{ form.name <> "[#{argument.name}]" }}
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
-        {{ {:safe, Heroicons.Solid.plus(class: "h-4 w-4 text-gray-500")} }}
+        <HeroIcon name="plus" class="h-4 w-4 text-gray-500" />
       </button>
 
       <button
@@ -286,7 +288,7 @@ defmodule AshAdmin.Components.Resource.Form do
         phx-value-type={{ "lookup" }}
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
-        {{ {:safe, Heroicons.Solid.search_circle(class: "h-4 w-4 text-gray-500")} }}
+        <HeroIcon name="search-circle" class="h-4 w-4 text-gray-500" />
       </button>
     </div>
     <div :if={{ needs_to_load?(opts) && !loaded?(form.source, relationship.name) }}>
@@ -333,7 +335,7 @@ defmodule AshAdmin.Components.Resource.Form do
           phx-value-path={{ inner_form.name }}
           class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
         >
-          {{ {:safe, Heroicons.Solid.minus(class: "h-4 w-4 text-gray-500")} }}
+          <HeroIcon name="minus" class="h-4 w-4 text-gray-500" />
         </button>
         <div class="shadow-lg p-4">
           <div :for={{{inner_form, type, relationship} <- relationship_forms(form, inner_form, relationship, opts, @actor)}}>
@@ -357,7 +359,7 @@ defmodule AshAdmin.Components.Resource.Form do
         phx-value-type={{ "lookup" }}
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
-        {{ {:safe, Heroicons.Solid.search_circle(class: "h-4 w-4 text-gray-500")} }}
+        <HeroIcon name="search-circle" class="h-4 w-4 text-gray-500" />
       </button>
       <button
         type="button"
@@ -367,7 +369,7 @@ defmodule AshAdmin.Components.Resource.Form do
         phx-value-type={{ "create" }}
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
-        {{ {:safe, Heroicons.Solid.plus(class: "h-4 w-4 text-gray-500")} }}
+        <HeroIcon name="plus" class="h-4 w-4 text-gray-500" />
       </button>
     </div>
     """
@@ -892,7 +894,7 @@ defmodule AshAdmin.Components.Resource.Form do
           phx-value-path={{ inner_form.name }}
           class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
         >
-          {{ {:safe, Heroicons.Solid.minus(class: "h-4 w-4 text-gray-500")} }}
+          <HeroIcon name="minus" class="h-4 w-4 text-gray-500" />
         </button>
 
         {{ render_attributes(assigns, inner_form.source.resource, inner_form.source.action, inner_form) }}
@@ -904,7 +906,7 @@ defmodule AshAdmin.Components.Resource.Form do
         phx-value-path={{ form.name <> "[#{attribute.name}]" }}
         class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
-        {{ {:safe, Heroicons.Solid.plus(class: "h-4 w-4 text-gray-500")} }}
+        <HeroIcon name="plus" class="h-4 w-4 text-gray-500" />
       </button>
       """
     else

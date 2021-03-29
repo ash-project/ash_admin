@@ -4,6 +4,7 @@ defmodule AshAdmin.Components.Resource.Show do
 
   alias Surface.Components.LiveRedirect
   alias AshAdmin.Components.Resource.Table
+  alias AshAdmin.Components.HeroIcon
   import AshAdmin.Helpers
 
   prop(resource, :any)
@@ -48,7 +49,7 @@ defmodule AshAdmin.Components.Resource.Show do
         phx-value-api={{ @api }}
         phx-value-pkey={{ encode_primary_key(@record) }}
       >
-        {{ {:safe, Heroicons.Solid.key(class: "h-5 w-5 text-gray-500")} }}
+      <HeroIcon name="key" class="h-5 w-5 text-gray-500" />
       </button>
       <div class="px-4 py-5 sm:p-6">
         <div>
@@ -285,17 +286,17 @@ defmodule AshAdmin.Components.Resource.Show do
     case Map.get(record, name) do
       true ->
         ~H"""
-        {{ {:safe, Heroicons.Solid.check(class: "text-gray-600 h-4 w-4")} }}
+        <HeroIcon name="check" class="h-4 w-4 text-gray-600" />
         """
 
       false ->
         ~H"""
-        {{ {:safe, Heroicons.Solid.x(class: "text-gray-600 h-4 w-4")} }}
+        <HeroIcon name="x" class="h-4 w-4 text-gray-600" />
         """
 
       nil ->
         ~H"""
-        {{ {:safe, Heroicons.Solid.minus(class: "text-gray-600 h-4 w-4")} }}
+        <HeroIcon name="minus" class="h-4 w-4 text-gray-600" />
         """
     end
   end
