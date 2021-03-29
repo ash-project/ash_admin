@@ -64,8 +64,10 @@ defmodule Demo.Tickets.Ticket do
       accept [:subject]
       primary? true
       argument :representative, :map, allow_nil?: false
-      argument :tickets, {:array, :map}, allow_nil?: false
+      argument :organization, :map, allow_nil?: false
+      argument :tickets, {:array, :map}
 
+      change manage_relationship(:organization, on_no_match: :create, on_lookup: :relate, on_match: :ignore)
       change manage_relationship(:representative, type: :append)
       change manage_relationship(:tickets, :source_links, on_lookup: {:relate_and_update, :create, :read, :all})
     end
@@ -137,6 +139,9 @@ defmodule Demo.Tickets.Ticket do
     belongs_to :reporter, Demo.Tickets.Customer
 
     belongs_to :representative, Demo.Tickets.Representative
+    belongs_to :organization, Demo.Tickets.Organization do
+      required? true
+    end
 
     has_many :comments, Demo.Tickets.Comment do
       context %{data_layer: %{table: "ticket_comments"}}

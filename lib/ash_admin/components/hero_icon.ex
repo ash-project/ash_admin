@@ -28,7 +28,7 @@ defmodule AshAdmin.Components.HeroIcon do
     """
   end
 
-  defp render_heroicon("search-cicrle", "solid", assigns) do
+  defp render_heroicon("search-circle", "solid", assigns) do
     ~H"""
     <svg class={{@class}} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
       <path d="M9 9a2 2 0 114 0 2 2 0 01-4 0z" />
