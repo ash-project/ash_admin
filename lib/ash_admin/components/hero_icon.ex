@@ -1,4 +1,5 @@
 defmodule AshAdmin.Components.HeroIcon do
+  @moduledoc false
   use Surface.Component
 
   prop(name, :string)
