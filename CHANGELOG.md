@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.4](https://github.com/ash-project/ash_admin/compare/v0.2.3...v0.2.4) (2021-03-30)
+
+
+
+
+### Bug Fixes:
+
+* show add button on array input relationships
+
 ## [v0.2.3](https://github.com/ash-project/ash_admin/compare/v0.2.2...v0.2.3) (2021-03-29)
 
 
