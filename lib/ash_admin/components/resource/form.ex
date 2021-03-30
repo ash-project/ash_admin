@@ -1093,7 +1093,7 @@ defmodule AshAdmin.Components.Resource.Form do
           socket.assigns.resource
           |> Ash.Changeset.for_create(
             socket.assigns.action.name,
-            params,
+            params || %{},
             actor: socket.assigns[:actor],
             tenant: socket.assigns[:tenant]
           )
@@ -1116,7 +1116,7 @@ defmodule AshAdmin.Components.Resource.Form do
         socket.assigns.record
         |> Ash.Changeset.for_update(
           socket.assigns.action.name,
-          params,
+          params || %{},
           actor: socket.assigns[:actor],
           tenant: socket.assigns[:tenant]
         )
@@ -1137,7 +1137,7 @@ defmodule AshAdmin.Components.Resource.Form do
         socket.assigns.record
         |> Ash.Changeset.for_destroy(
           socket.assigns.action.name,
-          params,
+          params || %{},
           actor: socket.assigns[:actor],
           tenant: socket.assigns[:tenant]
         )
