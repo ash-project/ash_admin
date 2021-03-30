@@ -5,6 +5,19 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.5](https://github.com/ash-project/ash_admin/compare/v0.2.4...v0.2.5) (2021-03-30)
+
+
+
+
+### Bug Fixes:
+
+* don't send empty params on save
+
+### Improvements:
+
+* update to latest ash_phoenix
+
 ## [v0.2.4](https://github.com/ash-project/ash_admin/compare/v0.2.3...v0.2.4) (2021-03-30)
 
 
