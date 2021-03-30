@@ -275,7 +275,7 @@ defmodule AshAdmin.Components.Resource.Form do
       <button
         type="button"
         :on-click="append_related"
-        :if={{ could_lookup?(opts) && !relationship_set?(form.source, relationship.name, argument.name) }}
+        :if={{ could_lookup?(opts) }}
         phx-value-path={{ form.name <> "[#{argument.name}]" }}
         phx-value-type={{ "lookup" }}
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
@@ -286,7 +286,7 @@ defmodule AshAdmin.Components.Resource.Form do
       <button
         type="button"
         :on-click="append_related"
-        :if={{ could_create?(opts) && !relationship_set?(form.source, relationship.name, argument.name) }}
+        :if={{ could_create?(opts) }}
         phx-value-path={{ form.name <> "[#{argument.name}]" }}
         phx-value-type={{"create"}}
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
