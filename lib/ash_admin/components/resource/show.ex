@@ -395,7 +395,13 @@ defmodule AshAdmin.Components.Resource.Show do
   end
 
   defp value!(value) do
-    Phoenix.HTML.Safe.to_iodata(value)
+    data = Phoenix.HTML.Safe.to_iodata(value)
+
+    if is_binary(data) and !String.valid?(data) do
+      "..."
+    else
+      data
+    end
   rescue
     _ ->
       "..."

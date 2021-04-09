@@ -97,9 +97,16 @@ defmodule AshAdmin.Components.Resource.Table do
     if Ash.Type.embedded_type?(attribute.type) do
       "..."
     else
-      record
-      |> Map.get(attribute.name)
-      |> Phoenix.HTML.Safe.to_iodata()
+      data =
+        record
+        |> Map.get(attribute.name)
+        |> Phoenix.HTML.Safe.to_iodata()
+
+      if is_binary(data) and !String.valid?(data) do
+        "..."
+      else
+        data
+      end
     end
   rescue
     _ ->
