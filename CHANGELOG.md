@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.7](https://github.com/ash-project/ash_admin/compare/v0.2.6...v0.2.7) (2021-04-09)
+
+
+
+
+### Bug Fixes:
+
+* set actor in datatable
+
 ## [v0.2.6](https://github.com/ash-project/ash_admin/compare/v0.2.5...v0.2.6) (2021-04-09)
 
 
