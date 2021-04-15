@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.8](https://github.com/ash-project/ash_admin/compare/v0.2.7...v0.2.8) (2021-04-15)
+
+
+
+
+### Bug Fixes:
+
+* properly track embedded attribute targets
+
 ## [v0.2.7](https://github.com/ash-project/ash_admin/compare/v0.2.6...v0.2.7) (2021-04-09)
 
 
