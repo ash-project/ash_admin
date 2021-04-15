@@ -43,8 +43,56 @@ defmodule AshAdmin.Components.Resource.Form do
      socket
      |> assign(assigns)
      |> assign_changeset()
+     |> assign_initial_targets()
      |> assign(:initialized, true)}
   end
+
+  defp assign_initial_targets(socket, force? \\ false) do
+    if !socket.assigns[:initialized] || force? do
+      socket.assigns.resource
+      |> Ash.Resource.Info.attributes()
+      |> Enum.filter(&Ash.Type.embedded_type?(&1.type))
+      |> Enum.reduce(socket, fn attribute, socket ->
+        type = unwrap_type(attribute.type)
+        string_pkey_fields = string_pkey_fields(type)
+
+        type
+        |> embedded_targets()
+        |> Enum.reduce(socket, &add_target(&2, ["change" | &1]))
+        |> add_target(["change", to_string(attribute.name), "~"] ++ string_pkey_fields)
+        |> add_target(["change", to_string(attribute.name)] ++ string_pkey_fields)
+      end)
+    else
+      socket
+    end
+  end
+
+  defp embedded_targets(embedded_resource, prefix \\ ["change"]) do
+    embedded_resource
+    |> Ash.Resource.Info.attributes()
+    |> Enum.filter(&Ash.Type.embedded_type?(&1.type))
+    |> Enum.map(fn attribute ->
+      type = unwrap_type(attribute.type)
+      string_pkey_fields = string_pkey_fields(type)
+
+      targets = [
+        prefix ++ [to_string(attribute.name), "~"] ++ string_pkey_fields,
+        prefix ++ [to_string(attribute.name)] ++ string_pkey_fields
+      ]
+
+      targets ++ Enum.concat(Enum.map(targets, &embedded_targets(type, &1)))
+    end)
+    |> Enum.concat()
+  end
+
+  defp string_pkey_fields(type) do
+    type
+    |> Ash.Resource.Info.primary_key()
+    |> Enum.map(&to_string/1)
+  end
+
+  defp unwrap_type({:array, type}), do: unwrap_type(type)
+  defp unwrap_type(type), do: type
 
   def render(assigns) do
     ~H"""
@@ -435,7 +483,6 @@ defmodule AshAdmin.Components.Resource.Form do
     opts
     |> Ash.Changeset.ManagedRelationshipHelpers.on_match_destination_actions(relationship)
     |> Kernel.||([])
-    |> drop_destination_form()
     |> Enum.map(&action_form(&1, form, inner_form, relationship, actor))
   end
 
@@ -933,7 +980,7 @@ defmodule AshAdmin.Components.Resource.Form do
         end
       )
 
-    socket = assign(socket, targets: MapSet.new())
+    socket = assign_initial_targets(socket, true)
 
     case action.type do
       :create ->
@@ -1034,8 +1081,6 @@ defmodule AshAdmin.Components.Resource.Form do
     socket =
       socket
       |> add_target(decoded_path)
-      |> add_target(decoded_path ++ ["*"])
-      |> add_target(decoded_path ++ ["*", "_type"])
       |> add_target(decoded_path ++ ["_type"])
 
     new_changeset =
@@ -1064,7 +1109,6 @@ defmodule AshAdmin.Components.Resource.Form do
     socket =
       socket
       |> add_target(decoded_path)
-      |> add_target(decoded_path ++ ["*"])
 
     {:noreply,
      assign(socket, changeset: AshPhoenix.add_embed(socket.assigns.changeset, path, "change"))}
@@ -1076,7 +1120,6 @@ defmodule AshAdmin.Components.Resource.Form do
     socket =
       socket
       |> add_target(decoded_path)
-      |> add_target(decoded_path ++ ["*"])
 
     {:noreply,
      assign(socket,
@@ -1273,30 +1316,29 @@ defmodule AshAdmin.Components.Resource.Form do
   defp take_targets(params, []), do: params
 
   defp take_targets(params, targets) when is_map(params) do
-    # if Enum.any?(targets, &List.starts_with?(&1, ["*"])) do
-    #   params
-    # else
-    Enum.reduce(params, %{}, fn {key, value}, acc ->
-      case Integer.parse(key) do
-        {integer, ""} ->
-          case targets_for(targets, integer) do
-            [] ->
-              Map.put(acc, key, value)
+    if Enum.any?(targets, &List.starts_with?(&1, ["*"])) do
+      params
+    else
+      Enum.reduce(params, %{}, fn {key, value}, acc ->
+        case Integer.parse(key) do
+          {integer, ""} ->
+            case targets_for(targets, integer) do
+              [] ->
+                Map.put(acc, key, value)
 
-            targets ->
-              Map.put(acc, key, take_targets(value, targets))
-          end
+              targets ->
+                Map.put(acc, key, take_targets(value, targets))
+            end
 
-        :error ->
-          if targets_for(targets, key) != [] do
-            Map.put(acc, key, take_targets(value, targets_for(targets, key)))
-          else
-            acc
-          end
-      end
-    end)
-
-    # end
+          :error ->
+            if targets_for(targets, key) != [] do
+              Map.put(acc, key, take_targets(value, targets_for(targets, key)))
+            else
+              acc
+            end
+        end
+      end)
+    end
   end
 
   defp take_targets(params, _) do
@@ -1307,6 +1349,7 @@ defmodule AshAdmin.Components.Resource.Form do
     targets
     |> Enum.filter(fn
       [first | _] ->
+        # ~ means match any key at this point
         first == "~" || to_string(key) == first
 
       _ ->
