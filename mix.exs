@@ -66,10 +66,8 @@ defmodule AshAdmin.MixProject do
     [
       generate_migrations:
         "ash_postgres.generate_migrations --apis Demo.Accounts.Api,Demo.Tickets.Api --snapshot-path dev/resource_snapshots --migration-path dev --drop-columns",
-      migrate: [
-        "ecto.migrate --migrations-path dev/repo/migrations",
-        "ecto.migrate --migrations-path dev/repo/tenant_migrations"
-      ],
+      migrate: "ash_postgres.migrate --migrations-path dev/repo/migrations",
+      migrate_tenants: "ash_postgres.migrate --migrations-path dev/repo/tenant_migrations",
       setup: ["deps.get", "cmd npm install --prefix assets"],
       dev: "run --no-halt dev.exs --config config",
       sobelow: "sobelow --ignore XSS.Raw",
@@ -89,7 +87,7 @@ defmodule AshAdmin.MixProject do
   defp deps do
     [
       {:ash, "~> 1.37 and >= 1.37.1"},
-      {:ash_phoenix, "~> 0.4 and >= 0.4.10"},
+      {:ash_phoenix, "~> 0.4 and >= 0.4.13"},
       {:surface, "~> 0.3.2"},
       {:phoenix_live_view, "~> 0.15.4"},
       {:phoenix_html, "~> 2.14.1 or ~> 2.15"},

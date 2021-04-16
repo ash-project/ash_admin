@@ -16,7 +16,7 @@
       "name": "id",
       "primary_key?": true,
       "references": null,
-      "type": "binary_id"
+      "type": "uuid"
     },
     {
       "allow_nil?": false,
@@ -26,6 +26,23 @@
       "primary_key?": false,
       "references": null,
       "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "name": "organization_id",
+      "primary_key?": false,
+      "references": {
+        "destination_field": "id",
+        "multitenancy": {
+          "attribute": null,
+          "global": null,
+          "strategy": null
+        },
+        "table": "organizations"
+      },
+      "type": "uuid"
     },
     {
       "allow_nil?": true,
@@ -42,7 +59,7 @@
         },
         "table": "users"
       },
-      "type": "binary_id"
+      "type": "uuid"
     },
     {
       "allow_nil?": true,
@@ -53,13 +70,13 @@
       "references": {
         "destination_field": "id",
         "multitenancy": {
-          "attribute": "first_name",
-          "global": false,
-          "strategy": "attribute"
+          "attribute": null,
+          "global": null,
+          "strategy": null
         },
         "table": "users"
       },
-      "type": "binary_id"
+      "type": "uuid"
     },
     {
       "allow_nil?": true,
@@ -99,7 +116,7 @@
     }
   ],
   "base_filter": null,
-  "hash": "6718A473EA64E57EFC8A2433BF19D4BA730E762C77085C4D61818F962FA6D2AB",
+  "hash": "08D648E713F5FC1AA964C9932376A10FC053DAD684F73E664989875C21F9DA6B",
   "identities": [],
   "multitenancy": {
     "attribute": null,

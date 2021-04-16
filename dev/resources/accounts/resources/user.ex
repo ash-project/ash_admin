@@ -91,6 +91,7 @@ defmodule Demo.Accounts.User do
 
     attribute :profile, Demo.Accounts.Profile
     attribute :alternate_profiles, {:array, Demo.Accounts.Profile}
+    attribute :tags, {:array, :string}
 
     timestamps()
   end

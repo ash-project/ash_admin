@@ -35,7 +35,16 @@
       "name": "id",
       "primary_key?": true,
       "references": null,
-      "type": "binary_id"
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": true,
+      "default": "fragment(\"now()\")",
+      "generated?": false,
+      "name": "inserted_at",
+      "primary_key?": false,
+      "references": null,
+      "type": "utc_datetime_usec"
     },
     {
       "allow_nil?": true,
@@ -61,10 +70,31 @@
       "primary_key?": false,
       "references": null,
       "type": "boolean"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "name": "tags",
+      "primary_key?": false,
+      "references": null,
+      "type": [
+        "array",
+        "text"
+      ]
+    },
+    {
+      "allow_nil?": true,
+      "default": "fragment(\"now()\")",
+      "generated?": false,
+      "name": "updated_at",
+      "primary_key?": false,
+      "references": null,
+      "type": "utc_datetime_usec"
     }
   ],
   "base_filter": null,
-  "hash": "5B37D2DE8D4E87A94BEB677D5C265C5CC2D3467F74A56D3A0E9630A743EC0E1F",
+  "hash": "9A651D6CB9281B93AC4EFDBE06185785E766E9832E027BA807D78CC4D20C84C9",
   "identities": [
     {
       "base_filter": "representative = true",
