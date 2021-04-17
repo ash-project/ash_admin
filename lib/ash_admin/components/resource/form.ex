@@ -853,7 +853,7 @@ defmodule AshAdmin.Components.Resource.Form do
         type="button"
         :on-click="append_embed"
         :if={{can_append_embed?(form.source, attribute.name)}}
-        phx-value-path={{ form.name <> "[#{attribute.name}]" }}
+        phx-value-path={{ name || form.name <> "[#{attribute.name}]" }}
         class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
         <HeroIcon name="plus" class="h-4 w-4 text-gray-500" />
@@ -1653,6 +1653,7 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp map_type?(:map), do: true
+  defp map_type?(Ash.Type.Map), do: true
 
   defp map_type?(type) do
     if Ash.Type.embedded_type?(type) do
