@@ -895,8 +895,6 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp render_fallback_attribute(assigns, form, attribute, value, name) do
-    IO.inspect(attribute)
-
     ~H"""
     <TextInput
       form={{ form }}
