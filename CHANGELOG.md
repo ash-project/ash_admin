@@ -5,6 +5,21 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.11](https://github.com/ash-project/ash_admin/compare/v0.2.10...v0.2.11) (2021-05-06)
+
+
+
+
+### Bug Fixes:
+
+* fix special text fields
+
+### Improvements:
+
+* always show action dropdown
+
+* log on failures in the UI
+
 ## [v0.2.10](https://github.com/ash-project/ash_admin/compare/v0.2.9...v0.2.10) (2021-04-17)
 
 
