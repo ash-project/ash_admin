@@ -4,6 +4,8 @@ defmodule AshAdmin.Components.Resource.Form do
 
   import AshAdmin.Helpers
 
+  require Logger
+
   alias Surface.Components.{Context, Form}
 
   alias Surface.Components.Form.{
@@ -147,12 +149,13 @@ defmodule AshAdmin.Components.Resource.Form do
           as="action"
           for={{ :action }}
           change="change_action"
-          :if={{ Enum.count(actions(@resource, @type)) > 1 }}
           opts={{id: @id <> "_action_form"}}
         >
           <FieldContext name="action">
             <Label>Action</Label>
-            <Select selected={{ to_string(@action.name) }} options={{ actions(@resource, @type) }} />
+            <Select
+              opts={{disabled: Enum.count(actions(@resource, @type)) <= 1 }}
+              selected={{ to_string(@action.name) }} options={{ actions(@resource, @type) }} />
           </FieldContext>
         </Form>
       </div>
@@ -770,7 +773,6 @@ defmodule AshAdmin.Components.Resource.Form do
         assigns,
         %{
           type: type,
-          name: name,
           default: default
         } = attribute,
         form,
@@ -893,6 +895,8 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp render_fallback_attribute(assigns, form, attribute, value, name) do
+    IO.inspect(attribute)
+
     ~H"""
     <TextInput
       form={{ form }}
@@ -1154,6 +1158,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
     {:noreply,
      socket
+     |> push_event("form_change", %{})
      |> assign(changeset: new_changeset)}
   end
 
@@ -1168,6 +1173,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
     {:noreply,
      socket
+     |> push_event("form_change", %{})
      |> assign(changeset: new_changeset)}
   end
 
@@ -1184,6 +1190,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
     {:noreply,
      socket
+     |> push_event("form_change", %{})
      |> assign(changeset: new_changeset)}
   end
 
@@ -1193,10 +1200,12 @@ defmodule AshAdmin.Components.Resource.Form do
     {record, changeset} = AshPhoenix.remove_related(socket.assigns.changeset, path, "change")
 
     {:noreply,
-     assign(socket,
+     socket
+     |> assign(
        record: record,
        changeset: %{changeset | data: record}
-     )}
+     )
+     |> push_event("form_change", %{})}
   end
 
   def handle_event("append_embed", %{"path" => path}, socket) do
@@ -1207,7 +1216,9 @@ defmodule AshAdmin.Components.Resource.Form do
       |> add_target(decoded_path)
 
     {:noreply,
-     assign(socket, changeset: AshPhoenix.add_embed(socket.assigns.changeset, path, "change"))}
+     socket
+     |> assign(changeset: AshPhoenix.add_embed(socket.assigns.changeset, path, "change"))
+     |> push_event("form_change", %{})}
   end
 
   def handle_event("remove_embed", %{"path" => path}, socket) do
@@ -1218,9 +1229,9 @@ defmodule AshAdmin.Components.Resource.Form do
       |> add_target(decoded_path)
 
     {:noreply,
-     assign(socket,
-       changeset: AshPhoenix.remove_embed(socket.assigns.changeset, path, "change")
-     )}
+     socket
+     |> assign(changeset: AshPhoenix.remove_embed(socket.assigns.changeset, path, "change"))
+     |> push_event("form_change", %{})}
   end
 
   def handle_event("save", data, socket) do
@@ -1243,6 +1254,7 @@ defmodule AshAdmin.Components.Resource.Form do
           authorize?: socket.assigns[:authorizing],
           actor: socket.assigns[:actor]
         )
+        |> log_errors()
         |> case do
           {:ok, created} ->
             redirect_to(socket, created)
@@ -1264,6 +1276,7 @@ defmodule AshAdmin.Components.Resource.Form do
           authorize?: socket.assigns[:authorizing],
           actor: socket.assigns[:actor]
         )
+        |> log_errors()
         |> case do
           {:ok, updated} ->
             redirect_to(socket, updated)
@@ -1285,6 +1298,7 @@ defmodule AshAdmin.Components.Resource.Form do
           authorize?: socket.assigns[:authorizing],
           actor: socket.assigns[:actor]
         )
+        |> log_errors()
         |> case do
           :ok ->
             {:noreply,
@@ -1345,6 +1359,17 @@ defmodule AshAdmin.Components.Resource.Form do
 
         {:noreply, assign(socket, :changeset, changeset)}
     end
+  end
+
+  defp log_errors({:ok, _} = result), do: result
+  defp log_errors(:ok), do: :ok
+
+  defp log_errors({:error, error}) do
+    Logger.warn(
+      "Error while creating/updating data in ash admin: \n#{Exception.format(:error, error)}"
+    )
+
+    {:error, error}
   end
 
   defp add_target(socket, target) do

@@ -11,6 +11,8 @@ defmodule AshAdmin.PageLive do
   require Ash.Query
   alias AshAdmin.Components.{Resource, TopNav}
 
+  require Logger
+
   def mount(socket) do
     {:ok, socket}
   end
@@ -151,6 +153,18 @@ defmodule AshAdmin.PageLive do
                 actor: actor,
                 authorize?: socket.assigns.authorizing
               )
+
+            case record do
+              {:error, error} ->
+                Logger.warn(
+                  "Error while loading record on admin dashboard\n: #{
+                    Exception.format(:error, error)
+                  }"
+                )
+
+              {:ok, _} ->
+                :ok
+            end
 
             socket
             |> assign(:id, params["primary_key"])
