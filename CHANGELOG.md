@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.12](https://github.com/ash-project/ash_admin/compare/v0.2.11...v0.2.12) (2021-05-10)
+
+
+
+
+### Improvements:
+
+* support explicit enum types
+
 ## [v0.2.11](https://github.com/ash-project/ash_admin/compare/v0.2.10...v0.2.11) (2021-05-06)
 
 
