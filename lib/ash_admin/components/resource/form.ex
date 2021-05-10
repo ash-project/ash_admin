@@ -836,33 +836,46 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def render_attribute_input(assigns, attribute, form, value, name) do
-    if Ash.Type.embedded_type?(attribute.type) do
-      ~H"""
-      <Inputs form={{ form }} for={{ attribute.name }} :let={{ form: inner_form }}>
-        <HiddenInputs for={{inner_form}} />
+    cond do
+      Ash.Type.embedded_type?(attribute.type) ->
+        ~H"""
+        <Inputs form={{ form }} for={{ attribute.name }} :let={{ form: inner_form }}>
+          <HiddenInputs for={{inner_form}} />
+          <button
+            type="button"
+            :on-click="remove_embed"
+            phx-value-path={{ inner_form.name }}
+            class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+          >
+            <HeroIcon name="minus" class="h-4 w-4 text-gray-500" />
+          </button>
+
+          {{ render_attributes(assigns, inner_form.source.resource, inner_form.source.action, inner_form) }}
+        </Inputs>
         <button
           type="button"
-          :on-click="remove_embed"
-          phx-value-path={{ inner_form.name }}
+          :on-click="append_embed"
+          :if={{can_append_embed?(form.source, attribute.name)}}
+          phx-value-path={{ name || form.name <> "[#{attribute.name}]" }}
           class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
         >
-          <HeroIcon name="minus" class="h-4 w-4 text-gray-500" />
+          <HeroIcon name="plus" class="h-4 w-4 text-gray-500" />
         </button>
+        """
 
-        {{ render_attributes(assigns, inner_form.source.resource, inner_form.source.action, inner_form) }}
-      </Inputs>
-      <button
-        type="button"
-        :on-click="append_embed"
-        :if={{can_append_embed?(form.source, attribute.name)}}
-        phx-value-path={{ name || form.name <> "[#{attribute.name}]" }}
-        class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
-      >
-        <HeroIcon name="plus" class="h-4 w-4 text-gray-500" />
-      </button>
-      """
-    else
-      render_fallback_attribute(assigns, form, attribute, value, name)
+      is_atom(attribute.type) && :erlang.function_exported(attribute.type, :values, 0) ->
+        ~H"""
+        <Select
+          form={{ form }}
+          :props={{props(value, attribute)}}
+          options={{ Enum.map(attribute.type.values(), &{to_name(&1), &1}) ++ allow_nil_option(attribute) }}
+          selected={{value(value, form, attribute)}}
+          name={{name || form.name <> "[#{attribute.name}]"}}
+        />
+        """
+
+      true ->
+        render_fallback_attribute(assigns, form, attribute, value, name)
     end
   end
 
