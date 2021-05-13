@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.13](https://github.com/ash-project/ash_admin/compare/v0.2.12...v0.2.13) (2021-05-13)
+
+
+
+
+### Bug Fixes:
+
+* track pkey of embeds when adding
+
 ## [v0.2.12](https://github.com/ash-project/ash_admin/compare/v0.2.11...v0.2.12) (2021-05-10)
 
 
