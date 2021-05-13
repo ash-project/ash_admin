@@ -856,6 +856,7 @@ defmodule AshAdmin.Components.Resource.Form do
           type="button"
           :on-click="append_embed"
           :if={{can_append_embed?(form.source, attribute.name)}}
+          phx-value-pkey={{embedded_type_pkey(attribute.type)}}
           phx-value-path={{ name || form.name <> "[#{attribute.name}]" }}
           class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
         >
@@ -918,6 +919,23 @@ defmodule AshAdmin.Components.Resource.Form do
       :props={{props(value, attribute)}}
     />
     """
+  end
+
+  defp embedded_type_pkey({:array, type}) do
+    embedded_type_pkey(type)
+  end
+
+  defp embedded_type_pkey(type) do
+    type
+    |> Ash.Resource.Info.primary_key()
+    |> Enum.flat_map(fn attr ->
+      if Ash.Resource.Info.attribute(type, attr).private? do
+        []
+      else
+        [attr]
+      end
+    end)
+    |> Enum.join("-")
   end
 
   defp props({:value, _value}, _attribute) do
@@ -1219,12 +1237,25 @@ defmodule AshAdmin.Components.Resource.Form do
      |> push_event("form_change", %{})}
   end
 
-  def handle_event("append_embed", %{"path" => path}, socket) do
+  def handle_event("append_embed", %{"path" => path, "pkey" => pkey}, socket) do
     decoded_path = AshPhoenix.decode_path(path)
 
     socket =
       socket
       |> add_target(decoded_path)
+
+    socket =
+      if pkey do
+        pkey
+        |> String.split("-")
+        |> Enum.reduce(socket, fn key, socket ->
+          socket
+          |> add_target(decoded_path ++ ["~", key])
+          |> add_target(decoded_path ++ [key])
+        end)
+      else
+        add_target(socket, decoded_path ++ ["*"])
+      end
 
     {:noreply,
      socket
