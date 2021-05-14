@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.14](https://github.com/ash-project/ash_admin/compare/v0.2.13...v0.2.14) (2021-05-14)
+
+
+
+
+### Improvements:
+
+* general manage relationship improvements
+
 ## [v0.2.13](https://github.com/ash-project/ash_admin/compare/v0.2.12...v0.2.13) (2021-05-13)
 
 
