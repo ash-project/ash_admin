@@ -71,7 +71,7 @@ defmodule Demo.Tickets.Representative do
     end
 
     has_many :comments, Demo.Tickets.Comment do
-      context %{data_layer: %{table: "representative_comments"}}
+      relationship_context %{data_layer: %{table: "representative_comments"}}
       destination_field :resource_id
     end
   end

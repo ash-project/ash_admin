@@ -144,7 +144,7 @@ defmodule Demo.Tickets.Ticket do
     end
 
     has_many :comments, Demo.Tickets.Comment do
-      context %{data_layer: %{table: "ticket_comments"}}
+      relationship_context %{data_layer: %{table: "ticket_comments"}}
       destination_field :resource_id
     end
 
