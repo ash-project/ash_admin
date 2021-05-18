@@ -699,18 +699,21 @@ defmodule AshAdmin.Components.Resource.Form do
       case Ash.Resource.Info.action(relationship.destination, action_name).type do
         :update ->
           inner_form.data
+          |> new_form_changeset(inner_form)
           |> Ash.Changeset.for_update(action_name, inner_form.params, actor: actor)
           |> retain_hiding_errors(inner_form.source)
           |> Phoenix.HTML.FormData.to_form(as: inner_form.name)
 
         :create ->
           inner_form.data.__struct__
+          |> new_form_changeset(inner_form)
           |> Ash.Changeset.for_create(action_name, inner_form.params, actor: actor)
           |> retain_hiding_errors(inner_form.source)
           |> Phoenix.HTML.FormData.to_form(as: inner_form.name)
 
         :destroy ->
           inner_form.data
+          |> new_form_changeset(inner_form)
           |> Ash.Changeset.for_destroy(action_name, inner_form.params, actor: actor)
           |> retain_hiding_errors(inner_form.source)
           |> Phoenix.HTML.FormData.to_form(as: inner_form.name)
@@ -751,6 +754,15 @@ defmodule AshAdmin.Components.Resource.Form do
 
     {new_inner_form, limit,
      Ash.Resource.Info.relationship(relationship.source, relationship.join_relationship)}
+  end
+
+  defp new_form_changeset(source, inner_form) do
+    source
+    |> Ash.Changeset.new()
+    |> Ash.Changeset.put_context(
+      :manage_relationship_source,
+      inner_form.source.context[:manage_relationship_source]
+    )
   end
 
   defp retain_hiding_errors(changeset, source_changeset) do
@@ -801,7 +813,6 @@ defmodule AshAdmin.Components.Resource.Form do
            relationship
          ) do
       [{:destination, action} | _rest] ->
-        # do something with rest here
         action
 
       _ ->
@@ -812,7 +823,6 @@ defmodule AshAdmin.Components.Resource.Form do
   defp update_action(opts, relationship) do
     case Ash.Changeset.ManagedRelationshipHelpers.on_match_destination_actions(opts, relationship) do
       [{:destination, action} | _rest] ->
-        # do something with rest here
         action
 
       _ ->
@@ -1476,77 +1486,6 @@ defmodule AshAdmin.Components.Resource.Form do
      socket
      |> assign(changeset: changeset)}
   end
-
-  # if socket.assigns.action.type == :update do
-  #   case Ash.Resource.Info.relationship(socket.assigns.resource, Enum.at(decoded_path, 1)) do
-  #     nil ->
-  #       AshPhoenix.remove_embed(socket.assigns.changeset, path, "change")
-
-  #     rel ->
-  #       case Enum.at(decoded_path, 2) do
-  #         index when is_integer(index) ->
-  #           socket.assigns.record
-  #           |> Map.get(rel.name)
-  #           |> Enum.reject(&AshPhoenix.FormData.Helpers.hidden?/1)
-  #           |> Enum.at(index)
-  #           |> case do
-  #             nil ->
-  #               new_index = index - Enum.count(Map.get(socket.assigns.record, rel.name))
-  #               new_decoded_path = List.replace_at(decoded_path, 2, new_index)
-  #               value_to_add = AshPhoenix.add_to_path(%{}, decoded_path, nil)
-
-  #               AshPhoenix.add_related(
-  #                 socket.assigns.changeset,
-  #                 new_decoded_path,
-  #                 "change",
-  #                 value_to_add
-  #               )
-
-  #             value ->
-  #               AshPhoenix.add_()
-  #           end
-
-  #         _ ->
-  #           case Map.get(socket.assigns.record, rel.name) do
-  #             nil ->
-  #               AshPhoenix.add_related(
-  #                 socket.assigns.changeset,
-  #                 path,
-  #                 nil
-  #               )
-
-  #             related ->
-  #               if AshPhoenix.FormData.Helpers.hidden?(related) do
-  #                 AshPhoenix.add_related(
-  #                   socket.assigns.changeset,
-  #                   path,
-  #                   nil
-  #                 )
-  #               else
-  #                 AshPhoenix.remove_related(socket.assigns.changeset, path, "change")
-  #               end
-  #           end
-  #       end
-  #   end
-  # else
-  #   nil
-  # end
-  # |> case do
-  #   {record, changeset} ->
-  #     {:noreply,
-  #      socket
-  #      |> assign(
-  #        record: record,
-  #        changeset: %{changeset | data: record}
-  #      )
-  #      |> push_event("form_change", %{})}
-
-  #   changeset ->
-  #     {:noreply,
-  #      socket
-  #      |> assign(changeset: changeset)
-  #      |> push_event("form_change", %{})}
-  # end
 
   def handle_event("save", data, socket) do
     params = params(data || %{}, socket)
