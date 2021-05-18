@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.15](https://github.com/ash-project/ash_admin/compare/v0.2.14...v0.2.15) (2021-05-18)
+
+
+
+
+### Bug Fixes:
+
+* retain `manage_relationship_source` context where possible
+
 ## [v0.2.14](https://github.com/ash-project/ash_admin/compare/v0.2.13...v0.2.14) (2021-05-14)
 
 
