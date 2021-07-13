@@ -18,13 +18,13 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
   prop(prefix, :any, required: true)
 
   def render(assigns) do
-    ~H"""
+    ~F"""
     <div id="actor-hook" class="flex items-center mr-5 text-white" phx-hook="Actor">
       <div>
         <span>
-          <button :on-click={{ @toggle_authorizing }} type="button">
+          <button :on-click={@toggle_authorizing} type="button">
             <svg
-              :if={{ @authorizing }}
+              :if={@authorizing}
               width="1em"
               height="1em"
               viewBox="0 0 16 16"
@@ -37,7 +37,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
               />
             </svg>
             <svg
-              :if={{ !@authorizing }}
+              :if={!@authorizing}
               width="1em"
               height="1em"
               viewBox="0 0 16 16"
@@ -50,9 +50,9 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
               />
             </svg>
           </button>
-          <button :if={{@actor}} :on-click={{ @toggle_actor_paused }} type="button">
+          <button :if={@actor} :on-click={@toggle_actor_paused} type="button">
             <svg
-              :if={{ @actor_paused }}
+              :if={@actor_paused}
               width="1em"
               height="1em"
               viewBox="0 0 16 16"
@@ -62,7 +62,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
               <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z" />
             </svg>
             <svg
-              :if={{ !@actor_paused }}
+              :if={!@actor_paused}
               width="1em"
               height="1em"
               viewBox="0 0 16 16"
@@ -73,19 +73,19 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
             </svg>
           </button>
           <LiveRedirect
-            :if={{@actor}}
+            :if={@actor}
             class="hover:text-blue-400 hover:underline"
-            to={{ash_show_path(
+            to={ash_show_path(
               @prefix,
               @actor_api,
               @actor.__struct__,
               @actor,
               nil
-            )}}
+            )}
           >
-            {{ user_display(@actor) }}
+            {user_display(@actor)}
           </LiveRedirect>
-          <button :if={{@actor}} :on-click={{ @clear_actor }} type="button">
+          <button :if={@actor} :on-click={@clear_actor} type="button">
             <svg width="1em" height="1em" viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg">
               <path
                 fill-rule="evenodd"
@@ -99,44 +99,44 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
           </button>
         </span>
       </div>
-      <div :if={{ !@actor }}>
-        {{ render_actor_link(assigns, @actor_resources) }}
+      <div :if={!@actor}>
+        {render_actor_link(assigns, @actor_resources)}
       </div>
     </div>
     """
   end
 
   defp render_actor_link(assigns, [{api, resource}]) do
-    ~H"""
-    <LiveRedirect to={{ash_action_path(
+    ~F"""
+    <LiveRedirect to={ash_action_path(
       @prefix,
       api,
       resource,
       :read,
       Ash.Resource.Info.primary_action(resource, :read).name,
       nil
-    )}}>
-      Set {{ AshAdmin.Resource.name(resource) }}
+    )}>
+      Set {AshAdmin.Resource.name(resource)}
     </LiveRedirect>
     """
   end
 
   defp render_actor_link(assigns, apis_and_resources) do
-    ~H"""
+    ~F"""
     <div aria-labelledby="actor-banner">
       <LiveRedirect
-        to={{ash_action_path(
+        to={ash_action_path(
           @prefix,
           api,
           resource,
           :read,
           Ash.Resource.Info.primary_action(resource, :read).name,
           nil
-        )}}
-        :for.with_index={{ {{api, resource}, i} <- apis_and_resources }}
+        )}
+        :for.with_index={{{api, resource}, i} <- apis_and_resources}
       >
-        Set {{ AshAdmin.Resource.name(resource) }}
-        <span :if={{ i != Enum.count(apis_and_resources) - 1 }}>
+        Set {AshAdmin.Resource.name(resource)}
+        <span :if={i != Enum.count(apis_and_resources) - 1}>
           |
         </span>
       </LiveRedirect>

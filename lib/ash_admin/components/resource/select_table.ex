@@ -11,13 +11,13 @@ defmodule AshAdmin.Components.Resource.SelectTable do
   prop(tables, :any, required: true)
 
   def render(assigns) do
-    ~H"""
+    ~F"""
     <div>
-      <div :if={{ @resource && AshAdmin.Resource.polymorphic?(@resource) }}>
-        <Form as="table" for={{ :table }} change={{ @on_change }}>
+      <div :if={@resource && AshAdmin.Resource.polymorphic?(@resource)}>
+        <Form as={:table} for={:table} change={@on_change}>
           <FieldContext name="table">
             <Label>Table</Label>
-            <Select selected={{ @table }} options={{ @tables || [] }} />
+            <Select selected={@table} options={@tables || []} />
           </FieldContext>
         </Form>
       </div>

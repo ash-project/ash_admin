@@ -5,8 +5,8 @@ defmodule AshAdmin.Components.Resource.AttributeTable do
   prop(resource, :any, required: true)
 
   def render(assigns) do
-    ~H"""
-    <div :if={{ Enum.any?(attributes(@resource)) }}>
+    ~F"""
+    <div :if={Enum.any?(attributes(@resource))}>
       <h1 class="text-center text-3xl rounded-t py-8">
         Attributes
       </h1>
@@ -24,20 +24,20 @@ defmodule AshAdmin.Components.Resource.AttributeTable do
         </thead>
         <tbody>
           <tr
-            class={{ "h-10", "bg-gray-200": rem(index, 2) == 0 }}
-            :for.with_index={{ {attribute, index} <- attributes(@resource) }}
+            class={"h-10", "bg-gray-200": rem(index, 2) == 0}
+            :for.with_index={{attribute, index} <- attributes(@resource)}
           >
             <th scope="row" class="text-center px-3">
-              {{ attribute.name }}
+              {attribute.name}
             </th>
             <td class="text-center px-3">
-              {{ attribute_type(attribute) }}
+              {attribute_type(attribute)}
             </td>
-            <td class="text-center max-w-sm min-w-sm">{{ attribute.description }}</td>
-            <td class="text-center">{{ to_string(attribute.primary_key?) }}</td>
-            <td class="text-center">{{ to_string(attribute.private?) }}</td>
-            <td class="text-center">{{ to_string(attribute.allow_nil?) }}</td>
-            <td class="text-center">{{ to_string(attribute.writable?) }}</td>
+            <td class="text-center max-w-sm min-w-sm">{attribute.description}</td>
+            <td class="text-center">{to_string(attribute.primary_key?)}</td>
+            <td class="text-center">{to_string(attribute.private?)}</td>
+            <td class="text-center">{to_string(attribute.allow_nil?)}</td>
+            <td class="text-center">{to_string(attribute.writable?)}</td>
           </tr>
         </tbody>
       </table>
