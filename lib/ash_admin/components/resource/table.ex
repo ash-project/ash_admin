@@ -17,57 +17,57 @@ defmodule AshAdmin.Components.Resource.Table do
   prop(skip, :list, default: [])
 
   def render(assigns) do
-    ~H"""
+    ~F"""
     <div>
       <table class="rounded-t-lg m-5 w-5/6 mx-auto text-left">
         <thead class="text-left border-b-2">
-          <th :for={{ attribute <- attributes(@resource, @attributes, @skip) }}>
-            {{ to_name(attribute.name) }}
+          <th :for={attribute <- attributes(@resource, @attributes, @skip)}>
+            {to_name(attribute.name)}
           </th>
         </thead>
         <tbody>
-          <tr :for={{ record <- @data }} class="border-b-2">
-            <td :for={{ attribute <- attributes(@resource, @attributes, @skip) }} class="py-3">{{ render_attribute(record, attribute) }}</td>
-            <td :if={{ @actions && actions?(@resource) }}>
+          <tr :for={record <- @data} class="border-b-2">
+            <td :for={attribute <- attributes(@resource, @attributes, @skip)} class="py-3">{render_attribute(record, attribute)}</td>
+            <td :if={@actions && actions?(@resource)}>
               <div class="flex h-max justify-items-center">
-                <div :if={{ AshAdmin.Resource.show_action(@resource) }}>
-                  <LiveRedirect to={{ ash_show_path(@prefix, @api, @resource, record, @table) }}>
+                <div :if={AshAdmin.Resource.show_action(@resource)}>
+                  <LiveRedirect to={ash_show_path(@prefix, @api, @resource, record, @table)}>
                     <HeroIcon name="information-circle" class="h-5 w-5 text-gray-500" />
                   </LiveRedirect>
                 </div>
 
-                <div :if={{ Ash.Resource.Info.primary_action(@resource, :update) }}>
-                  <LiveRedirect to={{ash_update_path(
+                <div :if={Ash.Resource.Info.primary_action(@resource, :update)}>
+                  <LiveRedirect to={ash_update_path(
                     @prefix,
                     @api,
                     @resource,
                     record,
                     Ash.Resource.Info.primary_action(@resource, :update).name,
                     @table
-                  )}}>
+                  )}>
                     <HeroIcon name="pencil" class="h-5 w-5 text-gray-500" />
                   </LiveRedirect>
                 </div>
 
-                <div :if={{ Ash.Resource.Info.primary_action(@resource, :destroy) }}>
-                  <LiveRedirect to={{ash_destroy_path(
+                <div :if={Ash.Resource.Info.primary_action(@resource, :destroy)}>
+                  <LiveRedirect to={ash_destroy_path(
                     @prefix,
                     @api,
                     @resource,
                     record,
                     Ash.Resource.Info.primary_action(@resource, :destroy).name,
                     @table
-                  )}}>
+                  )}>
                     <HeroIcon name="x-circle" class="h-5 w-5 text-gray-500" />
                   </LiveRedirect>
                 </div>
 
                 <button
-                  :if={{ AshAdmin.Resource.actor?(@resource) }}
-                  :on-click={{ @set_actor }}
-                  phx-value-resource={{ @resource }}
-                  phx-value-api={{ @api }}
-                  phx-value-pkey={{ encode_primary_key(record) }}
+                  :if={AshAdmin.Resource.actor?(@resource)}
+                  :on-click={@set_actor}
+                  phx-value-resource={@resource}
+                  phx-value-api={@api}
+                  phx-value-pkey={encode_primary_key(record)}
                 >
                   <HeroIcon name="key" class="h-5 w-5 text-gray-500" />
                 </button>

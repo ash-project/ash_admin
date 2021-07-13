@@ -9,10 +9,10 @@ defmodule AshAdmin.Components.Resource.Info do
   prop(prefix, :any, required: true)
 
   def render(assigns) do
-    ~H"""
+    ~F"""
     <div class="relative mx-12">
-      <AttributeTable resource={{ @resource }} />
-      <RelationshipTable api={{ @api }} resource={{ @resource }} prefix={{ @prefix }} />
+      <AttributeTable resource={@resource} />
+      <RelationshipTable api={@api} resource={@resource} prefix={@prefix} />
     </div>
     """
   end

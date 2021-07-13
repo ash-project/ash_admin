@@ -9,10 +9,10 @@ defmodule AshAdmin.Components.TopNav.TenantForm do
   prop(set_tenant, :event, required: true)
 
   def render(assigns) do
-    ~H"""
+    ~F"""
     <div id="tenant-hook" class="relative text-white" phx-hook="Tenant">
-      <form :if={{ @editing_tenant }} :on-submit={{ @set_tenant }}>
-        <input type="text" name="tenant" value={{ @tenant }} class={{ "text-black": @editing_tenant }}>
+      <form :if={@editing_tenant} :on-submit={@set_tenant}>
+        <input type="text" name="tenant" value={@tenant} class={"text-black": @editing_tenant}>
         <button :on-click="stop_editing_tenant">
           <svg width="1em" height="1em" viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -26,7 +26,7 @@ defmodule AshAdmin.Components.TopNav.TenantForm do
           </svg>
         </button>
       </form>
-      <button :if={{ @tenant }} :on-click={{ @clear_tenant }}>
+      <button :if={@tenant} :on-click={@clear_tenant}>
         <svg width="1em" height="1em" viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg">
           <path
             fill-rule="evenodd"
@@ -34,8 +34,8 @@ defmodule AshAdmin.Components.TopNav.TenantForm do
           />
         </svg>
       </button>
-      <a :if={{ !@editing_tenant }} href="#" :on-click="start_editing_tenant">
-        {{ @tenant || "No tenant" }}
+      <a :if={!@editing_tenant} href="#" :on-click="start_editing_tenant">
+        {@tenant || "No tenant"}
       </a>
     </div>
     """

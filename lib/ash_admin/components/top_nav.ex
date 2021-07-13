@@ -24,14 +24,14 @@ defmodule AshAdmin.Components.TopNav do
   prop(prefix, :any, required: true)
 
   def render(assigns) do
-    ~H"""
+    ~F"""
     <nav x-data="{ navOpen: false }" @keydown.window.escape="navOpen = false" class="bg-gray-800">
       <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center w-full">
             <div class="flex-shrink-0">
               <h3 class="text-white text-lg">
-                <LiveRedirect to={{ ash_admin_path(@prefix) }}>
+                <LiveRedirect to={ash_admin_path(@prefix)}>
                   Admin
                 </LiveRedirect>
               </h3>
@@ -40,34 +40,34 @@ defmodule AshAdmin.Components.TopNav do
               <div class="flex justify-between">
                 <div class="ml-10 flex items-center">
                   <Dropdown
-                    :for={{ api <- @apis }}
-                    active={{ api == @api }}
+                    :for={api <- @apis}
+                    active={api == @api}
                     class="mr-1"
-                    id={{ AshAdmin.Api.name(api) <> "_api_nav" }}
-                    name={{ AshAdmin.Api.name(api) }}
-                    groups={{ dropdown_groups(@prefix, @resource, api) }}
+                    id={AshAdmin.Api.name(api) <> "_api_nav"}
+                    name={AshAdmin.Api.name(api)}
+                    groups={dropdown_groups(@prefix, @resource, api)}
                   />
                 </div>
                 <div class="ml-10 flex items-center">
                   <ActorSelect
-                    :if={{ @actor_resources != []}}
-                    actor_resources={{ @actor_resources }}
-                    authorizing={{ @authorizing }}
-                    actor_paused={{ @actor_paused }}
-                    actor={{ @actor }}
-                    toggle_authorizing={{ @toggle_authorizing }}
-                    toggle_actor_paused={{ @toggle_actor_paused }}
-                    clear_actor={{ @clear_actor }}
-                    actor_api={{ @actor_api }}
-                    api={{ @api }}
-                    prefix={{ @prefix }}
+                    :if={@actor_resources != []}
+                    actor_resources={@actor_resources}
+                    authorizing={@authorizing}
+                    actor_paused={@actor_paused}
+                    actor={@actor}
+                    toggle_authorizing={@toggle_authorizing}
+                    toggle_actor_paused={@toggle_actor_paused}
+                    clear_actor={@clear_actor}
+                    actor_api={@actor_api}
+                    api={@api}
+                    prefix={@prefix}
                   />
                   <TenantForm
-                    :if={{ show_tenant_form?(@apis) }}
-                    tenant={{ @tenant }}
+                    :if={show_tenant_form?(@apis)}
+                    tenant={@tenant}
                     id="tenant_editor"
-                    set_tenant={{ @set_tenant }}
-                    clear_tenant={{ @clear_tenant }}
+                    set_tenant={@set_tenant}
+                    clear_tenant={@clear_tenant}
                   />
                 </div>
               </div>
@@ -104,33 +104,33 @@ defmodule AshAdmin.Components.TopNav do
         <div class="relative px-2 pt-2 pb-3 sm:px-3">
           <div class="block px-4 py-2 text-sm">
             <ActorSelect
-              :if={{ @actor_resources != [] }}
-              actor_resources={{ @actor_resources }}
-              authorizing={{ @authorizing }}
-              actor_paused={{ @actor_paused }}
-              actor={{ @actor }}
-              toggle_authorizing={{ @toggle_authorizing }}
-              toggle_actor_paused={{ @toggle_actor_paused }}
-              clear_actor={{ @clear_actor }}
-              actor_api={{ @actor_api }}
-              api={{ @api }}
-              prefix={{ @prefix }}
+              :if={@actor_resources != []}
+              actor_resources={@actor_resources}
+              authorizing={@authorizing}
+              actor_paused={@actor_paused}
+              actor={@actor}
+              toggle_authorizing={@toggle_authorizing}
+              toggle_actor_paused={@toggle_actor_paused}
+              clear_actor={@clear_actor}
+              actor_api={@actor_api}
+              api={@api}
+              prefix={@prefix}
             />
           </div>
           <div class="block px-4 py-2 text-sm">
             <TenantForm
-              :if={{ show_tenant_form?(@apis) }}
-              tenant={{ @tenant }}
+              :if={show_tenant_form?(@apis)}
+              tenant={@tenant}
               id="tenant_editor_drawer"
-              set_tenant={{ @set_tenant }}
-              clear_tenant={{ @clear_tenant }}
+              set_tenant={@set_tenant}
+              clear_tenant={@clear_tenant}
             />
           </div>
           <DrawerDropdown
-            :for={{ api <- @apis }}
-            id={{ AshAdmin.Api.name(api) <> "_api_nav_drawer" }}
-            name={{ AshAdmin.Api.name(api) }}
-            groups={{ dropdown_groups(@prefix, @resource, api) }}
+            :for={api <- @apis}
+            id={AshAdmin.Api.name(api) <> "_api_nav_drawer"}
+            name={AshAdmin.Api.name(api)}
+            groups={dropdown_groups(@prefix, @resource, api)}
           />
         </div>
       </div>
