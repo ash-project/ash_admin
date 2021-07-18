@@ -138,7 +138,7 @@ defmodule AshAdmin.Components.Resource.Form do
           tables={{ @tables }}
         />
         <Form
-          as="action"
+          as={{ :action }}
           for={{ :action }}
           change="change_action"
           opts={{id: @id <> "_action_form"}}
@@ -978,29 +978,7 @@ defmodule AshAdmin.Components.Resource.Form do
       AshPhoenix.Form.update_form(
         socket.assigns.form,
         path,
-        fn adding_form ->
-          current_value =
-            adding_form.source
-            |> Phoenix.HTML.FormData.input_value(nil, String.to_existing_atom(field))
-            |> List.wrap()
-            |> Enum.with_index()
-            |> Map.new(fn {value, index} ->
-              {to_string(index), value}
-            end)
-
-          new_value = Map.delete(current_value, index)
-
-          new_value =
-            if new_value == %{} do
-              nil
-            else
-              new_value
-            end
-
-          new_params = Map.put(adding_form.params, field, new_value)
-
-          AshPhoenix.Form.validate(adding_form, new_params)
-        end
+        &remove_value(&1, field, index)
       )
 
     path =
@@ -1066,6 +1044,40 @@ defmodule AshAdmin.Components.Resource.Form do
   defp add_target(socket, target) do
     old_targets = socket.assigns[:targets] || MapSet.new()
     assign(socket, :targets, MapSet.put(old_targets, Enum.map(target, &to_string/1)))
+  end
+
+  defp remove_value(form, field, index) do
+    current_value =
+      form.source
+      |> Phoenix.HTML.FormData.input_value(
+        Phoenix.HTML.Form.form_for(form, "foo"),
+        String.to_existing_atom(field)
+      )
+      |> case do
+        map when is_map(map) ->
+          map
+
+        list ->
+          list
+          |> List.wrap()
+          |> Enum.with_index()
+          |> Map.new(fn {value, index} ->
+            {to_string(index), value}
+          end)
+      end
+
+    new_value = Map.delete(current_value, index)
+
+    new_value =
+      if new_value == %{} do
+        nil
+      else
+        new_value
+      end
+
+    new_params = Map.put(form.params, field, new_value)
+
+    AshPhoenix.Form.validate(form, new_params)
   end
 
   defp params(params, socket) do

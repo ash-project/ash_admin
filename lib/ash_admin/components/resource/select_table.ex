@@ -14,7 +14,7 @@ defmodule AshAdmin.Components.Resource.SelectTable do
     ~H"""
     <div>
       <div :if={{ @resource && AshAdmin.Resource.polymorphic?(@resource) }}>
-        <Form as="table" for={{ :table }} change={{ @on_change }}>
+        <Form as={{ :table }} for={{ :table }} change={{ @on_change }}>
           <FieldContext name="table">
             <Label>Table</Label>
             <Select selected={{ @table }} options={{ @tables || [] }} />

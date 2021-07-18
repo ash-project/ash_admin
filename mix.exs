@@ -87,13 +87,13 @@ defmodule AshAdmin.MixProject do
   defp deps do
     [
       {:ash, "~> 1.46 and >= 1.46.9"},
-      {:ash_phoenix, "~> 0.4.23-rc1"},
-      {:surface, "~> 0.3.2"},
+      {:ash_phoenix, "~> 0.5"},
+      {:surface, "~> 0.4.1"},
       {:phoenix_live_view, "~> 0.15.4"},
       {:phoenix_html, "~> 2.14.1 or ~> 2.15"},
       {:jason, "~> 1.0"},
       # Dev dependencies
-      {:surface_formatter, "~> 0.3.1", only: [:dev, :test]},
+      {:surface_formatter, "~> 0.4.1", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
       {:ash_postgres, "~> 0.35.4", only: [:dev, :test]},

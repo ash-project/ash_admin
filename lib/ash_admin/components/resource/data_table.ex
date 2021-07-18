@@ -156,7 +156,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
               <div class="px-4 sm:p-6">
                 <Form
                   :if={{ @query }}
-                  as="query"
+                  as={{ :query }}
                   for={{ @query }}
                   change="validate"
                   submit="save"
