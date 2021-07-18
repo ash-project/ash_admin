@@ -498,7 +498,7 @@ defmodule AshAdmin.Components.Resource.Form do
     <Select
     form={{ form }}
     options={{ Nil: nil, True: "true", False: "false" }}
-    selected={{boolean_selected(value(value, form, attribute))}}
+    selected={{value(value, form, attribute)}}
     name={{name || form.name <> "[#{attribute.name}]"}}
     :props={{props(value, attribute)}} />
     """
@@ -698,7 +698,24 @@ defmodule AshAdmin.Components.Resource.Form do
   defp value({:value, value}, _form, _attribute), do: value
 
   defp value(value, form, attribute) do
-    value || Phoenix.HTML.FormData.input_value(form.source, form, attribute.name)
+    if value do
+      value
+    else
+      if Map.has_key?(form.source.params, to_string(attribute.name)) do
+        Phoenix.HTML.FormData.input_value(form.source, form, attribute.name)
+      else
+        case attribute.default do
+          nil ->
+            nil
+
+          func when is_function(func) ->
+            nil
+
+          default ->
+            default
+        end
+      end
+    end
   end
 
   defp allow_nil_option(%{allow_nil?: true}), do: [{"", nil}]
@@ -1193,14 +1210,6 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def attributes(resource, action, exactly \\ nil)
-
-  def attributes(resource, :_lookup, _exactly) do
-    resource
-    |> Ash.Resource.Info.attributes()
-    |> Enum.filter(& &1.primary_key?)
-    |> Enum.map(&Map.put(&1, :default, nil))
-    |> sort_attributes(resource)
-  end
 
   def attributes(resource, %{type: :read, arguments: arguments}, exactly)
       when not is_nil(exactly) do
