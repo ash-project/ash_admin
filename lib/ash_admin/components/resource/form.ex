@@ -735,10 +735,6 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
-  defp boolean_selected(nil), do: :Nil
-  defp boolean_selected(true), do: :True
-  defp boolean_selected(false), do: :False
-
   defp placeholder(value) when is_function(value) do
     "DEFAULT"
   end
