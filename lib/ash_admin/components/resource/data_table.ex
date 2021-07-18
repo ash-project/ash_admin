@@ -32,13 +32,22 @@ defmodule AshAdmin.Components.Resource.DataTable do
     else
       socket = assign(socket, assigns)
       params = socket.assigns[:params] || %{}
-      arguments = params["args"] || %{}
+      arguments = params["args"]
 
       query =
         socket.assigns[:resource]
-        |> Ash.Query.for_read(socket.assigns.action.name, arguments, actor: socket.assigns[:actor])
-        |> Ash.Query.set_tenant(socket.assigns[:tenant])
-        |> AshPhoenix.hide_errors()
+        |> AshPhoenix.Form.for_read(socket.assigns.action.name,
+          as: "query",
+          actor: socket.assigns[:actor],
+          tenant: socket.assigns[:tenant]
+        )
+
+      query =
+        if arguments do
+          AshPhoenix.Form.validate(query, arguments)
+        else
+          query
+        end
 
       socket = assign(socket, :query, query)
 
@@ -94,7 +103,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                    !socket.assigns[:table] do
                 {:ok, []}
               else
-                socket.assigns.query
+                socket.assigns.query.source
                 |> set_table(socket.assigns[:table])
                 |> assigns[:api].read(
                   action: socket.assigns[:action].name,
@@ -115,7 +124,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                    !socket.assigns[:table] do
                 {:ok, []}
               else
-                socket.assigns.query
+                socket.assigns.query.source
                 |> set_table(socket.assigns[:table])
                 |> assigns[:api].read(
                   action: socket.assigns[:action],
@@ -238,11 +247,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   end
 
   def handle_event("validate", %{"query" => query}, socket) do
-    query =
-      Ash.Query.for_read(socket.assigns.resource, socket.assigns.action.name, query,
-        tenant: socket.assigns[:tenant],
-        actor: socket.assigns[:actor]
-      )
+    query = AshPhoenix.Form.validate(socket.assigns.query, query)
 
     {:noreply, assign(socket, query: query)}
   end
