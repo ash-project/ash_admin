@@ -5,6 +5,19 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.16-rc.0](https://github.com/ash-project/ash_admin/compare/v0.2.15...v0.2.16-rc.0) (2021-07-18)
+
+
+
+
+### Bug Fixes:
+
+* show boolean default values better
+
+### Improvements:
+
+* update to new form logic
+
 ## [v0.2.15](https://github.com/ash-project/ash_admin/compare/v0.2.14...v0.2.15) (2021-05-18)
 
 
