@@ -910,7 +910,6 @@ defmodule AshAdmin.Components.Resource.Form do
     {:noreply,
      socket
      |> assign(:form, form)
-     #  |> push_event("form_change", %{})
      |> add_target(["form" | path])
      |> add_target(["form" | path] ++ ["_form_type"])}
   end
@@ -974,7 +973,9 @@ defmodule AshAdmin.Components.Resource.Form do
         fn adding_form ->
           if adding_form.data do
             new_data = socket.assigns.api.load!(adding_form.data, relationship)
+
             %{adding_form | data: new_data, source: %{adding_form.source | data: new_data}}
+            |> AshPhoenix.Form.validate(adding_form.params, errors: false)
           else
             adding_form
           end
@@ -1024,7 +1025,7 @@ defmodule AshAdmin.Components.Resource.Form do
       end
     end
 
-    case AshPhoenix.Form.submit(form, socket.assigns.api, before_submit: before_submit) do
+    case AshPhoenix.Form.submit(form, before_submit: before_submit) do
       {:ok, result} ->
         redirect_to(socket, result)
 
@@ -1396,22 +1397,36 @@ defmodule AshAdmin.Components.Resource.Form do
       end
 
       form =
-        if socket.assigns.action.type == :create do
-          socket.assigns.resource
-          |> AshPhoenix.Form.for_create(socket.assigns.action.name,
-            forms: [
-              auto?: true
-            ],
-            transform_errors: transform_errors
-          )
-        else
-          socket.assigns.record
-          |> AshPhoenix.Form.for_update(socket.assigns.action.name,
-            forms: [
-              auto?: true
-            ],
-            transform_errors: transform_errors
-          )
+        case socket.assigns.action.type do
+          :create ->
+            socket.assigns.resource
+            |> AshPhoenix.Form.for_create(socket.assigns.action.name,
+              api: socket.assigns.api,
+              forms: [
+                auto?: true
+              ],
+              transform_errors: transform_errors
+            )
+
+          :update ->
+            socket.assigns.record
+            |> AshPhoenix.Form.for_update(socket.assigns.action.name,
+              api: socket.assigns.api,
+              forms: [
+                auto?: true
+              ],
+              transform_errors: transform_errors
+            )
+
+          :destroy ->
+            socket.assigns.record
+            |> AshPhoenix.Form.for_destroy(socket.assigns.action.name,
+              api: socket.assigns.api,
+              forms: [
+                auto?: true
+              ],
+              transform_errors: transform_errors
+            )
         end
 
       assign(socket, :form, form)
