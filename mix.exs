@@ -98,7 +98,7 @@ defmodule AshAdmin.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
       {:ash_postgres, "~> 0.35.4", only: [:dev, :test]},
       {:ash_policy_authorizer, "~> 0.16.0", only: [:dev, :test]},
-      {:git_ops, "~> 2.4.4", only: [:dev, :test]},
+      {:git_ops, "~> 2.4.5", only: [:dev, :test]},
       {:ex_doc, "~> 0.23", only: [:dev, :test], runtime: false},
       {:ex_check, "~> 0.12.0", only: [:dev, :test]},
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
