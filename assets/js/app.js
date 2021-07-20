@@ -5,31 +5,59 @@ import NProgress from "nprogress"
 import { LiveSocket, Browser } from "phoenix_live_view"
 import 'alpinejs'
 
-function cookieValue(name) {
-  if (document.cookie) {
-    let cookie =
-      document.cookie
-        .split('; ')
-        .find(row => row.startsWith(name + '='))
-    if (cookie) {
-      let value = cookie.split('=')[1];
-
-      if (value) {
-        return value.split(';')[0]
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
-  } else {
-    return null;
-  };
-}
-
 let socketPath = document.querySelector("html").getAttribute("phx-socket") || "/live"
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let Hooks = {}
+const editors = {};
+
+Hooks.JsonEditor = {
+  mounted() {
+    const inputId = this.el.getAttribute("data-input-id")
+    const hook = this;
+    this.editor = new JSONEditor(this.el, {
+      onChangeJSON: (json) => {
+        const target = document.getElementById(inputId)
+
+        target.value = JSON.stringify(json)
+        target.dispatchEvent(new Event('change', { 'bubbles': true }))
+      },
+      onModeChange: (newMode) => {
+        hook.mode = newMode;
+      },
+      modes: ['preview', 'tree']
+    }, JSON.parse(document.getElementById(inputId).value));
+
+    editors[this.el.id] = this.editor
+  }
+}
+
+Hooks.JsonView = {
+  updated() {
+    const json = JSON.parse(this.el.getAttribute("data-json"));
+    this.editor = new JSONEditor(this.el, {
+      mode: 'preview'
+    }, json)
+  },
+  mounted() {
+    const json = JSON.parse(this.el.getAttribute("data-json"));
+    this.editor = new JSONEditor(this.el, {
+      mode: 'preview'
+    }, json)
+  }
+}
+
+Hooks.JsonEditorSource = {
+  updated() {
+    try {
+      editors[this.el.getAttribute("data-editor-id")].update(JSON.parse(response))
+      updateText(this.el.value)
+    } catch (e) {
+
+    }
+  }
+}
+
+
 Hooks.Actor = {
   mounted() {
     this.handleEvent("set_actor", (payload) => {

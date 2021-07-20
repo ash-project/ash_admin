@@ -12,6 +12,7 @@ defmodule AshAdmin.Components.Resource.Form do
     Checkbox,
     ErrorTag,
     FieldContext,
+    HiddenInput,
     Inputs,
     Label,
     Select,
@@ -458,9 +459,12 @@ defmodule AshAdmin.Components.Resource.Form do
         true
 
       _ ->
-        false
+        unwrap_type(attribute.type) == Ash.Type.Map
     end
   end
+
+  defp unwrap_type({:array, type}), do: unwrap_type(type)
+  defp unwrap_type(type), do: type
 
   def render_attribute_input(assigns, attribute, form, value \\ nil, name \\ nil)
 
@@ -570,6 +574,51 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
+  def render_attribute_input(
+        assigns,
+        %{type: {:array, Ash.Type.Map}} = attribute,
+        form,
+        value,
+        name
+      ) do
+    render_attribute_input(assigns, %{attribute | type: Ash.Type.Map}, form, value, name)
+  end
+
+  def render_attribute_input(assigns, %{type: Ash.Type.Map} = attribute, form, value, name) do
+    encoded = Jason.encode!(value(value, form, attribute))
+
+    ~H"""
+    <div>
+      <div
+      phx-hook="JsonEditor"
+      phx-update="ignore"
+      data-input-id={{form.id <> "_#{attribute.name}"}}
+      id={{form.id <> "_#{attribute.name}_json"}}
+      />
+
+      <HiddenInput
+        opts={{phx_hook: "JsonEditorSource", data_editor_id: form.id <> "_#{attribute.name}_json"}}
+        form={{ form }}
+        value={{encoded}}
+        name={{name || form.name <> "[#{attribute.name}]"}}
+        id={{form.id <> "_#{attribute.name}"}}
+        class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+      />
+    </div>
+    """
+  rescue
+    _ ->
+      ~H"""
+      <TextInput
+        form={{ form }}
+        opts={{ disabled: true }}
+        value={{"..."}}
+        name={{name || form.name <> "[#{attribute.name}]"}}
+        class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+      />
+      """
+  end
+
   def render_attribute_input(assigns, attribute, form, value, name) do
     cond do
       Ash.Type.embedded_type?(attribute.type) ->
@@ -621,7 +670,7 @@ defmodule AshAdmin.Components.Resource.Form do
     ~H"""
     <div>
       <div :for.with_index={{{value, index} <- list_value(value || Phoenix.HTML.FormData.input_value(form.source, form, attribute.name))}}>
-          {{render_attribute_input(assigns, %{attribute | type: type, constraints: attribute.constraints[:items] || []}, form, {:value, value}, name <> "[#{index}]")}}
+          {{render_attribute_input(assigns, %{attribute | type: type, constraints: attribute.constraints[:items] || []}, %{form | params: %{"#{attribute.name}" => form.params["#{attribute.name}"]["#{index}"]}}, {:value, value}, name <> "[#{index}]")}}
           <button
             type="button"
             :on-click="remove_value"
@@ -647,16 +696,42 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp render_fallback_attribute(assigns, form, attribute, value, name) do
+    casted_value = Phoenix.HTML.Safe.to_iodata(value(value, form, attribute))
+
     ~H"""
     <TextInput
       form={{ form }}
       opts={{ type: text_input_type(attribute), placeholder: placeholder(attribute.default) }}
-      value={{value(value, form, attribute)}}
+      value={{casted_value}}
       name={{name || form.name <> "[#{attribute.name}]"}}
       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-      :props={{props(value, attribute)}}
     />
     """
+  rescue
+    _ ->
+      case Map.fetch(form.params, to_string(attribute.name)) do
+        {:ok, value} ->
+          ~H"""
+          <TextInput
+            form={{ form }}
+            opts={{ type: text_input_type(attribute), placeholder: placeholder(attribute.default) }}
+            value={{value}}
+            name={{name || form.name <> "[#{attribute.name}]"}}
+            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+          />
+          """
+
+        :error ->
+          ~H"""
+          <TextInput
+            form={{ form }}
+            opts={{ disabled: true }}
+            value={{"..."}}
+            name={{name || form.name <> "[#{attribute.name}]"}}
+            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+          />
+          """
+      end
   end
 
   defp list_value(value) do
@@ -1103,14 +1178,14 @@ defmodule AshAdmin.Components.Resource.Form do
   defp append_to_map(map, value) do
     key =
       map
+      |> Kernel.||(%{})
       |> Map.keys()
       |> Enum.map(&String.to_integer/1)
-      |> Enum.max()
-      |> Kernel.||(-1)
+      |> Enum.max(fn -> -1 end)
       |> Kernel.+(1)
       |> to_string()
 
-    Map.put(map, key, value)
+    Map.put(map || %{}, key, value)
   end
 
   defp take_targets(params, []), do: params

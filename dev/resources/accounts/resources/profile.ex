@@ -14,5 +14,6 @@ defmodule Demo.Accounts.Profile do
     attribute :bio, :string, allow_nil?: false
     attribute :history, :string
     attribute :tags, {:array, :string}, default: []
+    attribute :metadata, :map
   end
 end

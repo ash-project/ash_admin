@@ -7,6 +7,8 @@
     <%= csrf_meta_tag() %>
     <title><%= assigns[:page_title] || "Ash Admin" %></title>
     <style><%= raw(render("app.css")) %></style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.5.1/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.5.1/jsoneditor.min.js"></script>
   </head>
   <body>
     <%= @inner_content %>

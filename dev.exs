@@ -13,7 +13,7 @@ Application.put_env(:ash_admin, DemoWeb.Endpoint,
       "node_modules/webpack/bin/webpack.js",
       "--mode",
       System.get_env("NODE_ENV") || "production",
-      "--watch-stdin",
+      "--watch-options-stdin",
       cd: "assets"
     ]
   ],
