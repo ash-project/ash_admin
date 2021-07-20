@@ -776,8 +776,10 @@ defmodule AshAdmin.Components.Resource.Form do
     if value do
       value
     else
-      if Map.has_key?(form.source.params, to_string(attribute.name)) do
-        Phoenix.HTML.FormData.input_value(form.source, form, attribute.name)
+      value = Phoenix.HTML.FormData.input_value(form.source, form, attribute.name)
+
+      if value do
+        value
       else
         case attribute.default do
           nil ->

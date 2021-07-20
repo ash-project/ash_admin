@@ -24,11 +24,15 @@ Hooks.JsonEditor = {
         } catch (_e) {
         }
       },
-      onChangeJSON: (json) => {
-        const target = document.getElementById(inputId)
+      onChange: () => {
+        try {
+          const target = document.getElementById(inputId)
+          json = hook.editor.get();
 
-        target.value = JSON.stringify(json)
-        target.dispatchEvent(new Event('change', { 'bubbles': true }))
+          target.value = JSON.stringify(json)
+          target.dispatchEvent(new Event('change', { 'bubbles': true }))
+        } catch (_e) {
+        }
       },
       onModeChange: (newMode) => {
         hook.mode = newMode;
