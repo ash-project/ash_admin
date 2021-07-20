@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.17](https://github.com/ash-project/ash_admin/compare/v0.2.16-rc.1...v0.2.17) (2021-07-20)
+
+
+
+
+### Improvements:
+
+* add json editor
+
 ## [v0.2.16-rc.1](https://github.com/ash-project/ash_admin/compare/v0.2.16-rc.0...v0.2.16-rc.1) (2021-07-18)
 
 
