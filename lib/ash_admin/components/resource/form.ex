@@ -1019,8 +1019,20 @@ defmodule AshAdmin.Components.Resource.Form do
         socket.assigns.form,
         path,
         fn adding_form ->
+          new_value =
+            adding_form
+            |> Phoenix.HTML.Form.form_for("foo")
+            |> Phoenix.HTML.Form.input_value(String.to_existing_atom(field))
+            |> Kernel.||([])
+            |> indexed_list()
+            |> append_to_and_map(nil)
+
           new_params =
-            Map.update(adding_form.params, field, %{"0" => nil}, &append_to_map(&1, nil))
+            Map.put(
+              adding_form.params,
+              field,
+              new_value
+            )
 
           AshPhoenix.Form.validate(adding_form, new_params)
         end
@@ -1135,6 +1147,19 @@ defmodule AshAdmin.Components.Resource.Form do
     assign(socket, :targets, MapSet.put(old_targets, Enum.map(target, &to_string/1)))
   end
 
+  defp indexed_list(map) when is_map(map) do
+    map
+    |> Map.keys()
+    |> Enum.map(&String.to_integer/1)
+    |> Enum.sort()
+    |> Enum.map(&map[to_string(&1)])
+  rescue
+    _ ->
+      List.wrap(map)
+  end
+
+  defp indexed_list(other), do: List.wrap(other)
+
   defp remove_value(form, field, index) do
     current_value =
       form.source
@@ -1175,17 +1200,13 @@ defmodule AshAdmin.Components.Resource.Form do
     take_targets(params, targets)["form"]
   end
 
-  defp append_to_map(map, value) do
-    key =
-      map
-      |> Kernel.||(%{})
-      |> Map.keys()
-      |> Enum.map(&String.to_integer/1)
-      |> Enum.max(fn -> -1 end)
-      |> Kernel.+(1)
-      |> to_string()
-
-    Map.put(map || %{}, key, value)
+  defp append_to_and_map(list, value) do
+    list
+    |> Enum.concat([value])
+    |> Enum.with_index()
+    |> Map.new(fn {v, i} ->
+      {"#{i}", v}
+    end)
   end
 
   defp take_targets(params, []), do: params

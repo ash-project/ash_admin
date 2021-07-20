@@ -15,6 +15,15 @@ Hooks.JsonEditor = {
     const inputId = this.el.getAttribute("data-input-id")
     const hook = this;
     this.editor = new JSONEditor(this.el, {
+      onChangeText: (json) => {
+        const target = document.getElementById(inputId)
+        try {
+          JSON.parse(json)
+          target.value = json;
+          target.dispatchEvent(new Event('change', { 'bubbles': true }))
+        } catch (_e) {
+        }
+      },
       onChangeJSON: (json) => {
         const target = document.getElementById(inputId)
 
@@ -24,12 +33,31 @@ Hooks.JsonEditor = {
       onModeChange: (newMode) => {
         hook.mode = newMode;
       },
-      modes: ['preview', 'tree']
+      modes: ['text', 'tree']
     }, JSON.parse(document.getElementById(inputId).value));
 
     editors[this.el.id] = this.editor
   }
 }
+
+Hooks.JsonEditorSource = {
+  updated() {
+    try {
+      let editor = editors[this.el.getAttribute("data-editor-id")];
+      if (editor.getMode() === "tree") {
+        editor.update(JSON.parse(this.el.value))
+      } else {
+        if (console.log(editor.get()) !== console.log(JSON.parse(this.el.value))) {
+          editor.setText(this.el.value)
+        } else {
+        }
+      }
+    } catch (_e) {
+
+    }
+  }
+}
+
 
 Hooks.JsonView = {
   updated() {
@@ -45,18 +73,6 @@ Hooks.JsonView = {
     }, json)
   }
 }
-
-Hooks.JsonEditorSource = {
-  updated() {
-    try {
-      editors[this.el.getAttribute("data-editor-id")].update(JSON.parse(response))
-      updateText(this.el.value)
-    } catch (e) {
-
-    }
-  }
-}
-
 
 Hooks.Actor = {
   mounted() {

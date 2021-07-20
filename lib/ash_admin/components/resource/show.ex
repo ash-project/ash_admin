@@ -282,23 +282,24 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   end
 
-  defp render_attribute(assigns, resource, record, %{type: {:array, Ash.Type.Map}} = attribute, nested?) do
-    render_attribute(assigns, resource, record, %{attribute | type: Ash.Type.Map}, nested?) do
+  defp render_attribute(
+         assigns,
+         resource,
+         record,
+         %{type: {:array, Ash.Type.Map}} = attribute,
+         nested?
+       ) do
+    render_attribute(assigns, resource, record, %{attribute | type: Ash.Type.Map}, nested?)
   end
 
-  defp render_attribute(assigns, resource, record, %{type: Ash.Type.Map} = attribute, nested?) do
-    render_attribute(assigns, resource, record, %{attribute | type: Ash.Type.Map}, nested?) do
-  end
-
-  def render_attribute_input(assigns, %{type: Ash.Type.Map} = attribute, form, value, name) do
-    encoded = Jason.encode!(value(value, form, attribute))
+  defp render_attribute(assigns, _resource, record, %{type: Ash.Type.Map} = attribute, _nested?) do
+    encoded = Jason.encode!(Map.get(record, attribute.name))
 
     ~H"""
       <div
       phx-hook="JsonView"
-      phx-update="ignore"
       data-json={{encoded}}
-      id={{"_#{attribute.name}_json"}}
+      id={{"_#{AshAdmin.Helpers.encode_primary_key(record)}_#{attribute.name}_json"}}
       />
     """
   rescue
