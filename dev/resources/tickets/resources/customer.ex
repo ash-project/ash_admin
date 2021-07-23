@@ -3,7 +3,14 @@ defmodule Demo.Tickets.Customer do
     data_layer: AshPostgres.DataLayer,
     authorizers: [
       AshPolicyAuthorizer.Authorizer
+    ],
+    extensions: [
+      AshAdmin.Resource
     ]
+
+    admin do
+      relationship_display_fields [:id, :first_name]
+    end
 
   resource do
     base_filter representative: false

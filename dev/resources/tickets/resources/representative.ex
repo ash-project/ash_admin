@@ -8,6 +8,10 @@ defmodule Demo.Tickets.Representative do
       AshAdmin.Resource
     ]
 
+    admin do
+      relationship_display_fields [:id, :first_name]
+    end
+
   resource do
     base_filter representative: true
 
