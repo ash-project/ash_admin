@@ -67,9 +67,9 @@ defmodule AshAdmin.Resource do
         doc: "The list of attributes to render on the table view."
       ],
       format_fields: [
-        type: {:list, :any},
+        type: {:list, :tuple},
         doc: "The list of fields and their formats."
-      ]
+      ],
       relationship_display_fields: [
         type: {:list, :atom},
         doc: "The list of attributes to render when it's shown as a relationship on a datatable"
