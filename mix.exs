@@ -5,7 +5,7 @@ defmodule AshAdmin.MixProject do
   An admin UI for Ash Framework
   """
 
-  @version "0.2.18"
+  @version "0.2.20"
 
   def project do
     [
@@ -86,9 +86,9 @@ defmodule AshAdmin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ash, "~> 1.46 and >= 1.46.9"},
+      {:ash, "~> 1.47 and >= 1.47.3"},
       # {:ash, path: "../ash", override: true},
-      {:ash_phoenix, "~> 0.5 and >= 0.5.3"},
+      {:ash_phoenix, "~> 0.5 and >= 0.5.7"},
       # {:ash_phoenix, path: "../ash_phoenix"},
       {:surface, "~> 0.4.1"},
       {:phoenix_live_view, "~> 0.15.4"},
@@ -98,8 +98,8 @@ defmodule AshAdmin.MixProject do
       {:surface_formatter, "~> 0.4.1", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
-      {:ash_postgres, "~> 0.35.4", only: [:dev, :test]},
-      {:ash_policy_authorizer, "~> 0.16.0", only: [:dev, :test]},
+      {:ash_postgres, "~> 0.40.9", only: [:dev, :test]},
+      {:ash_policy_authorizer, "~> 0.16.2", only: [:dev, :test]},
       {:git_ops, "~> 2.4.5", only: [:dev, :test]},
       {:ex_doc, "~> 0.23", only: [:dev, :test], runtime: false},
       {:ex_check, "~> 0.12.0", only: [:dev, :test]},

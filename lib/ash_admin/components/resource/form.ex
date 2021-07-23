@@ -118,7 +118,7 @@ defmodule AshAdmin.Components.Resource.Form do
     <div class="shadow-lg overflow-hidden sm:rounded-md bg-white">
       <div :if={{ @form.submitted_once? }} class="ml-4 mt-4 text-red-500">
         <ul>
-          <li :for={{ {field, message} <- AshPhoenix.Form.errors_for(@form, [], :simple) || [] }}>
+          <li :for={{ {field, message} <- AshPhoenix.Form.errors(@form) }}>
             <span :if={{field}}>
               {{ to_name(field) }}:
             </span>
@@ -276,7 +276,7 @@ defmodule AshAdmin.Components.Resource.Form do
       >
         <div :if={{ @form.submitted_once? }} class="ml-4 mt-4 text-red-500">
           <ul>
-            <li :for={{ {field, message} <- AshPhoenix.Form.errors_for(@form, inner_form.name, :simple) || [] }}>
+            <li :for={{ {field, message} <- AshPhoenix.Form.errors(@form, inner_form.name) }}>
               <span :if={{field}}>
                 {{ to_name(field) }}:
               </span>

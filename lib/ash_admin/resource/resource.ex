@@ -70,10 +70,16 @@ defmodule AshAdmin.Resource do
         type: {:list, :any},
         doc: "The list of fields and their formats."
       ]
+      relationship_display_fields: [
+        type: {:list, :atom},
+        doc: "The list of attributes to render when it's shown as a relationship on a datatable"
+      ]
     ]
   }
 
-  use Ash.Dsl.Extension, sections: [@admin]
+  use Ash.Dsl.Extension,
+    sections: [@admin],
+    transformers: [AshAdmin.Resource.Transformers.ValidateTableColumns]
 
   @moduledoc """
   An Api extension to alter the behavior of a resource in the admin ui.
@@ -99,6 +105,10 @@ defmodule AshAdmin.Resource do
     |> Ash.Dsl.Extension.get_opt([:admin], :polymorphic_tables, [], true)
     |> Enum.concat(find_polymorphic_tables(resource, apis))
     |> Enum.uniq()
+  end
+
+  def relationship_display_fields(resource) do
+    Ash.Dsl.Extension.get_opt(resource, [:admin], :relationship_display_fields, nil, true)
   end
 
   def table_columns(resource) do
