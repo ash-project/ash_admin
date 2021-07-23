@@ -214,6 +214,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 api={{ @api }}
                 set_actor={{ @set_actor }}
                 attributes={{ AshAdmin.Resource.table_columns(@resource) }}
+                format_fields={{ AshAdmin.Resource.format_fields(@resource) }}
                 prefix={{ @prefix }}
               />
               {{ render_pagination_links(assigns, :bottom) }}
