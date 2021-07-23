@@ -10,7 +10,7 @@ defmodule Demo.Tickets.Ticket do
 
   admin do
     show_action :read
-    table_columns [:id, :representative_id, :reporter_id, :subject, :status]
+    table_columns [:id, :representative, :reporter, :reporter_id, :subject, :status]
     form do
       field :description, type: :long_text
     end

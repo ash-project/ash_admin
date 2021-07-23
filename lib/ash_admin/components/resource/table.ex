@@ -5,6 +5,7 @@ defmodule AshAdmin.Components.Resource.Table do
   import AshAdmin.Helpers
   alias Surface.Components.LiveRedirect
   alias AshAdmin.Components.HeroIcon
+  alias Ash.Resource.Relationships.{BelongsTo, HasOne}
 
   prop(attributes, :any, default: nil)
   prop(data, :list, default: nil)
@@ -27,7 +28,7 @@ defmodule AshAdmin.Components.Resource.Table do
         </thead>
         <tbody>
           <tr :for={{ record <- @data }} class="border-b-2">
-            <td :for={{ attribute <- attributes(@resource, @attributes, @skip) }} class="py-3">{{ render_attribute(record, attribute) }}</td>
+            <td :for={{ attribute <- attributes(@resource, @attributes, @skip) }} class="py-3">{{ render_attribute(@api, record, attribute) }}</td>
             <td :if={{ @actions && actions?(@resource) }}>
               <div class="flex h-max justify-items-center">
                 <div :if={{ AshAdmin.Resource.show_action(@resource) }}>
@@ -88,29 +89,83 @@ defmodule AshAdmin.Components.Resource.Table do
 
   defp attributes(resource, attributes, skip) do
     attributes
-    |> Enum.map(&Ash.Resource.Info.attribute(resource, &1))
+    |> Enum.map(fn x ->
+      value = Ash.Resource.Info.attribute(resource, x)
+
+      if is_nil(value) do
+        Ash.Resource.Info.relationship(resource, x)
+      else
+        value
+      end
+    end)
     |> Enum.filter(& &1)
     |> Enum.reject(&(&1.name in skip))
   end
 
-  defp render_attribute(record, attribute) do
+  defp render_attribute(api, record, attribute) do
     if Ash.Type.embedded_type?(attribute.type) do
       "..."
     else
-      data =
-        record
-        |> Map.get(attribute.name)
-        |> Phoenix.HTML.Safe.to_iodata()
-
-      if is_binary(data) and !String.valid?(data) do
-        "..."
-      else
-        data
-      end
+      process_attribute(api, record, attribute)
     end
   rescue
     _ ->
       "..."
+  end
+
+  defp process_attribute(api, record, %module{} = attribute) when module in [HasOne, BelongsTo] do
+    display_attributes = AshAdmin.Resource.relationship_display_fields(attribute.destination)
+
+    if is_nil(display_attributes) do
+      "..."
+    else
+      record =
+        if loaded?(record, attribute.name) do
+          record
+        else
+          api.load!(record, [{attribute.name, display_attributes}])
+        end
+
+      relationship = Map.get(record, attribute.name)
+
+      if is_nil(relationship) do
+        "None"
+      else
+        attributes = attributes(attribute.destination, display_attributes, [])
+
+        attributes
+        |> Enum.map(fn x -> render_attribute(api, relationship, x) end)
+        |> Enum.join(" - ")
+      end
+    end
+  end
+
+  defp process_attribute(_, record, %Ash.Resource.Attribute{} = attribute) do
+    data =
+      record
+      |> Map.get(attribute.name)
+      |> Phoenix.HTML.Safe.to_iodata()
+
+    format_attribute_value(data)
+  end
+
+  defp process_attribute(_, _, _) do
+    "..."
+  end
+
+  defp format_attribute_value(data) do
+    if is_binary(data) and !String.valid?(data) do
+      "..."
+    else
+      data
+    end
+  end
+
+  defp loaded?(record, relationship) do
+    case Map.get(record, relationship) do
+      %Ash.NotLoaded{} -> false
+      _ -> true
+    end
   end
 
   defp actions?(resource) do
