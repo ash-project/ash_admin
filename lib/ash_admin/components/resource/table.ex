@@ -114,7 +114,7 @@ defmodule AshAdmin.Components.Resource.Table do
       "..."
   end
 
-  defp process_attribute(api, record, %module{} = attribute, _) when module in [HasOne, BelongsTo] do
+  defp process_attribute(api, record, %module{} = attribute, formats) when module in [HasOne, BelongsTo] do
     display_attributes = AshAdmin.Resource.relationship_display_fields(attribute.destination)
 
     if is_nil(display_attributes) do
@@ -135,18 +135,18 @@ defmodule AshAdmin.Components.Resource.Table do
         attributes = attributes(attribute.destination, display_attributes, [])
 
         attributes
-        |> Enum.map(fn x -> render_attribute(api, relationship, x) end)
+        |> Enum.map(fn x -> render_attribute(api, relationship, x, formats) end)
         |> Enum.join(" - ")
       end
     end
   end
 
   defp process_attribute(_, record, %Ash.Resource.Attribute{} = attribute, formats) do
-    [mod, func] = Keyword.get(formats, attribute.name, [Phoenix.HTML.Safe, :to_iodata])
+    {mod, func, args} = Keyword.get(formats, attribute.name, {Phoenix.HTML.Safe, :to_iodata, []})
     data =
       record
       |> Map.get(attribute.name)
-      |> (&(apply(mod, func, [&1]))).()
+      |> (&(apply(mod, func, [&1] ++ args))).()
 
     format_attribute_value(data)
   end
