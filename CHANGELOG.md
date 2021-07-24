@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.22](https://github.com/ash-project/ash_admin/compare/v0.2.21...v0.2.22) (2021-07-24)
+
+
+
+
+### Bug Fixes:
+
+* render values properly when no format set
+
 ## [v0.2.21](https://github.com/ash-project/ash_admin/compare/v0.2.20...v0.2.21) (2021-07-24)
 
 
