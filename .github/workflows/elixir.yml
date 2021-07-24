@@ -18,12 +18,12 @@ jobs:
       matrix:
         otp: ["23"]
         elixir: ["1.11.4"]
-        ash: ["master", "1.37.1"]
+        ash: ["master", "1.47.3"]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       ASH_VERSION: ${{matrix.ash}}
     steps:
-      - run: sudo apt-get install --yes erlang-dev
+      - run: sudo apt-get install --yes erlang-dev inotify-tools
       - uses: actions/checkout@v2
       - uses: erlef/setup-elixir@v1
         with:
