@@ -6,6 +6,7 @@ locals_without_parens = [
   destroy_actions: 1,
   field: 1,
   field: 2,
+  format_fields: 1,
   name: 1,
   polymorphic_tables: 1,
   read_actions: 1,
