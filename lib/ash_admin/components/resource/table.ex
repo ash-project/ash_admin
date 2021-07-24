@@ -155,11 +155,6 @@ defmodule AshAdmin.Components.Resource.Table do
   end
 
   defp process_attribute(api, record, attr, formats) do
-    IO.inspect(api)
-    IO.inspect(record)
-    IO.inspect(attr)
-    IO.inspect(formats)
-
     "..."
   end
 
