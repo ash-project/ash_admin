@@ -66,6 +66,10 @@ defmodule AshAdmin.Resource do
         type: {:list, :atom},
         doc: "The list of attributes to render on the table view."
       ],
+      format_fields: [
+        type: {:list, :any},
+        doc: "The list of fields and their formats."
+      ],
       relationship_display_fields: [
         type: {:list, :atom},
         doc: "The list of attributes to render when it's shown as a relationship on a datatable"
@@ -109,6 +113,10 @@ defmodule AshAdmin.Resource do
 
   def table_columns(resource) do
     Ash.Dsl.Extension.get_opt(resource, [:admin], :table_columns, nil, true)
+  end
+
+  def format_fields(resource) do
+    Ash.Dsl.Extension.get_opt(resource, [:admin], :format_fields, nil, true)
   end
 
   def name(resource) do

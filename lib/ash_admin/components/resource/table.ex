@@ -16,6 +16,7 @@ defmodule AshAdmin.Components.Resource.Table do
   prop(table, :any, required: true)
   prop(prefix, :any, required: true)
   prop(skip, :list, default: [])
+  prop(format_fields, :any, default: [])
 
   def render(assigns) do
     ~H"""
@@ -28,7 +29,7 @@ defmodule AshAdmin.Components.Resource.Table do
         </thead>
         <tbody>
           <tr :for={{ record <- @data }} class="border-b-2">
-            <td :for={{ attribute <- attributes(@resource, @attributes, @skip) }} class="py-3">{{ render_attribute(@api, record, attribute) }}</td>
+            <td :for={{ attribute <- attributes(@resource, @attributes, @skip) }} class="py-3">{{ render_attribute(@api, record, attribute, @format_fields) }}</td>
             <td :if={{ @actions && actions?(@resource) }}>
               <div class="flex h-max justify-items-center">
                 <div :if={{ AshAdmin.Resource.show_action(@resource) }}>
@@ -102,18 +103,18 @@ defmodule AshAdmin.Components.Resource.Table do
     |> Enum.reject(&(&1.name in skip))
   end
 
-  defp render_attribute(api, record, attribute) do
+  defp render_attribute(api, record, attribute, formats) do
     if Ash.Type.embedded_type?(attribute.type) do
       "..."
     else
-      process_attribute(api, record, attribute)
+      process_attribute(api, record, attribute, formats)
     end
   rescue
     _ ->
       "..."
   end
 
-  defp process_attribute(api, record, %module{} = attribute) when module in [HasOne, BelongsTo] do
+  defp process_attribute(api, record, %module{} = attribute, formats) when module in [HasOne, BelongsTo] do
     display_attributes = AshAdmin.Resource.relationship_display_fields(attribute.destination)
 
     if is_nil(display_attributes) do
@@ -134,17 +135,18 @@ defmodule AshAdmin.Components.Resource.Table do
         attributes = attributes(attribute.destination, display_attributes, [])
 
         attributes
-        |> Enum.map(fn x -> render_attribute(api, relationship, x) end)
+        |> Enum.map(fn x -> render_attribute(api, relationship, x, formats) end)
         |> Enum.join(" - ")
       end
     end
   end
 
-  defp process_attribute(_, record, %Ash.Resource.Attribute{} = attribute) do
+  defp process_attribute(_, record, %Ash.Resource.Attribute{} = attribute, formats) do
+    {mod, func, args} = Keyword.get(formats, attribute.name, {Phoenix.HTML.Safe, :to_iodata, []})
     data =
       record
       |> Map.get(attribute.name)
-      |> Phoenix.HTML.Safe.to_iodata()
+      |> (&(apply(mod, func, [&1] ++ args))).()
 
     format_attribute_value(data)
   end
