@@ -143,7 +143,8 @@ defmodule AshAdmin.Components.Resource.Table do
   end
 
   defp process_attribute(_, record, %Ash.Resource.Attribute{} = attribute, formats) do
-    {mod, func, args} = Keyword.get(formats, attribute.name, {Phoenix.HTML.Safe, :to_iodata, []})
+    {mod, func, args} =
+      Keyword.get(formats || [], attribute.name, {Phoenix.HTML.Safe, :to_iodata, []})
 
     data =
       record
@@ -153,7 +154,12 @@ defmodule AshAdmin.Components.Resource.Table do
     format_attribute_value(data)
   end
 
-  defp process_attribute(_, _, _, _) do
+  defp process_attribute(api, record, attr, formats) do
+    IO.inspect(api)
+    IO.inspect(record)
+    IO.inspect(attr)
+    IO.inspect(formats)
+
     "..."
   end
 
