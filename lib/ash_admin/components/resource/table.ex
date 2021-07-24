@@ -154,7 +154,7 @@ defmodule AshAdmin.Components.Resource.Table do
     format_attribute_value(data)
   end
 
-  defp process_attribute(api, record, attr, formats) do
+  defp process_attribute(_api, _record, _attr, _formats) do
     "..."
   end
 
