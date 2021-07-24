@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.2.21](https://github.com/ash-project/ash_admin/compare/v0.2.20...v0.2.21) (2021-07-24)
+
+
+
+
+### Improvements:
+
+* define custom formats for any field (#7)
+
 ## [v0.2.20](https://github.com/ash-project/ash_admin/compare/v0.2.19...v0.2.20) (2021-07-23)
 
 
