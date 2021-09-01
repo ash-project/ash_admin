@@ -5,6 +5,17 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.3.0-rc.0](https://github.com/ash-project/ash_admin/compare/v0.2.22...v0.3.0-rc.0) (2021-09-01)
+### Breaking Changes:
+
+* support latest surface/phoenix
+
+
+
+### Improvements:
+
+* remove compile-time router, use params instead
+
 ## [v0.2.22](https://github.com/ash-project/ash_admin/compare/v0.2.21...v0.2.22) (2021-07-24)
 
 
