@@ -38,7 +38,7 @@ defmodule DemoWeb.Router do
     pipe_through :browser
     import AshAdmin.Router
 
-    ash_admin("/", apis: [Demo.Accounts.Api, Demo.Tickets.Api])
+    ash_admin("/")
   end
 end
 

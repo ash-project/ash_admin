@@ -4,7 +4,13 @@ defmodule AshAdmin.Api do
     name: :admin,
     schema: [
       name: [
-        type: :string
+        type: :string,
+        doc: "The name of the api in the dashboard. Will be derived if not set."
+      ],
+      show?: [
+        type: :boolean,
+        default: false,
+        doc: "Wether or not this api and its resources should be included in the admin dashboard"
       ]
     ]
   }
@@ -24,6 +30,10 @@ defmodule AshAdmin.Api do
 
   def name(api) do
     Ash.Dsl.Extension.get_opt(api, [:admin], :name, nil, true) || default_name(api)
+  end
+
+  def show?(api) do
+    Ash.Dsl.Extension.get_opt(api, [:admin], :show?, false, true)
   end
 
   defp default_name(api) do

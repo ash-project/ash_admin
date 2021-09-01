@@ -21,16 +21,11 @@ defmodule AshAdmin.PageLive do
   def mount(
         _params,
         %{
-          "prefix" => prefix,
-          "api" => api,
-          "apis" => apis,
-          "tab" => tab,
-          "action_type" => action_type,
-          "action_name" => action_name,
-          "resource" => resource
+          "prefix" => prefix
         } = session,
         socket
       ) do
+    otp_app = socket.endpoint.config(:otp_app)
     socket = assign(socket, :prefix, prefix)
 
     actor_paused =
@@ -40,79 +35,66 @@ defmodule AshAdmin.PageLive do
         AshAdmin.ActorPlug.session_bool(session["actor_paused"])
       end
 
-    action =
-      if action_type && action_name && resource do
-        Ash.Resource.Info.action(resource, action_name, action_type)
-      end
-
-    tables =
-      if resource do
-        AshAdmin.Resource.polymorphic_tables(resource, apis)
-      end
+    apis = apis(otp_app)
 
     {:ok,
      socket
      |> Surface.init()
      |> assign(:prefix, prefix)
-     |> assign(:api, api)
-     |> assign(:apis, apis)
-     |> assign(:resource, resource)
-     |> assign(:action, action)
      |> assign(:primary_key, nil)
      |> assign(:record, nil)
-     |> assign(:tab, tab)
-     |> assign(:actor_resources, actor_resources(apis))
+     |> assign(:apis, apis)
      |> assign(:tenant, session["tenant"])
-     |> assign(:actor, AshAdmin.ActorPlug.actor_from_session(session))
-     |> assign(:actor_api, AshAdmin.ActorPlug.actor_api_from_session(session))
+     |> assign(:actor, AshAdmin.ActorPlug.actor_from_session(socket.endpoint, session))
+     |> assign(:actor_api, AshAdmin.ActorPlug.actor_api_from_session(socket.endpoint, session))
+     |> assign(:actor_resources, actor_resources(apis))
      |> assign(
        :authorizing,
        AshAdmin.ActorPlug.session_bool(session["actor_authorizing"]) || false
      )
-     |> assign(:actor_paused, actor_paused)
-     |> assign(:tables, tables)
-     |> assign(:table, session["table"] || Enum.at(tables || [], 0))}
+     |> assign(:actor_paused, actor_paused)}
   end
 
   @impl true
   def render(assigns) do
-    ~H"""
+    ~F"""
     <TopNav
       id="top_nav"
-      apis={{ @apis }}
-      api={{ @api }}
-      actor_api={{ @actor_api }}
-      resource={{ @resource }}
-      tenant={{ @tenant }}
-      actor_resources={{ @actor_resources }}
-      authorizing={{ @authorizing }}
-      actor_paused={{ @actor_paused }}
-      actor={{ @actor }}
+      apis={@apis}
+      api={@api}
+      actor_api={@actor_api}
+      resource={@resource}
+      tenant={@tenant}
+      actor_resources={@actor_resources}
+      authorizing={@authorizing}
+      actor_paused={@actor_paused}
+      actor={@actor}
       set_tenant="set_tenant"
       clear_tenant="clear_tenant"
       toggle_authorizing="toggle_authorizing"
       toggle_actor_paused="toggle_actor_paused"
       clear_actor="clear_actor"
-      prefix={{ @prefix }}
+      prefix={@prefix}
     />
     <Resource
-      :if={{ @resource }}
-      id={{ @resource }}
-      resource={{ @resource }}
+      :if={@resource}
+      id={@resource}
+      resource={@resource}
       set_actor="set_actor"
-      primary_key={{ @primary_key }}
-      record={{ @record }}
-      api={{ @api }}
-      tab={{ @tab }}
-      url_path={{ @url_path }}
-      params={{ @params }}
-      action={{ @action }}
-      tenant={{ @tenant }}
-      actor={{ unless @actor_paused, do: @actor }}
-      authorizing={{ @authorizing }}
-      table={{ @table }}
-      tables={{ @tables }}
-      prefix={{ @prefix }}
+      primary_key={@primary_key}
+      record={@record}
+      api={@api}
+      tab={@tab}
+      action_type={@action_type}
+      url_path={@url_path}
+      params={@params}
+      action={@action}
+      tenant={@tenant}
+      actor={unless @actor_paused, do: @actor}
+      authorizing={@authorizing}
+      table={@table}
+      tables={@tables}
+      prefix={@prefix}
     />
     """
   end
@@ -128,13 +110,206 @@ defmodule AshAdmin.PageLive do
     end)
   end
 
+  defp apis(otp_app) do
+    otp_app
+    |> Application.get_env(:ash_apis)
+    |> Enum.filter(&AshAdmin.Api.show?/1)
+  end
+
+  # defp find_api(api, otp_app) do
+  #   otp_app
+  #   |> apis()
+  #   |> Enum.find(fn api ->
+  #     AshAdmin.Api.name(api) == api
+  #   end)
+  # end
+
+  # defp find_resource(api, resource, otp_app) do
+  #   case find_api(api, otp_app) do
+  #     nil ->
+  #       nil
+
+  #     api ->
+  #       api
+  #       |> Ash.Api.resources()
+  #       |> Enum.find(fn resource ->
+  #         AshAdmin.Resource.name(resource) == resource
+  #       end)
+  #   end
+  # end
+
+  # defp match_result(%{path: path}, otp_app) when path == "/" || path == "" do
+  #   {:ok, [api: Enum.at(apis(otp_app), 0)]}
+  # end
+
+  # defp match_result(url, otp_app) do
+  #   url.path
+  #   |> Enum.split("/")
+  #   |> case do
+  #     [api] ->
+  #       case find_api(api, otp_app) do
+  #         nil ->
+  #           :error
+
+  #         api ->
+  #           {:ok, api: api, tab: "info"}
+  #       end
+
+  #     [api, resource] ->
+  #       case find_resource(api, resource, otp_app) do
+  #         {api, resource} ->
+  #           {:ok, api: api, resource: resource, tab: "info"}
+
+  #         nil ->
+  #           :error
+  #       end
+
+  #     [api, resource, table_or_action_type] ->
+  #       case find_table_or_action_type(api, resource, table_or_action_type, otp_app) do
+  #         {:table, api, resource} ->
+  #           {:ok, api: api, resource: resource, table: table_or_action_type}
+
+  #         {:action, api, resource, action_type} ->
+  #           action = Ash.Resource.Info.primary_action!(resource, action_type)
+  #           {:ok, api: api, resource: resource, action_type: action_type, action: action.name}
+  #       end
+
+  #     [api, resource, table_or_action_type, action_type_or_action_name, otp_app] ->
+  #       case find_action_type_or_action_name(
+  #              api,
+  #              resource,
+  #              table_or_action_type,
+  #              action_type_or_action_name
+  #            ) do
+  #         {:action_name, api, resource, action_type, action_name} ->
+  #           {:ok, api: api, resource: resource, action_type: action_type, action: action_name}
+
+  #         {:action_type, api, resource, action_type} ->
+  #           action = Ash.Resource.Info.primary_action!(resource, action_type)
+
+  #           {:ok,
+  #            api: api,
+  #            resource: resource,
+  #            action_type: action_type,
+  #            action: action.name,
+  #            table: table_or_action_type}
+
+  #         {:action_type_with_pkey, api, resource, action_type, primary_key} ->
+  #           action = Ash.Resource.Info.primary_action!(resource, action_type)
+  #           {:ok, api: api, resource: resource, action_type: action_type, action: action.name}
+  #       end
+
+  #     [api, resource, table_or_action_type, action_type_or_action_name, primary_key] ->
+  #       case find_action_type_or_action_name_with_primary_key(
+  #              api,
+  #              resource,
+  #              table_or_action_type,
+  #              action_type_or_action_name,
+  #              otp_app
+  #            ) do
+  #         {:table, api, resource, action_type, primary_key} ->
+  #           action = Ash.Resource.Info.primary_action!(resource, action_type)
+
+  #           {:ok,
+  #            api: api,
+  #            resource: resource,
+  #            action_type: action_type,
+  #            primary_key: primary_key,
+  #            table: table_or_action_type,
+  #            action: action.name}
+
+  #         {:action_name, api, resource, action_type, action_name, primary_key} ->
+  #           {:ok,
+  #            api: api,
+  #            resource: resource,
+  #            action_type: action_type,
+  #            action: action_name,
+  #            primary_key: primary_key}
+  #       end
+  #     [api, resource, table, action_type, action_name, primary_key] ->
+  #       action_type = case action_type do
+  #         "update" -> :update
+  #         "destroy" -> :destroy
+  #       end
+  #       case find_resource(api, resource, otp_app) do
+
+  #       end
+
+  #   end
+  # end
+
+  defp assign_api(socket, api) do
+    api =
+      Enum.find(socket.assigns.apis, fn shown_api ->
+        AshAdmin.Api.name(shown_api) == api
+      end) || Enum.at(socket.assigns.apis, 0)
+
+    assign(socket, :api, api)
+  end
+
+  defp assign_resource(socket, resource) do
+    resources = Ash.Api.resources(socket.assigns.api)
+
+    resource =
+      Enum.find(resources, fn api_resource ->
+        AshAdmin.Resource.name(api_resource) == resource
+      end) || Enum.at(resources, 0)
+
+    assign(socket, :resource, resource)
+  end
+
+  defp assign_action(socket, action, action_type) do
+    action_type =
+      case action_type do
+        "read" -> :read
+        "update" -> :update
+        "create" -> :create
+        "destroy" -> :destroy
+        nil -> nil
+      end
+
+    if action_type do
+      action =
+        Enum.find(Ash.Resource.Info.actions(socket.assigns.resource), fn resource_action ->
+          to_string(resource_action.name) == action && resource_action.type == action_type
+        end) || Ash.Resource.Info.primary_action!(socket.assigns.resource, action_type)
+
+      assign(socket, action_type: action_type, action: action)
+    else
+      assign(socket, action: nil, action_type: nil)
+    end
+  end
+
+  defp assign_tables(socket, table) do
+    tables =
+      if socket.assigns.resource do
+        AshAdmin.Resource.polymorphic_tables(socket.assigns.resource, socket.assigns.apis)
+      else
+        []
+      end
+
+    if table && table != "" do
+      assign(socket, table: table, tables: tables)
+    else
+      assign(socket, table: Enum.at(tables, 0), tables: tables)
+    end
+  end
+
   @impl true
   def handle_params(params, url, socket) do
     url = URI.parse(url)
 
     socket =
-      if params["primary_key"] do
-        case decode_primary_key(socket.assigns.resource, params["primary_key"]) do
+      socket
+      |> assign_api(params["api"])
+      |> assign_resource(params["resource"])
+      |> assign_action(params["action"], params["action_type"])
+      |> assign_tables(params["table"])
+      |> assign(primary_key: params["primary_key"], tab: params["tab"])
+
+    socket =
+      if socket.assigns[:primary_key] do
+        case decode_primary_key(socket.assigns.resource, socket.assigns[:primary_key]) do
           {:ok, primary_key} ->
             actor =
               if socket.assigns.actor_paused do
@@ -157,9 +332,7 @@ defmodule AshAdmin.PageLive do
             case record do
               {:error, error} ->
                 Logger.warn(
-                  "Error while loading record on admin dashboard\n: #{
-                    Exception.format(:error, error)
-                  }"
+                  "Error while loading record on admin dashboard\n: #{Exception.format(:error, error)}"
                 )
 
               {:ok, _} ->
@@ -185,6 +358,10 @@ defmodule AshAdmin.PageLive do
      socket
      |> assign(:url_path, url.path)
      |> assign(:params, params)}
+
+    #   :error ->
+    #     {:error, "Not Found"}
+    # end
   end
 
   defp to_one_relationships(resource) do
@@ -238,15 +415,18 @@ defmodule AshAdmin.PageLive do
           |> Ash.Query.filter(^pkey_filter)
           |> api.read_one!(action: action)
 
+        api_name = AshAdmin.Api.name(api)
+        resource_name = AshAdmin.Resource.name(resource)
+
         {:noreply,
          socket
          |> push_event(
            "set_actor",
            %{
-             resource: to_string(resource),
+             resource: to_string(resource_name),
              primary_key: encode_primary_key(actor),
              action: to_string(action.name),
-             api: to_string(api)
+             api: to_string(api_name)
            }
          )
          |> assign(actor: actor, actor_api: api)}

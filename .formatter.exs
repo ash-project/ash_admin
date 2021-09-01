@@ -11,6 +11,7 @@ locals_without_parens = [
   polymorphic_tables: 1,
   read_actions: 1,
   relationship_display_fields: 1,
+  show?: 1,
   show_action: 1,
   table_columns: 1,
   type: 1,

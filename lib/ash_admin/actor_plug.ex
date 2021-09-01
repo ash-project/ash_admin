@@ -36,7 +36,7 @@ defmodule AshAdmin.ActorPlug do
         session["actor_paused"]
       end
 
-    actor = actor_from_session(session)
+    actor = actor_from_session(conn.private.phoenix_endpoint, session)
 
     authorizing = session_bool(authorizing)
     actor_paused = session_bool(actor_paused)
@@ -56,37 +56,60 @@ defmodule AshAdmin.ActorPlug do
 
   def actor_session(conn, _), do: conn
 
-  def actor_api_from_session(%{"actor_api" => api}) do
-    Module.concat([api])
+  def actor_api_from_session(endpoint, %{"actor_api" => api}) do
+    otp_app = endpoint.config(:otp_app)
+    apis = Application.get_env(otp_app, :ash_apis)
+
+    Enum.find(apis, fn allowed_api ->
+      AshAdmin.Api.show?(allowed_api) && AshAdmin.Api.name(allowed_api) == api
+    end)
   end
 
-  def actor_from_session(%{
+  def actor_api_from_session(_, _), do: nil
+
+  def actor_from_session(endpoint, %{
         "actor_resource" => resource,
         "actor_api" => api,
         "actor_primary_key" => primary_key,
         "actor_action" => action
       })
       when not is_nil(resource) and not is_nil(api) do
-    resource = Module.concat([resource])
-    api = Module.concat([api])
+    otp_app = endpoint.config(:otp_app)
+    apis = Application.get_env(otp_app, :ash_apis)
 
-    action =
-      if action do
-        Ash.Resource.Info.action(resource, String.to_existing_atom(action), :read)
+    api =
+      Enum.find(apis, fn allowed_api ->
+        AshAdmin.Api.show?(allowed_api) && AshAdmin.Api.name(allowed_api) == api
+      end)
+
+    resource =
+      if api do
+        api
+        |> Ash.Api.resources()
+        |> Enum.find(fn api_resource ->
+          AshAdmin.Resource.name(api_resource) == resource
+        end)
       end
 
-    case decode_primary_key(resource, primary_key) do
-      :error ->
-        nil
+    if api && resource do
+      action =
+        if action do
+          Ash.Resource.Info.action(resource, String.to_existing_atom(action), :read)
+        end
 
-      {:ok, filter} ->
-        resource
-        |> Ash.Query.filter(^filter)
-        |> api.read_one!(action: action)
+      case decode_primary_key(resource, primary_key) do
+        :error ->
+          nil
+
+        {:ok, filter} ->
+          resource
+          |> Ash.Query.filter(^filter)
+          |> api.read_one!(action: action)
+      end
     end
   end
 
-  def actor_from_session(_), do: nil
+  def actor_from_session(_, _), do: nil
 
   def session_bool(value) do
     case value do

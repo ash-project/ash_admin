@@ -44,8 +44,6 @@ defmodule AshAdmin.Router do
   Defines an AshAdmin route.
   It expects the `path` the admin dashboard will be mounted at
   and a set of options.
-  ## Options
-    * `:apis` - The list of Apis to include in the admin dashboard
   ## Examples
       defmodule MyAppWeb.Router do
         use Phoenix.Router
@@ -63,258 +61,21 @@ defmodule AshAdmin.Router do
       end
   """
   defmacro ash_admin(path, opts \\ []) do
-    quote bind_quoted: binding() do
-      scope path, alias: false, as: false do
-        import Phoenix.LiveView.Router, only: [live: 4]
+    quote bind_quoted: [path: path, opts: opts] do
+      import Phoenix.LiveView.Router
+      live_socket_path = Keyword.get(opts, :live_socket_path, "/live")
 
-        prefix =
-          if opts[:prefix] do
-            opts[:prefix] <> path
-          else
-            path
-          end
-
-        prefix = String.trim_trailing(prefix, "/")
-
-        apis = opts[:apis]
-        Enum.each(apis, &Code.ensure_compiled/1)
-        api = List.first(opts[:apis])
-
-        resource =
-          api
-          |> Ash.Api.resources()
-          |> List.first()
-
+      live_session :default,
+        session: {AshAdmin.Router, :__session__, %{"prefix" => path}},
+        root_layout: {AshAdmin.LayoutView, :admin} do
         live(
-          "/",
+          "#{path}/*route",
           AshAdmin.PageLive,
           :page,
-          AshAdmin.Router.__options__(opts, %{
-            "prefix" => prefix,
-            "apis" => apis,
-            "api" => api,
-            "tab" => nil,
-            "resource" => nil,
-            "action_type" => nil,
-            "action_name" => nil
-          })
+          private: %{live_socket_path: live_socket_path}
         )
-
-        for api <- apis do
-          live(
-            "/#{AshAdmin.Api.name(api)}",
-            AshAdmin.PageLive,
-            :api_page,
-            AshAdmin.Router.__options__(opts, %{
-              "prefix" => prefix,
-              "apis" => apis,
-              "api" => api,
-              "tab" => "info",
-              "resource" => nil,
-              "action_type" => nil,
-              "action_name" => nil
-            })
-          )
-
-          for resource <- Ash.Api.resources(api) do
-            for {table, alias_part, polymorphic_part} <-
-                  AshAdmin.Router.polymorphic_parts(resource, apis) do
-              live(
-                "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{polymorphic_part}",
-                AshAdmin.PageLive,
-                :resource_page,
-                AshAdmin.Router.__options__(opts, %{
-                  "prefix" => prefix,
-                  "apis" => apis,
-                  "api" => api,
-                  "tab" => "info",
-                  "resource" => resource,
-                  "action_type" => nil,
-                  "action_name" => nil,
-                  "table" => table
-                })
-              )
-
-              if Enum.any?(Ash.Resource.Info.actions(resource), &(&1.type == :create)) do
-                live(
-                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
-                    polymorphic_part
-                  }/create",
-                  AshAdmin.PageLive,
-                  :resource_page,
-                  AshAdmin.Router.__options__(opts, %{
-                    "prefix" => prefix,
-                    "apis" => apis,
-                    "api" => api,
-                    "resource" => resource,
-                    "tab" => "create",
-                    "action_type" => :create,
-                    "action_name" => Ash.Resource.Info.primary_action!(resource, :create).name,
-                    "table" => table
-                  })
-                )
-              end
-
-              for %{type: :create} = action <- Ash.Resource.Info.actions(resource) do
-                live(
-                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
-                    polymorphic_part
-                  }/create/#{action.name}",
-                  AshAdmin.PageLive,
-                  :resource_page,
-                  AshAdmin.Router.__options__(opts, %{
-                    "prefix" => prefix,
-                    "apis" => apis,
-                    "api" => api,
-                    "resource" => resource,
-                    "tab" => "create",
-                    "action_type" => :create,
-                    "action_name" => action.name,
-                    "table" => table
-                  })
-                )
-              end
-
-              if Enum.any?(Ash.Resource.Info.actions(resource), &(&1.type == :update)) do
-                live(
-                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
-                    polymorphic_part
-                  }/update/:primary_key",
-                  AshAdmin.PageLive,
-                  :resource_page,
-                  AshAdmin.Router.__options__(opts, %{
-                    "prefix" => prefix,
-                    "apis" => apis,
-                    "api" => api,
-                    "resource" => resource,
-                    "tab" => "update",
-                    "action_type" => :update,
-                    "action_name" => Ash.Resource.Info.primary_action!(resource, :update).name,
-                    "table" => table
-                  })
-                )
-
-                for %{type: :update} = action <- Ash.Resource.Info.actions(resource) do
-                  live(
-                    "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
-                      polymorphic_part
-                    }/update/#{action.name}/:primary_key",
-                    AshAdmin.PageLive,
-                    :resource_page,
-                    AshAdmin.Router.__options__(opts, %{
-                      "prefix" => prefix,
-                      "apis" => apis,
-                      "api" => api,
-                      "resource" => resource,
-                      "tab" => "update",
-                      "action_type" => :update,
-                      "action_name" => action.name,
-                      "table" => table
-                    })
-                  )
-                end
-              end
-
-              if Enum.any?(Ash.Resource.Info.actions(resource), &(&1.type == :destroy)) do
-                live(
-                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
-                    polymorphic_part
-                  }/destroy/:primary_key",
-                  AshAdmin.PageLive,
-                  :resource_page,
-                  AshAdmin.Router.__options__(opts, %{
-                    "prefix" => prefix,
-                    "apis" => apis,
-                    "api" => api,
-                    "resource" => resource,
-                    "tab" => "destroy",
-                    "action_type" => :destroy,
-                    "action_name" => Ash.Resource.Info.primary_action!(resource, :destroy).name,
-                    "table" => table
-                  })
-                )
-
-                for %{type: :destroy} = action <- Ash.Resource.Info.actions(resource) do
-                  live(
-                    "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
-                      polymorphic_part
-                    }/destroy/#{action.name}/:primary_key",
-                    AshAdmin.PageLive,
-                    :resource_page,
-                    AshAdmin.Router.__options__(opts, %{
-                      "prefix" => prefix,
-                      "apis" => apis,
-                      "api" => api,
-                      "resource" => resource,
-                      "tab" => "destroy",
-                      "action_type" => :destroy,
-                      "action_name" => action.name,
-                      "table" => table
-                    })
-                  )
-                end
-              end
-
-              show_action = AshAdmin.Resource.show_action(resource)
-
-              if show_action do
-                action =
-                  Ash.Resource.Info.action(resource, AshAdmin.Resource.show_action(resource))
-
-                live(
-                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
-                    polymorphic_part
-                  }/show/:primary_key",
-                  AshAdmin.PageLive,
-                  :show_page,
-                  AshAdmin.Router.__options__(opts, %{
-                    "prefix" => prefix,
-                    "apis" => apis,
-                    "api" => api,
-                    "resource" => resource,
-                    "tab" => "read",
-                    "action_type" => :read,
-                    "action_name" => action.name,
-                    "table" => table
-                  })
-                )
-              end
-
-              for %{type: :read} = action <- Ash.Resource.Info.actions(resource) do
-                live(
-                  "/#{AshAdmin.Api.name(api)}/#{AshAdmin.Resource.name(resource)}#{
-                    polymorphic_part
-                  }/#{action.type}/#{action.name}",
-                  AshAdmin.PageLive,
-                  :resource_page,
-                  AshAdmin.Router.__options__(opts, %{
-                    "prefix" => prefix,
-                    "apis" => apis,
-                    "api" => api,
-                    "resource" => resource,
-                    "tab" => "data",
-                    "action_type" => :read,
-                    "action_name" => action.name,
-                    "table" => table
-                  })
-                )
-              end
-            end
-          end
-        end
       end
     end
-  end
-
-  @doc false
-  def __options__(options, session) do
-    live_socket_path = Keyword.get(options, :live_socket_path, "/live")
-
-    [
-      session: {__MODULE__, :__session__, [session]},
-      private: %{live_socket_path: live_socket_path},
-      layout: {AshAdmin.LayoutView, :admin}
-    ]
   end
 
   @cookies_to_replicate [
@@ -338,16 +99,5 @@ defmodule AshAdmin.Router do
           Map.put(session, cookie, value)
       end
     end)
-  end
-
-  @doc false
-  def polymorphic_parts(resource, apis) do
-    case AshAdmin.Resource.polymorphic_tables(resource, apis) do
-      [] ->
-        [{nil, "", ""}]
-
-      tables ->
-        [{nil, "", ""} | Enum.map(tables, &{&1, &1, "/#{&1}"})]
-    end
   end
 end

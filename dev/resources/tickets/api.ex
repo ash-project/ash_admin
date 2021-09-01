@@ -1,8 +1,13 @@
 defmodule Demo.Tickets.Api do
   @moduledoc false
-  use Ash.Api
+  use Ash.Api,
+    extensions: [AshAdmin.Api]
 
   alias Demo.Tickets.{Comment, Customer, Representative, Ticket, TicketLink, Organization}
+
+  admin do
+    show? true
+  end
 
   resources do
     resource(Customer)
