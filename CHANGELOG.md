@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.4.0](https://github.com/ash-project/ash_admin/compare/v0.3.0-rc.0...v0.4.0) (2021-11-14)
+
+
+
+
+### Bug Fixes:
+
+* handle new liveview arg pattern
+
 ## [v0.3.0-rc.0](https://github.com/ash-project/ash_admin/compare/v0.2.22...v0.3.0-rc.0) (2021-09-01)
 ### Breaking Changes:
 
