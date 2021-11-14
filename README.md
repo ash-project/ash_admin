@@ -21,7 +21,25 @@ First, ensure you've added ash_admin to your `mix.exs` file.
 
 ## Setup
 
-Modify your router to add ash admin:
+Ensure your apis are configured in `config.exs`
+
+```elixir
+config :my_app, ash_apis: [MyApp.Foo, MyApp.Bar]
+```
+
+Add the admin extension to each api you want to show in the admin dashboard, and configure it to show
+
+```elixir
+use Ash.Api,
+  extensions: [AshAdmin.Api]
+
+admin do
+  show? true
+end
+```
+
+Modify your router to add ash admin at whatever path you'd like to serve it at.
+
 ```elixir
 defmodule MyAppWeb.Router do
   use Phoenix.Router
@@ -37,8 +55,7 @@ defmodule MyAppWeb.Router do
     # Pipe it through your browser pipeline
     pipe_through [:browser]
 
-    ash_admin "/admin",
-      apis: [MyApp.Api1, MyApp.Api2]
+    ash_admin "/admin"
   end
 end
 ```

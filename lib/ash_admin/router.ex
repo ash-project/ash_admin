@@ -19,8 +19,7 @@ defmodule AshAdmin.Router do
     scope "/" do
 
       pipe_through [:something]
-      ash_admin "/admin",
-        apis: [MyApp.Api1, MyApp.Api2]
+      ash_admin "/admin"
     end
   end
   ```
@@ -55,8 +54,7 @@ defmodule AshAdmin.Router do
           # If you don't have one, see `admin_browser_pipeline/1`
           pipe_through [:browser]
 
-          ash_admin "/admin",
-            apis: [MyApp.Api1, MyApp.Api2]
+          ash_admin "/admin"
         end
       end
   """
