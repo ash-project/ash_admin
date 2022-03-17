@@ -5,6 +5,17 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.4.1](https://github.com/ash-project/ash_admin/compare/v0.4.0...v0.4.1) (2022-03-17)
+
+
+
+
+### Bug Fixes:
+
+* various other fixes for events and hooks
+
+* fix issues w/ admin UI not rendering
+
 ## [v0.4.0](https://github.com/ash-project/ash_admin/compare/v0.3.0-rc.0...v0.4.0) (2021-11-14)
 
 
