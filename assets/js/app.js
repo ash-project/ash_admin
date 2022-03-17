@@ -96,6 +96,7 @@ Hooks.Actor = {
       document.cookie = 'actor_paused=true;path=/';
     });
     this.handleEvent("toggle_authorizing", (payload) => {
+      console.log(payload);
       document.cookie = 'actor_authorizing' + '=' + payload.authorizing + ';path=/';
     });
     this.handleEvent("toggle_actor_paused", (payload) => {

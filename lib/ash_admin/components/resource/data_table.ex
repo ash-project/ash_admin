@@ -279,6 +279,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
         <div class="flex-1 flex justify-between sm:hidden">
           <button
             :if={!(keyset?(@data) && is_nil(@params["page"])) && prev_page?(@data)}
+            phx-target={@myself}
             :on-click="prev_page"
             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
           >
@@ -288,6 +289,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
           <button
             :if={next_page?(@data)}
             :on-click="next_page"
+            phx-target={@myself}
             class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
           >
             Next
@@ -302,6 +304,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
               <button
                 :if={!(keyset?(@data) && is_nil(@params["page"])) && prev_page?(@data)}
                 :on-click="prev_page"
+                phx-target={@myself}
                 class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
               >
                 <span class="sr-only">Previous</span>
@@ -328,6 +331,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
               <button
                 :if={next_page?(@data)}
                 :on-click="next_page"
+                phx-target={@myself}
                 class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
               >
                 <span class="sr-only">Next</span>
@@ -358,6 +362,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
     ~F"""
     <button
       :on-click="specific_page"
+      phx-target={@myself}
       phx-value-page={i}
       :for={i <- page_nums}
       class={

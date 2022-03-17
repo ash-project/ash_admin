@@ -89,6 +89,7 @@ defmodule AshAdmin.Components.Resource.Show do
           <button
             :if={!loaded?(@record, relationship.name)}
             :on-click="load"
+            phx-target={@myself}
             phx-value-relationship={relationship.name}
             type="button"
             class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
@@ -98,6 +99,7 @@ defmodule AshAdmin.Components.Resource.Show do
           <button
             :if={loaded?(@record, relationship.name) && relationship.cardinality == :many}
             :on-click="unload"
+            phx-target={@myself}
             phx-value-relationship={relationship.name}
             type="button"
             class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
