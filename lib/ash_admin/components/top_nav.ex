@@ -5,6 +5,7 @@ defmodule AshAdmin.Components.TopNav do
   alias AshAdmin.Components.TopNav.{ActorSelect, DrawerDropdown, TenantForm, Dropdown}
 
   data(nav_collapsed, :boolean, default: true)
+  data(open, :boolean, default: false)
 
   prop(api, :any, required: true)
   prop(resource, :any, required: true)
@@ -24,7 +25,7 @@ defmodule AshAdmin.Components.TopNav do
 
   def render(assigns) do
     ~F"""
-    <nav x-data="{ navOpen: false }" @keydown.window.escape="navOpen = false" class="bg-gray-800">
+    <nav phx-keydown="close" phx-key="escape" class="bg-gray-800" phx-target={@myself}>
       <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center w-full">
@@ -75,21 +76,20 @@ defmodule AshAdmin.Components.TopNav do
           </div>
           <div class="-mr-2 flex md:hidden">
             <button
-              x-on:click="navOpen = !navOpen"
+              phx-click="toggle"
+              phx-target={@myself}
               class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:bg-gray-700 focus:text-white"
             >
               <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path
-                  :class="{'hidden': navOpen, 'inline-flex': !navOpen }"
-                  class="inline-flex"
+                  class={"inline-flex": !@open, hidden: @open}
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
                   d="M4 6h16M4 12h16M4 18h16"
                 />
                 <path
-                  :class="{'hidden': !navOpen, 'inline-flex': navOpen }"
-                  class="hidden"
+                  class={hidden: !@open, "inline-flex": @open}
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
@@ -100,7 +100,7 @@ defmodule AshAdmin.Components.TopNav do
           </div>
         </div>
       </div>
-      <div x-show="navOpen" class="md:hidden" x-cloak>
+      <div :if={@open} class="md:hidden" x-cloak>
         <div class="relative px-2 pt-2 pb-3 sm:px-3">
           <div class="block px-4 py-2 text-sm">
             <ActorSelect
@@ -153,6 +153,14 @@ defmodule AshAdmin.Components.TopNav do
 
   def handle_event("collapse_nav", _, socket) do
     {:noreply, assign(socket, :nav_collapsed, !socket.assigns.nav_collapsed)}
+  end
+
+  def handle_event("close", _, socket) do
+    {:noreply, assign(socket, :open, false)}
+  end
+
+  def handle_event("toggle", _, socket) do
+    {:noreply, assign(socket, :open, !socket.assigns.open)}
   end
 
   defp show_tenant_form?(apis) do

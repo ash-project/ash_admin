@@ -61,8 +61,7 @@ defmodule AshAdmin.Components.Resource.Nav do
     [
       resource
       |> Ash.Resource.Info.actions()
-      |> Enum.filter(&(&1.type == :read))
-      |> Enum.filter(&(is_nil(read_actions) || &1.name in read_actions))
+      |> Enum.filter(&(&1.type == :read && (is_nil(read_actions) || &1.name in read_actions)))
       |> Enum.map(fn action ->
         %{
           text: action_name(action),
@@ -84,7 +83,6 @@ defmodule AshAdmin.Components.Resource.Nav do
     action.name
     |> to_string()
     |> String.split("_")
-    |> Enum.map(&String.capitalize/1)
-    |> Enum.join(" ")
+    |> Enum.map_join(" ", &String.capitalize/1)
   end
 end

@@ -21,8 +21,7 @@ defmodule AshAdmin.Helpers do
     name
     |> to_string()
     |> String.split("_")
-    |> Enum.map(&String.capitalize/1)
-    |> Enum.join(" ")
+    |> Enum.map_join(" ", &String.capitalize/1)
   end
 
   def short_description(nil), do: {:not_split, nil}

@@ -1297,18 +1297,6 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@vue/reactivity@~3.1.1":
-  "integrity" "sha512-1tdfLmNjWG6t/CsPldh+foumYFo3cpyCHgBYQ34ylaMsJ+SNHQ1kApMIa8jN+i593zQuaw3AdWH0nJTARzCFhg=="
-  "resolved" "https://registry.npmjs.org/@vue/reactivity/-/reactivity-3.1.5.tgz"
-  "version" "3.1.5"
-  dependencies:
-    "@vue/shared" "3.1.5"
-
-"@vue/shared@3.1.5":
-  "integrity" "sha512-oJ4F3TnvpXaQwZJNF3ZK+kLPHKarDmJjJ6jyzVNDKH9md1dptjC7lWR//jrGuLdek/U6iltWxqAnYOu8gCiOvA=="
-  "resolved" "https://registry.npmjs.org/@vue/shared/-/shared-3.1.5.tgz"
-  "version" "3.1.5"
-
 "@webassemblyjs/ast@1.9.0":
   "integrity" "sha512-C6wW5L+b7ogSDVqymbkkvuW9kruN//YisMED04xzeBBqjHa2FYnmvOlS6Xj68xWQRgWvI9cIglsjFowH/RJyEA=="
   "resolved" "https://registry.npmjs.org/@webassemblyjs/ast/-/ast-1.9.0.tgz"
@@ -1548,13 +1536,6 @@
   "integrity" "sha1-l6ERlkmyEa0zaR2fn0hqjsn74KM="
   "resolved" "https://registry.npmjs.org/alphanum-sort/-/alphanum-sort-1.0.2.tgz"
   "version" "1.0.2"
-
-"alpinejs@3.7.1":
-  "integrity" "sha512-OJDlhOT50+9REa4cpGHr4WlGBE9ysJEZ+IfN2xwmotUANxp1VSrYgBNBfUWJr9uQ1INhodzvi6UfIWoqQqYOnA=="
-  "resolved" "https://registry.npmjs.org/alpinejs/-/alpinejs-3.7.1.tgz"
-  "version" "3.7.1"
-  dependencies:
-    "@vue/reactivity" "~3.1.1"
 
 "ansi-escapes@^4.2.1":
   "integrity" "sha512-gKXj5ALrKWQLsYG9jlTRmR/xKluxHV+Z9QEwNIgCfM1/uwPMCuzVVnh5mwTd+OuBZcwSIMbqssNWRm1lE51QaQ=="
@@ -5852,16 +5833,17 @@
   "resolved" "https://registry.npmjs.org/performance-now/-/performance-now-2.1.0.tgz"
   "version" "2.1.0"
 
-"phoenix_html@file:../deps/phoenix_html":
+"phoenix_html@3.2.0":
   "resolved" "file:../deps/phoenix_html"
   "version" "3.2.0"
 
-"phoenix_live_view@file:../deps/phoenix_live_view":
+"phoenix_live_view@0.17.7":
   "resolved" "file:../deps/phoenix_live_view"
   "version" "0.17.7"
 
-"phoenix@../deps/phoenix":
-  "resolved" "file:../deps/phoenix"
+"phoenix@1.6.6":
+  "integrity" "sha512-KLNHVlrZH8UAoEzeCS1XBI9z5juWz0gZ/+No7j5p/byVINnd+del9H5vtBMzQgZa3ZcUjVVZcQR8bKdnH/FmMg=="
+  "resolved" "https://registry.npmjs.org/phoenix/-/phoenix-1.6.6.tgz"
   "version" "1.6.6"
 
 "picocolors@^0.2.1":

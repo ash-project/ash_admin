@@ -2,9 +2,7 @@ import css from "../css/app.scss"
 import "phoenix_html"
 import { Socket } from "phoenix"
 import NProgress from "nprogress"
-import { LiveSocket, Browser } from "phoenix_live_view"
-import Alpine from 'alpinejs'
-
+import { LiveSocket } from "phoenix_live_view"
 
 let socketPath = document.querySelector("html").getAttribute("phx-socket") || "/live"
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
@@ -82,6 +80,7 @@ Hooks.JsonView = {
 Hooks.Actor = {
   mounted() {
     this.handleEvent("set_actor", (payload) => {
+      console.log(payload);
       document.cookie = 'actor_resource' + '=' + payload.resource + ';path=/';
       document.cookie = 'actor_primary_key' + '=' + payload.primary_key + ';path=/';
       document.cookie = 'actor_action' + '=' + payload.action + ';path=/';
@@ -150,11 +149,7 @@ window.addEventListener("phx:page-loading-stop", info => NProgress.done())
 liveSocket.connect()
 
 // expose liveSocket on window for web console debug logs and latency simulation:
-// >> liveSocket.enableDebug()
+>> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)
 
 window.liveSocket = liveSocket
-
-window.Alpine = Alpine;
-
-Alpine.start();

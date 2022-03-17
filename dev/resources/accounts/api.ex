@@ -8,6 +8,6 @@ defmodule Demo.Accounts.Api do
   end
 
   resources do
-    resource Demo.Accounts.User
+    registry Demo.Accounts.Registry
   end
 end

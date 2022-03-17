@@ -104,8 +104,9 @@ defmodule AshAdmin.PageLive do
     |> Enum.flat_map(fn api ->
       api
       |> Ash.Api.resources()
-      |> Enum.filter(&AshAdmin.Helpers.primary_action(&1, :read))
-      |> Enum.filter(&AshAdmin.Resource.actor?/1)
+      |> Enum.filter(fn resource ->
+        AshAdmin.Helpers.primary_action(resource, :read) && AshAdmin.Resource.actor?(resource)
+      end)
       |> Enum.map(fn resource -> {api, resource} end)
     end)
   end

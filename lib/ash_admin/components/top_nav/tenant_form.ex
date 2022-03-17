@@ -10,7 +10,7 @@ defmodule AshAdmin.Components.TopNav.TenantForm do
 
   def render(assigns) do
     ~F"""
-    <div id="tenant-hook" class="relative text-white" phx-hook="Tenant" phx-target={@myself}>
+    <div id={@id} class="relative text-white" phx-hook="Tenant" phx-target={@myself}>
       <form :if={@editing_tenant} :on-submit={@set_tenant}>
         <input type="text" name="tenant" value={@tenant} class={"text-black": @editing_tenant}>
         <button :on-click="stop_editing_tenant">

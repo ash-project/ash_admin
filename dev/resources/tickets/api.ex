@@ -3,18 +3,11 @@ defmodule Demo.Tickets.Api do
   use Ash.Api,
     extensions: [AshAdmin.Api]
 
-  alias Demo.Tickets.{Comment, Customer, Representative, Ticket, TicketLink, Organization}
-
   admin do
     show? true
   end
 
   resources do
-    resource(Customer)
-    resource(Representative)
-    resource(Ticket)
-    resource(Comment)
-    resource(TicketLink)
-    resource(Organization)
+    registry Demo.Tickets.Registry
   end
 end

@@ -122,9 +122,9 @@ defmodule AshAdmin.Components.Resource.Table do
       else
         attributes = attributes(attribute.destination, display_attributes, [])
 
-        attributes
-        |> Enum.map(fn x -> render_attribute(api, relationship, x, formats) end)
-        |> Enum.join(" - ")
+        Enum.map_join(attributes, " - ", fn x ->
+          render_attribute(api, relationship, x, formats)
+        end)
       end
     end
   end

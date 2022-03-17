@@ -1,19 +1,20 @@
 defmodule AshAdmin.Components.TopNav.Dropdown do
   @moduledoc false
-  use Surface.Component
+  use Surface.LiveComponent
 
   alias Surface.Components.LiveRedirect
 
   prop(name, :string, required: true)
   prop(groups, :list, required: true)
-  prop(id, :string, required: true)
   prop(active, :boolean, required: true)
   prop(class, :css_class)
 
+  data(open, :boolean, default: false)
+
   def render(assigns) do
     ~F"""
-    <div class={"relative", @class}>
-      <div x-data="{isOpen: false}">
+    <div class={"relative", @class} phx-target={@myself}>
+      <div phx-click-away="close" phx-target={@myself}>
         <button
           type="button"
           class={
@@ -21,8 +22,9 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
             "bg-gray-800 hover:bg-gray-900 text-white": @active,
             "bg-white text-gray-700 hover:bg-gray-300": !@active
           }
-          x-on:click="isOpen = !isOpen"
-          id={"#{@id}_dropown"}
+          phx-click="toggle"
+          phx-target={@myself}
+          id={"#{@id}_dropdown_button"}
           aria-haspopup="true"
           aria-expanded="true"
         >
@@ -43,51 +45,53 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
           </svg>
         </button>
 
-        <div
-          x-show="isOpen"
-          x-cloak
-          class={
-            "origin-top-right absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 z-10",
-            "bg-gray-600 hover:bg-gray-700": single_active_group?(@groups)
-          }
-          x-transition:enter="transition ease-out duration-100"
-          x-transition:enter-start="transform opacity-0 scale-95"
-          x-transition:enter-end="transform opacity-0 scale-95"
-          x-transition:leave="transition ease-in duration-75"
-          x-transition:leave-start="transform opacity-100 scale-100"
-          x-transition:leave-end="transform opacity-0 scale-95"
-          role="menu"
-          aria-orientation="vertical"
-          @click.away="isOpen=false"
-          id={"#{@id}_dropown"}
-        >
-
-          {#for group <- @groups}
+        {#if @open}
           <div
-            class="py-1"
+            class={
+              "origin-top-right absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 z-10",
+              "bg-gray-600 hover:bg-gray-700": single_active_group?(@groups)
+            }
             role="menu"
             aria-orientation="vertical"
-            aria-labelledby={"#{@id}_dropown"}
+            phx-target={@myself}
+            id={"#{@id}_dropown"}
           >
-          {#for link <- group}
-            <LiveRedirect
-              to={link.to}
-              class={
-                "block px-4 py-2 text-sm ",
-                "bg-gray-600 text-white hover:bg-gray-700": Map.get(link, :active),
-                "text-gray-700 hover:bg-gray-100 hover:text-gray-900": !Map.get(link, :active)
-              }
-              opts={role: "menuitem"}
+
+            {#for group <- @groups}
+            <div
+              class="py-1"
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby={"#{@id}_dropown"}
             >
-              {link.text}
-            </LiveRedirect>
-          {/for}
+            {#for link <- group}
+              <LiveRedirect
+                to={link.to}
+                class={
+                  "block px-4 py-2 text-sm ",
+                  "bg-gray-600 text-white hover:bg-gray-700": Map.get(link, :active),
+                  "text-gray-700 hover:bg-gray-100 hover:text-gray-900": !Map.get(link, :active)
+                }
+                opts={role: "menuitem"}
+              >
+                {link.text}
+              </LiveRedirect>
+            {/for}
+            </div>
+            {/for}
           </div>
-          {/for}
-        </div>
+        {/if}
       </div>
     </div>
     """
+  end
+
+  def handle_event("close", _, socket) do
+    {:noreply, assign(socket, :open, false)}
+  end
+
+  def handle_event("toggle", _, socket) do
+    {:noreply, assign(socket, :open, !socket.assigns.open)}
   end
 
   defp single_active_group?([[%{active: true}]]), do: true
