@@ -88,7 +88,7 @@ defmodule AshAdmin.MixProject do
     [
       {:ash, "~> 1.51 and >= 1.5.2"},
       # {:ash, path: "../ash", override: true},
-      {:ash_phoenix, "~> 0.6.0-rc.7 or >= 0.6.0"},
+      {:ash_phoenix, "~> 0.7"},
       # {:ash_phoenix, path: "../ash_phoenix"},
       {:surface, "~> 0.7.1"},
       {:phoenix_live_view, "~> 0.17.7"},
