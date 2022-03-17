@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.4.2](https://github.com/ash-project/ash_admin/compare/v0.4.1...v0.4.2) (2022-03-17)
+
+
+
+
+### Bug Fixes:
+
+* don't lock phoenix version
+
 ## [v0.4.1](https://github.com/ash-project/ash_admin/compare/v0.4.0...v0.4.1) (2022-03-17)
 
 
