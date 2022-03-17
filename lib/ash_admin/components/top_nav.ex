@@ -38,14 +38,15 @@ defmodule AshAdmin.Components.TopNav do
             <div class="hidden md:block w-full">
               <div class="flex justify-between">
                 <div class="ml-10 flex items-center">
-                  <Dropdown
-                    :for={api <- @apis}
-                    active={api == @api}
-                    class="mr-1"
-                    id={AshAdmin.Api.name(api) <> "_api_nav"}
-                    name={AshAdmin.Api.name(api)}
-                    groups={dropdown_groups(@prefix, @resource, api)}
-                  />
+                  {#for api <- @apis}
+                    <Dropdown
+                      active={api == @api}
+                      class="mr-1"
+                      id={AshAdmin.Api.name(api) <> "_api_nav"}
+                      name={AshAdmin.Api.name(api)}
+                      groups={dropdown_groups(@prefix, @resource, api)}
+                    />
+                  {/for}
                 </div>
                 <div class="ml-10 flex items-center">
                   <ActorSelect
@@ -74,7 +75,7 @@ defmodule AshAdmin.Components.TopNav do
           </div>
           <div class="-mr-2 flex md:hidden">
             <button
-              @click="navOpen = !navOpen"
+              x-on:click="navOpen = !navOpen"
               class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:bg-gray-700 focus:text-white"
             >
               <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
@@ -99,7 +100,7 @@ defmodule AshAdmin.Components.TopNav do
           </div>
         </div>
       </div>
-      <div x-show="navOpen" class="md:hidden">
+      <div x-show="navOpen" class="md:hidden" x-cloak>
         <div class="relative px-2 pt-2 pb-3 sm:px-3">
           <div class="block px-4 py-2 text-sm">
             <ActorSelect

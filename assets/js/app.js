@@ -3,7 +3,11 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import NProgress from "nprogress"
 import { LiveSocket, Browser } from "phoenix_live_view"
-import 'alpinejs'
+import Alpine from 'alpinejs'
+
+window.Alpine = Alpine
+
+Alpine.start()
 
 let socketPath = document.querySelector("html").getAttribute("phx-socket") || "/live"
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
@@ -133,7 +137,8 @@ let liveSocket = new LiveSocket(socketPath, Socket, {
   dom: {
     onBeforeElUpdated(from, to) {
       if (from.__x) {
-        window.Alpine.clone(from.__x, to)
+        console.log('here')
+        window.Alpine.clone(from, to);
       }
     }
   },
@@ -150,4 +155,5 @@ liveSocket.connect()
 // expose liveSocket on window for web console debug logs and latency simulation:
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)
+
 window.liveSocket = liveSocket

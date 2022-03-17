@@ -28,7 +28,7 @@ defmodule AshAdmin.Components.Resource.Nav do
               <div class="ml-12 flex items-center space-x-1">
                 <div :if={has_create_action?(@resource)} class="relative">
                   <LiveRedirect
-                    to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=create&action=#{Ash.Resource.Info.primary_action(@resource, :create).name}&tab=create&table=#{@table}"}
+                    to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=create&action=#{create_action(@resource).name}&tab=create&table=#{@table}"}
                     class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
                   >
                     Create
@@ -48,6 +48,11 @@ defmodule AshAdmin.Components.Resource.Nav do
       </div>
     </nav>
     """
+  end
+
+  defp create_action(resource) do
+    AshAdmin.Helpers.primary_action(resource, :create) ||
+      Enum.find(Ash.Resource.Info.actions(resource), &(&1.type == :create))
   end
 
   defp data_groups(prefix, api, resource, current_action, table) do

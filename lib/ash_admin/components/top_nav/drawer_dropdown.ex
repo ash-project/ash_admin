@@ -13,7 +13,7 @@ defmodule AshAdmin.Components.TopNav.DrawerDropdown do
     <div class="relative">
       <div x-data="{isOpen: false}">
         <a
-          @click="isOpen = !isOpen"
+          x-on:click="isOpen = !isOpen"
           id={"#{@id}_dropdown_drawer"}
           class="mt-1 block px-3 py-2 rounded-t text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700"
           href="#"
@@ -27,6 +27,7 @@ defmodule AshAdmin.Components.TopNav.DrawerDropdown do
           aria-labelledby={"#{@id}_dropown_drawer"}
           class="bg-gray-700 text-white"
           x-show="isOpen"
+          x-cloak
           role="menu"
           aria-orientation="vertical"
           x-transition:enter="transition ease-out duration-150"

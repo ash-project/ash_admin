@@ -152,7 +152,7 @@ defmodule AshAdmin.Resource do
     if action do
       action
     else
-      action = Ash.Resource.Info.primary_action(resource, :read)
+      action = AshAdmin.Helpers.primary_action(resource, :read)
       action && action.name
     end
   end

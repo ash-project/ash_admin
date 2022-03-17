@@ -38,15 +38,15 @@ defmodule AshAdmin.Components.Resource.Table do
                   </LiveRedirect>
                 </div>
 
-                <div :if={Ash.Resource.Info.primary_action(@resource, :update)}>
+                <div :if={AshAdmin.Helpers.primary_action(@resource, :update)}>
                   <LiveRedirect
-                    to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&action=#{Ash.Resource.Info.primary_action(@resource, :update).name}&tab=update&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
+                    to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&action=#{AshAdmin.Helpers.primary_action(@resource, :update).name}&tab=update&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
                     <HeroIcon name="pencil" class="h-5 w-5 text-gray-500" />
                   </LiveRedirect>
                 </div>
 
-                <div :if={Ash.Resource.Info.primary_action(@resource, :destroy)}>
-                  <LiveRedirect to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&action=#{Ash.Resource.Info.primary_action(@resource, :destroy).name}&tab=destroy&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
+                <div :if={AshAdmin.Helpers.primary_action(@resource, :destroy)}>
+                  <LiveRedirect to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&action=#{AshAdmin.Helpers.primary_action(@resource, :destroy).name}&tab=destroy&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
                     <HeroIcon name="x-circle" class="h-5 w-5 text-gray-500" />
                   </LiveRedirect>
                 </div>
@@ -161,7 +161,7 @@ defmodule AshAdmin.Components.Resource.Table do
   end
 
   defp actions?(resource) do
-    Ash.Resource.Info.primary_action(resource, :update) || AshAdmin.Resource.show_action(resource) ||
-      AshAdmin.Resource.actor?(resource) || Ash.Resource.Info.primary_action(resource, :destroy)
+    AshAdmin.Helpers.primary_action(resource, :update) || AshAdmin.Resource.show_action(resource) ||
+      AshAdmin.Resource.actor?(resource) || AshAdmin.Helpers.primary_action(resource, :destroy)
   end
 end

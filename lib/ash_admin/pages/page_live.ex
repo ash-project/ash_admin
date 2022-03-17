@@ -104,7 +104,7 @@ defmodule AshAdmin.PageLive do
     |> Enum.flat_map(fn api ->
       api
       |> Ash.Api.resources()
-      |> Enum.filter(&Ash.Resource.Info.primary_action(&1, :read))
+      |> Enum.filter(&AshAdmin.Helpers.primary_action(&1, :read))
       |> Enum.filter(&AshAdmin.Resource.actor?/1)
       |> Enum.map(fn resource -> {api, resource} end)
     end)
@@ -115,128 +115,6 @@ defmodule AshAdmin.PageLive do
     |> Application.get_env(:ash_apis)
     |> Enum.filter(&AshAdmin.Api.show?/1)
   end
-
-  # defp find_api(api, otp_app) do
-  #   otp_app
-  #   |> apis()
-  #   |> Enum.find(fn api ->
-  #     AshAdmin.Api.name(api) == api
-  #   end)
-  # end
-
-  # defp find_resource(api, resource, otp_app) do
-  #   case find_api(api, otp_app) do
-  #     nil ->
-  #       nil
-
-  #     api ->
-  #       api
-  #       |> Ash.Api.resources()
-  #       |> Enum.find(fn resource ->
-  #         AshAdmin.Resource.name(resource) == resource
-  #       end)
-  #   end
-  # end
-
-  # defp match_result(%{path: path}, otp_app) when path == "/" || path == "" do
-  #   {:ok, [api: Enum.at(apis(otp_app), 0)]}
-  # end
-
-  # defp match_result(url, otp_app) do
-  #   url.path
-  #   |> Enum.split("/")
-  #   |> case do
-  #     [api] ->
-  #       case find_api(api, otp_app) do
-  #         nil ->
-  #           :error
-
-  #         api ->
-  #           {:ok, api: api, tab: "info"}
-  #       end
-
-  #     [api, resource] ->
-  #       case find_resource(api, resource, otp_app) do
-  #         {api, resource} ->
-  #           {:ok, api: api, resource: resource, tab: "info"}
-
-  #         nil ->
-  #           :error
-  #       end
-
-  #     [api, resource, table_or_action_type] ->
-  #       case find_table_or_action_type(api, resource, table_or_action_type, otp_app) do
-  #         {:table, api, resource} ->
-  #           {:ok, api: api, resource: resource, table: table_or_action_type}
-
-  #         {:action, api, resource, action_type} ->
-  #           action = Ash.Resource.Info.primary_action!(resource, action_type)
-  #           {:ok, api: api, resource: resource, action_type: action_type, action: action.name}
-  #       end
-
-  #     [api, resource, table_or_action_type, action_type_or_action_name, otp_app] ->
-  #       case find_action_type_or_action_name(
-  #              api,
-  #              resource,
-  #              table_or_action_type,
-  #              action_type_or_action_name
-  #            ) do
-  #         {:action_name, api, resource, action_type, action_name} ->
-  #           {:ok, api: api, resource: resource, action_type: action_type, action: action_name}
-
-  #         {:action_type, api, resource, action_type} ->
-  #           action = Ash.Resource.Info.primary_action!(resource, action_type)
-
-  #           {:ok,
-  #            api: api,
-  #            resource: resource,
-  #            action_type: action_type,
-  #            action: action.name,
-  #            table: table_or_action_type}
-
-  #         {:action_type_with_pkey, api, resource, action_type, primary_key} ->
-  #           action = Ash.Resource.Info.primary_action!(resource, action_type)
-  #           {:ok, api: api, resource: resource, action_type: action_type, action: action.name}
-  #       end
-
-  #     [api, resource, table_or_action_type, action_type_or_action_name, primary_key] ->
-  #       case find_action_type_or_action_name_with_primary_key(
-  #              api,
-  #              resource,
-  #              table_or_action_type,
-  #              action_type_or_action_name,
-  #              otp_app
-  #            ) do
-  #         {:table, api, resource, action_type, primary_key} ->
-  #           action = Ash.Resource.Info.primary_action!(resource, action_type)
-
-  #           {:ok,
-  #            api: api,
-  #            resource: resource,
-  #            action_type: action_type,
-  #            primary_key: primary_key,
-  #            table: table_or_action_type,
-  #            action: action.name}
-
-  #         {:action_name, api, resource, action_type, action_name, primary_key} ->
-  #           {:ok,
-  #            api: api,
-  #            resource: resource,
-  #            action_type: action_type,
-  #            action: action_name,
-  #            primary_key: primary_key}
-  #       end
-  #     [api, resource, table, action_type, action_name, primary_key] ->
-  #       action_type = case action_type do
-  #         "update" -> :update
-  #         "destroy" -> :destroy
-  #       end
-  #       case find_resource(api, resource, otp_app) do
-
-  #       end
-
-  #   end
-  # end
 
   defp assign_api(socket, api) do
     api =
@@ -272,9 +150,13 @@ defmodule AshAdmin.PageLive do
       action =
         Enum.find(Ash.Resource.Info.actions(socket.assigns.resource), fn resource_action ->
           to_string(resource_action.name) == action && resource_action.type == action_type
-        end) || Ash.Resource.Info.primary_action!(socket.assigns.resource, action_type)
+        end) || AshAdmin.Helpers.primary_action(socket.assigns.resource, action_type)
 
-      assign(socket, action_type: action_type, action: action)
+      if action do
+        assign(socket, action_type: action_type, action: action)
+      else
+        assign(socket, action: nil, action_type: nil)
+      end
     else
       assign(socket, action: nil, action_type: nil)
     end
@@ -324,7 +206,7 @@ defmodule AshAdmin.PageLive do
               |> Ash.Query.load(to_one_relationships(socket.assigns.resource))
               |> Ash.Query.set_tenant(socket.assigns[:tenant])
               |> socket.assigns.api.read_one(
-                action: Ash.Resource.Info.primary_action!(socket.assigns.resource, :read),
+                action: AshAdmin.Helpers.primary_action(socket.assigns.resource, :read),
                 actor: actor,
                 authorize?: socket.assigns.authorizing
               )
@@ -408,7 +290,7 @@ defmodule AshAdmin.PageLive do
     case decode_primary_key(resource, primary_key) do
       {:ok, pkey_filter} ->
         api = Module.concat([api])
-        action = Ash.Resource.Info.primary_action!(resource, :read)
+        action = AshAdmin.Helpers.primary_action(resource, :read)
 
         actor =
           resource

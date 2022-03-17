@@ -21,7 +21,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
             "bg-gray-800 hover:bg-gray-900 text-white": @active,
             "bg-white text-gray-700 hover:bg-gray-300": !@active
           }
-          @click="isOpen = !isOpen"
+          x-on:click="isOpen = !isOpen"
           id={"#{@id}_dropown"}
           aria-haspopup="true"
           aria-expanded="true"
@@ -45,6 +45,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
 
         <div
           x-show="isOpen"
+          x-cloak
           class={
             "origin-top-right absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 z-10",
             "bg-gray-600 hover:bg-gray-700": single_active_group?(@groups)
@@ -60,15 +61,16 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
           @click.away="isOpen=false"
           id={"#{@id}_dropown"}
         >
+
+          {#for group <- @groups}
           <div
-            :for={group <- @groups}
             class="py-1"
             role="menu"
             aria-orientation="vertical"
             aria-labelledby={"#{@id}_dropown"}
           >
+          {#for link <- group}
             <LiveRedirect
-              :for={link <- group}
               to={link.to}
               class={
                 "block px-4 py-2 text-sm ",
@@ -79,7 +81,9 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
             >
               {link.text}
             </LiveRedirect>
+          {/for}
           </div>
+          {/for}
         </div>
       </div>
     </div>

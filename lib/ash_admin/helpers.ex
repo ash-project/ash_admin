@@ -86,4 +86,11 @@ defmodule AshAdmin.Helpers do
   defp simple_type?(resource, field) do
     Ash.Resource.Info.attribute(resource, field).type in @simple_types
   end
+
+  def primary_action(resource, type) do
+    Ash.Resource.Info.primary_action(resource, type)
+  rescue
+    _ ->
+      nil
+  end
 end

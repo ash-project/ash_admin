@@ -830,7 +830,7 @@ defmodule AshAdmin.Components.Resource.Form do
            "#{socket.assigns.prefix}?api=#{AshAdmin.Api.name(socket.assigns.api)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}&tab=show&table=#{socket.assigns.table}&primary_key=#{encode_primary_key(record)}"
        )}
     else
-      case Ash.Resource.Info.primary_action(socket.assigns.resource, :update) do
+      case AshAdmin.Helpers.primary_action(socket.assigns.resource, :update) do
         nil ->
           {:noreply,
            redirect(socket,
