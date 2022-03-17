@@ -95,7 +95,6 @@ defmodule AshAdmin.MixProject do
       {:phoenix_html, "~> 3.2"},
       {:jason, "~> 1.0"},
       # Dev dependencies
-      {:phoenix, ">= 1.6.5", override: true},
       {:surface_formatter, "~> 0.7.5", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
