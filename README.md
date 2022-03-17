@@ -65,3 +65,15 @@ Now start your project (usually by running `mix phx.server` in a terminal) and v
 ## Configuration
 
 See the documentation in [`AshAdmin.Resource`](https://hexdocs.pm/ash_admin/AshAdmin.Resource.html) and [`AshAdmin.Api`](https://hexdocs.pm/ash_admin/AshAdmin.Api.html) for information on the available configuration.
+
+## Development
+
+To work on ash_admin, you'll want to be able to run the dev app. You'll need to have postgres setup locally, at which point you can do the following:
+
+1. `mix ash_postgres.create`
+2. `mix migrate`
+3. `mix migrate_tenants`
+
+Then, you can start the app with: `mix dev`
+
+If you make changes to the resources, you can generate migrations with `mix generate_migrations`
