@@ -39,6 +39,8 @@ defmodule AshAdmin.Components.Resource.Form do
   prop(table, :any, required: true)
   prop(tables, :any, required: true)
   prop(prefix, :any, required: true)
+  prop(url_path, :any, required: true)
+  prop(params, :any, required: true)
 
   def update(assigns, socket) do
     {:ok,
@@ -142,7 +144,7 @@ defmodule AshAdmin.Components.Resource.Form do
           as={:action}
           for={:action}
           change="change_action"
-          opts={id: @id <> "_action_form"}
+          opts={id: @id <> "_action_form", phx_target: @myself}
         >
           <FieldContext name="action">
             <Label>Action</Label>
@@ -157,7 +159,7 @@ defmodule AshAdmin.Components.Resource.Form do
           for={@form}
           change="validate"
           submit="save"
-          opts={autocomplete: false, id: @id <> "_form"}
+          opts={autocomplete: false, id: "#{@id}_form", phx_target: @myself}
           :let={form: form}
         >
           <input hidden phx-hook="FormChange" id="resource_form">
@@ -890,19 +892,22 @@ defmodule AshAdmin.Components.Resource.Form do
       :create ->
         {:noreply,
          push_redirect(socket,
-           to: self_path(socket.assigns.url_path, socket.assigns.params, %{"action" => action})
+           to:
+             self_path(socket.assigns.url_path, socket.assigns.params, %{"action" => action.name})
          )}
 
       :update ->
         {:noreply,
          push_redirect(socket,
-           to: self_path(socket.assigns.url_path, socket.assigns.params, %{"action" => action})
+           to:
+             self_path(socket.assigns.url_path, socket.assigns.params, %{"action" => action.name})
          )}
 
       :destroy ->
         {:noreply,
          push_redirect(socket,
-           to: self_path(socket.assigns.url_path, socket.assigns.params, %{"action" => action})
+           to:
+             self_path(socket.assigns.url_path, socket.assigns.params, %{"action" => action.name})
          )}
     end
   end

@@ -5,9 +5,6 @@ import NProgress from "nprogress"
 import { LiveSocket, Browser } from "phoenix_live_view"
 import Alpine from 'alpinejs'
 
-window.Alpine = Alpine
-
-Alpine.start()
 
 let socketPath = document.querySelector("html").getAttribute("phx-socket") || "/live"
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
@@ -55,7 +52,7 @@ Hooks.JsonEditorSource = {
       if (editor.getMode() === "tree") {
         editor.update(JSON.parse(this.el.value))
       } else {
-        if (console.log(editor.get()) !== console.log(JSON.parse(this.el.value))) {
+        if (editor.get() !== JSON.parse(this.el.value)) {
           editor.setText(this.el.value)
         } else {
         }
@@ -133,17 +130,16 @@ Hooks.MaintainAttrs = {
 }
 
 let liveSocket = new LiveSocket(socketPath, Socket, {
+  params: { _csrf_token: csrfToken },
   hooks: Hooks,
   dom: {
     onBeforeElUpdated(from, to) {
-      if (from.__x) {
-        console.log('here')
+      if (from._x_dataStack) {
         window.Alpine.clone(from, to);
       }
-    }
+    },
   },
-  params: { _csrf_token: csrfToken }
-})
+});
 
 // Show progress bar on live navigation and form submits
 window.addEventListener("phx:page-loading-start", info => NProgress.start())
@@ -157,3 +153,7 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)
 
 window.liveSocket = liveSocket
+
+window.Alpine = Alpine;
+
+Alpine.start();

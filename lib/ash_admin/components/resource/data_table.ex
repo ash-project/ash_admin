@@ -160,6 +160,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                   for={@query}
                   change="validate"
                   submit="save"
+                  opts={phx_target: @myself}
                   :let={form: form}
                 >
                   {AshAdmin.Components.Resource.Form.render_attributes(assigns, @resource, @action, form)}

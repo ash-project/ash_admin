@@ -1549,10 +1549,10 @@
   "resolved" "https://registry.npmjs.org/alphanum-sort/-/alphanum-sort-1.0.2.tgz"
   "version" "1.0.2"
 
-"alpinejs@3.9.1":
-  "integrity" "sha512-RcNHza1C9hrGEScXP1igFwnP4iTn4cXbT6vhd1gDT6DsZLE8kutG4FRRF1yk2T0poQYMyyxfFlqX865HUHJy3Q=="
-  "resolved" "https://registry.npmjs.org/alpinejs/-/alpinejs-3.9.1.tgz"
-  "version" "3.9.1"
+"alpinejs@3.7.1":
+  "integrity" "sha512-OJDlhOT50+9REa4cpGHr4WlGBE9ysJEZ+IfN2xwmotUANxp1VSrYgBNBfUWJr9uQ1INhodzvi6UfIWoqQqYOnA=="
+  "resolved" "https://registry.npmjs.org/alpinejs/-/alpinejs-3.7.1.tgz"
+  "version" "3.7.1"
   dependencies:
     "@vue/reactivity" "~3.1.1"
 

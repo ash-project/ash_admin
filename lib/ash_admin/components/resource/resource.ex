@@ -48,6 +48,8 @@ defmodule AshAdmin.Components.Resource do
           type={:update}
           record={record}
           resource={@resource}
+          url_path={@url_path}
+          params={@params}
           action={@action}
           api={@api}
           id={update_id(@resource)}
@@ -67,7 +69,9 @@ defmodule AshAdmin.Components.Resource do
           type={:destroy}
           record={record}
           resource={@resource}
+          url_path={@url_path}
           action={@action}
+          params={@params}
           set_actor={@set_actor}
           api={@api}
           id={destroy_id(@resource)}
@@ -97,6 +101,8 @@ defmodule AshAdmin.Components.Resource do
         :if={@tab == "create"}
         type={:create}
         resource={@resource}
+        url_path={@url_path}
+        params={@params}
         api={@api}
         set_actor={@set_actor}
         action={@action}
