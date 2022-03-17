@@ -5,6 +5,21 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.4.3](https://github.com/ash-project/ash_admin/compare/v0.4.2...v0.4.3) (2022-03-17)
+
+
+
+
+### Bug Fixes:
+
+* a bunch of behavior fixes, getting the demo to snuff with new Ash
+
+* fix tenant/actor session w/ new phx version
+
+### Improvements:
+
+* update tons of dependencies
+
 ## [v0.4.2](https://github.com/ash-project/ash_admin/compare/v0.4.1...v0.4.2) (2022-03-17)
 
 
