@@ -10,6 +10,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
   alias Surface.Components.Form.{
     Checkbox,
+    DateInput,
     ErrorTag,
     FieldContext,
     HiddenInput,
@@ -475,6 +476,17 @@ defmodule AshAdmin.Components.Resource.Form do
 
   def render_attribute_input(assigns, attribute, form, value \\ nil, name \\ nil)
 
+  def render_attribute_input(assigns, %{type: Ash.Type.Date} = attribute, form, value, name) do
+    ~F"""
+    <DateInput
+      form={form}
+      value={value(value, form, attribute)}
+      name={name || form.name <> "[#{attribute.name}]"}
+      :props={props(value, attribute)}
+      />
+    """
+  end
+
   def render_attribute_input(
         assigns,
         %{
@@ -490,7 +502,6 @@ defmodule AshAdmin.Components.Resource.Form do
       form={form}
       value={value(value, form, attribute)}
       name={name || form.name <> "[#{attribute.name}]"}
-      class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
       :props={props(value, attribute)}
     />
     """
