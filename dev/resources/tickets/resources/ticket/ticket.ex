@@ -2,7 +2,7 @@ defmodule Demo.Tickets.Ticket do
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
     authorizers: [
-      AshPolicyAuthorizer.Authorizer
+      Ash.Policy.Authorizer
     ],
     extensions: [
       AshAdmin.Resource
@@ -112,7 +112,9 @@ defmodule Demo.Tickets.Ticket do
       )
     end
 
-    destroy :destroy
+    destroy :destroy do
+      primary? true
+    end
   end
 
   postgres do

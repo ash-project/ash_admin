@@ -7,6 +7,10 @@ defmodule Demo.Tickets.Organization do
     repo Demo.Repo
   end
 
+  actions do
+    defaults [:create, :read, :update, :destroy]
+  end
+
   attributes do
     uuid_primary_key :id
 

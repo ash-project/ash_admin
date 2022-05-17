@@ -13,6 +13,10 @@ defmodule Demo.Tickets.TicketLink do
     ], allow_nil?: false
   end
 
+  actions do
+    defaults [:create, :read, :update, :destroy]
+  end
+
   relationships do
     belongs_to :source, Demo.Tickets.Ticket do
       primary_key? true

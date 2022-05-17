@@ -2,7 +2,7 @@ defmodule Demo.Tickets.Customer do
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
     authorizers: [
-      AshPolicyAuthorizer.Authorizer
+      Ash.Policy.Authorizer
     ],
     extensions: [
       AshAdmin.Resource

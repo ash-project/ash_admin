@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 pg_url = System.get_env("PG_URL") || "postgres:postgres@127.0.0.1"
 pg_database = System.get_env("PG_DATABASE") || "ash_admin_dev"
@@ -29,8 +29,6 @@ config :ash_admin, DemoWeb.Endpoint,
 
 config :logger, level: :debug
 config :phoenix, :serve_endpoints, true
-
-use Mix.Config
 
 if Mix.env() == :dev do
   config :git_ops,

@@ -17,8 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         otp: ["23"]
-        elixir: ["1.11.4"]
-        ash: ["master", "1.47.3"]
+        elixir: ["1.13.1"]
+        ash: ["main", "1.47.3"]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       ASH_VERSION: ${{matrix.ash}}
@@ -53,7 +53,7 @@ jobs:
     strategy:
       matrix:
         otp: ["23"]
-        elixir: ["1.11.4"]
+        elixir: ["1.13.1"]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -79,7 +79,7 @@ jobs:
     strategy:
       matrix:
         otp: ["23"]
-        elixir: ["1.11.4"]
+        elixir: ["1.13.1"]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
