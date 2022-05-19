@@ -150,9 +150,9 @@ defmodule AshAdmin.Components.TopNav do
         group: AshAdmin.Resource.resource_group(resource)
       }
     end
-    |> Enum.sort_by(fn resource -> resource.group end)
     |> Enum.group_by(fn resource -> resource.group end)
-    |> Map.values()
+    |> Enum.sort_by(fn {label, _items} -> label || "_____always_put_me_last" end)
+    |> Keyword.values()
   end
 
   defp dropdown_group_labels(api) do
