@@ -1126,11 +1126,8 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp remove_value(form, field, index) do
     current_value =
-      form.source
-      |> Phoenix.HTML.FormData.input_value(
-        Phoenix.HTML.Form.form_for(form, "foo"),
-        String.to_existing_atom(field)
-      )
+      form
+      |> AshPhoenix.Form.value(String.to_existing_atom(field))
       |> case do
         map when is_map(map) ->
           map

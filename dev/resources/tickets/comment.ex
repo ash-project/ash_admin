@@ -10,6 +10,7 @@ defmodule Demo.Tickets.Comment do
   end
 
   actions do
+    defaults [:read, :update, :destroy]
     create :create do
       primary? true
     end

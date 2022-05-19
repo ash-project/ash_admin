@@ -33,8 +33,7 @@ defmodule Demo.Tickets.Customer do
   end
 
   actions do
-    defaults []
-    read :read
+    defaults [:read]
   end
 
   attributes do
