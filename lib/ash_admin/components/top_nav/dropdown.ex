@@ -88,23 +88,25 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
     """
   end
 
-  def group_label(assigns) when not is_map_key(assigns, :group_labels), do: no_content()
-  def group_label(%{group_labels: []}), do: no_content()
-  def group_label(%{item: item}) when not is_map_key(item, :group), do: no_content()
+  defp group_label(assigns) do
+    assigns = Map.put(assigns, :label_text, group_label_text(assigns))
 
-  def group_label(assigns) do
-    case Keyword.get(assigns.group_labels, assigns.item.group) do
-      nil ->
-        no_content()
-
-      label ->
-        ~F"""
-        <span class="block px-4 py-2 text-xs text-gray-400 font-semibold italic">{label}</span>
-        """
-    end
+    ~F"""
+    {#if @label_text}
+    <span class="block px-4 py-2 text-xs text-gray-400 font-semibold italic">{@label_text}</span>
+    {/if}
+    """
   end
 
-  defp no_content(assigns \\ %{}), do: ~H""
+  # No labels specified for the whole dropdown
+  defp group_label_text(assigns) when not is_map_key(assigns, :group_labels), do: nil
+  defp group_label_text(%{group_labels: []}), do: nil
+
+  # No label specified for this dropdown group
+  defp group_label_text(%{item: item}) when not is_map_key(item, :group), do: nil
+
+  # Maybe a label to display!
+  defp group_label_text(assigns), do: Keyword.get(assigns.group_labels, assigns.item.group)
 
   def handle_event("close", _, socket) do
     {:noreply, assign(socket, :open, false)}
