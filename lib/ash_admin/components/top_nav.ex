@@ -46,6 +46,7 @@ defmodule AshAdmin.Components.TopNav do
                       id={AshAdmin.Api.name(api) <> "_api_nav"}
                       name={AshAdmin.Api.name(api)}
                       groups={dropdown_groups(@prefix, @resource, api)}
+                      group_labels={dropdown_group_labels(api)}
                     />
                   {/for}
                 </div>
@@ -131,6 +132,7 @@ defmodule AshAdmin.Components.TopNav do
             id={AshAdmin.Api.name(api) <> "_api_nav_drawer"}
             name={AshAdmin.Api.name(api)}
             groups={dropdown_groups(@prefix, @resource, api)}
+            group_labels={dropdown_group_labels(api)}
           />
         </div>
       </div>
@@ -139,16 +141,22 @@ defmodule AshAdmin.Components.TopNav do
   end
 
   defp dropdown_groups(prefix, current_resource, api) do
-    [
-      for resource <- Ash.Api.resources(api) do
-        %{
-          text: AshAdmin.Resource.name(resource),
-          to:
-            "#{prefix}?api=#{AshAdmin.Api.name(api)}&resource=#{AshAdmin.Resource.name(resource)}",
-          active: resource == current_resource
-        }
-      end
-    ]
+    for resource <- Ash.Api.resources(api) do
+      %{
+        text: AshAdmin.Resource.name(resource),
+        to:
+          "#{prefix}?api=#{AshAdmin.Api.name(api)}&resource=#{AshAdmin.Resource.name(resource)}",
+        active: resource == current_resource,
+        group: AshAdmin.Resource.resource_group(resource)
+      }
+    end
+    |> Enum.group_by(fn resource -> resource.group end)
+    |> Enum.sort_by(fn {label, _items} -> label || "_____always_put_me_last" end)
+    |> Keyword.values()
+  end
+
+  defp dropdown_group_labels(api) do
+    AshAdmin.Api.resource_group_labels(api)
   end
 
   def handle_event("collapse_nav", _, socket) do

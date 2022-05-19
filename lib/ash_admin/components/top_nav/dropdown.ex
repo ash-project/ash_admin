@@ -6,6 +6,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
 
   prop(name, :string, required: true)
   prop(groups, :list, required: true)
+  prop(group_labels, :keyword, required: false)
   prop(active, :boolean, required: true)
   prop(class, :css_class)
 
@@ -64,6 +65,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
               aria-orientation="vertical"
               aria-labelledby={"#{@id}_dropown"}
             >
+            <.group_label item={hd(group)} group_labels={@group_labels} />
             {#for link <- group}
               <LiveRedirect
                 to={link.to}
@@ -85,6 +87,26 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
     </div>
     """
   end
+
+  defp group_label(assigns) do
+    assigns = Map.put(assigns, :label_text, group_label_text(assigns))
+
+    ~F"""
+    {#if @label_text}
+    <span class="block px-4 py-2 text-xs text-gray-400 font-semibold italic">{@label_text}</span>
+    {/if}
+    """
+  end
+
+  # No labels specified for the whole dropdown
+  defp group_label_text(assigns) when not is_map_key(assigns, :group_labels), do: nil
+  defp group_label_text(%{group_labels: []}), do: nil
+
+  # No label specified for this dropdown group
+  defp group_label_text(%{item: item}) when not is_map_key(item, :group), do: nil
+
+  # Maybe a label to display!
+  defp group_label_text(assigns), do: Keyword.get(assigns.group_labels, assigns.item.group)
 
   def handle_event("close", _, socket) do
     {:noreply, assign(socket, :open, false)}

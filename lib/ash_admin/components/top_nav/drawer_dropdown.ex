@@ -6,6 +6,7 @@ defmodule AshAdmin.Components.TopNav.DrawerDropdown do
 
   prop(name, :string, required: true)
   prop(groups, :list, required: true)
+  prop(group_labels, :keyword, required: false)
 
   data(open, :boolean, default: false)
 

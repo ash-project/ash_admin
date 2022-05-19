@@ -17,6 +17,8 @@ defmodule AshAdmin.Helpers do
       Plug.Conn.Query.encode(Map.merge(socket_params || %{}, Enum.into(new_params, %{})))
   end
 
+  def to_name(:id), do: "ID"
+
   def to_name(name) do
     name
     |> to_string()
