@@ -139,16 +139,18 @@ defmodule AshAdmin.Components.TopNav do
   end
 
   defp dropdown_groups(prefix, current_resource, api) do
-    [
-      for resource <- Ash.Api.resources(api) do
-        %{
-          text: AshAdmin.Resource.name(resource),
-          to:
-            "#{prefix}?api=#{AshAdmin.Api.name(api)}&resource=#{AshAdmin.Resource.name(resource)}",
-          active: resource == current_resource
-        }
-      end
-    ]
+    for resource <- Ash.Api.resources(api) do
+      %{
+        text: AshAdmin.Resource.name(resource),
+        to:
+          "#{prefix}?api=#{AshAdmin.Api.name(api)}&resource=#{AshAdmin.Resource.name(resource)}",
+        active: resource == current_resource,
+        group: AshAdmin.Resource.resource_group(resource)
+      }
+    end
+    |> Enum.sort_by(fn resource -> resource.group end)
+    |> Enum.group_by(fn resource -> resource.group end)
+    |> Map.values()
   end
 
   def handle_event("collapse_nav", _, socket) do
