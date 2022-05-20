@@ -10,7 +10,8 @@ defmodule AshAdmin.Api do
       show?: [
         type: :boolean,
         default: false,
-        doc: "Whether or not this API and its resources should be included in the admin dashboard."
+        doc:
+          "Whether or not this API and its resources should be included in the admin dashboard."
       ],
       resource_group_labels: [
         type: :keyword_list,
