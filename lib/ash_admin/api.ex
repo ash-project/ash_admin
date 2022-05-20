@@ -1,16 +1,16 @@
 defmodule AshAdmin.Api do
   @admin %Ash.Dsl.Section{
-    describe: "Configure the admin dashboard for a given API",
+    describe: "Configure the admin dashboard for a given API.",
     name: :admin,
     schema: [
       name: [
         type: :string,
-        doc: "The name of the api in the dashboard. Will be derived if not set."
+        doc: "The name of the API in the dashboard. Will be derived if not set."
       ],
       show?: [
         type: :boolean,
         default: false,
-        doc: "Wether or not this api and its resources should be included in the admin dashboard"
+        doc: "Whether or not this API and its resources should be included in the admin dashboard."
       ],
       resource_group_labels: [
         type: :keyword_list,
@@ -24,7 +24,7 @@ defmodule AshAdmin.Api do
   use Ash.Dsl.Extension, sections: [@admin]
 
   @moduledoc """
-  An Api extension to alter the behavior of an Api in the admin ui.
+  An API extension to alter the behavior of an API in the admin UI.
 
   Table of Contents:
   #{Ash.Dsl.Extension.doc_index([@admin])}
