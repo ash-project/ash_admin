@@ -1,6 +1,6 @@
 defmodule AshAdmin.Resource do
   @field %Ash.Dsl.Entity{
-    describe: "Declare non-default behavior for a specific attribute",
+    describe: "Declare non-default behavior for a specific attribute.",
     name: :field,
     schema: AshAdmin.Resource.Field.schema(),
     target: AshAdmin.Resource.Field,
@@ -16,7 +16,7 @@ defmodule AshAdmin.Resource do
   }
 
   @admin %Ash.Dsl.Section{
-    describe: "Configure the admin dashboard for a given resource",
+    describe: "Configure the admin dashboard for a given resource.",
     name: :admin,
     sections: [
       @form
@@ -24,11 +24,11 @@ defmodule AshAdmin.Resource do
     schema: [
       name: [
         type: :string,
-        doc: "The proper name to use when this resource appears in the admin interface"
+        doc: "The proper name to use when this resource appears in the admin interface."
       ],
       actor?: [
         type: :boolean,
-        doc: "Whether or not this resource can be used as the actor for requests"
+        doc: "Whether or not this resource can be used as the actor for requests."
       ],
       show_action: [
         type: :atom,
@@ -38,28 +38,28 @@ defmodule AshAdmin.Resource do
       read_actions: [
         type: {:list, :atom},
         doc:
-          "A list of read actions that can be used to show resource details. By default, all actions are included"
+          "A list of read actions that can be used to show resource details. By default, all actions are included."
       ],
       create_actions: [
         type: {:list, :atom},
         doc:
-          "A list of create actions that can be create records. By default, all actions are included"
+          "A list of create actions that can create records. By default, all actions are included."
       ],
       update_actions: [
         type: {:list, :atom},
         doc:
-          "A list of update actions that can be update records. By default, all actions are included"
+          "A list of update actions that can be used to update records. By default, all actions are included."
       ],
       destroy_actions: [
         type: {:list, :atom},
         doc:
-          "A list of destroy actions that can be destroy records. By default, all actions are included"
+          "A list of destroy actions that can be used to destroy records. By default, all actions are included."
       ],
       polymorphic_tables: [
         type: {:list, :string},
         doc: """
-        For resources that use ash_postgres's polymorphism capabilities, you can provide a list of tables that should be available to
-        select. These will be added to the list of derivable tables based on scanning all Apis + resources provided to ash_admin.
+        For resources that use ash_postgres' polymorphism capabilities, you can provide a list of tables that should be available to
+        select. These will be added to the list of derivable tables based on scanning all APIs and resources provided to ash_admin.
         """
       ],
       table_columns: [
@@ -76,7 +76,7 @@ defmodule AshAdmin.Resource do
       ],
       resource_group: [
         type: :atom,
-        doc: "A group for the resource to appear in, in the top resource dropdown."
+        doc: "The group in the top resource dropdown that the resource appears in."
       ]
     ]
   }
@@ -86,7 +86,7 @@ defmodule AshAdmin.Resource do
     transformers: [AshAdmin.Resource.Transformers.ValidateTableColumns]
 
   @moduledoc """
-  An Api extension to alter the behavior of a resource in the admin ui.
+  An API extension to alter the behaviour of a resource in the admin UI.
 
   Table of Contents:
   #{Ash.Dsl.Extension.doc_index([@admin])}
