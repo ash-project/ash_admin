@@ -144,7 +144,7 @@ defmodule AshAdmin.PageLive do
         "update" -> :update
         "create" -> :create
         "destroy" -> :destroy
-        nil -> nil
+        nil -> if AshAdmin.Api.primary_read_default?(socket.assigns.api), do: :read, else: nil
       end
 
     if action_type do
@@ -156,10 +156,10 @@ defmodule AshAdmin.PageLive do
       if action do
         assign(socket, action_type: action_type, action: action)
       else
-        assign(socket, action: nil, action_type: nil)
+        assign(socket, action_type: nil, action: nil)
       end
     else
-      assign(socket, action: nil, action_type: nil)
+      assign(socket, action_type: nil, action: nil)
     end
   end
 

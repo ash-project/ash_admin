@@ -12,6 +12,12 @@ defmodule AshAdmin.Api do
         default: false,
         doc: "Wether or not this api and its resources should be included in the admin dashboard"
       ],
+      primary_read_default?: [
+        type: :boolean,
+        default: false,
+        doc:
+          "Should the default page for the resource be the primary read action or the schema view?"
+      ],
       resource_group_labels: [
         type: :keyword_list,
         default: [],
@@ -40,6 +46,10 @@ defmodule AshAdmin.Api do
 
   def show?(api) do
     Ash.Dsl.Extension.get_opt(api, [:admin], :show?, false, true)
+  end
+
+  def primary_read_default?(api) do
+    Ash.Dsl.Extension.get_opt(api, [:admin], :primary_read_default?, false, true)
   end
 
   def resource_group_labels(api) do
