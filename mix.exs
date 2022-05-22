@@ -88,23 +88,22 @@ defmodule AshAdmin.MixProject do
     [
       {:ash, "~> 1.52.0-rc.5"},
       {:ash_phoenix, "~> 0.7.2-rc.0"},
-      # {:ash_phoenix, path: "../ash_phoenix"},
-      {:surface, "~> 0.7.1"},
-      {:phoenix_live_view, "~> 0.17.7"},
+      {:surface, "~> 0.7"},
+      {:phoenix_live_view, "~> 0.17"},
       {:phoenix_html, "~> 3.2"},
       {:jason, "~> 1.0"},
       # Dev dependencies
-      {:surface_formatter, "~> 0.7.5", only: [:dev, :test]},
+      {:surface_formatter, "~> 0.7", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
       {:ash_postgres, "~> 0.42.0-rc.0", only: [:dev, :test]},
-      {:git_ops, "~> 2.4.5", only: [:dev, :test]},
+      {:git_ops, "~> 2.4", only: [:dev, :test]},
       {:ex_doc, "~> 0.23", only: [:dev, :test], runtime: false},
-      {:ex_check, "~> 0.12.0", only: [:dev, :test]},
+      {:ex_check, "~> 0.14", only: [:dev, :test]},
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:sobelow, ">= 0.0.0", only: [:dev, :test], runtime: false},
-      {:excoveralls, "~> 0.13.0", only: [:dev, :test]}
+      {:excoveralls, "~> 0.14", only: [:dev, :test]}
     ]
   end
 end
