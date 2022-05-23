@@ -140,11 +140,22 @@ defmodule AshAdmin.PageLive do
   defp assign_action(socket, action, action_type) do
     action_type =
       case action_type do
-        "read" -> :read
-        "update" -> :update
-        "create" -> :create
-        "destroy" -> :destroy
-        nil -> nil
+        "read" ->
+          :read
+
+        "update" ->
+          :update
+
+        "create" ->
+          :create
+
+        "destroy" ->
+          :destroy
+
+        nil ->
+          if AshAdmin.Api.default_resource_page(socket.assigns.api) == :primary_read,
+            do: :read,
+            else: nil
       end
 
     if action_type do
@@ -156,10 +167,10 @@ defmodule AshAdmin.PageLive do
       if action do
         assign(socket, action_type: action_type, action: action)
       else
-        assign(socket, action: nil, action_type: nil)
+        assign(socket, action_type: nil, action: nil)
       end
     else
-      assign(socket, action: nil, action_type: nil)
+      assign(socket, action_type: nil, action: nil)
     end
   end
 
