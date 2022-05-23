@@ -5,6 +5,25 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.4.5-rc.0](https://github.com/ash-project/ash_admin/compare/v0.4.4...v0.4.5-rc.0) (2022-05-23)
+
+
+
+
+### Bug Fixes:
+
+* update to latest ash for bugfix
+
+* get the original value using `AshPhoenix.Form.value/2`
+
+### Improvements:
+
+* Top nav resource grouping (#15)
+
+* update ash version and fix build
+
+* add DateInput for dates
+
 ## [v0.4.4](https://github.com/ash-project/ash_admin/compare/v0.4.3...v0.4.4) (2022-03-17)
 
 
