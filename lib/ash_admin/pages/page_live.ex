@@ -138,27 +138,7 @@ defmodule AshAdmin.PageLive do
   end
 
   defp assign_action(socket, action, action_type) do
-    action_type =
-      case action_type do
-        "read" ->
-          :read
-
-        "update" ->
-          :update
-
-        "create" ->
-          :create
-
-        "destroy" ->
-          :destroy
-
-        nil ->
-          if AshAdmin.Api.default_resource_page(socket.assigns.api) == :primary_read,
-            do: :read,
-            else: nil
-      end
-
-    if action_type do
+    if action_type = get_action_type(socket.assigns.api, action_type) do
       action =
         Enum.find(Ash.Resource.Info.actions(socket.assigns.resource), fn resource_action ->
           to_string(resource_action.name) == action && resource_action.type == action_type
@@ -171,6 +151,19 @@ defmodule AshAdmin.PageLive do
       end
     else
       assign(socket, action_type: nil, action: nil)
+    end
+  end
+
+  defp get_action_type(_, "read"), do: :read
+  defp get_action_type(_, "update"), do: :update
+  defp get_action_type(_, "create"), do: :create
+  defp get_action_type(_, "destroy"), do: :destroy
+
+  defp get_action_type(api, _) do
+    if AshAdmin.Api.default_resource_page(api) == :primary_read do
+      :read
+    else
+      nil
     end
   end
 
