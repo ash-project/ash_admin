@@ -138,17 +138,14 @@ defmodule AshAdmin.PageLive do
   end
 
   defp assign_action(socket, action, action_type) do
-    if action_type = get_action_type(socket.assigns.api, action_type) do
-      action =
-        Enum.find(Ash.Resource.Info.actions(socket.assigns.resource), fn resource_action ->
-          to_string(resource_action.name) == action && resource_action.type == action_type
-        end) || AshAdmin.Helpers.primary_action(socket.assigns.resource, action_type)
+    action_type = get_action_type(socket.assigns.api, action_type)
 
-      if action do
-        assign(socket, action_type: action_type, action: action)
-      else
-        assign(socket, action_type: nil, action: nil)
-      end
+    action =
+      find_action(socket.assigns.resource, action, action_type) ||
+        AshAdmin.Helpers.primary_action(socket.assigns.resource, action_type)
+
+    if action && action_type do
+      assign(socket, action_type: action_type, action: action)
     else
       assign(socket, action_type: nil, action: nil)
     end
@@ -165,6 +162,12 @@ defmodule AshAdmin.PageLive do
     else
       nil
     end
+  end
+
+  defp find_action(resource, action, action_type) do
+    Enum.find(Ash.Resource.Info.actions(resource), fn resource_action ->
+      to_string(resource_action.name) == action && resource_action.type == action_type
+    end)
   end
 
   defp assign_tables(socket, table) do
