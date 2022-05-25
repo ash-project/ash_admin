@@ -77,6 +77,16 @@ defmodule AshAdmin.Resource do
       resource_group: [
         type: :atom,
         doc: "The group in the top resource dropdown that the resource appears in."
+      ],
+      default_page: [
+        type:
+          {:or,
+           [
+             {:in, [:schema, :read, :create, :update, :destroy]},
+             {:custom, __MODULE__, :action_tuple, []}
+           ]},
+        doc:
+          "The default landing page for the resource. Can be `:schema | action_type | {:action, action_name} | {:custom, custom_page_name}`"
       ]
     ]
   }
@@ -165,6 +175,10 @@ defmodule AshAdmin.Resource do
     end
   end
 
+  def default_page(resource) do
+    Ash.Dsl.Extension.get_opt(resource, [:admin], :default_page, nil, true)
+  end
+
   def fields(resource) do
     Ash.Dsl.Extension.get_entities(resource, [:admin, :form])
   end
@@ -175,6 +189,14 @@ defmodule AshAdmin.Resource do
     |> Enum.find(fn field ->
       field.name == name
     end)
+  end
+
+  def action_tuple({:action, action_name}, _) when is_atom(action_name) do
+    {:ok, {:action, action_name}}
+  end
+
+  def action_tuple(invalid, _) do
+    {:error, "Expected `{:action, action_name}`, got: #{inspect(invalid)}"}
   end
 
   defp find_polymorphic_tables(resource, apis) do
