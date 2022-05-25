@@ -3,6 +3,7 @@
 locals_without_parens = [
   actor?: 1,
   create_actions: 1,
+  default_page: 1,
   default_resource_page: 1,
   destroy_actions: 1,
   field: 1,
