@@ -7,12 +7,6 @@ Application.put_env(:ash_admin, Demo.Repo, url: "ecto://#{pg_url}/#{pg_database}
 config :phoenix, :json_library, Jason
 config :ash_admin, ecto_repos: [Demo.Repo]
 
-config :ash_admin,
-  ash_apis: [
-    Demo.Accounts.Api,
-    Demo.Tickets.Api
-  ]
-
 config :surface, :components, [
   {Surface.Components.Form.ErrorTag, default_class: "invalid-feedback"}
 ]
@@ -30,7 +24,13 @@ config :ash_admin, DemoWeb.Endpoint,
 config :logger, level: :debug
 config :phoenix, :serve_endpoints, true
 
-if Mix.env() == :dev do
+if config_env() == :dev do
+  config :ash_admin,
+    ash_apis: [
+      Demo.Accounts.Api,
+      Demo.Tickets.Api
+    ]
+
   config :git_ops,
     mix_project: AshAdmin.MixProject,
     changelog_file: "CHANGELOG.md",
@@ -42,4 +42,20 @@ if Mix.env() == :dev do
     # Pass in `true` to use `"README.md"` or a string to customize
     manage_readme_version: "README.md",
     version_tag_prefix: "v"
+end
+
+if config_env() == :test do
+  config :ash_admin, AshAdmin.Test.Endpoint,
+    url: [host: "localhost"],
+    debug_errors: true,
+    secret_key_base: "Hu4qQN3iKzTV4fJxhorPQlA/osH9fAMtbtjVS58PFgfw3ja5Z18Q/WSNR9wP4OfW",
+    live_view: [signing_salt: "hMegieSe"],
+    pubsub_server: AshAdmin.Test.PubSub
+
+  config :ash, :disable_async?, true
+
+  config :ash_admin,
+    ash_apis: [
+      AshAdmin.Test.Api
+    ]
 end
