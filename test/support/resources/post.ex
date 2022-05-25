@@ -1,4 +1,5 @@
 defmodule AshAdmin.Test.Post do
+  @moduledoc false
   use Ash.Resource,
     data_layer: Ash.DataLayer.Ets
 

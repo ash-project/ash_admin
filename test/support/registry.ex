@@ -1,4 +1,5 @@
 defmodule AshAdmin.Test.Registry do
+  @moduledoc false
   use Ash.Registry
 
   entries do

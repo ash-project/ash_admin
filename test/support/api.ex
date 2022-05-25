@@ -1,4 +1,5 @@
 defmodule AshAdmin.Test.Api do
+  @moduledoc false
   use Ash.Api,
     extensions: [AshAdmin.Api]
 
