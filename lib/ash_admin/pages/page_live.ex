@@ -157,7 +157,7 @@ defmodule AshAdmin.PageLive do
   defp get_action_type(_, "destroy"), do: :destroy
 
   defp get_action_type(api, _) do
-    if AshAdmin.Api.default_resource_page(api) == :primary_read do
+    if AshAdmin.Api.default_resource_page(api) == :read do
       :read
     else
       nil

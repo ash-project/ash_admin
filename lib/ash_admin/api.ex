@@ -14,7 +14,7 @@ defmodule AshAdmin.Api do
           "Whether or not this API and its resources should be included in the admin dashboard."
       ],
       default_resource_page: [
-        type: {:in, [:schema, :primary_read]},
+        type: {:in, [:schema, :read]},
         default: :schema,
         doc:
           "Set the default page for the resource to be the primary read action or the resource schema. Schema is the default for backwards compatibility, if a resource doesn't have a primary read action it will fallback to the schema view."
