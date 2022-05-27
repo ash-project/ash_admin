@@ -138,11 +138,20 @@ defmodule AshAdmin.PageLive do
   end
 
   defp assign_action(socket, action, action_type) do
+    resource = socket.assigns.resource
+
     action_type = get_action_type(socket.assigns.api, action_type)
+    case action_type do
+      nil ->
+            if result = AshAdmin.Resource.default_page(resource) do
+      {:action, action} = result |> IO.inspect()
+      assign(socket, action_type: action_type, action: Ash.Resource.Info.action(resource, action))
+      _ ->
+    end
 
     action =
-      find_action(socket.assigns.resource, action, action_type) ||
-        AshAdmin.Helpers.primary_action(socket.assigns.resource, action_type)
+      find_action(resource, action, action_type) ||
+        AshAdmin.Helpers.primary_action(resource, action_type)
 
     if action && action_type do
       assign(socket, action_type: action_type, action: action)

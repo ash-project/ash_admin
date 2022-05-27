@@ -191,11 +191,11 @@ defmodule AshAdmin.Resource do
     end)
   end
 
-  def action_tuple({:action, action_name}, _) when is_atom(action_name) do
+  def action_tuple({:action, action_name}) when is_atom(action_name) do
     {:ok, {:action, action_name}}
   end
 
-  def action_tuple(invalid, _) do
+  def action_tuple(invalid) do
     {:error, "Expected `{:action, action_name}`, got: #{inspect(invalid)}"}
   end
 
