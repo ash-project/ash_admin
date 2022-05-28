@@ -138,40 +138,48 @@ defmodule AshAdmin.PageLive do
   end
 
   defp assign_action(socket, action, action_type) do
+    api = socket.assigns.api
     resource = socket.assigns.resource
 
-    action_type = get_action_type(socket.assigns.api, action_type)
-    case action_type do
-      nil ->
-            if result = AshAdmin.Resource.default_page(resource) do
-      {:action, action} = result |> IO.inspect()
-      assign(socket, action_type: action_type, action: Ash.Resource.Info.action(resource, action))
-      _ ->
-    end
+    api_default_action_type = AshAdmin.Api.default_resource_page(api)
+    resource_default_action = AshAdmin.Resource.default_page(resource)
 
-    action =
-      find_action(resource, action, action_type) ||
-        AshAdmin.Helpers.primary_action(resource, action_type)
+    action_type = get_action_type(resource_default_action, api_default_action, action_type)
 
-    if action && action_type do
-      assign(socket, action_type: action_type, action: action)
-    else
-      assign(socket, action_type: nil, action: nil)
-    end
+    {action, action_type} =
+      case {action_type, resource_default_action} do
+        {nil, {:action, action}} ->
+          action_struct = Ash.Resource.Info.action(resource, action)
+          {action_struct.type, action_struct}
+
+        {nil, _} ->
+          {nil, nil}
+
+        {action_type, _action} ->
+          if action_struct =
+               find_action(resource, action, action_type) ||
+                 AshAdmin.Helpers.primary_action(resource, action_type) do
+            {action_struct.type, action_struct}
+          else
+            {nil, nil}
+          end
+      end
+
+    assign(socket, action_type: action_type, action: action)
   end
 
-  defp get_action_type(_, "read"), do: :read
-  defp get_action_type(_, "update"), do: :update
-  defp get_action_type(_, "create"), do: :create
-  defp get_action_type(_, "destroy"), do: :destroy
+  defp get_action_type(_, _, "read"), do: :read
+  defp get_action_type(_, _, "update"), do: :update
+  defp get_action_type(_, _, "create"), do: :create
+  defp get_action_type(_, _, "destroy"), do: :destroy
 
-  defp get_action_type(api, _) do
-    if AshAdmin.Api.default_resource_page(api) == :read do
-      :read
-    else
-      nil
-    end
-  end
+  defp get_action_type(resource_default_action, _, _) when is_atom(resource_default_action),
+    do: resource_default_action
+
+  defp get_action_type(nil, api_default_action, _) when is_atom(api_default_action),
+    do: api_default_action
+
+  defp get_action_type(_, _, _), do: nil
 
   defp find_action(resource, action, action_type) do
     Enum.find(Ash.Resource.Info.actions(resource), fn resource_action ->
