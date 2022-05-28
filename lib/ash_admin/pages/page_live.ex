@@ -144,41 +144,48 @@ defmodule AshAdmin.PageLive do
     api_default_action_type = AshAdmin.Api.default_resource_page(api)
     resource_default_action = AshAdmin.Resource.default_page(resource)
 
-    action_type = get_action_type(resource_default_action, api_default_action, action_type)
+    action_type = get_action_type(resource_default_action, api_default_action_type, action_type)
 
-    {action, action_type} =
-      case {action_type, resource_default_action} do
-        {nil, {:action, action}} ->
-          action_struct = Ash.Resource.Info.action(resource, action)
-          {action_struct.type, action_struct}
+    IO.inspect({api_default_action_type, resource_default_action, action_type})
 
-        {nil, _} ->
-          {nil, nil}
-
-        {action_type, _action} ->
-          if action_struct =
-               find_action(resource, action, action_type) ||
-                 AshAdmin.Helpers.primary_action(resource, action_type) do
-            {action_struct.type, action_struct}
-          else
-            {nil, nil}
-          end
-      end
+    {action_type, action} =
+      set_action(resource, action_type, action, resource_default_action, api_default_action_type)
 
     assign(socket, action_type: action_type, action: action)
+  end
+
+  defp set_action(resource, action_type, action, resource_default_action, api_default_action_type) do
+    case {action_type, resource_default_action, api_default_action_type} do
+      {nil, {:action, action}, _} ->
+        action_struct = Ash.Resource.Info.action(resource, action)
+        {action_struct.type, action_struct}
+
+      {nil, :schema, _} ->
+        {nil, nil}
+
+      {nil, _, :schema} ->
+        {nil, nil}
+
+      {nil, _, api_default_action_type} ->
+        {api_default_action_type,
+         AshAdmin.Helpers.primary_action(resource, api_default_action_type)}
+
+      {action_type, _, _} ->
+        if action_struct =
+             find_action(resource, action, action_type) ||
+               AshAdmin.Helpers.primary_action(resource, action_type) do
+          {action_struct.type, action_struct}
+        else
+          {nil, nil}
+        end
+    end
+    |> IO.inspect(label: "output")
   end
 
   defp get_action_type(_, _, "read"), do: :read
   defp get_action_type(_, _, "update"), do: :update
   defp get_action_type(_, _, "create"), do: :create
   defp get_action_type(_, _, "destroy"), do: :destroy
-
-  defp get_action_type(resource_default_action, _, _) when is_atom(resource_default_action),
-    do: resource_default_action
-
-  defp get_action_type(nil, api_default_action, _) when is_atom(api_default_action),
-    do: api_default_action
-
   defp get_action_type(_, _, _), do: nil
 
   defp find_action(resource, action, action_type) do
