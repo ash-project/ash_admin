@@ -279,7 +279,7 @@ defmodule AshAdmin.Components.Resource.Form do
       >
         <div :if={@form.submitted_once?} class="ml-4 mt-4 text-red-500">
           <ul>
-            <li :for={{field, message} <- AshPhoenix.Form.errors(@form, inner_form.name)}>
+            <li :for={{field, message} <- AshPhoenix.Form.errors(inner_form.source)}>
               <span :if={field}>
                 {to_name(field)}:
               </span>
