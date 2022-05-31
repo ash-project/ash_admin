@@ -146,8 +146,6 @@ defmodule AshAdmin.PageLive do
 
     action_type = get_action_type(resource_default_action, api_default_action_type, action_type)
 
-    IO.inspect({api_default_action_type, resource_default_action, action_type})
-
     {action_type, action} =
       set_action(resource, action_type, action, resource_default_action, api_default_action_type)
 
@@ -155,20 +153,26 @@ defmodule AshAdmin.PageLive do
   end
 
   defp set_action(resource, action_type, action, resource_default_action, api_default_action_type) do
-    case {action_type, resource_default_action, api_default_action_type} do
-      {nil, {:action, action}, _} ->
-        action_struct = Ash.Resource.Info.action(resource, action)
-        {action_struct.type, action_struct}
+    IO.inspect({action_type, resource_default_action, api_default_action_type}, label: "!!!")
 
+    case {action_type, resource_default_action, api_default_action_type} do
       {nil, :schema, _} ->
         {nil, nil}
 
       {nil, _, :schema} ->
         {nil, nil}
 
-      {nil, _, api_default_action_type} ->
+      {nil, {:action, action}, _} ->
+        action_struct = Ash.Resource.Info.action(resource, action)
+        {action_struct.type, action_struct}
+
+      {nil, nil, api_default_action_type} ->
         {api_default_action_type,
          AshAdmin.Helpers.primary_action(resource, api_default_action_type)}
+
+      {nil, resource_default_action_type, _} when not is_nil(resource_default_action_type) ->
+        {resource_default_action_type,
+         AshAdmin.Helpers.primary_action(resource, resource_default_action_type)}
 
       {action_type, _, _} ->
         if action_struct =

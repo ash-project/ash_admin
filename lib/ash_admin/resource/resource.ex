@@ -86,7 +86,7 @@ defmodule AshAdmin.Resource do
              {:custom, __MODULE__, :action_tuple, []}
            ]},
         doc:
-          "The default landing page for the resource. Can be `:schema | action_type | {:action, action_name} | {:custom, custom_page_name}`"
+          "The default landing page for the resource. Can be `:schema | action_type | {:action, action_name}`"
       ]
     ]
   }
