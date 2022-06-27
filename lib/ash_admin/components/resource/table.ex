@@ -91,11 +91,7 @@ defmodule AshAdmin.Components.Resource.Table do
   end
 
   defp render_attribute(api, record, attribute, formats) do
-    if Ash.Type.embedded_type?(attribute.type) do
-      "..."
-    else
-      process_attribute(api, record, attribute, formats)
-    end
+    process_attribute(api, record, attribute, formats)
   rescue
     _ ->
       "..."
