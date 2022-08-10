@@ -105,12 +105,11 @@ defmodule AshAdmin.Components.Resource.DataTable do
               else
                 socket.assigns.query.source
                 |> set_table(socket.assigns[:table])
-                |> assigns[:api].read(
-                  action: socket.assigns[:action].name,
+                |> Ash.Query.for_read(socket.assigns[:action].name, %{},
                   actor: socket.assigns[:actor],
-                  authorize?: socket.assigns[:authorizing],
-                  page: page_params
+                  authorize?: socket.assigns[:authorizing]
                 )
+                |> assigns[:api].read(page: page_params)
               end
             end,
             load_until_connected?: true
@@ -126,11 +125,11 @@ defmodule AshAdmin.Components.Resource.DataTable do
               else
                 socket.assigns.query.source
                 |> set_table(socket.assigns[:table])
-                |> assigns[:api].read(
-                  action: socket.assigns[:action],
+                |> Ash.Query.for_read(socket.assigns[:action].name, %{},
                   actor: socket.assigns[:actor],
                   authorize?: socket.assigns[:authorizing]
                 )
+                |> assigns[:api].read()
               end
             end,
             load_until_connected?: true

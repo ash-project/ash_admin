@@ -1459,6 +1459,8 @@ defmodule AshAdmin.Components.Resource.Form do
             socket.assigns.resource
             |> AshPhoenix.Form.for_create(socket.assigns.action.name,
               api: socket.assigns.api,
+              actor: socket.assigns[:actor],
+              authorize?: socket.assigns[:authorizing],
               forms: [
                 auto?: true
               ],
@@ -1472,6 +1474,8 @@ defmodule AshAdmin.Components.Resource.Form do
               forms: [
                 auto?: true
               ],
+              actor: socket.assigns[:actor],
+              authorize?: socket.assigns[:authorizing],
               transform_errors: transform_errors
             )
 
@@ -1482,6 +1486,8 @@ defmodule AshAdmin.Components.Resource.Form do
               forms: [
                 auto?: true
               ],
+              actor: socket.assigns[:actor],
+              authorize?: socket.assigns[:authorizing],
               transform_errors: transform_errors
             )
         end

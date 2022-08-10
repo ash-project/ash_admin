@@ -217,11 +217,13 @@ defmodule AshAdmin.PageLive do
               |> Ash.Query.filter(^primary_key)
               |> Ash.Query.load(to_one_relationships(socket.assigns.resource))
               |> Ash.Query.set_tenant(socket.assigns[:tenant])
-              |> socket.assigns.api.read_one(
-                action: AshAdmin.Helpers.primary_action(socket.assigns.resource, :read),
+              |> Ash.Query.for_read(
+                AshAdmin.Helpers.primary_action(socket.assigns.resource, :read).name,
+                %{},
                 actor: actor,
                 authorize?: socket.assigns.authorizing
               )
+              |> socket.assigns.api.read_one()
 
             case record do
               {:error, error} ->
