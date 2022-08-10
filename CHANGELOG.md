@@ -5,6 +5,23 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.5.0](https://github.com/ash-project/ash_admin/compare/v0.4.5-rc.0...v0.5.0) (2022-08-10)
+
+
+
+
+### Features:
+
+* allow setting primary read action as default resource page (#19)
+
+### Bug Fixes:
+
+* failing error case for nested forms (#21)
+
+### Improvements:
+
+* use new authorize? configuration
+
 ## [v0.4.5-rc.0](https://github.com/ash-project/ash_admin/compare/v0.4.4...v0.4.5-rc.0) (2022-05-23)
 
 
