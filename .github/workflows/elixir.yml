@@ -107,7 +107,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           status: |
-            Beta version "${{ steps.tagName.outputs.tag }}" of AshAdmin released!
+            AshAdmin version "${{ steps.tagName.outputs.tag }}" released!
 
             #myelixirstatus
 
