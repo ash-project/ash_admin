@@ -5,6 +5,19 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.5.1-rc.0](https://github.com/ash-project/ash_admin/compare/v0.5.0...v0.5.1-rc.0) (2022-08-15)
+
+
+
+
+### Bug Fixes:
+
+* remove unnecessary code
+
+* fix data loading, change tracking (handled by AshPhoenix.Form)
+
+* changelog URL in release tweet (#24)
+
 ## [v0.5.0](https://github.com/ash-project/ash_admin/compare/v0.4.5-rc.0...v0.5.0) (2022-08-10)
 
 
