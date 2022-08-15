@@ -2,7 +2,7 @@ defmodule AshAdmin.Components.Resource.Info do
   @moduledoc false
   use Surface.Component
 
-  alias AshAdmin.Components.Resource.{RelationshipTable, AttributeTable, Source}
+  alias AshAdmin.Components.Resource.{RelationshipTable, AttributeTable}
 
   prop(resource, :any, required: true)
   prop(api, :any, required: true)
@@ -13,7 +13,6 @@ defmodule AshAdmin.Components.Resource.Info do
     <div class="relative mx-12">
       <AttributeTable resource={@resource} />
       <RelationshipTable api={@api} resource={@resource} prefix={@prefix} />
-      <Source resource={@resource} />
     </div>
     """
   end

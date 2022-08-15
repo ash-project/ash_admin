@@ -56,7 +56,7 @@ defmodule AshAdmin.Components.Resource.Show do
           {render_attributes(assigns, record, resource)}
           <div :if={buttons?} class="px-4 py-3 text-right sm:px-6">
             <LiveRedirect
-              to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&action=#{AshAdmin.Helpers.primary_action(@resource, :destroy).name}&tab=destroy&table=#{@table}&primary_key=#{encode_primary_key(@record)}"}
+              to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&action=#{primary_action_name(@resource, :destroy)}&tab=destroy&table=#{@table}&primary_key=#{encode_primary_key(@record)}"}
               :if={destroy?(@resource)}
               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
@@ -64,7 +64,7 @@ defmodule AshAdmin.Components.Resource.Show do
             </LiveRedirect>
 
             <LiveRedirect
-              to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&action=#{AshAdmin.Helpers.primary_action(@resource, :update).name}&tab=update&table=#{@table}&primary_key=#{encode_primary_key(@record)}"}
+              to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&action=#{primary_action_name(@resource, :update)}&tab=update&table=#{@table}&primary_key=#{encode_primary_key(@record)}"}
               :if={update?(@resource)}
               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
@@ -114,6 +114,11 @@ defmodule AshAdmin.Components.Resource.Show do
       </div>
     </div>
     """
+  end
+
+  defp primary_action_name(resource, type) do
+    action = AshAdmin.Helpers.primary_action(resource, type)
+    action && action.name
   end
 
   defp render_relationship_data(assigns, record, %{
@@ -439,12 +444,12 @@ defmodule AshAdmin.Components.Resource.Show do
   defp destroy?(resource) do
     resource
     |> Ash.Resource.Info.actions()
-    |> Enum.any?(&(&1.type == :destroy))
+    |> Enum.any?(&(&1.type == :destroy && &1.primary?))
   end
 
   defp update?(resource) do
     resource
     |> Ash.Resource.Info.actions()
-    |> Enum.any?(&(&1.type == :update))
+    |> Enum.any?(&(&1.type == :update && &1.primary?))
   end
 end

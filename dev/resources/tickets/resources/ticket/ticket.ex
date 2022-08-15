@@ -108,7 +108,7 @@ defmodule Demo.Tickets.Ticket do
         :source_links,
         type: :direct_control,
         on_match: {:update, :nested_example, :update, [:type]},
-        on_no_match: {:create, :nested_example, :update, [:type]}
+        on_no_match: {:create, :open, :create, [:type]}
       )
     end
 

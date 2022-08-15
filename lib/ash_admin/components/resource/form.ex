@@ -25,7 +25,6 @@ defmodule AshAdmin.Components.Resource.Form do
 
   data(form, :any)
   data(load_errors, :map, default: %{})
-  data(targets, :any, default: MapSet.new())
   data(loaded, :any, default: MapSet.new())
 
   prop(resource, :any, required: true)
@@ -48,48 +47,7 @@ defmodule AshAdmin.Components.Resource.Form do
      socket
      |> assign(assigns)
      |> assign_form()
-     |> assign_initial_targets()
      |> assign(:initialized, true)}
-  end
-
-  defp assign_initial_targets(socket, force? \\ false) do
-    if !socket.assigns[:initialized] || force? do
-      socket.assigns.form.form_keys
-      |> Enum.reduce(socket, fn {key, config}, socket ->
-        if config[:resource] do
-          if config[:type] == :list do
-            config[:resource]
-            |> string_pkey_fields()
-            |> Enum.reduce(socket, fn pkey_field, socket ->
-              add_target(socket, ["form", to_string(key), "~", pkey_field])
-            end)
-          else
-            config[:resource]
-            |> string_pkey_fields()
-            |> Enum.reduce(socket, fn pkey_field, socket ->
-              add_target(socket, ["form", to_string(key), pkey_field])
-            end)
-          end
-        else
-          socket
-        end
-      end)
-    else
-      socket
-    end
-  end
-
-  defp string_pkey_fields(type) do
-    values =
-      type
-      |> Ash.Resource.Info.primary_key()
-      |> Enum.map(&to_string/1)
-
-    if Enum.all?(values, &(!Ash.Resource.Info.attribute(type, &1).private?)) do
-      values
-    else
-      ["~"]
-    end
   end
 
   def render(assigns) do
@@ -163,7 +121,6 @@ defmodule AshAdmin.Components.Resource.Form do
           opts={autocomplete: false, id: "#{@id}_form", phx_target: @myself}
           :let={form: form}
         >
-          <input hidden phx-hook="FormChange" id="resource_form">
           <input :for={kv <- form.hidden} name={form.name <> "[#{elem(kv, 0)}]"} value={elem(kv, 1)} hidden>
           {render_attributes(assigns, @resource, @action, form)}
           <div class="px-4 py-3 text-right sm:px-6">
@@ -271,7 +228,7 @@ defmodule AshAdmin.Components.Resource.Form do
          opts
        ) do
     ~F"""
-    <div :if={!needs_to_load?(opts) || loaded?(form.source.source, relationship.name)}>
+    <div :if={!must_load?(opts) || loaded?(form.source.source, relationship.name)}>
       <Inputs
         form={form}
         for={argument.name}
@@ -290,6 +247,23 @@ defmodule AshAdmin.Components.Resource.Form do
           </ul>
         </div>
         <input :for={kv <- inner_form.hidden} name={inner_form.name <> "[#{elem(kv, 0)}]"} value={elem(kv, 1)} hidden>
+        {#if inner_form.source.form_keys[:_join]}
+          <Inputs
+            form={inner_form}
+            for={:_join}
+            :let={form: join_form}
+          >
+            <input :for={kv <- join_form.hidden} name={inner_form.name <> "[#{elem(kv, 0)}]"} value={elem(kv, 1)} hidden>
+            {render_attributes(
+              assigns,
+              relationship.through,
+              join_action(relationship.through, join_form, inner_form.source.form_keys[:_join]),
+              join_form,
+              inner_form.source.form_keys[:_join][:create_fields],
+              skip_through_related(relationship)
+            )}
+          </Inputs>
+        {/if}
         {render_attributes(
           assigns,
           inner_form.source.resource,
@@ -298,6 +272,7 @@ defmodule AshAdmin.Components.Resource.Form do
           relationship_fields(inner_form),
           skip_related(relationship)
         )}
+
         <button
         type="button"
         :on-click="remove_form"
@@ -317,6 +292,7 @@ defmodule AshAdmin.Components.Resource.Form do
         :if={can_add_related?(form, :read_action, argument)}
         phx-value-path={form.name <> "[#{argument.name}]"}
         phx-value-type={"lookup"}
+        phx-value-cardinality={to_string(relationship.cardinality)}
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
         <HeroIcon name="search-circle" class="h-4 w-4 text-gray-500" />
@@ -345,7 +321,7 @@ defmodule AshAdmin.Components.Resource.Form do
         <HeroIcon name="plus" class="h-4 w-4 text-gray-500" />
       </button>
     </div>
-    <div :if={needs_to_load?(opts) && !loaded?(form.source.source, relationship.name)}>
+    <div :if={must_load?(opts) && !loaded?(form.source.source, relationship.name)}>
       <button
         :on-click="load"
         phx-target={@myself}
@@ -364,6 +340,25 @@ defmodule AshAdmin.Components.Resource.Form do
       </div>
     </div>
     """
+  end
+
+  defp join_action(through, join_form, opts) do
+    name =
+      case join_form.source.type do
+        :create ->
+          opts[:create_action]
+
+        :update ->
+          opts[:update_action]
+
+        :destroy ->
+          opts[:destroy_action]
+
+        :read ->
+          opts[:read_action]
+      end
+
+    Ash.Resource.Info.action(through, name)
   end
 
   defp can_add_related?(form, action, argument) do
@@ -400,16 +395,17 @@ defmodule AshAdmin.Components.Resource.Form do
       :belongs_to ->
         []
 
-      :many_to_many ->
-        [relationship.source_field_on_join_table]
-
       _ ->
         [relationship.destination_field]
     end
   end
 
-  defp needs_to_load?(opts) do
+  defp must_load?(opts) do
     Ash.Changeset.ManagedRelationshipHelpers.must_load?(opts)
+  end
+
+  defp skip_through_related(relationship) do
+    [relationship.source_field_on_join_table, relationship.destination_field_on_join_table]
   end
 
   defp loaded?(%{action_type: :create}, _), do: true
@@ -906,8 +902,6 @@ defmodule AshAdmin.Components.Resource.Form do
         end
       )
 
-    socket = assign_initial_targets(socket, true)
-
     case action.type do
       :create ->
         {:noreply,
@@ -945,40 +939,17 @@ defmodule AshAdmin.Components.Resource.Form do
 
     form = AshPhoenix.Form.add_form(socket.assigns.form, path, type: type)
 
-    path =
-      form
-      |> AshPhoenix.Form.parse_path!(path)
-      |> Enum.map(&to_string/1)
-
     {:noreply,
      socket
-     |> assign(:form, form)
-     |> add_target(["form" | path])
-     |> add_target(["form" | path] ++ ["_form_type"])}
+     |> assign(:form, form)}
   end
 
   def handle_event("remove_form", %{"path" => path}, socket) do
-    parsed_path = AshPhoenix.Form.parse_path!(socket.assigns.form, path)
-
-    parsed_path =
-      if is_integer(List.last(parsed_path)) do
-        :lists.droplast(parsed_path)
-      else
-        parsed_path
-      end
-
-    parsed_path =
-      parsed_path
-      |> :lists.droplast()
-      |> Enum.map(&to_string/1)
-      |> Enum.concat(["*"])
-
     form = AshPhoenix.Form.remove_form(socket.assigns.form, path)
 
     {:noreply,
      socket
-     |> assign(:form, form)
-     |> add_target(["form" | parsed_path])}
+     |> assign(:form, form)}
   end
 
   def handle_event("append_value", %{"path" => path, "field" => field}, socket) do
@@ -1006,16 +977,9 @@ defmodule AshAdmin.Components.Resource.Form do
         end
       )
 
-    path =
-      form
-      |> AshPhoenix.Form.parse_path!(path)
-      |> Enum.map(&to_string/1)
-      |> Enum.concat([field])
-
     {:noreply,
      socket
-     |> assign(:form, form)
-     |> add_target(["form" | path])}
+     |> assign(:form, form)}
   end
 
   def handle_event("load", %{"path" => path, "relationship" => relationship}, socket) do
@@ -1029,18 +993,44 @@ defmodule AshAdmin.Components.Resource.Form do
           if adding_form.data do
             new_data = socket.assigns.api.load!(adding_form.data, relationship)
 
-            %{adding_form | data: new_data, source: %{adding_form.source | data: new_data}}
+            if Map.has_key?(adding_form.source, :data) do
+              %{adding_form | data: new_data, source: %{adding_form.source | data: new_data}}
+            else
+              %{adding_form | data: new_data}
+            end
             |> AshPhoenix.Form.validate(adding_form.params, errors: false)
           else
             adding_form
           end
         end
       )
+      |> AshPhoenix.Form.validate(AshPhoenix.Form.params(socket.assigns.form))
 
     {:noreply,
      socket
      |> assign(:form, form)}
   end
+
+  # path_to_load = AshPhoenix.Form.parse_path!(socket.assigns.form, path) ++ [relationship]
+  # form = socket.assigns.form
+
+  # new_data =
+  #   socket.assigns.api.load!(form.data, path_to_load,
+  #     actor: socket.assigns[:actor],
+  #     authorize?: socket.assigns[:authorizing],
+  #     lazy?: true
+  #   )
+
+  # new_source =
+  #   if Map.has_key?(form.source, :data) do
+  #     %{form.source | data: new_data}
+  #   else
+  #     form.source
+  #   end
+
+  # form =
+  #   %{form | data: new_data, source: new_source}
+  #   |> AshPhoenix.Form.validate(AshPhoenix.Form.params(form), errors: false)
 
   def handle_event("remove_value", %{"path" => path, "field" => field, "index" => index}, socket) do
     form =
@@ -1050,21 +1040,12 @@ defmodule AshAdmin.Components.Resource.Form do
         &remove_value(&1, field, index)
       )
 
-    path =
-      form
-      |> AshPhoenix.Form.parse_path!(path)
-      |> Enum.map(&to_string/1)
-      |> Enum.concat([field])
-
     {:noreply,
      socket
-     |> assign(:form, form)
-     |> add_target(["form" | path])}
+     |> assign(:form, form)}
   end
 
-  def handle_event("save", data, socket) do
-    params = params(data || %{}, socket)
-
+  def handle_event("save", %{"form" => params}, socket) do
     form = AshPhoenix.Form.validate(socket.assigns.form, params || %{})
 
     before_submit = fn changeset ->
@@ -1097,18 +1078,10 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
-  def handle_event("validate", data, socket) do
-    socket = add_target(socket, data["_target"])
-    params = params(data || %{}, socket)
-
+  def handle_event("validate", %{"form" => params}, socket) do
     form = AshPhoenix.Form.validate(socket.assigns.form, params || %{})
 
     {:noreply, assign(socket, :form, form)}
-  end
-
-  defp add_target(socket, target) do
-    old_targets = socket.assigns[:targets] || MapSet.new()
-    assign(socket, :targets, MapSet.put(old_targets, Enum.map(target, &to_string/1)))
   end
 
   defp indexed_list(map) when is_map(map) do
@@ -1155,12 +1128,6 @@ defmodule AshAdmin.Components.Resource.Form do
     AshPhoenix.Form.validate(form, new_params)
   end
 
-  defp params(params, socket) do
-    targets = socket.assigns[:targets] || MapSet.new()
-
-    take_targets(params, targets)["form"]
-  end
-
   defp append_to_and_map(list, value) do
     list
     |> Enum.concat([value])
@@ -1168,57 +1135,6 @@ defmodule AshAdmin.Components.Resource.Form do
     |> Map.new(fn {v, i} ->
       {"#{i}", v}
     end)
-  end
-
-  defp take_targets(params, []), do: params
-
-  defp take_targets(params, targets) when is_map(params) do
-    if Enum.any?(targets, &List.starts_with?(&1, ["*"])) do
-      params
-    else
-      Enum.reduce(params, %{}, fn {key, value}, acc ->
-        case Integer.parse(key) do
-          {integer, ""} ->
-            case targets_for(targets, integer) do
-              [] ->
-                Map.put(acc, key, value)
-
-              targets ->
-                Map.put(acc, key, take_targets(value, targets))
-            end
-
-          :error ->
-            if targets_for(targets, key) != [] do
-              Map.put(acc, key, take_targets(value, targets_for(targets, key)))
-            else
-              acc
-            end
-        end
-      end)
-    end
-  end
-
-  defp take_targets(params, _) do
-    params
-  end
-
-  defp targets_for(targets, key) when is_integer(key) do
-    targets
-    |> Enum.filter(fn
-      [first | _] ->
-        # ~ means match any key at this point
-        first == "~" || to_string(key) == first
-
-      _ ->
-        false
-    end)
-    |> Enum.map(&Enum.drop(&1, 1))
-  end
-
-  defp targets_for(targets, key) do
-    targets
-    |> Enum.filter(&List.starts_with?(&1, [key]))
-    |> Enum.map(&Enum.drop(&1, 1))
   end
 
   def relationships(resource, action, exactly \\ nil)
