@@ -5,6 +5,17 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.5.2](https://github.com/ash-project/ash_admin/compare/v0.5.1-rc.0...v0.5.2) (2022-08-22)
+
+
+
+
+### Improvements:
+
+* update to latest ash
+
+* support value-backed nested forms
+
 ## [v0.5.1-rc.0](https://github.com/ash-project/ash_admin/compare/v0.5.0...v0.5.1-rc.0) (2022-08-15)
 
 
