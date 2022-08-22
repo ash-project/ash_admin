@@ -91,7 +91,7 @@ defmodule AshAdmin.MixProject do
   defp deps do
     [
       {:ash, "~> 1.53 and >= 1.53.1"},
-      {:ash_phoenix, "~> 0.7.6-rc.0"},
+      {:ash_phoenix, "~> 0.7.7"},
       {:surface, "~> 0.7"},
       {:phoenix_live_view, "~> 0.17"},
       {:phoenix_html, "~> 3.2"},
