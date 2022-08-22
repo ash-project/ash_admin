@@ -227,6 +227,25 @@ defmodule AshAdmin.Components.Resource.Form do
          argument,
          opts
        ) do
+    key =
+      opts[:value_is_key] ||
+        relationship.destination
+        |> Ash.Resource.Info.primary_key()
+        |> case do
+          [key] ->
+            key
+
+          _ ->
+            nil
+        end
+
+    {hidden?, exactly_fields} =
+      if map_type?(argument.type) || !key do
+        {true, nil}
+      else
+        {false, [key]}
+      end
+
     ~F"""
     <div :if={!must_load?(opts) || loaded?(form.source.source, relationship.name)}>
       <Inputs
@@ -246,21 +265,25 @@ defmodule AshAdmin.Components.Resource.Form do
             </li>
           </ul>
         </div>
-        <input :for={kv <- inner_form.hidden} name={inner_form.name <> "[#{elem(kv, 0)}]"} value={elem(kv, 1)} hidden>
+        {#if hidden?}
+          <input :for={kv <- inner_form.hidden} name={inner_form.name <> "[#{elem(kv, 0)}]"} value={elem(kv, 1)} hidden>
+        {/if}
         {#if inner_form.source.form_keys[:_join]}
           <Inputs
             form={inner_form}
             for={:_join}
             :let={form: join_form}
           >
-            <input :for={kv <- join_form.hidden} name={inner_form.name <> "[#{elem(kv, 0)}]"} value={elem(kv, 1)} hidden>
+            {#if hidden?}
+              <input :for={kv <- join_form.hidden} name={inner_form.name <> "[#{elem(kv, 0)}]"} value={elem(kv, 1)} hidden>
+            {/if}
             {render_attributes(
               assigns,
               relationship.through,
               join_action(relationship.through, join_form, inner_form.source.form_keys[:_join]),
               join_form,
-              inner_form.source.form_keys[:_join][:create_fields],
-              skip_through_related(relationship)
+              exactly_fields || inner_form.source.form_keys[:_join][:create_fields],
+              skip_through_related(exactly_fields, relationship)
             )}
           </Inputs>
         {/if}
@@ -269,8 +292,8 @@ defmodule AshAdmin.Components.Resource.Form do
           inner_form.source.resource,
           inner_form.source.source.action,
           inner_form,
-          relationship_fields(inner_form),
-          skip_related(relationship)
+          exactly_fields || relationship_fields(inner_form),
+          skip_related(exactly_fields, relationship)
         )}
 
         <button
@@ -390,7 +413,7 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
-  defp skip_related(relationship) do
+  defp skip_related(nil, relationship) do
     case relationship.type do
       :belongs_to ->
         []
@@ -400,12 +423,20 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
+  defp skip_related(_, _) do
+    []
+  end
+
   defp must_load?(opts) do
     Ash.Changeset.ManagedRelationshipHelpers.must_load?(opts)
   end
 
-  defp skip_through_related(relationship) do
+  defp skip_through_related(nil, relationship) do
     [relationship.source_field_on_join_table, relationship.destination_field_on_join_table]
+  end
+
+  defp skip_through_related(_, _) do
+    []
   end
 
   defp loaded?(%{action_type: :create}, _), do: true
@@ -1011,27 +1042,6 @@ defmodule AshAdmin.Components.Resource.Form do
      |> assign(:form, form)}
   end
 
-  # path_to_load = AshPhoenix.Form.parse_path!(socket.assigns.form, path) ++ [relationship]
-  # form = socket.assigns.form
-
-  # new_data =
-  #   socket.assigns.api.load!(form.data, path_to_load,
-  #     actor: socket.assigns[:actor],
-  #     authorize?: socket.assigns[:authorizing],
-  #     lazy?: true
-  #   )
-
-  # new_source =
-  #   if Map.has_key?(form.source, :data) do
-  #     %{form.source | data: new_data}
-  #   else
-  #     form.source
-  #   end
-
-  # form =
-  #   %{form | data: new_data, source: new_source}
-  #   |> AshPhoenix.Form.validate(AshPhoenix.Form.params(form), errors: false)
-
   def handle_event("remove_value", %{"path" => path, "field" => field, "index" => index}, socket) do
     form =
       AshPhoenix.Form.update_form(
@@ -1240,7 +1250,7 @@ defmodule AshAdmin.Components.Resource.Form do
       attributes
       |> Enum.map(fn
         %Ash.Resource.Actions.Argument{} = argument ->
-          if action && map_type?(argument.type) do
+          if action do
             case manages_relationship(argument, action) do
               nil ->
                 argument
