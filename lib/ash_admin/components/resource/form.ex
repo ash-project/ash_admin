@@ -1379,6 +1379,11 @@ defmodule AshAdmin.Components.Resource.Form do
           other
       end
 
+      auto_forms =
+        AshPhoenix.Form.Auto.auto(socket.assigns.resource, socket.assigns.action.name,
+          include_non_map_types?: true
+        )
+
       form =
         case socket.assigns.action.type do
           :create ->
@@ -1387,9 +1392,7 @@ defmodule AshAdmin.Components.Resource.Form do
               api: socket.assigns.api,
               actor: socket.assigns[:actor],
               authorize?: socket.assigns[:authorizing],
-              forms: [
-                auto?: true
-              ],
+              forms: auto_forms,
               transform_errors: transform_errors
             )
 
@@ -1397,9 +1400,7 @@ defmodule AshAdmin.Components.Resource.Form do
             socket.assigns.record
             |> AshPhoenix.Form.for_update(socket.assigns.action.name,
               api: socket.assigns.api,
-              forms: [
-                auto?: true
-              ],
+              forms: auto_forms,
               actor: socket.assigns[:actor],
               authorize?: socket.assigns[:authorizing],
               transform_errors: transform_errors
@@ -1409,9 +1410,7 @@ defmodule AshAdmin.Components.Resource.Form do
             socket.assigns.record
             |> AshPhoenix.Form.for_destroy(socket.assigns.action.name,
               api: socket.assigns.api,
-              forms: [
-                auto?: true
-              ],
+              forms: auto_forms,
               actor: socket.assigns[:actor],
               authorize?: socket.assigns[:authorizing],
               transform_errors: transform_errors
