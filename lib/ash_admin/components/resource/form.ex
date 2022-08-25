@@ -553,6 +553,12 @@ defmodule AshAdmin.Components.Resource.Form do
     """
   end
 
+  def render_attribute_input(assigns, %{type: Ash.Type.Binary}, _form, _value, _name) do
+    ~F"""
+    <span class="italic">(binary fields cannot be edited)</span>
+    """
+  end
+
   def render_attribute_input(
         assigns,
         %{

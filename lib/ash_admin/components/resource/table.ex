@@ -134,14 +134,22 @@ defmodule AshAdmin.Components.Resource.Table do
       |> Map.get(attribute.name)
       |> (&apply(mod, func, [&1] ++ args)).()
 
-    format_attribute_value(data)
+    format_attribute_value(data, attribute)
   end
 
   defp process_attribute(_api, _record, _attr, _formats) do
     "..."
   end
 
-  defp format_attribute_value(data) do
+  defp format_attribute_value(data, %{type: Ash.Type.Binary}) when data not in [[], nil, ""] do
+    assigns = %{}
+
+    ~F"""
+    <span class='italic'>(binary)</span>
+    """
+  end
+
+  defp format_attribute_value(data, _attribute) do
     if is_binary(data) and !String.valid?(data) do
       "..."
     else
