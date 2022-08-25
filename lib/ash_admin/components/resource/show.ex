@@ -315,6 +315,18 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   end
 
+  defp render_attribute(assigns, _resource, record, %{name: name, type: Ash.Type.Binary}, _) do
+    if Map.get(record, name) do
+      ~F"""
+      <span class="italic">(binary data)</span>
+      """
+    else
+      ~F"""
+      (empty)
+      """
+    end
+  end
+
   defp render_attribute(assigns, resource, record, attribute, nested?) do
     if Ash.Type.embedded_type?(attribute.type) do
       both_classes = "ml-1 pl-2 pr-2"
