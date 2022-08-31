@@ -71,12 +71,12 @@ defmodule Demo.Tickets.Representative do
 
   relationships do
     has_many :assigned_tickets, Demo.Tickets.Ticket do
-      destination_field :representative_id
+      destination_attribute :representative_id
     end
 
     has_many :comments, Demo.Tickets.Comment do
       relationship_context %{data_layer: %{table: "representative_comments"}}
-      destination_field :resource_id
+      destination_attribute :resource_id
     end
   end
 end

@@ -85,7 +85,7 @@ defmodule AshAdmin.ActorPlug do
     resource =
       if api do
         api
-        |> Ash.Api.resources()
+        |> Ash.Api.Info.resources()
         |> Enum.find(fn api_resource ->
           AshAdmin.Resource.name(api_resource) == resource
         end)

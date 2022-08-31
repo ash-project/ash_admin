@@ -153,19 +153,19 @@ defmodule Demo.Tickets.Ticket do
 
     has_many :comments, Demo.Tickets.Comment do
       relationship_context %{data_layer: %{table: "ticket_comments"}}
-      destination_field :resource_id
+      destination_attribute :resource_id
     end
 
     many_to_many :source_links, Demo.Tickets.Ticket do
       through Demo.Tickets.TicketLink
-      source_field_on_join_table :source_id
-      destination_field_on_join_table :destination_id
+      source_attribute_on_join_resource :source_id
+      destination_attribute_on_join_resource :destination_id
     end
 
     many_to_many :destination_links, Demo.Tickets.Ticket do
       through Demo.Tickets.TicketLink
-      source_field_on_join_table :destination_id
-      destination_field_on_join_table :source_id
+      source_attribute_on_join_resource :destination_id
+      destination_attribute_on_join_resource :source_id
     end
   end
 end

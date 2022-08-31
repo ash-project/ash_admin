@@ -419,7 +419,7 @@ defmodule AshAdmin.Components.Resource.Form do
         []
 
       _ ->
-        [relationship.destination_field]
+        [relationship.destination_attribute]
     end
   end
 
@@ -432,7 +432,10 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp skip_through_related(nil, relationship) do
-    [relationship.source_field_on_join_table, relationship.destination_field_on_join_table]
+    [
+      relationship.source_attribute_on_join_resource,
+      relationship.destination_attribute_on_join_resource
+    ]
   end
 
   defp skip_through_related(_, _) do

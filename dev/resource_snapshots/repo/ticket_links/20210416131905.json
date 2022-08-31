@@ -7,7 +7,7 @@
       "name": "destination_id",
       "primary_key?": true,
       "references": {
-        "destination_field": "id",
+        "destination_attribute": "id",
         "multitenancy": {
           "attribute": null,
           "global": null,
@@ -24,7 +24,7 @@
       "name": "source_id",
       "primary_key?": true,
       "references": {
-        "destination_field": "id",
+        "destination_attribute": "id",
         "multitenancy": {
           "attribute": null,
           "global": null,

@@ -1,24 +1,25 @@
 defmodule AshAdmin.Resource.Transformers.ValidateTableColumns do
   @moduledoc "Validates that table columns are all either attributes, or `:one` cardinality relationships."
-  use Ash.Dsl.Transformer
+  use Spark.Dsl.Transformer
+  alias Spark.Dsl.Transformer
 
-  def transform(resource, dsl_state) do
+  def transform(dsl_state) do
     relationships =
-      resource
-      |> Ash.Resource.Info.relationships()
+      dsl_state
+      |> Transformer.get_entities([:relationships])
       |> Enum.filter(&(&1.cardinality == :one))
       |> Enum.map(& &1.name)
 
     attributes =
-      resource
-      |> Ash.Resource.Info.attributes()
+      dsl_state
+      |> Transformer.get_entities([:attributes])
       |> Enum.map(& &1.name)
 
     valid_fields = Enum.concat(relationships, attributes)
 
     bad_columns =
-      resource
-      |> AshAdmin.Resource.table_columns()
+      dsl_state
+      |> Transformer.get_option([:admin], :table_columns)
       |> List.wrap()
       |> Enum.reject(&(&1 in valid_fields))
 

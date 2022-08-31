@@ -46,7 +46,7 @@ defmodule Demo.Tickets.Customer do
 
   relationships do
     has_many :reported_tickets, Demo.Tickets.Ticket do
-      destination_field :reporter_id
+      destination_attribute :reporter_id
     end
   end
 end

@@ -16,7 +16,7 @@
       "name": "commenting_customer_id",
       "primary_key?": false,
       "references": {
-        "destination_field": "id",
+        "destination_attribute": "id",
         "multitenancy": {
           "attribute": null,
           "global": null,
@@ -33,7 +33,7 @@
       "name": "commenting_representative_id",
       "primary_key?": false,
       "references": {
-        "destination_field": "id",
+        "destination_attribute": "id",
         "multitenancy": {
           "attribute": null,
           "global": null,
@@ -59,7 +59,7 @@
       "name": "resource_id",
       "primary_key?": false,
       "references": {
-        "destination_field": "id",
+        "destination_attribute": "id",
         "multitenancy": {
           "attribute": null,
           "global": null,

@@ -5,7 +5,7 @@ defmodule AshAdmin.MixProject do
   An admin UI for Ash Framework
   """
 
-  @version "0.5.2"
+  @version "0.6.0-rc.0"
 
   def project do
     [
@@ -90,8 +90,8 @@ defmodule AshAdmin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ash, "~> 1.53 and >= 1.53.1"},
-      {:ash_phoenix, "~> 0.7.7"},
+      {:ash, "~> 2.0.0-rc.0"},
+      {:ash_phoenix, "~> 1.0.0-rc.0"},
       {:surface, "~> 0.7"},
       {:phoenix_live_view, "~> 0.17"},
       {:phoenix_html, "~> 3.2"},
@@ -100,7 +100,7 @@ defmodule AshAdmin.MixProject do
       {:surface_formatter, "~> 0.7", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
-      {:ash_postgres, "~> 0.43", only: [:dev, :test]},
+      {:ash_postgres, "~> 1.0.0-rc.0", only: [:dev, :test]},
       {:git_ops, "~> 2.4", only: [:dev, :test]},
       {:ex_doc, "~> 0.23", only: [:dev, :test], runtime: false},
       {:ex_check, "~> 0.14", only: [:dev, :test]},

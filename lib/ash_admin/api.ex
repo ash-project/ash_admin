@@ -1,5 +1,5 @@
 defmodule AshAdmin.Api do
-  @admin %Ash.Dsl.Section{
+  @admin %Spark.Dsl.Section{
     describe: "Configure the admin dashboard for a given API.",
     name: :admin,
     schema: [
@@ -28,33 +28,33 @@ defmodule AshAdmin.Api do
     ]
   }
 
-  use Ash.Dsl.Extension, sections: [@admin]
+  use Spark.Dsl.Extension, sections: [@admin]
 
   @moduledoc """
   An API extension to alter the behavior of an API in the admin UI.
 
   Table of Contents:
-  #{Ash.Dsl.Extension.doc_index([@admin])}
+  #{Spark.Dsl.Extension.doc_index([@admin])}
 
   DSL Docs:
 
-  #{Ash.Dsl.Extension.doc([@admin])}
+  #{Spark.Dsl.Extension.doc([@admin])}
   """
 
   def name(api) do
-    Ash.Dsl.Extension.get_opt(api, [:admin], :name, nil, true) || default_name(api)
+    Spark.Dsl.Extension.get_opt(api, [:admin], :name, nil, true) || default_name(api)
   end
 
   def show?(api) do
-    Ash.Dsl.Extension.get_opt(api, [:admin], :show?, false, true)
+    Spark.Dsl.Extension.get_opt(api, [:admin], :show?, false, true)
   end
 
   def default_resource_page(api) do
-    Ash.Dsl.Extension.get_opt(api, [:admin], :default_resource_page, :schema, true)
+    Spark.Dsl.Extension.get_opt(api, [:admin], :default_resource_page, :schema, true)
   end
 
   def resource_group_labels(api) do
-    Ash.Dsl.Extension.get_opt(api, [:admin], :resource_group_labels, [], true)
+    Spark.Dsl.Extension.get_opt(api, [:admin], :resource_group_labels, [], true)
   end
 
   defp default_name(api) do

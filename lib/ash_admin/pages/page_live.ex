@@ -103,7 +103,7 @@ defmodule AshAdmin.PageLive do
     apis
     |> Enum.flat_map(fn api ->
       api
-      |> Ash.Api.resources()
+      |> Ash.Api.Info.resources()
       |> Enum.filter(fn resource ->
         AshAdmin.Helpers.primary_action(resource, :read) && AshAdmin.Resource.actor?(resource)
       end)
@@ -127,7 +127,7 @@ defmodule AshAdmin.PageLive do
   end
 
   defp assign_resource(socket, resource) do
-    resources = Ash.Api.resources(socket.assigns.api)
+    resources = Ash.Api.Info.resources(socket.assigns.api)
 
     resource =
       Enum.find(resources, fn api_resource ->

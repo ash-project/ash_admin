@@ -141,7 +141,7 @@ defmodule AshAdmin.Components.TopNav do
   end
 
   defp dropdown_groups(prefix, current_resource, api) do
-    for resource <- Ash.Api.resources(api) do
+    for resource <- Ash.Api.Info.resources(api) do
       %{
         text: AshAdmin.Resource.name(resource),
         to:
@@ -174,7 +174,7 @@ defmodule AshAdmin.Components.TopNav do
   defp show_tenant_form?(apis) do
     Enum.any?(apis, fn api ->
       api
-      |> Ash.Api.resources()
+      |> Ash.Api.Info.resources()
       |> Enum.any?(fn resource ->
         Ash.Resource.Info.multitenancy_strategy(resource)
       end)

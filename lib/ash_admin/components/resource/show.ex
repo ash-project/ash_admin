@@ -154,7 +154,7 @@ defmodule AshAdmin.Components.Resource.Show do
          name: name,
          destination: destination,
          context: context,
-         destination_field: destination_field
+         destination_attribute: destination_attribute
        }) do
     data = Map.get(record, name)
 
@@ -167,7 +167,7 @@ defmodule AshAdmin.Components.Resource.Show do
         set_actor={@set_actor}
         table={context[:data_layer][:table]}
         prefix={@prefix}
-        skip={[destination_field]}
+        skip={[destination_attribute]}
       />
     </div>
     """

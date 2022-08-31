@@ -34,7 +34,7 @@
       "name": "organization_id",
       "primary_key?": false,
       "references": {
-        "destination_field": "id",
+        "destination_attribute": "id",
         "multitenancy": {
           "attribute": null,
           "global": null,
@@ -51,7 +51,7 @@
       "name": "reporter_id",
       "primary_key?": false,
       "references": {
-        "destination_field": "id",
+        "destination_attribute": "id",
         "multitenancy": {
           "attribute": null,
           "global": null,
@@ -68,7 +68,7 @@
       "name": "representative_id",
       "primary_key?": false,
       "references": {
-        "destination_field": "id",
+        "destination_attribute": "id",
         "multitenancy": {
           "attribute": null,
           "global": null,
