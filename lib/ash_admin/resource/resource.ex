@@ -96,12 +96,14 @@ defmodule AshAdmin.Resource do
   #{Spark.Dsl.Extension.doc([@admin])}
   """
 
-  if Code.ensure_compiled(AshPostgres) do
-    def polymorphic?(resource) do
-      AshPostgres.DataLayer.Info.polymorphic?(resource)
-    end
-  else
-    def polymorphic?(_), do: false
+  case Code.ensure_compiled(AshPostgres) do
+    {:module, _module} ->
+      def polymorphic?(resource) do
+        AshPostgres.DataLayer.Info.polymorphic?(resource)
+      end
+
+    _ ->
+      def polymorphic?(_), do: false
   end
 
   def polymorphic_tables(resource, apis) do
