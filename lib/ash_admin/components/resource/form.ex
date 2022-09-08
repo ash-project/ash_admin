@@ -95,6 +95,7 @@ defmodule AshAdmin.Components.Resource.Form do
       <div class="flex justify-between col-span-6 mr-4 mt-2 overflow-auto px-4">
         <AshAdmin.Components.Resource.SelectTable
           resource={@resource}
+          action={@action}
           on_change="change_table"
           table={@table}
           tables={@tables}

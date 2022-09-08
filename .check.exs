@@ -8,7 +8,7 @@
     ## curated tools may be disabled (e.g. the check for compilation warnings)
     # {:compiler, false},
     {:npm_test, false},
-    {:check_formatter, command: "mix ash.formatter --check"}
+    {:check_formatter, command: "mix spark.formatter --check"}
 
     ## ...or adjusted (e.g. use one-line formatter for more compact credo output)
     # {:credo, "mix credo --format oneline"},

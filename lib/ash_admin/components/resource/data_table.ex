@@ -19,6 +19,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   prop(tables, :any, required: true)
   prop(prefix, :any, required: true)
   prop(tenant, :any, required: true)
+  prop(polymorphic_actions, :any, required: true)
 
   data(initialized, :boolean, default: false)
   data(data, :any)
@@ -99,7 +100,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                   []
                 end
 
-              if AshAdmin.Resource.polymorphic?(socket.assigns.resource) &&
+              if socket.assigns[:tables] != [] &&
                    !socket.assigns[:table] do
                 {:ok, []}
               else
@@ -119,8 +120,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
             socket,
             :data,
             fn socket ->
-              if AshAdmin.Resource.polymorphic?(socket.assigns.resource) &&
-                   !socket.assigns[:table] do
+              if socket.assigns[:tables] != [] && !socket.assigns[:table] do
                 {:ok, []}
               else
                 socket.assigns.query.source
@@ -178,16 +178,18 @@ defmodule AshAdmin.Components.Resource.DataTable do
         </div>
 
         <div
-          :if={AshAdmin.Resource.polymorphic?(@resource)}
+          :if={@tables != []}
           class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10"
         >
           <div class="md:mt-0 md:col-span-2">
             <div class="px-4 sm:p-6">
               <AshAdmin.Components.Resource.SelectTable
                 resource={@resource}
+                action={@action}
                 on_change="change_table"
                 table={@table}
                 tables={@tables}
+                polymorphic_actions={@polymorphic_actions}
               />
             </div>
           </div>

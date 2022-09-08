@@ -23,6 +23,7 @@ defmodule AshAdmin.Components.Resource do
   prop(tables, :any, default: nil)
   prop(prefix, :any, default: nil)
   prop(action_type, :atom)
+  prop(polymorphic_actions, :any)
 
   data(filter_open, :boolean, default: false)
   slot(default)
@@ -113,9 +114,11 @@ defmodule AshAdmin.Components.Resource do
         table={@table}
         tables={@tables}
         prefix={@prefix}
+        polymorphic_actions={@polymorphic_actions}
       />
       <DataTable
         :if={@action_type == :read && @tab != "show"}
+        polymorphic_actions={@polymorphic_actions}
         resource={@resource}
         action={@action}
         actor={@actor}

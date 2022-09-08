@@ -62,6 +62,13 @@ defmodule AshAdmin.Resource do
         select. These will be added to the list of derivable tables based on scanning all APIs and resources provided to ash_admin.
         """
       ],
+      polymorphic_actions: [
+        type: {:list, :atom},
+        doc: """
+        For resources that use ash_postgres' polymorphism capabilities, you can provide a list of actions that should require a table to be set.
+        If this is not set, then *all* actions will require tables.
+        """
+      ],
       table_columns: [
         type: {:list, :atom},
         doc: "The list of attributes to render on the table view."
@@ -96,14 +103,8 @@ defmodule AshAdmin.Resource do
   #{Spark.Dsl.Extension.doc([@admin])}
   """
 
-  case Code.ensure_compiled(AshPostgres) do
-    {:module, _module} ->
-      def polymorphic?(resource) do
-        AshPostgres.DataLayer.Info.polymorphic?(resource)
-      end
-
-    _ ->
-      def polymorphic?(_), do: false
+  def polymorphic?(resource, apis) do
+    polymorphic_tables(resource, apis) not in [nil, []]
   end
 
   def polymorphic_tables(resource, apis) do
@@ -111,6 +112,10 @@ defmodule AshAdmin.Resource do
     |> Spark.Dsl.Extension.get_opt([:admin], :polymorphic_tables, [], true)
     |> Enum.concat(find_polymorphic_tables(resource, apis))
     |> Enum.uniq()
+  end
+
+  def polymorphic_actions(resource) do
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :polymorphic_actions, nil, true)
   end
 
   def relationship_display_fields(resource) do

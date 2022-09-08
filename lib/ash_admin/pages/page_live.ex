@@ -94,6 +94,7 @@ defmodule AshAdmin.PageLive do
       authorizing={@authorizing}
       table={@table}
       tables={@tables}
+      polymorphic_actions={@polymorphic_actions}
       prefix={@prefix}
     />
     """
@@ -183,9 +184,17 @@ defmodule AshAdmin.PageLive do
       end
 
     if table && table != "" do
-      assign(socket, table: table, tables: tables)
+      assign(socket,
+        table: table,
+        tables: tables,
+        polymorphic_actions: AshAdmin.Resource.polymorphic_actions(socket.assigns.resource)
+      )
     else
-      assign(socket, table: Enum.at(tables, 0), tables: tables)
+      assign(socket,
+        table: Enum.at(tables, 0),
+        tables: tables,
+        polymorphic_actions: AshAdmin.Resource.polymorphic_actions(socket.assigns.resource)
+      )
     end
   end
 

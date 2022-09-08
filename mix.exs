@@ -75,7 +75,7 @@ defmodule AshAdmin.MixProject do
       setup: ["deps.get", "cmd npm install --prefix assets"],
       dev: "run --no-halt dev.exs --config config",
       sobelow: "sobelow --ignore XSS.Raw",
-      "ash.formatter": "ash.formatter --extensions AshAdmin.Api,AshAdmin.Resource"
+      "spark.formatter": "spark.formatter --extensions AshAdmin.Api,AshAdmin.Resource"
     ]
   end
 
