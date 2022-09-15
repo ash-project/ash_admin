@@ -148,7 +148,7 @@ defmodule Demo.Tickets.Ticket do
 
     belongs_to :representative, Demo.Tickets.Representative
     belongs_to :organization, Demo.Tickets.Organization do
-      required? true
+      allow_nil? false
     end
 
     has_many :comments, Demo.Tickets.Comment do

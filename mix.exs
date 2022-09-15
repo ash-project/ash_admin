@@ -90,7 +90,7 @@ defmodule AshAdmin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ash, "~> 2.0.0-rc.0"},
+      {:ash, "~> 2.0.0-rc.7"},
       {:ash_phoenix, "~> 1.0.0-rc.0"},
       {:surface, "~> 0.7"},
       {:phoenix_live_view, "~> 0.17"},
