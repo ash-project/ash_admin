@@ -5,6 +5,21 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.6.0-rc.1](https://github.com/ash-project/ash_admin/compare/v0.6.0-rc.0...v0.6.0-rc.1) (2022-09-15)
+
+
+
+
+### Bug Fixes:
+
+* don't call into ash_postgres for tables anymore
+
+* properly match on `Code.ensrue_compiled/1` output
+
+### Improvements:
+
+* update to the latest ash
+
 ## [v0.5.2](https://github.com/ash-project/ash_admin/compare/v0.5.1-rc.0...v0.5.2) (2022-08-22)
 
 
