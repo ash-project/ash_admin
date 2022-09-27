@@ -20,12 +20,12 @@ defmodule Demo.Tickets.TicketLink do
   relationships do
     belongs_to :source, Demo.Tickets.Ticket do
       primary_key? true
-      allow_nil? true
+      allow_nil? false
     end
 
     belongs_to :destination, Demo.Tickets.Ticket do
       primary_key? true
-      allow_nil? true
+      allow_nil? false
     end
   end
 end
