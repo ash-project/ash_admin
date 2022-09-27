@@ -90,8 +90,8 @@ defmodule AshAdmin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ash, "~> 2.0.0-rc.7"},
-      {:ash_phoenix, "~> 1.0.0-rc.0"},
+      {:ash, "~> 2.0.0-rc.9"},
+      {:ash_phoenix, "~> 1.0.0-rc.1"},
       {:surface, "~> 0.7"},
       {:phoenix_live_view, "~> 0.17"},
       {:phoenix_html, "~> 3.2"},
@@ -100,7 +100,7 @@ defmodule AshAdmin.MixProject do
       {:surface_formatter, "~> 0.7", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
-      {:ash_postgres, "~> 1.0.0-rc.0", only: [:dev, :test]},
+      {:ash_postgres, "~> 1.0.0-rc.6", only: [:dev, :test]},
       {:git_ops, "~> 2.4", only: [:dev, :test]},
       {:ex_doc, "~> 0.23", only: [:dev, :test], runtime: false},
       {:ex_check, "~> 0.14", only: [:dev, :test]},
