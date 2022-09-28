@@ -27,7 +27,7 @@ defmodule Demo.Tickets.Customer do
     end
 
     policy action_type(:read) do
-      authorize_if attribute(:id, eq: actor(:id))
+      authorize_if expr(id == ^actor(:id))
       authorize_if relates_to_actor_via([:reported_tickets, :representative])
     end
   end

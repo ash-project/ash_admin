@@ -24,7 +24,7 @@ defmodule Demo.Accounts.User do
     end
 
     policy action_type(:read) do
-      authorize_if attribute(:id, eq: actor(:id))
+      authorize_if expr(id == ^actor(:id))
     end
   end
 
