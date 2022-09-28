@@ -5,6 +5,21 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.6.0-rc.2](https://github.com/ash-project/ash_admin/compare/v0.6.0-rc.1...v0.6.0-rc.2) (2022-09-28)
+
+
+
+
+### Improvements:
+
+* update to latest ash
+
+* unlock unused deps
+
+* support latest ash_phoenix
+
+* update to latest ash
+
 ## [v0.6.0-rc.1](https://github.com/ash-project/ash_admin/compare/v0.6.0-rc.0...v0.6.0-rc.1) (2022-09-15)
 
 
