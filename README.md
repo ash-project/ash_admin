@@ -77,3 +77,14 @@ To work on ash_admin, you'll want to be able to run the dev app. You'll need to 
 Then, you can start the app with: `mix dev`
 
 If you make changes to the resources, you can generate migrations with `mix generate_migrations`
+
+
+## Contributors
+
+Ash is made possible by its excellent community!
+
+<a href="https://github.com/ash-project/ash_admin/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=ash-project/ash_admin" />
+</a>
+
+[Become a contributor](https://ash-hq.org/docs/guides/ash/latest/how_to/contribute.md)
