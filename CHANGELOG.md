@@ -5,6 +5,17 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.6.2](https://github.com/ash-project/ash_admin/compare/v0.6.1...v0.6.2) (2022-10-20)
+
+
+
+
+### Bug Fixes:
+
+* handle missing api/resource better
+
+* if pagination is available but not required, opt to use it
+
 ## [v0.6.1](https://github.com/ash-project/ash_admin/compare/v0.6.0-rc.2...v0.6.1) (2022-10-20)
 
 
