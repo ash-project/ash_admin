@@ -128,73 +128,85 @@ defmodule AshAdmin.PageLive do
   end
 
   defp assign_resource(socket, resource) do
-    resources = Ash.Api.Info.resources(socket.assigns.api)
+    if socket.assigns.api do
+      resources = Ash.Api.Info.resources(socket.assigns.api)
 
-    resource =
-      Enum.find(resources, fn api_resource ->
-        AshAdmin.Resource.name(api_resource) == resource
-      end) || Enum.at(resources, 0)
+      resource =
+        Enum.find(resources, fn api_resource ->
+          AshAdmin.Resource.name(api_resource) == resource
+        end) || Enum.at(resources, 0)
 
-    assign(socket, :resource, resource)
+      assign(socket, :resource, resource)
+    else
+      assign(socket, :resource, nil)
+    end
   end
 
   defp assign_action(socket, action, action_type) do
-    action_type =
-      case action_type do
-        "read" ->
-          :read
+    if socket.assigns.api && socket.assigns.resource do
+      action_type =
+        case action_type do
+          "read" ->
+            :read
 
-        "update" ->
-          :update
+          "update" ->
+            :update
 
-        "create" ->
-          :create
+          "create" ->
+            :create
 
-        "destroy" ->
-          :destroy
+          "destroy" ->
+            :destroy
 
-        nil ->
-          if AshAdmin.Api.default_resource_page(socket.assigns.api) == :primary_read,
-            do: :read,
-            else: nil
-      end
+          nil ->
+            if AshAdmin.Api.default_resource_page(socket.assigns.api) == :primary_read,
+              do: :read,
+              else: nil
+        end
 
-    if action_type do
-      action =
-        Enum.find(Ash.Resource.Info.actions(socket.assigns.resource), fn resource_action ->
-          to_string(resource_action.name) == action && resource_action.type == action_type
-        end) || AshAdmin.Helpers.primary_action(socket.assigns.resource, action_type)
+      if action_type do
+        action =
+          Enum.find(Ash.Resource.Info.actions(socket.assigns.resource), fn resource_action ->
+            to_string(resource_action.name) == action && resource_action.type == action_type
+          end) || AshAdmin.Helpers.primary_action(socket.assigns.resource, action_type)
 
-      if action do
-        assign(socket, action_type: action_type, action: action)
+        if action do
+          assign(socket, action_type: action_type, action: action)
+        else
+          assign(socket, action_type: nil, action: nil)
+        end
       else
         assign(socket, action_type: nil, action: nil)
       end
     else
-      assign(socket, action_type: nil, action: nil)
+      assign(socket, :action, nil)
     end
   end
 
   defp assign_tables(socket, table) do
-    tables =
-      if socket.assigns.resource do
-        AshAdmin.Resource.polymorphic_tables(socket.assigns.resource, socket.assigns.apis)
-      else
-        []
-      end
+    if socket.assigns.resource do
+      tables =
+        if socket.assigns.resource do
+          AshAdmin.Resource.polymorphic_tables(socket.assigns.resource, socket.assigns.apis)
+        else
+          []
+        end
 
-    if table && table != "" do
-      assign(socket,
-        table: table,
-        tables: tables,
-        polymorphic_actions: AshAdmin.Resource.polymorphic_actions(socket.assigns.resource)
-      )
+      if table && table != "" do
+        assign(socket,
+          table: table,
+          tables: tables,
+          polymorphic_actions: AshAdmin.Resource.polymorphic_actions(socket.assigns.resource)
+        )
+      else
+        assign(socket,
+          table: Enum.at(tables, 0),
+          tables: tables,
+          polymorphic_actions: AshAdmin.Resource.polymorphic_actions(socket.assigns.resource)
+        )
+      end
     else
-      assign(socket,
-        table: Enum.at(tables, 0),
-        tables: tables,
-        polymorphic_actions: AshAdmin.Resource.polymorphic_actions(socket.assigns.resource)
-      )
+      assign(socket, table: table, tables: [], polymorphic_actions: [])
     end
   end
 

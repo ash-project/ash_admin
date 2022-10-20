@@ -88,16 +88,20 @@ defmodule AshAdmin.Components.Resource.DataTable do
             :data,
             fn socket ->
               default_limit =
-                socket.assigns[:action].pagination.default_limit ||
-                  socket.assigns[:action].pagination.max_page_size || 25
+                socket.assigns.action.pagination.default_limit ||
+                  socket.assigns.action.pagination.max_page_size || 50
 
-              count? = socket.assigns[:action].pagination.countable
+              count? = socket.assigns.action.pagination.countable
 
               page_params =
                 if socket.assigns[:params]["page"] do
                   page_from_params(socket.assigns[:params]["page"], default_limit, !!count?)
                 else
-                  []
+                  if socket.assigns.action.pagination.countable do
+                    [limit: 50, count: true]
+                  else
+                    [limit: 50]
+                  end
                 end
 
               if socket.assigns[:tables] != [] &&
@@ -384,7 +388,9 @@ defmodule AshAdmin.Components.Resource.DataTable do
         <span class="font-medium">{first(@data)}</span>
         to
         <span class="font-medium">{last(@data)}</span>
-        of
+        {#if count(@data)}
+          of
+        {/if}
       </span>
       <span :if={count(@data)}>
         <span class="font-medium">{count(@data)}</span>
