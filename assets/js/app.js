@@ -77,9 +77,10 @@ Hooks.JsonView = {
   }
 }
 
-const init = (element, initialValue) => new EasyMDE({
+const init = (element) => new EasyMDE({
   element: element,
-  forceSync: true
+  forceSync: true,
+  initialValue: element.getAttribute("value")
 })
 
 Hooks.MarkdownEditor = {
@@ -87,32 +88,8 @@ Hooks.MarkdownEditor = {
     const id = this.el.getAttribute("data-target-id")
     const el = document.getElementById(id)
     init(el)
-  },
-  // updated(){
-  //   console.log(this.el.value)
-  //   const textArea = init(this.el, this.el.value);
-  //   // textArea.codemirror.on("change", ( ) => {
-  //   //   console.log(textArea.value())
-  //   //   // this.pushEventTo(this.el, "")
-  //   // })
-
-  //   // init(document.getElementById(inputId));
-
-  //   // textArea.codemirror.on("change", ( ) => {
-  //   //   this.pushEventTo(
-  //   //     this.el, 
-  //   //     "handle_clientside_richtext",
-  //   //     {richtext_data: textArea.value()}
-  //   //   );
-  //   //   this.handleEvent(
-  //   //     "richtext_event",
-  //   //     (richtext_data) => textArea.value(richtext_data)
-  //   //   )
-  //   // })
-  // }
+  }
 }
-
-
 
 Hooks.Actor = {
   mounted() {
