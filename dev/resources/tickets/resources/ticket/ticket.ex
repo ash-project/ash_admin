@@ -18,7 +18,7 @@ defmodule Demo.Tickets.Ticket do
     ]
 
     form do
-      field :description, type: :long_text
+      field :description, type: :markdown
     end
   end
 

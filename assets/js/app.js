@@ -77,10 +77,46 @@ Hooks.JsonView = {
   }
 }
 
+const init = (element, initialValue) => new EasyMDE({
+  element: element,
+  forceSync: true
+})
+
+Hooks.MarkdownEditor = {
+  mounted() {
+    const id = this.el.getAttribute("data-target-id")
+    const el = document.getElementById(id)
+    init(el)
+  },
+  // updated(){
+  //   console.log(this.el.value)
+  //   const textArea = init(this.el, this.el.value);
+  //   // textArea.codemirror.on("change", ( ) => {
+  //   //   console.log(textArea.value())
+  //   //   // this.pushEventTo(this.el, "")
+  //   // })
+
+  //   // init(document.getElementById(inputId));
+
+  //   // textArea.codemirror.on("change", ( ) => {
+  //   //   this.pushEventTo(
+  //   //     this.el, 
+  //   //     "handle_clientside_richtext",
+  //   //     {richtext_data: textArea.value()}
+  //   //   );
+  //   //   this.handleEvent(
+  //   //     "richtext_event",
+  //   //     (richtext_data) => textArea.value(richtext_data)
+  //   //   )
+  //   // })
+  // }
+}
+
+
+
 Hooks.Actor = {
   mounted() {
     this.handleEvent("set_actor", (payload) => {
-      console.log(payload);
       document.cookie = 'actor_resource' + '=' + payload.resource + ';path=/';
       document.cookie = 'actor_primary_key' + '=' + payload.primary_key + ';path=/';
       document.cookie = 'actor_action' + '=' + payload.action + ';path=/';
@@ -95,7 +131,6 @@ Hooks.Actor = {
       document.cookie = 'actor_paused=true;path=/';
     });
     this.handleEvent("toggle_authorizing", (payload) => {
-      console.log(payload);
       document.cookie = 'actor_authorizing' + '=' + payload.authorizing + ';path=/';
     });
     this.handleEvent("toggle_actor_paused", (payload) => {

@@ -9,6 +9,8 @@
     <style><%= raw(render("app.css")) %></style>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.5.1/jsoneditor.min.css" rel="stylesheet" type="text/css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.5.1/jsoneditor.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
   </head>
   <body>
     <%= @inner_content %>

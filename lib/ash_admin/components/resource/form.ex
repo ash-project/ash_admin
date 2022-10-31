@@ -158,8 +158,9 @@ defmodule AshAdmin.Components.Resource.Form do
           :for={attribute <- Enum.reject(attributes, &(&1.name in skip))}
           class={
             "col-span-6",
+            "sm:col-span-full": markdown?(resource, attribute),
             "sm:col-span-2": short_text?(resource, attribute),
-            "sm:col-span-3": !long_text?(resource, attribute)
+            "sm:col-span-3": !(long_text?(resource, attribute) || markdown?(resource, attribute))
           }
         >
           <FieldContext name={attribute.name}>
@@ -502,6 +503,16 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
+  defp markdown?(resource, attribute) do
+    case AshAdmin.Resource.field(resource, attribute.name) do
+      %{type: :markdown} ->
+        true
+
+      _ ->
+        false
+    end
+  end
+
   defp unwrap_type({:array, type}), do: unwrap_type(type)
   defp unwrap_type(type), do: type
 
@@ -585,6 +596,35 @@ defmodule AshAdmin.Components.Resource.Form do
           name={name || form.name <> "[#{attribute.name}]"}
         />
         """
+
+      markdown?(form.source.resource, attribute) ->
+        ~F"""
+        <div phx-hook="MarkdownEditor"
+        id={form.id <> "_#{attribute.name}_container"}
+        phx-update="ignore"
+        data-target-id={form.id <> "_#{attribute.name}"}
+        class="prose max-w-none"
+        >
+          <textarea
+            id={form.id <> "_#{attribute.name}"}
+            value={value(value, form, attribute) || ""}
+            class="prose max-w-none"
+            name={name || form.name <> "[#{attribute.name}]"}/>
+        </div>
+        """
+
+      # <TextArea
+      #   form={form}
+      #   :props={props(value, attribute)}
+      #   name={name || form.name <> "[#{attribute.name}]"}
+      #   opts={
+      #     type: text_input_type(attribute),
+      #     placeholder: placeholder(default)
+      #     phx_update=
+      #   }
+      #   value={value(value, form, attribute)}
+      #   class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md resize-y"
+      # />
 
       long_text?(form.source.resource, attribute) ->
         ~F"""

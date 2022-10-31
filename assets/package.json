@@ -6,36 +6,33 @@
     "build": "NODE_ENV=production webpack --mode production",
     "watch": "NODE_ENV=production webpack --mode development --watch"
   },
-  "dependencies": {
-    "@tailwindcss/forms": "^0.2.1",
-    "bootstrap": "^4.4.1",
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.3",
+    "@tailwindcss/typography": "^0.5.7",
     "nprogress": "^0.2.0",
     "phoenix": "1.6.6",
     "phoenix_html": "3.2.0",
     "phoenix_live_view": "0.17.7",
-    "uplot": "^1.0.11"
-  },
-  "devDependencies": {
+    "tailwindcss": "^3.2.1",
+    "uplot": "^1.0.11",
     "@babel/core": "^7.3.4",
     "@babel/preset-env": "^7.4.1",
     "autoprefixer": "^9.8.8",
+    "postcss-loader": "^7.0.1",
     "babel-loader": "^8.0.6",
     "copy-webpack-plugin": "^6.1.1",
     "css-loader": "^3.4.2",
     "glob": "^7.1.6",
     "jest": "^25.1.0",
-    "mini-css-extract-plugin": "^0.9.0",
-    "optimize-css-assets-webpack-plugin": "^5.0.1",
-    "postcss": "^7.0.39",
-    "postcss-loader": "^3.0.0",
+    "mini-css-extract-plugin": "^2.6.1",
+    "postcss": "^8.4.18",
     "precss": "^4.0.0",
     "sass": "^1.32.13",
     "sass-loader": "^8.0.2",
     "style-loader": "^0.20.2",
-    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.17",
     "terser-webpack-plugin": "^4.2.2",
     "url-loader": "^4.0.0",
-    "webpack": "^4.41.5",
-    "webpack-cli": "^3.3.10"
+    "webpack": "^5.0.0",
+    "webpack-cli": "^4.10.0"
   }
 }
