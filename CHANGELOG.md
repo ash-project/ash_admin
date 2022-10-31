@@ -5,6 +5,19 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.7.0](https://github.com/ash-project/ash_admin/compare/v0.6.2...v0.7.0) (2022-10-31)
+
+
+
+
+### Features:
+
+* add markdown attributes
+
+### Improvements:
+
+* add markdown editor
+
 ## [v0.6.2](https://github.com/ash-project/ash_admin/compare/v0.6.1...v0.6.2) (2022-10-20)
 
 
