@@ -15,7 +15,8 @@ defmodule AshAdmin.Components.Resource.SelectTable do
   def render(assigns) do
     ~F"""
     <div>
-      <div :if={@resource && @tables != [] && (is_nil(@polymorphic_actions) || @action.name in @polymorphic_actions)}>
+      <div :if={@resource && @tables != [] &&
+        (is_nil(@polymorphic_actions) || @action.name in @polymorphic_actions)}>
         <Form as={:table} for={:table} change={@on_change}>
           <FieldContext name="table">
             <Label>Table</Label>

@@ -19,7 +19,11 @@ defmodule AshAdmin.Components.TopNav.DrawerDropdown do
           phx-target={@myself}
           id={"#{@id}_dropdown_drawer"}
           href="#"
-          class={"mt-1 block px-3 py-2 rounded-t text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700": true, "text-white bg-gray-700": @open}
+          class={
+            "mt-1 block px-3 py-2 rounded-t text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700":
+              true,
+            "text-white bg-gray-700": @open
+          }
         >
           {@name}
         </a>

@@ -39,8 +39,7 @@ defmodule AshAdmin.Components.Resource.Table do
                 </div>
 
                 <div :if={AshAdmin.Helpers.primary_action(@resource, :update)}>
-                  <LiveRedirect
-                    to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&action=#{AshAdmin.Helpers.primary_action(@resource, :update).name}&tab=update&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
+                  <LiveRedirect to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&action=#{AshAdmin.Helpers.primary_action(@resource, :update).name}&tab=update&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
                     <HeroIcon name="pencil" class="h-5 w-5 text-gray-500" />
                   </LiveRedirect>
                 </div>
@@ -145,7 +144,7 @@ defmodule AshAdmin.Components.Resource.Table do
     assigns = %{}
 
     ~F"""
-    <span class='italic'>(binary)</span>
+    <span class="italic">(binary)</span>
     """
   end
 

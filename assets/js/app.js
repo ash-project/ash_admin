@@ -79,7 +79,6 @@ Hooks.JsonView = {
 
 const init = (element) => new EasyMDE({
   element: element,
-  forceSync: true,
   initialValue: element.getAttribute("value")
 })
 
@@ -87,7 +86,11 @@ Hooks.MarkdownEditor = {
   mounted() {
     const id = this.el.getAttribute("data-target-id")
     const el = document.getElementById(id)
-    init(el)
+    const easyMDE = init(el)
+    easyMDE.codemirror.on("change", () => {
+      el.value = easyMDE.value()
+      el.dispatchEvent(new Event('change', { 'bubbles': true }))
+    });
   }
 }
 

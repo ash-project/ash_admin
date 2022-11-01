@@ -75,7 +75,8 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
           <LiveRedirect
             :if={@actor}
             class="hover:text-blue-400 hover:underline"
-            to={"#{@prefix}?api=#{AshAdmin.Api.name(@actor_api)}&resource=#{AshAdmin.Resource.name(@actor.__struct__)}&tab=show&primary_key=#{encode_primary_key(@actor)}"}>
+            to={"#{@prefix}?api=#{AshAdmin.Api.name(@actor_api)}&resource=#{AshAdmin.Resource.name(@actor.__struct__)}&tab=show&primary_key=#{encode_primary_key(@actor)}"}
+          >
             {user_display(@actor)}
           </LiveRedirect>
           <button :if={@actor} :on-click={@clear_actor} type="button">

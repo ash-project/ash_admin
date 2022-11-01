@@ -97,7 +97,12 @@ defmodule AshAdmin.Components.Resource do
         table={@table}
         prefix={@prefix}
       />
-      <Info :if={@tab == "info" || (is_nil(@tab) && is_nil(@action_type))} resource={@resource} api={@api} prefix={@prefix} />
+      <Info
+        :if={@tab == "info" || (is_nil(@tab) && is_nil(@action_type))}
+        resource={@resource}
+        api={@api}
+        prefix={@prefix}
+      />
       <Form
         :if={@tab == "create"}
         type={:create}

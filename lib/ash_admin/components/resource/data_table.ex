@@ -181,10 +181,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
           </div>
         </div>
 
-        <div
-          :if={@tables != []}
-          class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10"
-        >
+        <div :if={@tables != []} class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10">
           <div class="md:mt-0 md:col-span-2">
             <div class="px-4 sm:p-6">
               <AshAdmin.Components.Resource.SelectTable

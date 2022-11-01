@@ -57,29 +57,23 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
             phx-target={@myself}
             id={"#{@id}_dropown"}
           >
-
             {#for group <- @groups}
-            <div
-              class="py-1"
-              role="menu"
-              aria-orientation="vertical"
-              aria-labelledby={"#{@id}_dropown"}
-            >
-            <.group_label item={hd(group)} group_labels={@group_labels} />
-            {#for link <- group}
-              <LiveRedirect
-                to={link.to}
-                class={
-                  "block px-4 py-2 text-sm ",
-                  "bg-gray-600 text-white hover:bg-gray-700": Map.get(link, :active),
-                  "text-gray-700 hover:bg-gray-100 hover:text-gray-900": !Map.get(link, :active)
-                }
-                opts={role: "menuitem"}
-              >
-                {link.text}
-              </LiveRedirect>
-            {/for}
-            </div>
+              <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby={"#{@id}_dropown"}>
+                <.group_label item={hd(group)} group_labels={@group_labels} />
+                {#for link <- group}
+                  <LiveRedirect
+                    to={link.to}
+                    class={
+                      "block px-4 py-2 text-sm ",
+                      "bg-gray-600 text-white hover:bg-gray-700": Map.get(link, :active),
+                      "text-gray-700 hover:bg-gray-100 hover:text-gray-900": !Map.get(link, :active)
+                    }
+                    opts={role: "menuitem"}
+                  >
+                    {link.text}
+                  </LiveRedirect>
+                {/for}
+              </div>
             {/for}
           </div>
         {/if}
@@ -93,7 +87,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
 
     ~F"""
     {#if @label_text}
-    <span class="block px-4 py-2 text-xs text-gray-400 font-semibold italic">{@label_text}</span>
+      <span class="block px-4 py-2 text-xs text-gray-400 font-semibold italic">{@label_text}</span>
     {/if}
     """
   end

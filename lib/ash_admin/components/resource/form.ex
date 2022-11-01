@@ -613,19 +613,6 @@ defmodule AshAdmin.Components.Resource.Form do
         </div>
         """
 
-      # <TextArea
-      #   form={form}
-      #   :props={props(value, attribute)}
-      #   name={name || form.name <> "[#{attribute.name}]"}
-      #   opts={
-      #     type: text_input_type(attribute),
-      #     placeholder: placeholder(default)
-      #     phx_update=
-      #   }
-      #   value={value(value, form, attribute)}
-      #   class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md resize-y"
-      # />
-
       long_text?(form.source.resource, attribute) ->
         ~F"""
         <TextArea
@@ -1105,8 +1092,8 @@ defmodule AshAdmin.Components.Resource.Form do
      |> assign(:form, form)}
   end
 
-  def handle_event("save", %{"form" => params}, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.form, params || %{})
+  def handle_event("save", _, socket) do
+    form = socket.assigns.form
 
     before_submit = fn changeset ->
       changeset
@@ -1138,10 +1125,41 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
-  def handle_event("validate", %{"form" => params}, socket) do
+  def handle_event("validate", %{"form" => params, "_target" => target}, socket) do
+    params =
+      case target do
+        ["undefined"] ->
+          socket.assigns.form.params
+
+        target ->
+          put_in_creating(
+            socket.assigns.form.params || %{},
+            tl(target),
+            get_in(params, tl(target))
+          )
+      end
+
+
+    IO.inspect(params)
+
     form = AshPhoenix.Form.validate(socket.assigns.form, params || %{})
 
     {:noreply, assign(socket, :form, form)}
+  end
+
+  defp put_in_creating(map, [key], value) do
+    Map.put(map || %{}, key, value)
+  end
+
+  defp put_in_creating(list, [key | rest], value) when is_list(list) do
+    List.update_at(list, String.to_integer(key), &put_in_creating(&1, rest, value))
+  end
+
+  defp put_in_creating(map, [key | rest], value) do
+    map
+    |> Kernel.||(%{})
+    |> Map.put_new(key, %{})
+    |> Map.update!(key, &put_in_creating(&1, rest, value))
   end
 
   defp indexed_list(map) when is_map(map) do

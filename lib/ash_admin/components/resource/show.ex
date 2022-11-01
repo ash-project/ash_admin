@@ -49,7 +49,7 @@ defmodule AshAdmin.Components.Resource.Show do
         phx-value-api={@api}
         phx-value-pkey={encode_primary_key(@record)}
       >
-      <HeroIcon name="key" class="h-5 w-5 text-gray-500" />
+        <HeroIcon name="key" class="h-5 w-5 text-gray-500" />
       </button>
       <div class="px-4 py-5 sm:p-6">
         <div>
@@ -283,11 +283,11 @@ defmodule AshAdmin.Components.Resource.Show do
     encoded = Jason.encode!(Map.get(record, attribute.name))
 
     ~F"""
-      <div
+    <div
       phx-hook="JsonView"
       data-json={encoded}
       id={"_#{AshAdmin.Helpers.encode_primary_key(record)}_#{attribute.name}_json"}
-      />
+    />
     """
   rescue
     _ ->
