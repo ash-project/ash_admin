@@ -112,5 +112,4 @@ defmodule AshAdmin.MixProject do
       {:floki, ">= 0.30.0", only: :test}
     ]
   end
-
 end
