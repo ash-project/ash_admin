@@ -110,7 +110,9 @@ defmodule AshAdmin.Components.Resource.Form do
             <Label>Action</Label>
             <Select
               opts={disabled: Enum.count(actions(@resource, @type)) <= 1}
-              selected={to_string(@action.name)} options={actions(@resource, @type)} />
+              selected={to_string(@action.name)}
+              options={actions(@resource, @type)}
+            />
           </FieldContext>
         </Form>
       </div>
@@ -122,7 +124,12 @@ defmodule AshAdmin.Components.Resource.Form do
           opts={autocomplete: false, id: "#{@id}_form", phx_target: @myself}
           :let={form: form}
         >
-          <input :for={kv <- form.hidden} name={form.name <> "[#{elem(kv, 0)}]"} value={elem(kv, 1)} hidden>
+          <input
+            :for={kv <- form.hidden}
+            name={form.name <> "[#{elem(kv, 0)}]"}
+            value={elem(kv, 1)}
+            hidden
+          />
           {render_attributes(assigns, @resource, @action, form)}
           <div class="px-4 py-3 text-right sm:px-6">
             <button
@@ -165,7 +172,7 @@ defmodule AshAdmin.Components.Resource.Form do
         >
           <FieldContext name={attribute.name}>
             <Label class="block text-sm font-medium text-gray-700">{to_name(attribute.name)}</Label>
-              {render_attribute_input(assigns, attribute, form)}
+            {render_attribute_input(assigns, attribute, form)}
             <ErrorTag :if={!Ash.Type.embedded_type?(attribute.type)} field={attribute.name} />
           </FieldContext>
         </div>
@@ -215,7 +222,13 @@ defmodule AshAdmin.Components.Resource.Form do
       <div :for={{relationship, argument, opts} <- relationship_args}>
         <FieldContext name={argument.name} :if={relationship not in skip and argument.name not in skip}>
           <Label class="block text-sm font-medium text-gray-700">{to_name(argument.name)}</Label>
-          {render_relationship_input(assigns, Ash.Resource.Info.relationship(form.source.resource, relationship), form, argument, opts)}
+          {render_relationship_input(
+            assigns,
+            Ash.Resource.Info.relationship(form.source.resource, relationship),
+            form,
+            argument,
+            opts
+          )}
         </FieldContext>
       </div>
     </Context>
@@ -250,11 +263,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
     ~F"""
     <div :if={!must_load?(opts) || loaded?(form.source.source, relationship.name)}>
-      <Inputs
-        form={form}
-        for={argument.name}
-        :let={form: inner_form}
-      >
+      <Inputs form={form} for={argument.name} :let={form: inner_form}>
         <div :if={@form.submitted_once?} class="ml-4 mt-4 text-red-500">
           <ul>
             <li :for={{field, message} <- AshPhoenix.Form.errors(inner_form.source)}>
@@ -268,16 +277,22 @@ defmodule AshAdmin.Components.Resource.Form do
           </ul>
         </div>
         {#if hidden?}
-          <input :for={kv <- inner_form.hidden} name={inner_form.name <> "[#{elem(kv, 0)}]"} value={elem(kv, 1)} hidden>
+          <input
+            :for={kv <- inner_form.hidden}
+            name={inner_form.name <> "[#{elem(kv, 0)}]"}
+            value={elem(kv, 1)}
+            hidden
+          />
         {/if}
         {#if inner_form.source.form_keys[:_join]}
-          <Inputs
-            form={inner_form}
-            for={:_join}
-            :let={form: join_form}
-          >
+          <Inputs form={inner_form} for={:_join} :let={form: join_form}>
             {#if hidden?}
-              <input :for={kv <- join_form.hidden} name={inner_form.name <> "[#{elem(kv, 0)}]"} value={elem(kv, 1)} hidden>
+              <input
+                :for={kv <- join_form.hidden}
+                name={inner_form.name <> "[#{elem(kv, 0)}]"}
+                value={elem(kv, 1)}
+                hidden
+              />
             {/if}
             {render_attributes(
               assigns,
@@ -299,15 +314,15 @@ defmodule AshAdmin.Components.Resource.Form do
         )}
 
         <button
-        type="button"
-        :on-click="remove_form"
-        phx-target={@myself}
-        :if={can_remove_related?(inner_form, opts)}
-        phx-value-path={inner_form.name}
-        class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
-      >
-        <HeroIcon name="minus" class="h-4 w-4 text-gray-500" />
-      </button>
+          type="button"
+          :on-click="remove_form"
+          phx-target={@myself}
+          :if={can_remove_related?(inner_form, opts)}
+          phx-value-path={inner_form.name}
+          class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+        >
+          <HeroIcon name="minus" class="h-4 w-4 text-gray-500" />
+        </button>
       </Inputs>
 
       <button
@@ -316,7 +331,7 @@ defmodule AshAdmin.Components.Resource.Form do
         phx-target={@myself}
         :if={can_add_related?(form, :read_action, argument)}
         phx-value-path={form.name <> "[#{argument.name}]"}
-        phx-value-type={"lookup"}
+        phx-value-type="lookup"
         phx-value-cardinality={to_string(relationship.cardinality)}
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
@@ -329,7 +344,7 @@ defmodule AshAdmin.Components.Resource.Form do
         phx-target={@myself}
         :if={can_add_related?(form, :create_action, argument)}
         phx-value-path={form.name <> "[#{argument.name}]"}
-        phx-value-type={"create"}
+        phx-value-type="create"
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
         <HeroIcon name="plus" class="h-4 w-4 text-gray-500" />
@@ -338,9 +353,10 @@ defmodule AshAdmin.Components.Resource.Form do
         type="button"
         :on-click="add_form"
         phx-target={@myself}
-        :if={form.source.form_keys[argument.name][:read_form] && !relationship_set?(form.source.source, relationship.name, argument.name)}
+        :if={form.source.form_keys[argument.name][:read_form] &&
+          !relationship_set?(form.source.source, relationship.name, argument.name)}
         phx-value-path={form.name <> "[#{argument.name}]"}
-        phx-value-type={"lookup"}
+        phx-value-type="lookup"
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
         <HeroIcon name="plus" class="h-4 w-4 text-gray-500" />
@@ -524,8 +540,8 @@ defmodule AshAdmin.Components.Resource.Form do
       form={form}
       value={value(value, form, attribute)}
       name={name || form.name <> "[#{attribute.name}]"}
-      :props={props(value, attribute)}
-      />
+      {...props(value, attribute)}
+    />
     """
   end
 
@@ -544,7 +560,7 @@ defmodule AshAdmin.Components.Resource.Form do
       form={form}
       value={value(value, form, attribute)}
       name={name || form.name <> "[#{attribute.name}]"}
-      :props={props(value, attribute)}
+      {...props(value, attribute)}
     />
     """
   end
@@ -560,11 +576,12 @@ defmodule AshAdmin.Components.Resource.Form do
       ) do
     ~F"""
     <Select
-    form={form}
-    options={Nil: nil, True: "true", False: "false"}
-    selected={value(value, form, attribute)}
-    name={name || form.name <> "[#{attribute.name}]"}
-    :props={props(value, attribute)} />
+      form={form}
+      options={Nil: nil, True: "true", False: "false"}
+      selected={value(value, form, attribute)}
+      name={name || form.name <> "[#{attribute.name}]"}
+      {...props(value, attribute)}
+    />
     """
   end
 
@@ -590,7 +607,7 @@ defmodule AshAdmin.Components.Resource.Form do
         ~F"""
         <Select
           form={form}
-          :props={props(value, attribute)}
+          {...props(value, attribute)}
           options={Enum.map(attribute.constraints[:one_of], &{to_name(&1), &1}) ++ allow_nil_option(attribute)}
           selected={value(value, form, attribute)}
           name={name || form.name <> "[#{attribute.name}]"}
@@ -599,17 +616,19 @@ defmodule AshAdmin.Components.Resource.Form do
 
       markdown?(form.source.resource, attribute) ->
         ~F"""
-        <div phx-hook="MarkdownEditor"
-        id={form.id <> "_#{attribute.name}_container"}
-        phx-update="ignore"
-        data-target-id={form.id <> "_#{attribute.name}"}
-        class="prose max-w-none"
+        <div
+          phx-hook="MarkdownEditor"
+          id={form.id <> "_#{attribute.name}_container"}
+          phx-update="ignore"
+          data-target-id={form.id <> "_#{attribute.name}"}
+          class="prose max-w-none"
         >
           <textarea
             id={form.id <> "_#{attribute.name}"}
             value={value(value, form, attribute) || ""}
             class="prose max-w-none"
-            name={name || form.name <> "[#{attribute.name}]"}/>
+            name={name || form.name <> "[#{attribute.name}]"}
+          />
         </div>
         """
 
@@ -617,7 +636,7 @@ defmodule AshAdmin.Components.Resource.Form do
         ~F"""
         <TextArea
           form={form}
-          :props={props(value, attribute)}
+          {...props(value, attribute)}
           name={name || form.name <> "[#{attribute.name}]"}
           opts={
             type: text_input_type(attribute),
@@ -634,7 +653,7 @@ defmodule AshAdmin.Components.Resource.Form do
         ~F"""
         <TextInput
           form={form}
-          :props={props(value, attribute)}
+          {...props(value, attribute)}
           opts={type: text_input_type(attribute), placeholder: placeholder(default)}
           value={value(value, form, attribute)}
           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
@@ -646,7 +665,7 @@ defmodule AshAdmin.Components.Resource.Form do
         ~F"""
         <TextInput
           form={form}
-          :props={props(value, attribute)}
+          {...props(value, attribute)}
           opts={type: text_input_type(attribute), placeholder: placeholder(default)}
           value={value(value, form, attribute)}
           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
@@ -672,10 +691,10 @@ defmodule AshAdmin.Components.Resource.Form do
     ~F"""
     <div>
       <div
-      phx-hook="JsonEditor"
-      phx-update="ignore"
-      data-input-id={form.id <> "_#{attribute.name}"}
-      id={form.id <> "_#{attribute.name}_json"}
+        phx-hook="JsonEditor"
+        phx-update="ignore"
+        data-input-id={form.id <> "_#{attribute.name}"}
+        id={form.id <> "_#{attribute.name}_json"}
       />
 
       <HiddenInput
@@ -694,7 +713,7 @@ defmodule AshAdmin.Components.Resource.Form do
       <TextInput
         form={form}
         opts={disabled: true}
-        value={"..."}
+        value="..."
         name={name || form.name <> "[#{attribute.name}]"}
         class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
       />
@@ -706,7 +725,12 @@ defmodule AshAdmin.Components.Resource.Form do
       Ash.Type.embedded_type?(attribute.type) ->
         ~F"""
         <Inputs form={form} for={attribute.name} :let={form: inner_form}>
-          <input :for={kv <- inner_form.hidden} name={inner_form.name <> "[#{elem(kv, 0)}]"} value={elem(kv, 1)} hidden>
+          <input
+            :for={kv <- inner_form.hidden}
+            name={inner_form.name <> "[#{elem(kv, 0)}]"}
+            value={elem(kv, 1)}
+            hidden
+          />
           <button
             type="button"
             :on-click="remove_form"
@@ -717,7 +741,12 @@ defmodule AshAdmin.Components.Resource.Form do
             <HeroIcon name="minus" class="h-4 w-4 text-gray-500" />
           </button>
 
-          {render_attributes(assigns, inner_form.source.resource, inner_form.source.source.action, inner_form)}
+          {render_attributes(
+            assigns,
+            inner_form.source.resource,
+            inner_form.source.source.action,
+            inner_form
+          )}
         </Inputs>
         <button
           type="button"
@@ -736,7 +765,7 @@ defmodule AshAdmin.Components.Resource.Form do
         ~F"""
         <Select
           form={form}
-          :props={props(value, attribute)}
+          {...props(value, attribute)}
           options={Enum.map(attribute.type.values(), &{to_name(&1), &1}) ++ allow_nil_option(attribute)}
           selected={value(value, form, attribute)}
           name={name || form.name <> "[#{attribute.name}]"}
@@ -753,17 +782,24 @@ defmodule AshAdmin.Components.Resource.Form do
 
     ~F"""
     <div>
-      <div :for.with_index={{value, index} <- list_value(value || Phoenix.HTML.FormData.input_value(form.source, form, attribute.name))}>
-          {render_attribute_input(assigns, %{attribute | type: type, constraints: attribute.constraints[:items] || []}, %{form | params: %{"#{attribute.name}" => form.params["#{attribute.name}"]["#{index}"]}}, {:value, value}, name <> "[#{index}]")}
-          <button
-            type="button"
-            :on-click="remove_value"
-            phx-target={@myself}
-            phx-value-path={form.name}
-            phx-value-field={attribute.name}
-            phx-value-index={index}
-            class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
-          >
+      <div :for.with_index={{value, index} <-
+        list_value(value || Phoenix.HTML.FormData.input_value(form.source, form, attribute.name))}>
+        {render_attribute_input(
+          assigns,
+          %{attribute | type: type, constraints: attribute.constraints[:items] || []},
+          %{form | params: %{"#{attribute.name}" => form.params["#{attribute.name}"]["#{index}"]}},
+          {:value, value},
+          name <> "[#{index}]"
+        )}
+        <button
+          type="button"
+          :on-click="remove_value"
+          phx-target={@myself}
+          phx-value-path={form.name}
+          phx-value-field={attribute.name}
+          phx-value-index={index}
+          class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+        >
           <HeroIcon name="minus" class="h-4 w-4 text-gray-500" />
         </button>
       </div>
@@ -812,7 +848,7 @@ defmodule AshAdmin.Components.Resource.Form do
           <TextInput
             form={form}
             opts={disabled: true}
-            value={"..."}
+            value="..."
             name={name || form.name <> "[#{attribute.name}]"}
             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
           />
@@ -1138,9 +1174,6 @@ defmodule AshAdmin.Components.Resource.Form do
             get_in(params, tl(target))
           )
       end
-
-
-    IO.inspect(params)
 
     form = AshPhoenix.Form.validate(socket.assigns.form, params || %{})
 
