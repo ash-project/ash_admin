@@ -75,6 +75,7 @@ defmodule AshAdmin.MixProject do
       setup: ["deps.get", "cmd npm install --prefix assets"],
       dev: "run --no-halt dev.exs --config config",
       sobelow: "sobelow --ignore XSS.Raw",
+      docs: ["docs", "ash.replace_doc_links"],
       "spark.formatter": "spark.formatter --extensions AshAdmin.Api,AshAdmin.Resource"
     ]
   end
@@ -111,4 +112,5 @@ defmodule AshAdmin.MixProject do
       {:floki, ">= 0.30.0", only: :test}
     ]
   end
+
 end
