@@ -19,6 +19,14 @@ First, ensure you've added ash_admin to your `mix.exs` file.
 {:ash_admin, "~> 0.7.1"}
 ```
 
+## Phoenix 1.7
+
+If you want to use Phoenix 1.7 which has not yet been released, you'll need to use the git branch `phoenix-1.7`, i.e
+
+```elixir
+{:ash_admin, github: "ash-project/ash_admin", branch: "phoenix-1.7"}
+```
+
 ## Setup
 
 Ensure your apis are configured in `config.exs`
