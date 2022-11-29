@@ -93,8 +93,10 @@ defmodule AshAdmin.MixProject do
     [
       {:ash, "~> 2.0"},
       {:ash_phoenix, "~> 1.1"},
+      {:phoenix_view, "~> 2.0"},
+      {:phoenix, "1.7.0-rc.0", override: true},
       {:surface, "~> 0.9.1"},
-      {:phoenix_live_view, "~> 0.18"},
+      {:phoenix_live_view, "~> 0.18.3"},
       {:phoenix_html, "~> 3.2"},
       {:jason, "~> 1.0"},
       # Dev dependencies
