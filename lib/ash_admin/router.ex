@@ -63,7 +63,7 @@ defmodule AshAdmin.Router do
       import Phoenix.LiveView.Router
       live_socket_path = Keyword.get(opts, :live_socket_path, "/live")
 
-      live_session :default,
+      live_session :ash_admin,
         session: {AshAdmin.Router, :__session__, [%{"prefix" => path}]},
         root_layout: {AshAdmin.LayoutView, :admin} do
         live(
