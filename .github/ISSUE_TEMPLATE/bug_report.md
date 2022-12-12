@@ -8,15 +8,18 @@ assignees: ''
 ---
 
 **Describe the bug**
+
 A clear and concise description of what the bug is. If you are not sure if the bug is related to `ash` or an extension, log it with [ash](https://github.com/ash-project/ash/issues/new) and we will move it.
 
 **To Reproduce**
+
 A minimal set of resource definitions and calls that can reproduce the bug.
 
 **Expected behavior**
+
 A clear and concise description of what you expected to happen.
 
-** Runtime
+**Runtime**
  - Elixir version
  - Erlang version
  - OS
@@ -24,4 +27,5 @@ A clear and concise description of what you expected to happen.
  - any related extension versions
 
 **Additional context**
+
 Add any other context about the problem here.
