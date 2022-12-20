@@ -59,3 +59,8 @@ if config_env() == :test do
       AshAdmin.Test.Api
     ]
 end
+
+config :tails,
+  themes: %{
+    default: %{}
+  }

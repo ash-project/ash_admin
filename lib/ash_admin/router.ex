@@ -65,7 +65,7 @@ defmodule AshAdmin.Router do
 
       live_session :ash_admin,
         session: {AshAdmin.Router, :__session__, [%{"prefix" => path}]},
-        root_layout: {AshAdmin.LayoutView, :admin} do
+        root_layout: {AshAdmin.LayoutView, :root} do
         live(
           "#{path}/*route",
           AshAdmin.PageLive,
