@@ -1164,7 +1164,7 @@ defmodule AshAdmin.Components.Resource.Form do
   def handle_event("validate", %{"form" => params, "_target" => target}, socket) do
     params =
       case target do
-        ["undefined"] ->
+        [_] ->
           socket.assigns.form.params
 
         target ->

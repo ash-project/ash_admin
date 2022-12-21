@@ -28,7 +28,6 @@ defmodule AshAdmin.MixProject do
       homepage_url: "https://github.com/ash-project/ash_admin",
       deps: deps(),
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix] ++ Mix.compilers(),
       aliases: aliases()
     ]
   end
