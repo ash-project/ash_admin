@@ -26,6 +26,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   data(query, :any, default: nil)
   data(page_params, :any, default: nil)
   data(page_num, :any, default: nil)
+  data(thousand_records_warning, :boolean, default: false)
 
   def update(assigns, socket) do
     if assigns[:initialized] do
@@ -83,8 +84,9 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
       socket =
         if assigns[:action].pagination do
-          keep_live(
-            socket,
+          socket
+          |> assign(:thousand_records_warning, false)
+          |> keep_live(
             :data,
             fn socket ->
               default_limit =
@@ -120,8 +122,9 @@ defmodule AshAdmin.Components.Resource.DataTable do
             load_until_connected?: true
           )
         else
-          keep_live(
-            socket,
+          socket
+          |> assign(:thousand_records_warning, true)
+          |> keep_live(
             :data,
             fn socket ->
               if socket.assigns[:tables] != [] && !socket.assigns[:table] do
@@ -133,6 +136,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                   actor: socket.assigns[:actor],
                   authorize?: socket.assigns[:authorizing]
                 )
+                |> Ash.Query.limit(1000)
                 |> assigns[:api].read()
               end
             end,
@@ -209,6 +213,10 @@ defmodule AshAdmin.Components.Resource.DataTable do
             </div>
             <div class="px-2">
               {render_pagination_links(assigns, :top)}
+
+              <div :if={@thousand_records_warning && !@action.get?}>
+                Only showing up to 1000 rows. To show more, enable <a href="http://ash-hq.org/docs/guides/ash/2.5.9/topics/pagination">pagination</a> for the action in question.
+              </div>
               <Table
                 :if={match?({:ok, _data}, @data)}
                 table={@table}
