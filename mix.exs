@@ -5,7 +5,7 @@ defmodule AshAdmin.MixProject do
   An admin UI for Ash Framework
   """
 
-  @version "0.7.1"
+  @version "0.7.2"
 
   def project do
     [
@@ -103,7 +103,7 @@ defmodule AshAdmin.MixProject do
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
       {:ash_postgres, "~> 1.0", only: [:dev, :test]},
-      {:git_ops, "~> 2.4", only: [:dev, :test]},
+      {:git_ops, "~> 2.5", only: [:dev, :test]},
       {:ex_doc, "~> 0.23", only: [:dev, :test], runtime: false},
       {:ex_check, "~> 0.14", only: [:dev, :test]},
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
