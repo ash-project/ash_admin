@@ -2,9 +2,9 @@ defmodule AshAdmin.Components.Resource.Show do
   @moduledoc false
   use Surface.LiveComponent
 
-  alias Surface.Components.LiveRedirect
-  alias AshAdmin.Components.Resource.Table
   alias AshAdmin.Components.HeroIcon
+  alias AshAdmin.Components.Resource.Table
+  alias Surface.Components.LiveRedirect
   import AshAdmin.Helpers
 
   prop(resource, :any)

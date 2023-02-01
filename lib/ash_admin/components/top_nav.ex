@@ -1,8 +1,8 @@
 defmodule AshAdmin.Components.TopNav do
   @moduledoc false
   use Surface.LiveComponent
+  alias AshAdmin.Components.TopNav.{ActorSelect, DrawerDropdown, Dropdown, TenantForm}
   alias Surface.Components.LiveRedirect
-  alias AshAdmin.Components.TopNav.{ActorSelect, DrawerDropdown, TenantForm, Dropdown}
 
   data(nav_collapsed, :boolean, default: true)
   data(open, :boolean, default: false)

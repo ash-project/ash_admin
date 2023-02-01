@@ -3,9 +3,9 @@ defmodule AshAdmin.Components.Resource.Table do
   use Surface.Component
 
   import AshAdmin.Helpers
-  alias Surface.Components.LiveRedirect
   alias AshAdmin.Components.HeroIcon
   alias Ash.Resource.Relationships.{BelongsTo, HasOne}
+  alias Surface.Components.LiveRedirect
 
   prop(attributes, :any, default: nil)
   prop(data, :list, default: nil)

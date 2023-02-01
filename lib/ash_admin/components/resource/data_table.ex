@@ -4,8 +4,8 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
   import AshAdmin.Helpers
   import AshPhoenix.LiveView
-  alias Surface.Components.Form
   alias AshAdmin.Components.Resource.Table
+  alias Surface.Components.Form
 
   prop(resource, :atom)
   prop(api, :atom)

@@ -1,8 +1,8 @@
 defmodule AshAdmin.Components.Resource.Nav do
   @moduledoc false
   use Surface.Component
-  alias Surface.Components.LiveRedirect
   alias AshAdmin.Components.TopNav.Dropdown
+  alias Surface.Components.LiveRedirect
 
   prop(resource, :any, required: true)
   prop(api, :any, required: true)

@@ -2,7 +2,7 @@ defmodule AshAdmin.Components.Resource.Info do
   @moduledoc false
   use Surface.Component
 
-  alias AshAdmin.Components.Resource.{RelationshipTable, AttributeTable}
+  alias AshAdmin.Components.Resource.{AttributeTable, RelationshipTable}
 
   prop(resource, :any, required: true)
   prop(api, :any, required: true)

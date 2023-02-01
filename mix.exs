@@ -69,6 +69,7 @@ defmodule AshAdmin.MixProject do
     [
       generate_migrations:
         "ash_postgres.generate_migrations --apis Demo.Accounts.Api,Demo.Tickets.Api --snapshot-path dev/resource_snapshots --migration-path dev --drop-columns",
+      credo: "credo --strict",
       migrate: "ash_postgres.migrate --migrations-path dev/repo/migrations",
       migrate_tenants: "ash_postgres.migrate --migrations-path dev/repo/tenant_migrations",
       setup: ["deps.get", "cmd npm install --prefix assets"],
