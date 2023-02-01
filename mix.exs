@@ -110,7 +110,7 @@ defmodule AshAdmin.MixProject do
       {:dialyxir, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:sobelow, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.14", only: [:dev, :test]},
-      {:floki, ">= 0.30.0", only: :test}
+      {:floki, ">= 0.30.0", only: [:dev, :test]}
     ]
   end
 end
