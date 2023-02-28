@@ -70,6 +70,24 @@ end
 
 Now start your project (usually by running `mix phx.server` in a terminal) and visit `/admin` in your browser (or whatever path you gave to `ash_admin` in your router).
 
+### Content Security Policy
+
+If your app specifies a content security policy header, eg. via
+
+```elixir
+plug :put_secure_browser_headers, %{"content-security-policy" => "default-src 'self'"}
+```
+
+in your router, then all of the styles and JavaScript used to power AshAdmin will be blocked by your browser.
+
+To avoid this, you can add the specific AshAdmin nonces to the `default-src` allowlist, ie.
+
+```elixir
+plug :put_secure_browser_headers, %{"content-security-policy" => "default-src 'nonce-ash_admin-Ed55GFnX' 'self'"}
+```
+
+This will allow AshAdmin-generated inline CSS and JS blocks to execute normally.
+
 ## Configuration
 
 See the documentation in [`AshAdmin.Resource`](https://hexdocs.pm/ash_admin/AshAdmin.Resource.html) and [`AshAdmin.Api`](https://hexdocs.pm/ash_admin/AshAdmin.Api.html) for information on the available configuration.
@@ -85,7 +103,6 @@ To work on ash_admin, you'll want to be able to run the dev app. You'll need to 
 Then, you can start the app with: `mix dev`
 
 If you make changes to the resources, you can generate migrations with `mix generate_migrations`
-
 
 ## Contributors
 
