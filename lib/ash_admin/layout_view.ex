@@ -25,7 +25,7 @@ defmodule AshAdmin.LayoutView do
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0"/>
     <%= csrf_meta_tag() %>
     <title><%= assigns[:page_title] || "Ash Admin" %></title>
-    <style><%= raw(render("app.css", %{})) %></style>
+    <style nonce="ash_admin-Ed55GFnX"><%= raw(render("app.css", %{})) %></style>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.5.1/jsoneditor.min.css" rel="stylesheet" type="text/css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.5.1/jsoneditor.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
@@ -34,7 +34,7 @@ defmodule AshAdmin.LayoutView do
     <body>
     <%= @inner_content %>
     </body>
-    <script><%= raw(render("app.js", %{})) %></script>
+    <script nonce="ash_admin-Ed55GFnX"><%= raw(render("app.js", %{})) %></script>
     </html>
     """
   end
