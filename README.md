@@ -19,14 +19,6 @@ First, ensure you've added ash_admin to your `mix.exs` file.
 {:ash_admin, "~> 0.7.1"}
 ```
 
-## Phoenix 1.7
-
-If you want to use Phoenix 1.7 which has not yet been released, you'll need to use the git branch `phoenix-1.7`, i.e
-
-```elixir
-{:ash_admin, github: "ash-project/ash_admin", branch: "phoenix-1.7"}
-```
-
 ## Setup
 
 Ensure your apis are configured in `config.exs`
@@ -70,6 +62,24 @@ end
 
 Now start your project (usually by running `mix phx.server` in a terminal) and visit `/admin` in your browser (or whatever path you gave to `ash_admin` in your router).
 
+### Content Security Policy
+
+If your app specifies a content security policy header, eg. via
+
+```elixir
+plug :put_secure_browser_headers, %{"content-security-policy" => "default-src 'self'"}
+```
+
+in your router, then all of the styles and JavaScript used to power AshAdmin will be blocked by your browser.
+
+To avoid this, you can add the specific AshAdmin nonces to the `default-src` allowlist, ie.
+
+```elixir
+plug :put_secure_browser_headers, %{"content-security-policy" => "default-src 'nonce-ash_admin-Ed55GFnX' 'self'"}
+```
+
+This will allow AshAdmin-generated inline CSS and JS blocks to execute normally.
+
 ## Configuration
 
 See the documentation in [`AshAdmin.Resource`](https://hexdocs.pm/ash_admin/AshAdmin.Resource.html) and [`AshAdmin.Api`](https://hexdocs.pm/ash_admin/AshAdmin.Api.html) for information on the available configuration.
@@ -85,7 +95,6 @@ To work on ash_admin, you'll want to be able to run the dev app. You'll need to 
 Then, you can start the app with: `mix dev`
 
 If you make changes to the resources, you can generate migrations with `mix generate_migrations`
-
 
 ## Contributors
 
