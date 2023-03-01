@@ -5,6 +5,23 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.8.0](https://github.com/ash-project/ash_admin/compare/v0.7.1...v0.8.0) (2023-03-01)
+
+
+
+
+### Features:
+
+* Inline style nonce (#42)
+
+* Specify nonces on inline styles/JavaScript so they can be allowed by CSPs
+
+### Bug Fixes:
+
+* Add missing mix.lock changes (#43)
+
+* Add missing mix.lock changes
+
 ## [v0.7.1](https://github.com/ash-project/ash_admin/compare/v0.7.0...v0.7.1) (2022-11-01)
 
 
