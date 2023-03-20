@@ -57,7 +57,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
             phx-target={@myself}
             id={"#{@id}_dropown"}
           >
-            {#for group <- @groups}
+            {#for group when group != [] <- @groups}
               <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby={"#{@id}_dropown"}>
                 <.group_label item={hd(group)} group_labels={@group_labels} />
                 {#for link <- group}
