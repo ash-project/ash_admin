@@ -20,11 +20,15 @@ spark_locals_without_parens = [
   update_actions: 1
 ]
 
+macro_locals_without_parens = [
+  ash_admin: 1
+]
+
 [
   inputs: ["{mix,.formatter}.exs", "{config,lib,test}/**/*.{ex,exs}"],
-  locals_without_parens: spark_locals_without_parens,
+  locals_without_parens: spark_locals_without_parens ++ macro_locals_without_parens,
   plugins: [Surface.Formatter.Plugin],
   export: [
-    locals_without_parens: spark_locals_without_parens
+    locals_without_parens: spark_locals_without_parens ++ macro_locals_without_parens
   ]
 ]
