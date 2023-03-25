@@ -21,11 +21,12 @@ defmodule AshAdmin.PageLive do
   def mount(
         _params,
         %{
-          "prefix" => prefix
+          "prefix" => _prefix
         } = session,
         socket
       ) do
     otp_app = socket.endpoint.config(:otp_app)
+    prefix = session["prefix"]
     socket = assign(socket, :prefix, prefix)
 
     actor_paused =

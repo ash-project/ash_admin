@@ -6,10 +6,8 @@ defmodule AshAdmin.Test.Router do
     plug(:fetch_query_params)
   end
 
-  pipeline(:ash_admin, do: plug(AshAdmin.Router))
-
   scope "/" do
-    pipe_through([:browser, :ash_admin])
+    pipe_through(:browser)
     import AshAdmin.Router
 
     ash_admin("/")
