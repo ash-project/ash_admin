@@ -1,4 +1,12 @@
 defmodule AshAdmin.Router do
+  def init(_), do: []
+
+  def call(conn, opts) do
+    # @path conn.request_path
+    # ash_admin(conn.request_path, opts)
+    conn
+  end
+
   @moduledoc """
   Provides LiveView routing for AshAdmin.
   """

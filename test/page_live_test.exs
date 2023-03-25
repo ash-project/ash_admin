@@ -1,7 +1,6 @@
 defmodule AshAdmin.Test.PageLiveTest do
   use ExUnit.Case, async: false
 
-  import Plug.Conn
   import Phoenix.ConnTest
   import Phoenix.LiveViewTest
   @endpoint AshAdmin.Test.Endpoint
