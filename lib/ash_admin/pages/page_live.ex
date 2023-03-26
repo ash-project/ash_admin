@@ -26,6 +26,18 @@ defmodule AshAdmin.PageLive do
         socket
       ) do
     otp_app = socket.endpoint.config(:otp_app)
+
+    prefix =
+      case prefix do
+        "/" ->
+          session["request_path"]
+
+        _ ->
+          request_path = session["request_path"]
+          [scope, _] = String.split(request_path, prefix)
+          scope <> prefix
+      end
+
     socket = assign(socket, :prefix, prefix)
 
     actor_paused =

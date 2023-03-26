@@ -90,6 +90,8 @@ defmodule AshAdmin.Router do
   def __session__(conn, [session]), do: __session__(conn, session)
 
   def __session__(conn, session) do
+    session = Map.put(session, "request_path", conn.request_path)
+
     Enum.reduce(@cookies_to_replicate, session, fn cookie, session ->
       case conn.req_cookies[cookie] do
         value when value in [nil, "", "null"] ->
