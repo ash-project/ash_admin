@@ -5,6 +5,23 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.8.1](https://github.com/ash-project/ash_admin/compare/v0.8.0...v0.8.1) (2023-04-22)
+
+
+
+
+### Bug Fixes:
+
+* don't authorize actor read
+
+* Admin links are not aware of the scope where ash_admin is called (#49)
+
+* handle cases where actions of a given type don't exist
+
+### Improvements:
+
+* Update Surface to 0.10.0 (#50)
+
 ## [v0.8.0](https://github.com/ash-project/ash_admin/compare/v0.7.1...v0.8.0) (2023-03-01)
 
 
