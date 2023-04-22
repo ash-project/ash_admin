@@ -342,7 +342,7 @@ defmodule AshAdmin.PageLive do
         actor =
           resource
           |> Ash.Query.filter(^pkey_filter)
-          |> api.read_one!(action: action)
+          |> api.read_one!(action: action, authorize?: false)
 
         api_name = AshAdmin.Api.name(api)
         resource_name = AshAdmin.Resource.name(resource)
