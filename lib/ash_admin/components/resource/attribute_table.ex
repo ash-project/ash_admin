@@ -2,24 +2,26 @@ defmodule AshAdmin.Components.Resource.AttributeTable do
   @moduledoc false
   use Surface.Component
 
+  alias AshAdmin.Components.HeroIcon
+
   prop(resource, :any, required: true)
 
   def render(assigns) do
     ~F"""
     <div :if={Enum.any?(attributes(@resource))}>
-      <h1 class="text-center text-3xl rounded-t py-8">
+      <h1 class="text-3xl rounded-t py-8">
         Attributes
       </h1>
       <table class="table-auto w-full">
         <thead>
           <tr>
-            <th scope="col" class="text-center">Name</th>
-            <th scope="col" class="text-center">Type</th>
-            <th scope="col" class="text-center">Description</th>
-            <th scope="col" class="text-center">Primary Key</th>
-            <th scope="col" class="text-center">Private</th>
-            <th scope="col" class="text-center">Allow Nil</th>
-            <th scope="col" class="text-center">Writable</th>
+            <th scope="col" class="px-2 py-3 text-left text-sm font-semibold text-gray-900">Name</th>
+            <th scope="col" class="px-2 py-3 text-left text-sm font-semibold text-gray-900">Type</th>
+            <th scope="col" class="px-2 py-3 text-left text-sm font-semibold text-gray-900">Description</th>
+            <th scope="col" class="px-2 py-3 text-left text-sm font-semibold text-gray-900">Primary Key</th>
+            <th scope="col" class="px-2 py-3 text-left text-sm font-semibold text-gray-900">Private</th>
+            <th scope="col" class="px-2 py-3 text-left text-sm font-semibold text-gray-900">Allow Nil</th>
+            <th scope="col" class="px-2 py-3 text-left text-sm font-semibold text-gray-900">Writable</th>
           </tr>
         </thead>
         <tbody>
@@ -27,17 +29,28 @@ defmodule AshAdmin.Components.Resource.AttributeTable do
             class={"h-10", "bg-gray-200": rem(index, 2) == 0}
             :for.with_index={{attribute, index} <- attributes(@resource)}
           >
-            <th scope="row" class="text-center px-3">
+            <th scope="row" class="px-2 py-3 text-left text-sm font-semibold text-gray-900">
               {attribute.name}
             </th>
-            <td class="text-center px-3">
+            <td class="px-2 py-3 text-left text-sm text-gray-900">
               {attribute_type(attribute)}
             </td>
-            <td class="text-center max-w-sm min-w-sm">{attribute.description}</td>
-            <td class="text-center">{to_string(attribute.primary_key?)}</td>
-            <td class="text-center">{to_string(attribute.private?)}</td>
-            <td class="text-center">{to_string(attribute.allow_nil?)}</td>
-            <td class="text-center">{to_string(attribute.writable?)}</td>
+            <td class="max-w-sm min-w-sm text-sm text-gray-500">{attribute.description}</td>
+            <td class="px-2 py-3 text-left text-sm font-semibold text-gray-900">
+              <HeroIcon
+                name={if attribute.primary_key?, do: "check", else: "x"}
+                class="h-4 w-4 text-gray-500"
+              />
+            </td>
+            <td class="px-2 py-3 text-left text-sm font-semibold text-gray-900">
+              <HeroIcon name={if attribute.private?, do: "check", else: "x"} class="h-4 w-4 text-gray-500" />
+            </td>
+            <td class="px-2 py-3 text-left text-sm font-semibold text-gray-900">
+              <HeroIcon name={if attribute.allow_nil?, do: "check", else: "x"} class="h-4 w-4 text-gray-500" />
+            </td>
+            <td class="px-2 py-3 text-left text-sm font-semibold text-gray-900">
+              <HeroIcon name={if attribute.writable?, do: "check", else: "x"} class="h-4 w-4 text-gray-500" />
+            </td>
           </tr>
         </tbody>
       </table>
