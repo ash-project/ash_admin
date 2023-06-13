@@ -10,16 +10,16 @@ defmodule AshAdmin.Components.Resource.RelationshipTable do
   def render(assigns) do
     ~F"""
     <div class="w-full" :if={Enum.any?(relationships(@resource))}>
-      <h1 class="text-center text-3xl rounded-t py-8">
+      <h1 class="text-left text-3xl rounded-t py-8">
         Relationships
       </h1>
       <table class="table-auto w-full">
         <thead>
           <tr>
-            <th scope="col" class="text-center">Name</th>
-            <th scope="col" class="text-center">Type</th>
-            <th scope="col" class="text-center">Destination</th>
-            <th scope="col" class="text-center">Description</th>
+            <th scope="col" class="text-left">Name</th>
+            <th scope="col" class="text-left">Type</th>
+            <th scope="col" class="text-left">Destination</th>
+            <th scope="col" class="text-left">Description</th>
           </tr>
         </thead>
         <tbody>
@@ -30,14 +30,14 @@ defmodule AshAdmin.Components.Resource.RelationshipTable do
             <th scope="row">
               {relationship.name}
             </th>
-            <td class="text-center">
+            <td class="text-left">
               {relationship.type}</td>
-            <td class="text-center">
+            <td class="text-left">
               <LiveRedirect to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(relationship.destination)}"}>
                 {AshAdmin.Resource.name(relationship.destination)}
               </LiveRedirect>
             </td>
-            <td class="text-center max-w-sm min-w-sm">{relationship.description}</td>
+            <td class="text-left max-w-sm min-w-sm">{relationship.description}</td>
           </tr>
         </tbody>
       </table>
