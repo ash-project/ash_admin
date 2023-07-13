@@ -74,14 +74,24 @@ defmodule AshAdmin.Components.Resource.Form do
     """
   end
 
+  defp all_errors(form) do
+    form
+    |> AshPhoenix.Form.errors(for_path: :all)
+    |> Enum.flat_map(fn {path, errors} ->
+      Enum.map(errors, fn {field, message} ->
+        {Enum.join(List.wrap(path) ++ List.wrap(field), "."), message}
+      end)
+    end)
+  end
+
   defp render_form(assigns) do
     ~F"""
     <div class="shadow-lg overflow-hidden sm:rounded-md bg-white">
       <div :if={@form.submitted_once?} class="ml-4 mt-4 text-red-500">
         <ul>
-          <li :for={{field, message} <- AshPhoenix.Form.errors(@form)}>
+          <li :for={{field, message} <- all_errors(@form)}>
             <span :if={field}>
-              {to_name(field)}:
+              {field}:
             </span>
             <span>
               {message}
