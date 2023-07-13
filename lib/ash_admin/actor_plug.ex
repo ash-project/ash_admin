@@ -104,7 +104,7 @@ defmodule AshAdmin.ActorPlug do
         {:ok, filter} ->
           resource
           |> Ash.Query.filter(^filter)
-          |> api.read_one!(action: action)
+          |> api.read_one!(action: action, authorize?: false)
       end
     end
   end
