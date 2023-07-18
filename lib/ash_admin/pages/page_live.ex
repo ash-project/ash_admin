@@ -40,13 +40,6 @@ defmodule AshAdmin.PageLive do
 
     socket = assign(socket, :prefix, prefix)
 
-    actor_paused =
-      if is_nil(session["actor_paused"]) do
-        true
-      else
-        AshAdmin.ActorPlug.session_bool(session["actor_paused"])
-      end
-
     apis = apis(otp_app)
 
     {:ok,
@@ -57,14 +50,13 @@ defmodule AshAdmin.PageLive do
      |> assign(:record, nil)
      |> assign(:apis, apis)
      |> assign(:tenant, session["tenant"])
-     |> assign(:actor, AshAdmin.ActorPlug.actor_from_session(socket.endpoint, session))
-     |> assign(:actor_api, AshAdmin.ActorPlug.actor_api_from_session(socket.endpoint, session))
-     |> assign(:actor_resources, actor_resources(apis))
-     |> assign(
-       :authorizing,
-       AshAdmin.ActorPlug.session_bool(session["actor_authorizing"]) || false
-     )
-     |> assign(:actor_paused, actor_paused)}
+     |> then(fn socket ->
+       assign(socket, AshAdmin.ActorPlug.actor_assigns(socket, session))
+     end)
+     |> assign_new(:actor_api, fn -> nil end)
+     |> assign_new(:actor_resources, fn -> [] end)
+     |> assign_new(:authorizing, fn -> true end)
+     |> assign_new(:actor_paused, fn -> false end)}
   end
 
   @impl true
@@ -110,18 +102,6 @@ defmodule AshAdmin.PageLive do
       prefix={@prefix}
     />
     """
-  end
-
-  def actor_resources(apis) do
-    apis
-    |> Enum.flat_map(fn api ->
-      api
-      |> Ash.Api.Info.resources()
-      |> Enum.filter(fn resource ->
-        AshAdmin.Helpers.primary_action(resource, :read) && AshAdmin.Resource.actor?(resource)
-      end)
-      |> Enum.map(fn resource -> {api, resource} end)
-    end)
   end
 
   defp apis(otp_app) do
@@ -260,7 +240,7 @@ defmodule AshAdmin.PageLive do
 
             case record do
               {:error, error} ->
-                Logger.warn(
+                Logger.warning(
                   "Error while loading record on admin dashboard\n: #{Exception.format(:error, error)}"
                 )
 

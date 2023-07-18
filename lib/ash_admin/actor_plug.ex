@@ -6,6 +6,11 @@ defmodule AshAdmin.ActorPlug do
 
   import AshAdmin.Helpers
 
+  @plug Application.compile_env(:ash_admin, :actor_plug, __MODULE__)
+
+  @callback set_actor_session(conn :: Plug.Conn.t(), session :: map) :: Plug.Conn.t()
+  @callback actor_assigns(socket :: Phoenix.LiveView.Socket.t(), session :: map) :: Keyword.t()
+
   def init(opts), do: opts
 
   def call(conn, _opts) do
@@ -14,49 +19,103 @@ defmodule AshAdmin.ActorPlug do
         conn
 
       session ->
-        actor_session(conn, session)
+        set_actor_session(conn, session)
     end
   end
 
-  def actor_session(
-        conn,
+  if @plug == __MODULE__ do
+    def actor_assigns(socket, session) do
+      otp_app = socket.endpoint.config(:otp_app)
+      apis = apis(otp_app)
+
+      actor_paused =
+        if is_nil(session["actor_paused"]) do
+          true
+        else
+          session_bool(session["actor_paused"])
+        end
+
+      [
+        actor: actor_from_session(socket.endpoint, session),
+        actor_api: actor_api_from_session(socket.endpoint, session),
+        actor_resources: actor_resources(apis),
+        authorizing: session_bool(session["actor_authorizing"]) ,
+        actor_paused: actor_paused
+      ] |> IO.inspect()
+    end
+  else
+    def actor_assigns(socket, session) do
+      @plug.actor_assigns(socket, session)
+    end
+  end
+
+  if @plug == __MODULE__ do
+    defp set_actor_session(
+           conn,
+           session
+         ) do
+      case session do
         %{
           "actor_resource" => resource,
           "actor_api" => api,
           "actor_action" => action,
           "actor_primary_key" => primary_key
-        } = session
-      ) do
-    authorizing = session["actor_authorizing"] || false
+        } ->
+          authorizing = session["actor_authorizing"] || false
 
-    actor_paused =
-      if is_nil(session["actor_paused"]) do
-        true
-      else
-        session["actor_paused"]
+          actor_paused =
+            if is_nil(session["actor_paused"]) do
+              true
+            else
+              session["actor_paused"]
+            end
+
+          actor = actor_from_session(conn.private.phoenix_endpoint, session)
+
+          authorizing = session_bool(authorizing)
+          actor_paused = session_bool(actor_paused)
+
+          conn
+          |> Plug.Conn.put_session(:actor_resource, resource)
+          |> Plug.Conn.put_session(:actor_api, api)
+          |> Plug.Conn.put_session(:actor_action, action)
+          |> Plug.Conn.put_session(:actor_primary_key, primary_key)
+          |> Plug.Conn.put_session(:actor_authorizing, authorizing)
+          |> Plug.Conn.put_session(:actor_paused, actor_paused)
+          |> Plug.Conn.assign(:actor, actor)
+          |> Plug.Conn.assign(:authorizing, authorizing || false)
+          |> Plug.Conn.assign(:actor_paused, actor_paused)
+          |> Plug.Conn.assign(:authorizing, authorizing)
+
+        _ ->
+          conn
       end
-
-    actor = actor_from_session(conn.private.phoenix_endpoint, session)
-
-    authorizing = session_bool(authorizing)
-    actor_paused = session_bool(actor_paused)
-
-    conn
-    |> Plug.Conn.put_session(:actor_resource, resource)
-    |> Plug.Conn.put_session(:actor_api, api)
-    |> Plug.Conn.put_session(:actor_action, action)
-    |> Plug.Conn.put_session(:actor_primary_key, primary_key)
-    |> Plug.Conn.put_session(:actor_authorizing, authorizing)
-    |> Plug.Conn.put_session(:actor_paused, actor_paused)
-    |> Plug.Conn.assign(:actor, actor)
-    |> Plug.Conn.assign(:authorizing, authorizing || false)
-    |> Plug.Conn.assign(:actor_paused, actor_paused)
-    |> Plug.Conn.assign(:authorizing, authorizing)
+    end
+  else
+    defp set_actor_session(conn, session) do
+      @plug.set_actor_session(conn, session)
+    end
   end
 
-  def actor_session(conn, _), do: conn
+  defp actor_resources(apis) do
+    apis
+    |> Enum.flat_map(fn api ->
+      api
+      |> Ash.Api.Info.resources()
+      |> Enum.filter(fn resource ->
+        AshAdmin.Helpers.primary_action(resource, :read) && AshAdmin.Resource.actor?(resource)
+      end)
+      |> Enum.map(fn resource -> {api, resource} end)
+    end)
+  end
 
-  def actor_api_from_session(endpoint, %{"actor_api" => api}) do
+  defp apis(otp_app) do
+    otp_app
+    |> Application.get_env(:ash_apis)
+    |> Enum.filter(&AshAdmin.Api.show?/1)
+  end
+
+  defp actor_api_from_session(endpoint, %{"actor_api" => api}) do
     otp_app = endpoint.config(:otp_app)
     apis = Application.get_env(otp_app, :ash_apis)
 
@@ -65,15 +124,15 @@ defmodule AshAdmin.ActorPlug do
     end)
   end
 
-  def actor_api_from_session(_, _), do: nil
+  defp actor_api_from_session(_, _), do: nil
 
-  def actor_from_session(endpoint, %{
-        "actor_resource" => resource,
-        "actor_api" => api,
-        "actor_primary_key" => primary_key,
-        "actor_action" => action
-      })
-      when not is_nil(resource) and not is_nil(api) do
+  defp actor_from_session(endpoint, %{
+         "actor_resource" => resource,
+         "actor_api" => api,
+         "actor_primary_key" => primary_key,
+         "actor_action" => action
+       })
+       when not is_nil(resource) and not is_nil(api) do
     otp_app = endpoint.config(:otp_app)
     apis = Application.get_env(otp_app, :ash_apis)
 
@@ -109,9 +168,9 @@ defmodule AshAdmin.ActorPlug do
     end
   end
 
-  def actor_from_session(_, _), do: nil
+  defp actor_from_session(_, _), do: nil
 
-  def session_bool(value) do
+  defp session_bool(value) do
     case value do
       "true" ->
         true

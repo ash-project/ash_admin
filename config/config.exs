@@ -6,6 +6,7 @@ Application.put_env(:ash_admin, Demo.Repo, url: "ecto://#{pg_url}/#{pg_database}
 
 config :phoenix, :json_library, Jason
 config :ash_admin, ecto_repos: [Demo.Repo]
+config :ash, :use_all_identities_in_manage_relationship?, false
 
 config :surface, :components, [
   {Surface.Components.Form.ErrorTag, default_class: "invalid-feedback"}

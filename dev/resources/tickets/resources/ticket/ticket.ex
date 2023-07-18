@@ -92,7 +92,7 @@ defmodule Demo.Tickets.Ticket do
     update :link do
       accept []
       argument :tickets, {:array, :map}, allow_nil?: false
-      argument :link_comment, :map, type: :create
+      argument :link_comment, :map
 
       # Uses the defult create action of the join table, which accepts the `type`
       change manage_relationship(:tickets, :source_links, on_lookup: {:relate_and_update, :create, :read, :all})
