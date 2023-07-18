@@ -64,7 +64,8 @@ defmodule AshAdmin.Router do
       live_socket_path = Keyword.get(opts, :live_socket_path, "/live")
 
       live_session :ash_admin,
-        session: {AshAdmin.Router, :__session__, [%{"prefix" => path}]},
+        on_mount: List.wrap(opts[:on_mount]),
+        session: [{AshAdmin.Router, :__session__, [%{"prefix" => path}, List.wrap(opts[:session])]}],
         root_layout: {AshAdmin.LayoutView, :root} do
         live(
           "#{path}/*route",
@@ -87,9 +88,14 @@ defmodule AshAdmin.Router do
   ]
 
   @doc false
-  def __session__(conn, [session]), do: __session__(conn, session)
+  def __session__(conn, [session, additional_hooks]), do: __session__(conn, session, additional_hooks)
 
-  def __session__(conn, session) do
+  def __session__(conn, session, additional_hooks \\ []) do
+    session =
+      Enum.reduce(additional_hooks, session, fn {m, f, a}, acc ->
+        Map.merge(acc, apply(m, f, [conn | a]) || %{})
+      end)
+
     session = Map.put(session, "request_path", conn.request_path)
 
     Enum.reduce(@cookies_to_replicate, session, fn cookie, session ->
