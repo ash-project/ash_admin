@@ -41,7 +41,7 @@ defmodule AshAdmin.ActorPlug do
         actor_resources: actor_resources(apis),
         authorizing: session_bool(session["actor_authorizing"]) ,
         actor_paused: actor_paused
-      ] |> IO.inspect()
+      ]
     end
   else
     def actor_assigns(socket, session) do
