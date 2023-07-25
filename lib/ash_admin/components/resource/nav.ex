@@ -74,9 +74,18 @@ defmodule AshAdmin.Components.Resource.Nav do
   end
 
   defp has_create_action?(resource) do
-    resource
-    |> Ash.Resource.Info.actions()
-    |> Enum.any?(&(&1.type == :create))
+    case AshAdmin.Resource.create_actions(resource) do
+      nil ->
+        resource
+        |> Ash.Resource.Info.actions()
+        |> Enum.any?(&(&1.type == :create))
+
+      [] ->
+        false
+
+      _ ->
+        true
+    end
   end
 
   defp action_name(action) do
