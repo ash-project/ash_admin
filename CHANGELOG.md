@@ -5,6 +5,25 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.8.2](https://github.com/ash-project/ash_admin/compare/v0.8.1...v0.8.2) (2023-07-25)
+
+
+
+
+### Bug Fixes:
+
+* don't show create button if no create actions are configured
+
+* use `authorize?: false` when reading actor from session
+
+### Improvements:
+
+* show all errors on form submit
+
+* Improve frontend a little bit (#52)
+
+* Use overflow-auto instead of overflow-scroll on table
+
 ## [v0.8.1](https://github.com/ash-project/ash_admin/compare/v0.8.0...v0.8.1) (2023-04-22)
 
 
