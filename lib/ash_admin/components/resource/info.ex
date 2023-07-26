@@ -2,7 +2,7 @@ defmodule AshAdmin.Components.Resource.Info do
   @moduledoc false
   use Phoenix.Component
 
-  alias AshAdmin.Components.Resource.{AttributeTable, RelationshipTable}
+  alias AshAdmin.Components.Resource.MetadataTable
 
   attr :resource, :any, required: true
   attr :api, :any, required: true
@@ -11,8 +11,8 @@ defmodule AshAdmin.Components.Resource.Info do
   def info(assigns) do
     ~H"""
     <div class="relative mx-12">
-      <AttributeTable.table resource={@resource} />
-      <RelationshipTable.table api={@api} resource={@resource} prefix={@prefix} />
+      <MetadataTable.attribute_table resource={@resource} />
+      <MetadataTable.relationship_table api={@api} resource={@resource} prefix={@prefix} />
     </div>
     """
   end
