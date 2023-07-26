@@ -26,7 +26,7 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
         <tbody>
           <tr
             :for={{attribute, index} <- Enum.with_index(attributes(@resource))}
-            class={classes(["h-10", "bg-gray-200": rem(index, 2) == 0])}
+            class={classes("bg-gray-200": rem(index, 2) == 0)}
           >
             <.th scope="row">
               <%= attribute.name %>
@@ -89,7 +89,7 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
         <tbody>
           <tr
             :for={{relationship, index} <- Enum.with_index(relationships(@resource))}
-            class={classes(["h-10", "bg-gray-200": rem(index, 2) == 0])}
+            class={classes("bg-gray-200": rem(index, 2) == 0)}
           >
             <.th scope="row">
               <%= relationship.name %>
