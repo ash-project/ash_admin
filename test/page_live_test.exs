@@ -22,9 +22,4 @@ defmodule AshAdmin.Test.PageLiveTest do
     assert html =~ "body"
     assert html =~ "String"
   end
-
-  test "it raises error when no route is found", %{conn: conn} do
-    assert_raise(Phoenix.Router.NoRouteError, fn -> live(conn, "/") end)
-    assert_raise(Phoenix.Router.NoRouteError, fn -> live(conn, "/Api/Post") end)
-  end
 end

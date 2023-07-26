@@ -1,4 +1,5 @@
 defmodule AshAdmin.ActorPlug.Plug do
+  @moduledoc false
   @behaviour AshAdmin.ActorPlug
   import AshAdmin.Helpers
   require Ash.Query
