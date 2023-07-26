@@ -1,17 +1,14 @@
 defmodule AshAdmin.Components.TopNav.DrawerDropdown do
   @moduledoc false
-  use Surface.LiveComponent
+  use Phoenix.LiveComponent
+  import Tails
 
-  alias Surface.Components.LiveRedirect
-
-  prop(name, :string, required: true)
-  prop(groups, :list, required: true)
-  prop(group_labels, :keyword, required: false)
-
-  data(open, :boolean, default: false)
+  attr :name, :string, required: true
+  attr :groups, :list, required: true
+  attr :group_labels, :any, required: false
 
   def render(assigns) do
-    ~F"""
+    ~H"""
     <div class="relative">
       <div>
         <a
@@ -20,12 +17,14 @@ defmodule AshAdmin.Components.TopNav.DrawerDropdown do
           id={"#{@id}_dropdown_drawer"}
           href="#"
           class={
-            "mt-1 block px-3 py-2 rounded-t text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700":
-              true,
-            "text-white bg-gray-700": @open
+            classes(
+              "mt-1 block px-3 py-2 rounded-t text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700":
+                true,
+              "text-white bg-gray-700": @open
+            )
           }
         >
-          {@name}
+          <%= @name %>
         </a>
 
         <div
@@ -41,14 +40,14 @@ defmodule AshAdmin.Components.TopNav.DrawerDropdown do
           x-transition:leave="transition ease-in duration-150"
           x-transition:leave-end="opacity-0 transform -translate-y-3"
         >
-          <LiveRedirect
+          <.link
             :for={link <- group}
-            to={link.to}
+            navigate={link.to}
             class="block px-4 py-2 text-sm hover:bg-gray-200 hover:text-gray-900"
-            opts={role: "menuitem"}
+            role="menuitem"
           >
             {link.text}
-          </LiveRedirect>
+          </.link>
         </div>
       </div>
     </div>

@@ -6,7 +6,6 @@ end
 defmodule AshAdmin.PageLive do
   @moduledoc false
   use Phoenix.LiveView
-  import Surface
   import AshAdmin.Helpers
   require Ash.Query
   alias AshAdmin.Components.{Resource, TopNav}
@@ -44,7 +43,6 @@ defmodule AshAdmin.PageLive do
 
     {:ok,
      socket
-     |> Surface.init()
      |> assign(:prefix, prefix)
      |> assign(:primary_key, nil)
      |> assign(:record, nil)
@@ -61,8 +59,9 @@ defmodule AshAdmin.PageLive do
 
   @impl true
   def render(assigns) do
-    ~F"""
-    <TopNav
+    ~H"""
+    <.live_component
+      module={TopNav}
       id="top_nav"
       apis={@apis}
       api={@api}
@@ -80,8 +79,9 @@ defmodule AshAdmin.PageLive do
       clear_actor="clear_actor"
       prefix={@prefix}
     />
-    <Resource
+    <.live_component
       :if={@resource}
+      module={Resource}
       id={@resource}
       resource={@resource}
       set_actor="set_actor"

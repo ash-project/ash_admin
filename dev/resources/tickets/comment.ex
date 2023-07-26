@@ -13,6 +13,9 @@ defmodule Demo.Tickets.Comment do
     defaults [:read, :update, :destroy]
     create :create do
       primary? true
+      argument :foo, :utc_datetime
+      argument :thing, :boolean
+      argument :map, :map
     end
 
     create :create2

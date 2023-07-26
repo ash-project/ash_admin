@@ -1,46 +1,35 @@
 defmodule AshAdmin.Components.Resource.Form do
   @moduledoc false
-  use Surface.LiveComponent
+  use Phoenix.LiveComponent
 
   import AshAdmin.Helpers
+  import Tails
 
   require Logger
 
-  alias Surface.Components.{Context, Form}
-
-  alias Surface.Components.Form.{
-    Checkbox,
-    DateInput,
-    ErrorTag,
-    FieldContext,
-    HiddenInput,
-    Inputs,
-    Label,
-    Select,
-    TextArea,
-    TextInput
-  }
-
   alias AshAdmin.Components.HeroIcon
 
-  data(form, :any)
-  data(load_errors, :map, default: %{})
-  data(loaded, :any, default: MapSet.new())
+  attr :resource, :any, required: true
+  attr :api, :any, required: true
+  attr :record, :any, default: nil
+  attr :type, :atom, default: nil
+  attr :actor, :any, default: nil
+  attr :tenant, :any, default: nil
+  attr :authorizing, :boolean, default: false
+  attr :action, :any, required: true
+  attr :table, :any, required: true
+  attr :tables, :any, required: true
+  attr :prefix, :any, required: true
+  attr :url_path, :any, required: true
+  attr :params, :any, required: true
+  attr :polymorphic_actions, :any, required: true
 
-  prop(resource, :any, required: true)
-  prop(api, :any, required: true)
-  prop(record, :any, default: nil)
-  prop(type, :atom, default: nil)
-  prop(actor, :any, default: nil)
-  prop(tenant, :any, default: nil)
-  prop(authorizing, :boolean, default: false)
-  prop(set_actor, :event, required: true)
-  prop(action, :any, required: true)
-  prop(table, :any, required: true)
-  prop(tables, :any, required: true)
-  prop(prefix, :any, required: true)
-  prop(url_path, :any, required: true)
-  prop(params, :any, required: true)
+  def mount(socket) do
+    {:ok,
+     socket
+     |> assign_new(:load_errors, fn -> %{} end)
+     |> assign_new(:loaded, fn -> %{} end)}
+  end
 
   def update(assigns, socket) do
     {:ok,
@@ -51,23 +40,23 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def render(assigns) do
-    ~F"""
+    ~H"""
     <div class="md:pt-10 sm:mt-0 bg-gray-300 min-h-screen">
       <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
         <div class="mt-5 md:mt-0 md:col-span-2">
-          {render_form(assigns)}
+          <%= render_form(assigns) %>
         </div>
       </div>
 
       <div :if={@type != :create} class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
         <div class="mt-5 md:mt-0 md:col-span-2">
-          {AshAdmin.Components.Resource.Show.render_show(
+          <%= AshAdmin.Components.Resource.Show.render_show(
             assigns,
             @record,
             @resource,
             "Original Record",
             false
-          )}
+          ) %>
         </div>
       </div>
     </div>
@@ -85,71 +74,74 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp render_form(assigns) do
-    ~F"""
+    ~H"""
     <div class="shadow-lg overflow-hidden sm:rounded-md bg-white">
-      <div :if={@form.submitted_once?} class="ml-4 mt-4 text-red-500">
+      <div :if={@form.source.submitted_once?} class="ml-4 mt-4 text-red-500">
         <ul>
           <li :for={{field, message} <- all_errors(@form)}>
             <span :if={field}>
-              {field}:
+              <%= field %>:
             </span>
             <span>
-              {message}
+              <%= message %>
             </span>
           </li>
         </ul>
       </div>
       <h1 class="text-lg mt-2 ml-4">
-        {String.capitalize(to_string(@action.type))} {AshAdmin.Resource.name(@resource)}
+        <%= String.capitalize(to_string(@action.type)) %> <%= AshAdmin.Resource.name(@resource) %>
       </h1>
       <div class="flex justify-between col-span-6 mr-4 mt-2 overflow-auto px-4">
-        <AshAdmin.Components.Resource.SelectTable
+        <AshAdmin.Components.Resource.SelectTable.table
           resource={@resource}
           action={@action}
           on_change="change_table"
+          polymorphic_actions={@polymorphic_actions}
+          target={@myself}
           table={@table}
           tables={@tables}
         />
-        <Form
+        <.form
+          :let={form}
           as={:action}
-          for={:action}
-          change="change_action"
-          opts={id: @id <> "_action_form", phx_target: @myself}
+          for={to_form(%{}, as: :action)}
+          phx-change="change_action"
+          phx-target={@myself}
+          id="_action_form"
         >
-          <FieldContext name="action">
-            <Label>Action</Label>
-            <Select
-              opts={disabled: Enum.count(actions(@resource, @type)) <= 1}
-              selected={to_string(@action.name)}
-              options={actions(@resource, @type)}
-            />
-          </FieldContext>
-        </Form>
+          <label for="action">Action</label>
+          <%= Phoenix.HTML.Form.select(form, :action, actions(@resource, @type),
+            disabled: Enum.count(actions(@resource, @type)) <= 1,
+            select: to_string(@action.name)
+          ) %>
+        </.form>
       </div>
       <div class="px-4 py-5 sm:p-6">
-        <Form
+        <.form
+          :let={form}
           for={@form}
-          change="validate"
-          submit="save"
-          opts={autocomplete: false, id: "#{@id}_form", phx_target: @myself}
-          :let={form: form}
+          phx-change="validate"
+          phx-submit="save"
+          phx-target={@myself}
+          autocomplete={false}
+          id={"#{@id}_form"}
         >
           <input
             :for={kv <- form.hidden}
             name={form.name <> "[#{elem(kv, 0)}]"}
             value={elem(kv, 1)}
-            hidden
+            type="hidden"
           />
-          {render_attributes(assigns, @resource, @action, form)}
+          <%= render_attributes(assigns, @resource, @action, form) %>
           <div class="px-4 py-3 text-right sm:px-6">
             <button
               type="submit"
               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              {save_button_text(@type)}
+              <%= save_button_text(@type) %>
             </button>
           </div>
-        </Form>
+        </.form>
       </div>
     </div>
     """
@@ -166,83 +158,153 @@ defmodule AshAdmin.Components.Resource.Form do
         exactly \\ nil,
         skip \\ []
       ) do
-    ~F"""
-    {{attributes, flags, bottom_attributes, relationship_args} = attributes(resource, action, exactly)
-    nil}
-    <Context put={Form, form: form}>
-      <div class="grid grid-cols-6 gap-6">
-        <div
-          :for={attribute <- Enum.reject(attributes, &(&1.name in skip))}
-          class={
+    assigns =
+      assign(assigns,
+        resource: resource,
+        action: action,
+        form: form,
+        exactly: exactly,
+        skip: skip
+      )
+
+    ~H"""
+    <% {attributes, flags, bottom_attributes, relationship_args} =
+      attributes(@resource, @action, @exactly) %>
+    <div class="grid grid-cols-6 gap-6">
+      <div
+        :for={attribute <- Enum.reject(attributes, &(&1.name in @skip))}
+        class={
+          classes([
             "col-span-6",
-            "sm:col-span-full": markdown?(resource, attribute),
-            "sm:col-span-2": short_text?(resource, attribute),
-            "sm:col-span-3": !(long_text?(resource, attribute) || markdown?(resource, attribute))
-          }
-        >
-          <FieldContext name={attribute.name}>
-            <Label class="block text-sm font-medium text-gray-700">{to_name(attribute.name)}</Label>
-            {render_attribute_input(assigns, attribute, form)}
-            <ErrorTag :if={!Ash.Type.embedded_type?(attribute.type)} field={attribute.name} />
-          </FieldContext>
+            "sm:col-span-full": markdown?(@resource, attribute),
+            "sm:col-span-2": short_text?(@resource, attribute),
+            "sm:col-span-3": !(long_text?(@resource, attribute) || markdown?(@resource, attribute))
+          ])
+        }
+      >
+        <div phx-feedback-for={@form.name <> "[#{attribute.name}]"}>
+          <label
+            class="block text-sm font-medium text-gray-700"
+            for={@form.name <> "[#{attribute.name}]"}
+          >
+            <%= to_name(attribute.name) %>
+          </label>
+          <%= render_attribute_input(assigns, attribute, @form) %>
+          <.error_tag
+            :for={{error, vars} <- Keyword.get_values(@form.errors || [], attribute.name)}
+            :if={!Ash.Type.embedded_type?(attribute.type)}
+          >
+            <%= replace_vars(error, vars) %>
+          </.error_tag>
         </div>
       </div>
-      <div :if={!Enum.empty?(flags)} class="hidden sm:block" aria-hidden="true">
-        <div class="py-5">
-          <div class="border-t border-gray-200" />
-        </div>
+    </div>
+    <div :if={!Enum.empty?(flags)} class="hidden sm:block" aria-hidden="true">
+      <div class="py-5">
+        <div class="border-t border-gray-200" />
       </div>
-      <div class="grid grid-cols-6 gap-6" :if={!Enum.empty?(flags)}>
-        <div
-          :for={attribute <- flags}
-          class={
+    </div>
+    <div :if={!Enum.empty?(flags)} class="grid grid-cols-6 gap-6">
+      <div
+        :for={attribute <- flags}
+        class={
+          classes([
             "col-span-6",
-            "sm:col-span-2": short_text?(resource, attribute),
-            "sm:col-span-3": !long_text?(resource, attribute)
-          }
+            "sm:col-span-2": short_text?(@resource, attribute),
+            "sm:col-span-3": !long_text?(@resource, attribute)
+          ])
+        }
+      >
+        <label
+          class="block text-sm font-medium text-gray-700"
+          for={@form.name <> "[#{attribute.name}]"}
         >
-          <FieldContext name={attribute.name}>
-            <Label class="block text-sm font-medium text-gray-700">{to_name(attribute.name)}</Label>
-            {render_attribute_input(assigns, attribute, form)}
-            <ErrorTag :if={!Ash.Type.embedded_type?(attribute.type)} field={attribute.name} />
-          </FieldContext>
-        </div>
+          <%= to_name(attribute.name) %>
+        </label>
+        <%= render_attribute_input(assigns, attribute, @form) %>
+        <.error_tag
+          :for={{error, vars} <- Keyword.get_values(@form.errors || [], attribute.name)}
+          :if={!Ash.Type.embedded_type?(attribute.type)}
+        >
+          <%= replace_vars(error, vars) %>
+        </.error_tag>
       </div>
-      <div :if={!Enum.empty?(bottom_attributes)} class="hidden sm:block" aria-hidden="true">
-        <div class="py-5">
-          <div class="border-t border-gray-200" />
-        </div>
+    </div>
+    <div :if={!Enum.empty?(bottom_attributes)} class="hidden sm:block" aria-hidden="true">
+      <div class="py-5">
+        <div class="border-t border-gray-200" />
       </div>
-      <div class="grid grid-cols-6 gap-6" :if={!Enum.empty?(bottom_attributes)}>
-        <div
-          :for={attribute <- bottom_attributes}
-          class={
+    </div>
+    <div :if={!Enum.empty?(bottom_attributes)} class="grid grid-cols-6 gap-6">
+      <div
+        :for={attribute <- bottom_attributes}
+        class={
+          classes([
             "col-span-6",
-            "sm:col-span-2": short_text?(resource, attribute),
-            "sm:col-span-3": !(long_text?(resource, attribute) || Ash.Type.embedded_type?(attribute.type))
-          }
+            "sm:col-span-2": short_text?(@resource, attribute),
+            "sm:col-span-3":
+              !(long_text?(@resource, attribute) || Ash.Type.embedded_type?(attribute.type))
+          ])
+        }
+      >
+        <label
+          class="block text-sm font-medium text-gray-700"
+          for={@form.name <> "[#{attribute.name}]"}
         >
-          <FieldContext name={attribute.name}>
-            <Label class="block text-sm font-medium text-gray-700">{to_name(attribute.name)}</Label>
-            {render_attribute_input(assigns, attribute, form)}
-            <ErrorTag :if={!Ash.Type.embedded_type?(attribute.type)} field={attribute.name} />
-          </FieldContext>
-        </div>
+          <%= to_name(attribute.name) %>
+        </label>
+        <%= render_attribute_input(assigns, attribute, @form) %>
+        <.error_tag
+          :for={{error, vars} <- Keyword.get_values(@form.errors || [], attribute.name)}
+          :if={!Ash.Type.embedded_type?(attribute.type)}
+        >
+          <%= replace_vars(error, vars) %>
+        </.error_tag>
       </div>
-      <div :for={{relationship, argument, opts} <- relationship_args}>
-        <FieldContext name={argument.name} :if={relationship not in skip and argument.name not in skip}>
-          <Label class="block text-sm font-medium text-gray-700">{to_name(argument.name)}</Label>
-          {render_relationship_input(
-            assigns,
-            Ash.Resource.Info.relationship(form.source.resource, relationship),
-            form,
-            argument,
-            opts
-          )}
-        </FieldContext>
-      </div>
-    </Context>
+    </div>
+    <div :for={{relationship, argument, opts} <- relationship_args}>
+      <%= if relationship not in @skip and @argument.name not in @skip do %>
+        <label
+          class="block text-sm font-medium text-gray-700"
+          for={@form.name <> "[#{@argument.name}]"}
+        >
+          <%= to_name(argument.name) %>
+        </label>
+        <%= render_relationship_input(
+          assigns,
+          Ash.Resource.Info.relationship(@form.source.resource, @relationship),
+          @form,
+          @argument,
+          opts
+        ) %>
+      <% end %>
+    </div>
     """
+  end
+
+  def error_tag(assigns) do
+    ~H"""
+    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 phx-no-feedback:hidden">
+      <%= render_slot(@inner_block) %>
+    </p>
+    """
+  end
+
+  defp replace_vars(string, vars) do
+    vars =
+      if is_map(vars) do
+        vars
+      else
+        List.wrap(vars)
+      end
+
+    Enum.reduce(vars, string, fn {key, value}, acc ->
+      if String.contains?(acc, "%{#{key}}") do
+        String.replace(acc, "%{#{key}}", to_string(value))
+      else
+        acc
+      end
+    end)
   end
 
   defp render_relationship_input(
@@ -271,123 +333,134 @@ defmodule AshAdmin.Components.Resource.Form do
         {false, [key]}
       end
 
-    ~F"""
-    <div :if={!must_load?(opts) || loaded?(form.source.source, relationship.name)}>
-      <Inputs form={form} for={argument.name} :let={form: inner_form}>
-        <div :if={@form.submitted_once?} class="ml-4 mt-4 text-red-500">
+    assigns =
+      assign(assigns,
+        relationship: relationship,
+        form: form,
+        argument: argument,
+        opts: opts,
+        key: key,
+        hidden: hidden?,
+        exactly_fields: exactly_fields
+      )
+
+    ~H"""
+    <div :if={!must_load?(@opts) || loaded?(@form.source.source, @relationship.name)}>
+      <.inputs_for :let={inner_form} field={@form[@argument.name]}>
+        <div :if={@form.source.submitted_once?} class="ml-4 mt-4 text-red-500">
           <ul>
             <li :for={{field, message} <- AshPhoenix.Form.errors(inner_form.source)}>
               <span :if={field}>
-                {to_name(field)}:
+                <%= to_name(field) %>:
               </span>
               <span>
-                {message}
+                <%= message %>
               </span>
             </li>
           </ul>
         </div>
-        {#if hidden?}
-          <input
-            :for={kv <- inner_form.hidden}
-            name={inner_form.name <> "[#{elem(kv, 0)}]"}
-            value={elem(kv, 1)}
-            hidden
-          />
-        {/if}
-        {#if inner_form.source.form_keys[:_join]}
-          <Inputs form={inner_form} for={:_join} :let={form: join_form}>
-            {#if hidden?}
-              <input
-                :for={kv <- join_form.hidden}
-                name={inner_form.name <> "[#{elem(kv, 0)}]"}
-                value={elem(kv, 1)}
-                hidden
-              />
-            {/if}
-            {render_attributes(
+        <input
+          :for={kv <- inner_form.hidden}
+          :if={@hidden}
+          name={inner_form.name <> "[#{elem(kv, 0)}]"}
+          value={elem(kv, 1)}
+          type="hidden"
+        />
+        <%= if inner_form.source.form_keys[:_join] do %>
+          <.inputs_for :let={join_form} field={inner_form[:_join]}>
+            <input
+              :for={kv <- join_form.hidden}
+              :if={@hidden}
+              name={inner_form.name <> "[#{elem(kv, 0)}]"}
+              value={elem(kv, 1)}
+              type="hidden"
+            />
+            <%= render_attributes(
               assigns,
-              relationship.through,
-              join_action(relationship.through, join_form, inner_form.source.form_keys[:_join]),
+              @relationship.through,
+              join_action(@relationship.through, join_form, inner_form.source.form_keys[:_join]),
               join_form,
-              exactly_fields || inner_form.source.form_keys[:_join][:create_fields],
-              skip_through_related(exactly_fields, relationship)
-            )}
-          </Inputs>
-        {/if}
-        {render_attributes(
+              @exactly_fields || inner_form.source.form_keys[:_join][:create_fields],
+              skip_through_related(@exactly_fields, @relationship)
+            ) %>
+          </.inputs_for>
+        <% end %>
+        <%= render_attributes(
           assigns,
           inner_form.source.resource,
           inner_form.source.source.action,
           inner_form,
-          exactly_fields || relationship_fields(inner_form),
-          skip_related(exactly_fields, relationship)
-        )}
+          @exactly_fields || relationship_fields(inner_form),
+          skip_related(@exactly_fields, @relationship)
+        ) %>
 
         <button
+          :if={can_remove_related?(inner_form, @opts)}
           type="button"
-          :on-click="remove_form"
+          phx-click="remove_form"
           phx-target={@myself}
-          :if={can_remove_related?(inner_form, opts)}
           phx-value-path={inner_form.name}
           class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
         >
-          <HeroIcon name="minus" class="h-4 w-4 text-gray-500" />
+          <HeroIcon.icon name="minus" class="h-4 w-4 text-gray-500" />
         </button>
-      </Inputs>
+      </.inputs_for>
 
       <button
+        :if={can_add_related?(@form, :read_action, @argument)}
         type="button"
-        :on-click="add_form"
+        phx-click="add_form"
         phx-target={@myself}
-        :if={can_add_related?(form, :read_action, argument)}
-        phx-value-path={form.name <> "[#{argument.name}]"}
+        phx-value-path={@form.name <> "[#{@argument.name}]"}
         phx-value-type="lookup"
-        phx-value-cardinality={to_string(relationship.cardinality)}
+        phx-value-cardinality={to_string(@relationship.cardinality)}
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
-        <HeroIcon name="search-circle" class="h-4 w-4 text-gray-500" />
+        <HeroIcon.icon name="search-circle" class="h-4 w-4 text-gray-500" />
       </button>
 
       <button
+        :if={can_add_related?(@form, :create_action, @argument)}
         type="button"
-        :on-click="add_form"
+        phx-click="add_form"
         phx-target={@myself}
-        :if={can_add_related?(form, :create_action, argument)}
-        phx-value-path={form.name <> "[#{argument.name}]"}
+        phx-value-path={@form.name <> "[#{@argument.name}]"}
         phx-value-type="create"
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
-        <HeroIcon name="plus" class="h-4 w-4 text-gray-500" />
+        <HeroIcon.icon name="plus" class="h-4 w-4 text-gray-500" />
       </button>
       <button
+        :if={
+          @form.source.form_keys[@argument.name][:read_form] &&
+            !relationship_set?(@form.source.source, @relationship.name, @argument.name)
+        }
         type="button"
-        :on-click="add_form"
+        phx-click="add_form"
         phx-target={@myself}
-        :if={form.source.form_keys[argument.name][:read_form] &&
-          !relationship_set?(form.source.source, relationship.name, argument.name)}
-        phx-value-path={form.name <> "[#{argument.name}]"}
+        phx-value-path={@form.name <> "[#{@argument.name}]"}
         phx-value-type="lookup"
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
-        <HeroIcon name="plus" class="h-4 w-4 text-gray-500" />
+        <HeroIcon.icon name="plus" class="h-4 w-4 text-gray-500" />
       </button>
     </div>
-    <div :if={must_load?(opts) && !loaded?(form.source.source, relationship.name)}>
+    <div :if={must_load?(@opts) && !loaded?(@form.source.source, @relationship.name)}>
       <button
-        :on-click="load"
+        phx-click="load"
         phx-target={@myself}
-        phx-value-path={form.name}
-        phx-value-relationship={relationship.name}
+        phx-value-path={@form.name}
+        phx-value-relationship={@relationship.name}
         type="button"
         class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
         Load
       </button>
-      <div :if={is_exception(@load_errors[relationship.name])}>
-        {Exception.message(@load_errors[relationship.name])}
+      <div :if={is_exception(@load_errors[@relationship.name])}>
+        <%= Exception.message(@load_errors[@relationship.name]) %>
       </div>
-      <div :if={@load_errors[relationship.name] && !is_exception(@load_errors[relationship.name])}>
-        {inspect(@load_errors[relationship.name])}
+      <div :if={@load_errors[@relationship.name] && !is_exception(@load_errors[@relationship.name])}>
+        <%= inspect(@load_errors[@relationship.name]) %>
       </div>
     </div>
     """
@@ -545,12 +618,28 @@ defmodule AshAdmin.Components.Resource.Form do
   def render_attribute_input(assigns, attribute, form, value \\ nil, name \\ nil)
 
   def render_attribute_input(assigns, %{type: Ash.Type.Date} = attribute, form, value, name) do
-    ~F"""
-    <DateInput
-      form={form}
-      value={value(value, form, attribute)}
-      name={name || form.name <> "[#{attribute.name}]"}
-      {...props(value, attribute)}
+    assigns = assign(assigns, form: form, value: value, name: name, attribute: attribute)
+
+    ~H"""
+    <input
+      type="date"
+      value={value(@value, @form, @attribute)}
+      name={@name || @form.name <> "[#{@attribute.name}]"}
+      id={@form.id <> "_#{@attribute.name}"}
+    />
+    """
+  end
+
+  def render_attribute_input(assigns, %{type: type} = attribute, form, value, name)
+      when type in [Ash.Type.UtcDatetime, Ash.Type.UtcDatetimeUsec] do
+    assigns = assign(assigns, form: form, value: value, name: name, attribute: attribute)
+
+    ~H"""
+    <input
+      type="datetime-local"
+      value={value(@value, @form, @attribute)}
+      name={@name || @form.name <> "[#{@attribute.name}]"}
+      id={@form.id <> "_#{@attribute.name}"}
     />
     """
   end
@@ -565,12 +654,14 @@ defmodule AshAdmin.Components.Resource.Form do
         value,
         name
       ) do
-    ~F"""
-    <Checkbox
-      form={form}
-      value={value(value, form, attribute)}
-      name={name || form.name <> "[#{attribute.name}]"}
-      {...props(value, attribute)}
+    assigns = assign(assigns, attribute: attribute, form: form, value: value, name: name)
+
+    ~H"""
+    <input
+      type="checkbox"
+      value={value(@value, @form, @attribute)}
+      name={@name || @form.name <> "[#{@attribute.name}]"}
+      id={@form.id <> "_#{@attribute.name}"}
     />
     """
   end
@@ -584,19 +675,21 @@ defmodule AshAdmin.Components.Resource.Form do
         value,
         name
       ) do
-    ~F"""
-    <Select
-      form={form}
-      options={Nil: nil, True: "true", False: "false"}
-      selected={value(value, form, attribute)}
-      name={name || form.name <> "[#{attribute.name}]"}
-      {...props(value, attribute)}
-    />
+    assigns = assign(assigns, attribute: attribute, form: form, value: value, name: name)
+
+    ~H"""
+    <%= Phoenix.HTML.Form.select(
+      @form,
+      @attribute.name,
+      [Nil: nil, True: "true", False: "false"],
+      selected: value(@value, @form, @attribute),
+      name: @name || @form.name <> "[#{@attribute.name}]"
+    ) %>
     """
   end
 
   def render_attribute_input(assigns, %{type: Ash.Type.Binary}, _form, _value, _name) do
-    ~F"""
+    ~H"""
     <span class="italic">(binary fields cannot be edited)</span>
     """
   end
@@ -612,77 +705,70 @@ defmodule AshAdmin.Components.Resource.Form do
         name
       )
       when type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID, Ash.Type.Atom] do
-    cond do
-      type == Ash.Type.Atom && attribute.constraints[:one_of] ->
-        ~F"""
-        <Select
-          form={form}
-          {...props(value, attribute)}
-          options={Enum.map(attribute.constraints[:one_of], &{to_name(&1), &1}) ++ allow_nil_option(attribute)}
-          selected={value(value, form, attribute)}
-          name={name || form.name <> "[#{attribute.name}]"}
-        />
-        """
+    assigns =
+      assign(assigns,
+        attribute: attribute,
+        form: form,
+        value: value,
+        type: type,
+        name: name,
+        default: default
+      )
 
-      markdown?(form.source.resource, attribute) ->
-        ~F"""
+    ~H"""
+    <%= cond do %>
+      <% @type == Ash.Type.Atom && @attribute.constraints[:one_of] -> %>
+        <%= Phoenix.HTML.Form.select(
+          @form,
+          @attribute.name,
+          Enum.map(@attribute.constraints[:one_of], &{to_name(&1), &1}) ++
+            allow_nil_option(@attribute),
+          selected: value(@value, @form, @attribute),
+          name: @name || @form.name <> "[#{@attribute.name}]"
+        ) %>
+      <% markdown?(@form.source.resource, @attribute) -> %>
         <div
           phx-hook="MarkdownEditor"
-          id={form.id <> "_#{attribute.name}_container"}
+          id={@form.id <> "_#{@attribute.name}_container"}
           phx-update="ignore"
-          data-target-id={form.id <> "_#{attribute.name}"}
+          data-target-id={@form.id <> "_#{@attribute.name}"}
           class="prose max-w-none"
         >
           <textarea
-            id={form.id <> "_#{attribute.name}"}
-            value={value(value, form, attribute) || ""}
+            id={@form.id <> "_#{@attribute.name}"}
             class="prose max-w-none"
-            name={name || form.name <> "[#{attribute.name}]"}
-          />
+            name={@name || @form.name <> "[#{@attribute.name}]"}
+          ><%= value(@value, @form, @attribute) || "" %></textarea>
         </div>
-        """
-
-      long_text?(form.source.resource, attribute) ->
-        ~F"""
-        <TextArea
-          form={form}
-          {...props(value, attribute)}
-          name={name || form.name <> "[#{attribute.name}]"}
-          opts={
-            type: text_input_type(attribute),
-            placeholder: placeholder(default),
-            phx_hook: "MaintainAttrs",
-            data_attrs: "style"
-          }
-          value={value(value, form, attribute)}
+      <% long_text?(@form.source.resource, @attribute) -> %>
+        <textarea
+          id={@form.id <> "_#{@attribute.name}"}
+          name={@name || @form.name <> "[#{@attribute.name}]"}
           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md resize-y"
-        />
-        """
-
-      short_text?(form.source.resource, attribute) ->
-        ~F"""
-        <TextInput
-          form={form}
-          {...props(value, attribute)}
-          opts={type: text_input_type(attribute), placeholder: placeholder(default)}
-          value={value(value, form, attribute)}
+          phx-hook="MaintainAttrs"
+          data-attrs="style"
+          placeholder={placeholder(@default)}
+        ><%= value(@value, @form, @attribute) %></textarea>
+      <% short_text?(@form.source.resource, @attribute) -> %>
+        <input
+          type={text_input_type(@attribute)}
+          id={@form.id <> "_#{@attribute.name}"}
+          value={value(@value, @form, @attribute)}
           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-          name={name || form.name <> "[#{attribute.name}]"}
+          name={@name || @form.name <> "[#{@attribute.name}]"}
+          placeholder={placeholder(@default)}
         />
-        """
-
-      true ->
-        ~F"""
-        <TextInput
-          form={form}
-          {...props(value, attribute)}
-          opts={type: text_input_type(attribute), placeholder: placeholder(default)}
-          value={value(value, form, attribute)}
+      <% true -> %>
+        <input
+          type={text_input_type(@attribute)}
+          placeholder={placeholder(@default)}
+          id={@form.id <> "_#{@attribute.name}"}
+          value={value(@value, @form, @attribute)}
           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-          name={name || form.name <> "[#{attribute.name}]"}
+          name={@name || @form.name <> "[#{@attribute.name}]"}
         />
-        """
-    end
+    <% end %>
+    """
   end
 
   def render_attribute_input(
@@ -698,130 +784,156 @@ defmodule AshAdmin.Components.Resource.Form do
   def render_attribute_input(assigns, %{type: Ash.Type.Map} = attribute, form, value, name) do
     encoded = Jason.encode!(value(value, form, attribute))
 
-    ~F"""
+    assigns =
+      assign(assigns,
+        attribute: attribute,
+        form: form,
+        value: value,
+        name: name,
+        encoded: encoded
+      )
+
+    ~H"""
     <div>
       <div
         phx-hook="JsonEditor"
         phx-update="ignore"
-        data-input-id={form.id <> "_#{attribute.name}"}
-        id={form.id <> "_#{attribute.name}_json"}
+        data-input-id={@form.id <> "_#{@attribute.name}"}
+        id={@form.id <> "_#{@attribute.name}_json"}
       />
 
-      <HiddenInput
-        opts={phx_hook: "JsonEditorSource", data_editor_id: form.id <> "_#{attribute.name}_json"}
-        form={form}
-        value={encoded}
-        name={name || form.name <> "[#{attribute.name}]"}
-        id={form.id <> "_#{attribute.name}"}
+      <input
+        type="hidden"
+        phx-hook="JsonEditorSource"
+        data-editor-id={@form.id <> "_#{@attribute.name}_json"}
+        value={@encoded}
+        name={@name || @form.name <> "[#{@attribute.name}]"}
+        id={@form.id <> "_#{@attribute.name}"}
         class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
       />
     </div>
     """
   rescue
     _ ->
-      ~F"""
-      <TextInput
-        form={form}
-        opts={disabled: true}
+      ~H"""
+      <input
+        type="text"
+        disabled
         value="..."
-        name={name || form.name <> "[#{attribute.name}]"}
+        name={@name || @form.name <> "[#{@attribute.name}]"}
         class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
       />
       """
   end
 
   def render_attribute_input(assigns, attribute, form, value, name) do
-    cond do
-      Ash.Type.embedded_type?(attribute.type) ->
-        ~F"""
-        <Inputs form={form} for={attribute.name} :let={form: inner_form}>
+    assigns =
+      assign(assigns,
+        attribute: attribute,
+        form: form,
+        value: value,
+        name: name
+      )
+
+    ~H"""
+    <%= cond do %>
+      <% Ash.Type.embedded_type?(@attribute.type) -> %>
+        <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
           <input
             :for={kv <- inner_form.hidden}
             name={inner_form.name <> "[#{elem(kv, 0)}]"}
             value={elem(kv, 1)}
-            hidden
+            type="hidden"
           />
           <button
             type="button"
-            :on-click="remove_form"
+            phx-click="remove_form"
             phx-target={@myself}
             phx-value-path={inner_form.name}
             class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
           >
-            <HeroIcon name="minus" class="h-4 w-4 text-gray-500" />
+            <HeroIcon.icon name="minus" class="h-4 w-4 text-gray-500" />
           </button>
 
-          {render_attributes(
+          <%= render_attributes(
             assigns,
             inner_form.source.resource,
             inner_form.source.source.action,
             inner_form
-          )}
-        </Inputs>
+          ) %>
+        </.inputs_for>
         <button
+          :if={can_append_embed?(@form.source.source, @attribute.name)}
           type="button"
-          :on-click="add_form"
+          phx-click="add_form"
           phx-target={@myself}
-          :if={can_append_embed?(form.source.source, attribute.name)}
-          phx-value-pkey={embedded_type_pkey(attribute.type)}
-          phx-value-path={name || form.name <> "[#{attribute.name}]"}
+          phx-value-pkey={embedded_type_pkey(@attribute.type)}
+          phx-value-path={@name || @form.name <> "[#{@attribute.name}]"}
           class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
         >
-          <HeroIcon name="plus" class="h-4 w-4 text-gray-500" />
+          <HeroIcon.icon name="plus" class="h-4 w-4 text-gray-500" />
         </button>
-        """
-
-      is_atom(attribute.type) && :erlang.function_exported(attribute.type, :values, 0) ->
-        ~F"""
-        <Select
-          form={form}
-          {...props(value, attribute)}
-          options={Enum.map(attribute.type.values(), &{to_name(&1), &1}) ++ allow_nil_option(attribute)}
-          selected={value(value, form, attribute)}
-          name={name || form.name <> "[#{attribute.name}]"}
-        />
-        """
-
-      true ->
-        render_fallback_attribute(assigns, form, attribute, value, name)
-    end
+      <% is_atom(@attribute.type) && function_exported?(@attribute.type, :values, 0) -> %>
+        <%= Phoenix.HTML.Form.select(
+          @form,
+          @attribute.name,
+          Enum.map(@attribute.type.values(), &{to_name(&1), &1}) ++ allow_nil_option(@attribute),
+          selected: value(@value, @form, @attribute),
+          name: @name || @form.name <> "[#{@attribute.name}]"
+        ) %>
+      <% true -> %>
+        <%= render_fallback_attribute(assigns, @form, @attribute, @value, @name) %>
+    <% end %>
+    """
   end
 
   defp render_fallback_attribute(assigns, form, %{type: {:array, type}} = attribute, value, name) do
     name = name || form.name <> "[#{attribute.name}]"
 
-    ~F"""
+    assigns =
+      assign(assigns, form: form, attribute: attribute, type: type, value: value, name: name)
+
+    ~H"""
     <div>
-      <div :for.with_index={{value, index} <-
-        list_value(value || Phoenix.HTML.FormData.input_value(form.source, form, attribute.name))}>
-        {render_attribute_input(
+      <div :for={
+        {this_value, index} <-
+          Enum.with_index(
+            list_value(
+              @value || Phoenix.HTML.FormData.input_value(@form.source, @form, @attribute.name)
+            )
+          )
+      }>
+        <%= render_attribute_input(
           assigns,
-          %{attribute | type: type, constraints: attribute.constraints[:items] || []},
-          %{form | params: %{"#{attribute.name}" => form.params["#{attribute.name}"]["#{index}"]}},
-          {:value, value},
-          name <> "[#{index}]"
-        )}
+          %{@attribute | type: @type, constraints: @attribute.constraints[:items] || []},
+          %{
+            @form
+            | params: %{"#{@attribute.name}" => @form.params["#{@attribute.name}"]["#{index}"]}
+          },
+          {:value, this_value},
+          @name <> "[#{index}]"
+        ) %>
         <button
           type="button"
-          :on-click="remove_value"
+          phx-click="remove_value"
           phx-target={@myself}
-          phx-value-path={form.name}
-          phx-value-field={attribute.name}
+          phx-value-path={@form.name}
+          phx-value-field={@attribute.name}
           phx-value-index={index}
           class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
         >
-          <HeroIcon name="minus" class="h-4 w-4 text-gray-500" />
+          <HeroIcon.icon name="minus" class="h-4 w-4 text-gray-500" />
         </button>
       </div>
       <button
         type="button"
-        :on-click="append_value"
+        phx-click="append_value"
         phx-target={@myself}
-        phx-value-path={form.name}
-        phx-value-field={attribute.name}
+        phx-value-path={@form.name}
+        phx-value-field={@attribute.name}
         class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
-        <HeroIcon name="plus" class="h-4 w-4 text-gray-500" />
+        <HeroIcon.icon name="plus" class="h-4 w-4 text-gray-500" />
       </button>
     </div>
     """
@@ -830,12 +942,22 @@ defmodule AshAdmin.Components.Resource.Form do
   defp render_fallback_attribute(assigns, form, attribute, value, name) do
     casted_value = Phoenix.HTML.Safe.to_iodata(value(value, form, attribute))
 
-    ~F"""
-    <TextInput
-      form={form}
-      opts={type: text_input_type(attribute), placeholder: placeholder(attribute.default)}
-      value={casted_value}
-      name={name || form.name <> "[#{attribute.name}]"}
+    assigns =
+      assign(assigns,
+        casted_value: casted_value,
+        form: form,
+        attribute: attribute,
+        value: value,
+        name: name
+      )
+
+    ~H"""
+    <input
+      type={text_input_type(@attribute)}
+      placeholder={placeholder(@attribute.default)}
+      value={@casted_value}
+      name={@name || @form.name <> "[#{@attribute.name}]"}
+      id={@form.id <> "_#{@attribute.name}"}
       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
     />
     """
@@ -843,23 +965,27 @@ defmodule AshAdmin.Components.Resource.Form do
     _ ->
       case Map.fetch(form.params, to_string(attribute.name)) do
         {:ok, value} ->
-          ~F"""
-          <TextInput
-            form={form}
-            opts={type: text_input_type(attribute), placeholder: placeholder(attribute.default)}
-            value={value}
-            name={name || form.name <> "[#{attribute.name}]"}
+          assigns = assign(assigns, value: value)
+
+          ~H"""
+          <input
+            type={text_input_type(@attribute)}
+            placeholder={placeholder(@attribute.default)}
+            value={@value}
+            name={@name || @form.name <> "[#{@attribute.name}]"}
+            id={@form.id <> "_#{@attribute.name}"}
             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
           />
           """
 
         :error ->
-          ~F"""
-          <TextInput
-            form={form}
-            opts={disabled: true}
+          ~H"""
+          <input
+            type="text"
+            disabled
             value="..."
-            name={name || form.name <> "[#{attribute.name}]"}
+            name={@name || @form.name <> "[#{@attribute.name}]"}
+            id={@form.id <> "_#{@attribute.name}"}
             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
           />
           """
@@ -893,16 +1019,6 @@ defmodule AshAdmin.Components.Resource.Form do
     end)
     |> Enum.join("-")
   end
-
-  defp props({:value, _value}, _attribute) do
-    []
-  end
-
-  defp props(_, attribute) do
-    [field: attribute.name]
-  end
-
-  defp value({:value, value}, _form, _attribute), do: value
 
   defp value(value, form, attribute) do
     if value do
@@ -959,7 +1075,7 @@ defmodule AshAdmin.Components.Resource.Form do
        socket
        |> redirect(
          to:
-           "#{socket.assigns.prefix}?api=#{AshAdmin.Api.name(socket.assigns.api)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}&tab=show&table=#{socket.assigns.table}&primary_key=#{encode_primary_key(record)}"
+           "#{socket.assigns.prefix || "/"}?api=#{AshAdmin.Api.name(socket.assigns.api)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}&tab=show&table=#{socket.assigns.table}&primary_key=#{encode_primary_key(record)}"
        )}
     else
       case AshAdmin.Helpers.primary_action(socket.assigns.resource, :update) do
@@ -967,7 +1083,7 @@ defmodule AshAdmin.Components.Resource.Form do
           {:noreply,
            redirect(socket,
              to:
-               "#{socket.assigns.prefix}?api=#{AshAdmin.Api.name(socket.assigns.api)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}"
+               "#{socket.assigns.prefix || "/"}?api=#{AshAdmin.Api.name(socket.assigns.api)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}"
            )}
 
         _update ->
@@ -975,7 +1091,7 @@ defmodule AshAdmin.Components.Resource.Form do
            socket
            |> redirect(
              to:
-               "#{socket.assigns.prefix}?api=#{AshAdmin.Api.name(socket.assigns.api)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}&action_type=update&tab=update&table=#{socket.assigns.table}&primary_key=#{encode_primary_key(record)}"
+               "#{socket.assigns.prefix || "/"}?api=#{AshAdmin.Api.name(socket.assigns.api)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}&action_type=update&tab=update&table=#{socket.assigns.table}&primary_key=#{encode_primary_key(record)}"
            )}
       end
     end
@@ -1528,7 +1644,7 @@ defmodule AshAdmin.Components.Resource.Form do
             )
         end
 
-      assign(socket, :form, form)
+      assign(socket, :form, form |> to_form())
     end
   end
 end

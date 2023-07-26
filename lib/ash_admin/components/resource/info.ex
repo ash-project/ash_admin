@@ -1,18 +1,18 @@
 defmodule AshAdmin.Components.Resource.Info do
   @moduledoc false
-  use Surface.Component
+  use Phoenix.Component
 
   alias AshAdmin.Components.Resource.{AttributeTable, RelationshipTable}
 
-  prop(resource, :any, required: true)
-  prop(api, :any, required: true)
-  prop(prefix, :any, required: true)
+  attr :resource, :any, required: true
+  attr :api, :any, required: true
+  attr :prefix, :any, required: true
 
-  def render(assigns) do
-    ~F"""
+  def info(assigns) do
+    ~H"""
     <div class="relative mx-12">
-      <AttributeTable resource={@resource} />
-      <RelationshipTable api={@api} resource={@resource} prefix={@prefix} />
+      <AttributeTable.table resource={@resource} />
+      <RelationshipTable.table api={@api} resource={@resource} prefix={@prefix} />
     </div>
     """
   end

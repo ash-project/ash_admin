@@ -1,28 +1,25 @@
 defmodule AshAdmin.Components.Resource.SelectTable do
   @moduledoc false
-  use Surface.Component
+  use Phoenix.Component
 
-  alias Surface.Components.Form
-  alias Surface.Components.Form.{FieldContext, Label, Select}
+  attr :resource, :any, required: true
+  attr :on_change, :string, required: true
+  attr :table, :any, required: true
+  attr :tables, :any, required: true
+  attr :action, :any, required: true
+  attr :target, :any, required: true
+  attr :polymorphic_actions, :any, required: true
 
-  prop(resource, :any, required: true)
-  prop(on_change, :event, required: true)
-  prop(table, :any, required: true)
-  prop(tables, :any, required: true)
-  prop(action, :any, required: true)
-  prop(polymorphic_actions, :any, required: true)
-
-  def render(assigns) do
-    ~F"""
+  def table(assigns) do
+    ~H"""
     <div>
-      <div :if={@resource && @tables != [] &&
-        (is_nil(@polymorphic_actions) || @action.name in @polymorphic_actions)}>
-        <Form as={:table} for={:table} change={@on_change}>
-          <FieldContext name="table">
-            <Label>Table</Label>
-            <Select selected={@table} options={@tables || []} />
-          </FieldContext>
-        </Form>
+      <div :if={
+        @resource && @tables != [] &&
+          (is_nil(@polymorphic_actions) || @action.name in @polymorphic_actions)
+      }>
+        <.form :let={form} for={to_form(%{}, as: :table)} phx-change={@on_change} phx-target={@target}>
+          <%= Phoenix.HTML.Form.select(form, :table, @tables) %>
+        </.form>
       </div>
     </div>
     """

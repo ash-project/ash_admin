@@ -26,48 +26,48 @@ defmodule AshAdmin.ActorPlug.Plug do
 
   @impl true
   def set_actor_session(conn) do
-        case conn.cookies do
-          %{"actor_resource" => "undefined"} ->
+    case conn.cookies do
+      %{"actor_resource" => "undefined"} ->
+        conn
+
+      session ->
+        case session do
+          %{
+            "actor_resource" => resource,
+            "actor_api" => api,
+            "actor_action" => action,
+            "actor_primary_key" => primary_key
+          } ->
+            authorizing = session["actor_authorizing"] || false
+
+            actor_paused =
+              if is_nil(session["actor_paused"]) do
+                true
+              else
+                session["actor_paused"]
+              end
+
+            actor = actor_from_session(conn.private.phoenix_endpoint, session)
+
+            authorizing = session_bool(authorizing)
+            actor_paused = session_bool(actor_paused)
+
             conn
+            |> Plug.Conn.put_session(:actor_resource, resource)
+            |> Plug.Conn.put_session(:actor_api, api)
+            |> Plug.Conn.put_session(:actor_action, action)
+            |> Plug.Conn.put_session(:actor_primary_key, primary_key)
+            |> Plug.Conn.put_session(:actor_authorizing, authorizing)
+            |> Plug.Conn.put_session(:actor_paused, actor_paused)
+            |> Plug.Conn.assign(:actor, actor)
+            |> Plug.Conn.assign(:authorizing, authorizing || false)
+            |> Plug.Conn.assign(:actor_paused, actor_paused)
+            |> Plug.Conn.assign(:authorizing, authorizing)
 
-          session ->
-    case session do
-      %{
-        "actor_resource" => resource,
-        "actor_api" => api,
-        "actor_action" => action,
-        "actor_primary_key" => primary_key
-      } ->
-        authorizing = session["actor_authorizing"] || false
-
-        actor_paused =
-          if is_nil(session["actor_paused"]) do
-            true
-          else
-            session["actor_paused"]
-          end
-
-        actor = actor_from_session(conn.private.phoenix_endpoint, session)
-
-        authorizing = session_bool(authorizing)
-        actor_paused = session_bool(actor_paused)
-
-        conn
-        |> Plug.Conn.put_session(:actor_resource, resource)
-        |> Plug.Conn.put_session(:actor_api, api)
-        |> Plug.Conn.put_session(:actor_action, action)
-        |> Plug.Conn.put_session(:actor_primary_key, primary_key)
-        |> Plug.Conn.put_session(:actor_authorizing, authorizing)
-        |> Plug.Conn.put_session(:actor_paused, actor_paused)
-        |> Plug.Conn.assign(:actor, actor)
-        |> Plug.Conn.assign(:authorizing, authorizing || false)
-        |> Plug.Conn.assign(:actor_paused, actor_paused)
-        |> Plug.Conn.assign(:authorizing, authorizing)
-
-      _ ->
-        conn
+          _ ->
+            conn
+        end
     end
-  end
   end
 
   defp session_bool(value) do
@@ -161,5 +161,4 @@ defmodule AshAdmin.ActorPlug.Plug do
   end
 
   defp actor_from_session(_, _), do: nil
-
 end

@@ -1,41 +1,41 @@
 defmodule AshAdmin.Components.Resource.Nav do
   @moduledoc false
-  use Surface.Component
+  use Phoenix.Component
   alias AshAdmin.Components.TopNav.Dropdown
-  alias Surface.Components.LiveRedirect
 
-  prop(resource, :any, required: true)
-  prop(api, :any, required: true)
-  prop(tab, :string, required: true)
-  prop(action, :any)
-  prop(table, :any, default: nil)
-  prop(prefix, :any, default: nil)
+  attr :resource, :any, required: true
+  attr :api, :any, required: true
+  attr :tab, :string, required: true
+  attr :action, :any
+  attr :table, :any, default: nil
+  attr :prefix, :any, default: nil
 
-  def render(assigns) do
-    ~F"""
+  def nav(assigns) do
+    ~H"""
     <nav class="bg-gray-800 w-full">
       <div class="px-4 sm:px-6 lg:px-8 w-full">
         <div class="flex items-center justify-between h-16 w-full">
           <div class="flex items-center w-full">
             <div class="flex-shrink-0">
               <h3 class="text-white text-lg">
-                <LiveRedirect to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}"}>
-                  {AshAdmin.Resource.name(@resource)}
-                </LiveRedirect>
+                <.link navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}"}>
+                  <%= AshAdmin.Resource.name(@resource) %>
+                </.link>
               </h3>
             </div>
             <div class="w-full">
               <div class="ml-12 flex items-center space-x-1">
                 <div :if={has_create_action?(@resource)} class="relative">
-                  <LiveRedirect
-                    to={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=create&action=#{create_action(@resource).name}&tab=create&table=#{@table}"}
+                  <.link
+                    navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=create&action=#{create_action(@resource).name}&tab=create&table=#{@table}"}
                     class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
                   >
                     Create
-                  </LiveRedirect>
+                  </.link>
                 </div>
 
-                <Dropdown
+                <.live_component
+                  module={Dropdown}
                   name="Read"
                   id={"#{@resource}_data_dropdown"}
                   active={@tab == "data"}

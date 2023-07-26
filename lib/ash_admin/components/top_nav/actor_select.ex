@@ -1,28 +1,26 @@
 defmodule AshAdmin.Components.TopNav.ActorSelect do
   @moduledoc false
-  use Surface.Component
-
-  alias Surface.Components.LiveRedirect
+  use Phoenix.Component
 
   import AshAdmin.Helpers
 
-  prop(authorizing, :boolean, required: true)
-  prop(actor_paused, :boolean, required: true)
-  prop(actor, :any, required: true)
-  prop(actor_resources, :any, required: true)
-  prop(toggle_authorizing, :event, required: true)
-  prop(toggle_actor_paused, :event, required: true)
-  prop(clear_actor, :event, required: true)
-  prop(api, :any, required: true)
-  prop(actor_api, :any, required: true)
-  prop(prefix, :any, required: true)
+  attr :authorizing, :boolean, required: true
+  attr :actor_paused, :boolean, required: true
+  attr :actor, :any, required: true
+  attr :actor_resources, :any, required: true
+  attr :toggle_authorizing, :string, required: true
+  attr :toggle_actor_paused, :string, required: true
+  attr :clear_actor, :string, required: true
+  attr :api, :any, required: true
+  attr :actor_api, :any, required: true
+  attr :prefix, :any, required: true
 
-  def render(assigns) do
-    ~F"""
+  def actor_select(assigns) do
+    ~H"""
     <div id="actor-hook" class="flex items-center mr-5 text-white" phx-hook="Actor">
       <div>
         <span>
-          <button :on-click={@toggle_authorizing} type="button">
+          <button phx-click={@toggle_authorizing} type="button">
             <svg
               :if={@authorizing}
               width="1em"
@@ -50,7 +48,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
               />
             </svg>
           </button>
-          <button :if={@actor} :on-click={@toggle_actor_paused} type="button">
+          <button :if={@actor} phx-click={@toggle_actor_paused} type="button">
             <svg
               :if={@actor_paused}
               width="1em"
@@ -72,15 +70,21 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
               <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z" />
             </svg>
           </button>
-          <LiveRedirect
+          <.link
             :if={@actor}
             class="hover:text-blue-400 hover:underline"
-            to={"#{@prefix}?api=#{AshAdmin.Api.name(@actor_api)}&resource=#{AshAdmin.Resource.name(@actor.__struct__)}&tab=show&primary_key=#{encode_primary_key(@actor)}"}
+            target={"#{@prefix}?api=#{AshAdmin.Api.name(@actor_api)}&resource=#{AshAdmin.Resource.name(@actor.__struct__)}&tab=show&primary_key=#{encode_primary_key(@actor)}"}
           >
-            {user_display(@actor)}
-          </LiveRedirect>
-          <button :if={@actor} :on-click={@clear_actor} type="button">
-            <svg width="1em" height="1em" viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg">
+            <%= user_display(@actor) %>
+          </.link>
+          <button :if={@actor} phx-click={@clear_actor} type="button">
+            <svg
+              width="1em"
+              height="1em"
+              viewBox="0 0 16 16"
+              fill="white"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 fill-rule="evenodd"
                 d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"
@@ -94,32 +98,36 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
         </span>
       </div>
       <div :if={!@actor}>
-        {render_actor_link(assigns, @actor_resources)}
+        <%= render_actor_link(assigns, @actor_resources) %>
       </div>
     </div>
     """
   end
 
   defp render_actor_link(assigns, [{api, resource}]) do
-    ~F"""
-    <LiveRedirect to={"#{@prefix}?api=#{AshAdmin.Api.name(api)}&resource=#{AshAdmin.Resource.name(resource)}&action_type=read"}>
-      Set {AshAdmin.Resource.name(resource)}
-    </LiveRedirect>
+    assigns = assign(assigns, api: api, resource: resource)
+
+    ~H"""
+    <.link navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=read"}>
+      Set <%= AshAdmin.Resource.name(@resource) %>
+    </.link>
     """
   end
 
   defp render_actor_link(assigns, apis_and_resources) do
-    ~F"""
+    assigns = assign(assigns, apis_and_resources: apis_and_resources)
+
+    ~H"""
     <div aria-labelledby="actor-banner">
-      <LiveRedirect
-        to={"#{@prefix}?api=#{AshAdmin.Api.name(api)}&resource=#{AshAdmin.Resource.name(resource)}&action_type=read"}
-        :for.with_index={{{api, resource}, i} <- apis_and_resources}
+      <.link
+        :for={{{api, resource}, i} <- Enum.with_index(@apis_and_resources)}
+        navigate={"#{@prefix}?api=#{AshAdmin.Api.name(api)}&resource=#{AshAdmin.Resource.name(resource)}&action_type=read"}
       >
-        Set {AshAdmin.Resource.name(resource)}
-        <span :if={i != Enum.count(apis_and_resources) - 1}>
+        Set <%= AshAdmin.Resource.name(resource) %>
+        <span :if={i != Enum.count(@apis_and_resources) - 1}>
           |
         </span>
-      </LiveRedirect>
+      </.link>
     </div>
     """
   end

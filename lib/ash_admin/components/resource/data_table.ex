@@ -1,32 +1,127 @@
 defmodule AshAdmin.Components.Resource.DataTable do
   @moduledoc false
-  use Surface.LiveComponent
+  use Phoenix.LiveComponent
 
   import AshAdmin.Helpers
   import AshPhoenix.LiveView
+  import Tails
   alias AshAdmin.Components.Resource.Table
-  alias Surface.Components.Form
 
-  prop(resource, :atom)
-  prop(api, :atom)
-  prop(action, :any)
-  prop(authorizing, :boolean)
-  prop(set_actor, :event, required: true)
-  prop(actor, :any)
-  prop(url_path, :any)
-  prop(params, :any)
-  prop(table, :any, required: true)
-  prop(tables, :any, required: true)
-  prop(prefix, :any, required: true)
-  prop(tenant, :any, required: true)
-  prop(polymorphic_actions, :any, required: true)
+  attr :resource, :atom
+  attr :api, :atom
+  attr :action, :any
+  attr :authorizing, :boolean
+  attr :actor, :any
+  attr :url_path, :any
+  attr :params, :any
+  attr :table, :any, required: true
+  attr :tables, :any, required: true
+  attr :prefix, :any, required: true
+  attr :tenant, :any, required: true
+  attr :polymorphic_actions, :any, required: true
 
-  data(initialized, :boolean, default: false)
-  data(data, :any)
-  data(query, :any, default: nil)
-  data(page_params, :any, default: nil)
-  data(page_num, :any, default: nil)
-  data(thousand_records_warning, :boolean, default: false)
+  def render(assigns) do
+    ~H"""
+    <div>
+      <div class="sm:mt-0 bg-gray-300 min-h-screen">
+        <div
+          :if={@action.arguments != []}
+          class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10"
+        >
+          <div class="md:mt-0 md:col-span-2">
+            <div class="shadow-lg overflow-hidden pt-2 sm:rounded-md bg-white">
+              <div class="px-4 sm:p-6">
+                <.form
+                  :let={form}
+                  :if={@query}
+                  as={:query}
+                  for={@query}
+                  phx-change="validate"
+                  phx-submit="save"
+                  phx-target={@myself}
+                >
+                  <%= AshAdmin.Components.Resource.Form.render_attributes(
+                    assigns,
+                    @resource,
+                    @action,
+                    form
+                  ) %>
+                  <div class="px-4 py-3 text-right sm:px-6">
+                    <button
+                      type="submit"
+                      class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                      Run Query
+                    </button>
+                  </div>
+                </.form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div :if={@tables != []} class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10">
+          <div class="md:mt-0 md:col-span-2">
+            <div class="px-4 sm:p-6">
+              <AshAdmin.Components.Resource.SelectTable.table
+                resource={@resource}
+                action={@action}
+                on_change="change_table"
+                target={@myself}
+                table={@table}
+                tables={@tables}
+                polymorphic_actions={@polymorphic_actions}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div :if={@action.arguments == [] || @params["args"]} class="h-full overflow-auto md:mx-4">
+          <div class="shadow-lg overflow-auto sm:rounded-md bg-white">
+            <div :if={match?({:error, _}, @data)}>
+              <% {:error, %{query: query}} = @data %>
+              <ul>
+                <li :for={error <- query.errors}>
+                  <%= message(error) %>
+                </li>
+              </ul>
+            </div>
+            <div class="px-2">
+              <%= render_pagination_links(assigns, :top) %>
+
+              <div :if={@thousand_records_warning && !@action.get?}>
+                Only showing up to 1000 rows. To show more, enable
+                <a href="http://ash-hq.org/docs/guides/ash/2.5.9/topics/pagination">pagination</a>
+                for the action in question.
+              </div>
+              <Table.table
+                :if={match?({:ok, _data}, @data)}
+                table={@table}
+                data={data(@data)}
+                resource={@resource}
+                api={@api}
+                attributes={AshAdmin.Resource.table_columns(@resource)}
+                format_fields={AshAdmin.Resource.format_fields(@resource)}
+                prefix={@prefix}
+              />
+              <%= render_pagination_links(assigns, :bottom) %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  def mount(socket) do
+    {:ok,
+     socket
+     |> assign_new(:initialized, fn -> false end)
+     |> assign_new(:default, fn -> nil end)
+     |> assign_new(:page_params, fn -> nil end)
+     |> assign_new(:page_num, fn -> nil end)
+     |> assign_new(:thousand_records_warning, fn -> false end)}
+  end
 
   def update(assigns, socket) do
     if assigns[:initialized] do
@@ -150,93 +245,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
     end
   end
 
-  def render(assigns) do
-    ~F"""
-    <div>
-      <div class="sm:mt-0 bg-gray-300 min-h-screen">
-        <div
-          :if={@action.arguments != []}
-          class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10"
-        >
-          <div class="md:mt-0 md:col-span-2">
-            <div class="shadow-lg overflow-hidden pt-2 sm:rounded-md bg-white">
-              <div class="px-4 sm:p-6">
-                <Form
-                  :if={@query}
-                  as={:query}
-                  for={@query}
-                  change="validate"
-                  submit="save"
-                  opts={phx_target: @myself}
-                  :let={form: form}
-                >
-                  {AshAdmin.Components.Resource.Form.render_attributes(assigns, @resource, @action, form)}
-                  <div class="px-4 py-3 text-right sm:px-6">
-                    <button
-                      type="submit"
-                      class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Run Query
-                    </button>
-                  </div>
-                </Form>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div :if={@tables != []} class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10">
-          <div class="md:mt-0 md:col-span-2">
-            <div class="px-4 sm:p-6">
-              <AshAdmin.Components.Resource.SelectTable
-                resource={@resource}
-                action={@action}
-                on_change="change_table"
-                table={@table}
-                tables={@tables}
-                polymorphic_actions={@polymorphic_actions}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div :if={@action.arguments == [] || @params["args"]} class="h-full overflow-auto md:mx-4">
-          <div class="shadow-lg overflow-auto sm:rounded-md bg-white">
-            <div :if={match?({:error, _}, @data)}>
-              {{:error, %{query: query}} = @data
-              nil}
-              <ul>
-                <li :for={error <- query.errors}>
-                  {message(error)}
-                </li>
-              </ul>
-            </div>
-            <div class="px-2">
-              {render_pagination_links(assigns, :top)}
-
-              <div :if={@thousand_records_warning && !@action.get?}>
-                Only showing up to 1000 rows. To show more, enable <a href="http://ash-hq.org/docs/guides/ash/2.5.9/topics/pagination">pagination</a> for the action in question.
-              </div>
-              <Table
-                :if={match?({:ok, _data}, @data)}
-                table={@table}
-                data={data(@data)}
-                resource={@resource}
-                api={@api}
-                set_actor={@set_actor}
-                attributes={AshAdmin.Resource.table_columns(@resource)}
-                format_fields={AshAdmin.Resource.format_fields(@resource)}
-                prefix={@prefix}
-              />
-              {render_pagination_links(assigns, :bottom)}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
   def handle_event("next_page", _, socket) do
     params = %{"page" => page_link_params(socket.assigns.data, "next")}
 
@@ -280,9 +288,11 @@ defmodule AshAdmin.Components.Resource.DataTable do
   end
 
   defp render_pagination_links(assigns, placement) do
-    ~F"""
+    assigns = assign(assigns, :placement, placement)
+
+    ~H"""
     <div
-      :if={(offset?(@data) || keyset?(@data)) && show_pagination_links?(@data, placement)}
+      :if={(offset?(@data) || keyset?(@data)) && show_pagination_links?(@data, @placement)}
       class="w-5/6 mx-auto"
     >
       <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
@@ -290,15 +300,15 @@ defmodule AshAdmin.Components.Resource.DataTable do
           <button
             :if={!(keyset?(@data) && is_nil(@params["page"])) && prev_page?(@data)}
             phx-target={@myself}
-            :on-click="prev_page"
+            phx-click="prev_page"
             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
           >
             Previous
           </button>
-          {render_pagination_information(assigns, true)}
+          <%= render_pagination_information(assigns, true) %>
           <button
             :if={next_page?(@data)}
-            :on-click="next_page"
+            phx-click="next_page"
             phx-target={@myself}
             class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
           >
@@ -307,13 +317,16 @@ defmodule AshAdmin.Components.Resource.DataTable do
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            {render_pagination_information(assigns)}
+            <%= render_pagination_information(assigns) %>
           </div>
           <div>
-            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+            <nav
+              class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+              aria-label="Pagination"
+            >
               <button
                 :if={!(keyset?(@data) && is_nil(@params["page"])) && prev_page?(@data)}
-                :on-click="prev_page"
+                phx-click="prev_page"
                 phx-target={@myself}
                 class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
               >
@@ -334,13 +347,13 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 </svg>
               </button>
               <span :if={offset?(@data)}>
-                {render_page_links(assigns, leading_page_nums(@data))}
-                {render_middle_page_num(assigns, @page_num, trailing_page_nums(@data))}
-                {render_page_links(assigns, trailing_page_nums(@data))}
+                <%= render_page_links(assigns, leading_page_nums(@data)) %>
+                <%= render_middle_page_num(assigns, @page_num, trailing_page_nums(@data)) %>
+                <%= render_page_links(assigns, trailing_page_nums(@data)) %>
               </span>
               <button
                 :if={next_page?(@data)}
-                :on-click="next_page"
+                phx-click="next_page"
                 phx-target={@myself}
                 class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
               >
@@ -369,37 +382,40 @@ defmodule AshAdmin.Components.Resource.DataTable do
   end
 
   defp render_page_links(assigns, page_nums) do
-    ~F"""
+    assigns = assign(assigns, page_nums: page_nums)
+
+    ~H"""
     <button
-      :on-click="specific_page"
+      :for={i <- @page_nums}
+      phx-click="specific_page"
       phx-target={@myself}
       phx-value-page={i}
-      :for={i <- page_nums}
       class={
-        "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50",
-        "bg-gray-300": @page_num == i
+        classes([
+          "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50",
+          "bg-gray-300": @page_num == i
+        ])
       }
     >
-      {i}
+      <%= i %>
     </button>
     """
   end
 
   defp render_pagination_information(assigns, small? \\ false) do
-    ~F"""
-    <p class={"text-sm text-gray-700", "sm:hidden": small?}>
+    assigns = assign(assigns, :small, small?)
+
+    ~H"""
+    <p class={classes(["text-sm text-gray-700", "sm:hidden": @small])}>
       <span :if={offset?(@data)}>
-        Showing
-        <span class="font-medium">{first(@data)}</span>
-        to
-        <span class="font-medium">{last(@data)}</span>
-        {#if count(@data)}
+        Showing <span class="font-medium"><%= first(@data) %></span>
+        to <span class="font-medium"><%= last(@data) %></span>
+        <%= if count(@data) do %>
           of
-        {/if}
+        <% end %>
       </span>
       <span :if={count(@data)}>
-        <span class="font-medium">{count(@data)}</span>
-        results
+        <span class="font-medium"><%= count(@data) %></span> results
       </span>
     </p>
     """
@@ -445,19 +461,24 @@ defmodule AshAdmin.Components.Resource.DataTable do
   defp render_middle_page_num(assigns, num, trailing_page_nums) do
     ellipsis? = num in trailing_page_nums || num <= 3
 
-    ~F"""
+    assigns =
+      assign(assigns, num: num, trailing_page_nums: trailing_page_nums, ellipsis: ellipsis?)
+
+    ~H"""
     <span
       :if={show_ellipses?(@data)}
       class={
-        "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700",
-        "bg-gray-300": !ellipsis?
+        classes([
+          "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700",
+          "bg-gray-300": !@ellipsis
+        ])
       }
     >
-      <span :if={ellipsis?}>
+      <span :if={@ellipsis}>
         ...
       </span>
-      <span :if={!ellipsis?}>
-        {num}
+      <span :if={!@ellipsis}>
+        <%= @num %>
       </span>
     </span>
     """

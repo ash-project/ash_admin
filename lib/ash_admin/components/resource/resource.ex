@@ -1,37 +1,33 @@
 defmodule AshAdmin.Components.Resource do
   @moduledoc false
-  use Surface.LiveComponent
+  use Phoenix.LiveComponent
 
   require Ash.Query
 
   alias AshAdmin.Components.Resource.{DataTable, Form, Info, Nav, Show}
 
   # prop hide_filter, :boolean, default: true
-  prop(resource, :any, required: true)
-  prop(api, :any, required: true)
-  prop(tab, :string, required: true)
-  prop(action, :any)
-  prop(actor, :any, required: true)
-  prop(set_actor, :event, required: true)
-  prop(authorizing, :boolean, required: true)
-  prop(tenant, :string, required: true)
-  prop(url_path, :string, default: "")
-  prop(params, :map, default: %{})
-  prop(primary_key, :any, default: nil)
-  prop(record, :any, default: nil)
-  prop(table, :any, default: nil)
-  prop(tables, :any, default: nil)
-  prop(prefix, :any, default: nil)
-  prop(action_type, :atom)
-  prop(polymorphic_actions, :any)
-
-  data(filter_open, :boolean, default: false)
-  slot(default)
+  attr :resource, :any, required: true
+  attr :api, :any, required: true
+  attr :tab, :string, required: true
+  attr :action, :any
+  attr :actor, :any, required: true
+  attr :authorizing, :boolean, required: true
+  attr :tenant, :string, required: true
+  attr :url_path, :string, default: ""
+  attr :params, :map, default: %{}
+  attr :primary_key, :any, default: nil
+  attr :record, :any, default: nil
+  attr :table, :any, default: nil
+  attr :tables, :any, default: nil
+  attr :prefix, :any, default: nil
+  attr :action_type, :atom
+  attr :polymorphic_actions, :any
 
   def render(assigns) do
-    ~F"""
+    ~H"""
     <div class="content-center h-screen">
-      <Nav
+      <Nav.nav
         resource={@resource}
         api={@api}
         tab={@tab}
@@ -39,13 +35,12 @@ defmodule AshAdmin.Components.Resource do
         table={@table}
         prefix={@prefix}
       />
-      <div class="mx-24 relative grid grid-cols-1 justify-items-center">
-      </div>
-      <#slot />
+      <div class="mx-24 relative grid grid-cols-1 justify-items-center"></div>
       <div :if={@record && match?({:ok, record} when not is_nil(record), @record) && @tab == "update"}>
-        {{:ok, record} = @record
-        nil}
-        <Form
+        <% {:ok, record} = @record %>
+        <.live_component
+          module={Form}
+          polymorphic_actions={@polymorphic_actions}
           type={:update}
           record={record}
           resource={@resource}
@@ -55,7 +50,6 @@ defmodule AshAdmin.Components.Resource do
           api={@api}
           id={update_id(@resource)}
           actor={@actor}
-          set_actor={@set_actor}
           authorizing={@authorizing}
           tenant={@tenant}
           table={@table}
@@ -63,17 +57,19 @@ defmodule AshAdmin.Components.Resource do
           prefix={@prefix}
         />
       </div>
-      <div :if={@record && match?({:ok, record} when not is_nil(record), @record) && @tab == "destroy"}>
-        {{:ok, record} = @record
-        nil}
-        <Form
+      <div :if={
+        @record && match?({:ok, record} when not is_nil(record), @record) && @tab == "destroy"
+      }>
+        <% {:ok, record} = @record %>
+        <.live_component
+          module={Form}
+          polymorphic_actions={@polymorphic_actions}
           type={:destroy}
           record={record}
           resource={@resource}
           url_path={@url_path}
           action={@action}
           params={@params}
-          set_actor={@set_actor}
           api={@api}
           id={destroy_id(@resource)}
           actor={@actor}
@@ -84,8 +80,9 @@ defmodule AshAdmin.Components.Resource do
           prefix={@prefix}
         />
       </div>
-      <Show
+      <.live_component
         :if={@tab == "show" && match?({:ok, %_{}}, @record)}
+        module={Show}
         resource={@resource}
         api={@api}
         id={show_id(@resource)}
@@ -93,24 +90,23 @@ defmodule AshAdmin.Components.Resource do
         actor={@actor}
         authorizing={@authorizing}
         tenant={@tenant}
-        set_actor={@set_actor}
         table={@table}
         prefix={@prefix}
       />
-      <Info
+      <Info.info
         :if={@tab == "info" || (is_nil(@tab) && is_nil(@action_type))}
         resource={@resource}
         api={@api}
         prefix={@prefix}
       />
-      <Form
+      <.live_component
         :if={@tab == "create"}
+        module={Form}
         type={:create}
         resource={@resource}
         url_path={@url_path}
         params={@params}
         api={@api}
-        set_actor={@set_actor}
         action={@action}
         id={create_id(@resource)}
         actor={@actor}
@@ -121,8 +117,9 @@ defmodule AshAdmin.Components.Resource do
         prefix={@prefix}
         polymorphic_actions={@polymorphic_actions}
       />
-      <DataTable
+      <.live_component
         :if={@action_type == :read && @tab != "show"}
+        module={DataTable}
         polymorphic_actions={@polymorphic_actions}
         resource={@resource}
         action={@action}
@@ -130,7 +127,6 @@ defmodule AshAdmin.Components.Resource do
         api={@api}
         url_path={@url_path}
         params={@params}
-        set_actor={@set_actor}
         id={data_table_id(@resource)}
         authorizing={@authorizing}
         table={@table}
@@ -140,6 +136,10 @@ defmodule AshAdmin.Components.Resource do
       />
     </div>
     """
+  end
+
+  def mount(socket) do
+    {:ok, assign(socket, :filter_open, false)}
   end
 
   defp unwrap({:ok, val}), do: val

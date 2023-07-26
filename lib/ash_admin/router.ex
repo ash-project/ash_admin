@@ -65,7 +65,8 @@ defmodule AshAdmin.Router do
 
       live_session :ash_admin,
         on_mount: List.wrap(opts[:on_mount]),
-        session: {AshAdmin.Router, :__session__, [%{"prefix" => path}, List.wrap(opts[:session])]},
+        session:
+          {AshAdmin.Router, :__session__, [%{"prefix" => path}, List.wrap(opts[:session])]},
         root_layout: {AshAdmin.LayoutView, :root} do
         live(
           "#{path}/*route",
@@ -88,7 +89,8 @@ defmodule AshAdmin.Router do
   ]
 
   @doc false
-  def __session__(conn, [session, additional_hooks]), do: __session__(conn, session, additional_hooks)
+  def __session__(conn, [session, additional_hooks]),
+    do: __session__(conn, session, additional_hooks)
 
   def __session__(conn, session, additional_hooks \\ []) do
     session =

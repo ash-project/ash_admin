@@ -1,27 +1,26 @@
 defmodule AshAdmin.Components.TopNav.Dropdown do
   @moduledoc false
-  use Surface.LiveComponent
+  use Phoenix.LiveComponent
+  import Tails
 
-  alias Surface.Components.LiveRedirect
-
-  prop(name, :string, required: true)
-  prop(groups, :list, required: true)
-  prop(group_labels, :keyword, required: false)
-  prop(active, :boolean, required: true)
-  prop(class, :css_class)
-
-  data(open, :boolean, default: false)
+  attr :name, :string, required: true
+  attr :groups, :list, required: true
+  attr :group_labels, :any, required: false
+  attr :active, :boolean, required: true
+  attr :class, :string
 
   def render(assigns) do
-    ~F"""
-    <div class={"relative", @class} phx-target={@myself}>
-      <div phx-click-away="close" phx-target={@myself}>
+    ~H"""
+    <div class={classes(["relative", @class])} phx-target={@myself}>
+      <div phx-target={@myself}>
         <button
           type="button"
           class={
-            "inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500",
-            "bg-gray-800 hover:bg-gray-900 text-white": @active,
-            "bg-white text-gray-700 hover:bg-gray-300": !@active
+            classes([
+              "inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500",
+              "bg-gray-800 hover:bg-gray-900 text-white": @active,
+              "bg-white text-gray-700 hover:bg-gray-300": !@active
+            ])
           }
           phx-click="toggle"
           phx-target={@myself}
@@ -29,7 +28,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
           aria-haspopup="true"
           aria-expanded="true"
         >
-          {@name}
+          <%= @name %>
 
           <svg
             class="-mr-1 ml-2 h-5 w-5"
@@ -46,49 +45,67 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
           </svg>
         </button>
 
-        {#if @open}
+        <%= if @open do %>
           <div
+            phx-click-away="close"
             class={
-              "origin-top-right absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 z-10",
-              "bg-gray-600 hover:bg-gray-700": single_active_group?(@groups)
+              classes([
+                "origin-top-right absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 z-10",
+                "bg-gray-600 hover:bg-gray-700": single_active_group?(@groups)
+              ])
             }
             role="menu"
             aria-orientation="vertical"
             phx-target={@myself}
             id={"#{@id}_dropown"}
           >
-            {#for group when group != [] <- @groups}
-              <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby={"#{@id}_dropown"}>
+            <%= for group when group != [] <- @groups do %>
+              <div
+                class="py-1"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby={"#{@id}_dropown"}
+              >
                 <.group_label item={hd(group)} group_labels={@group_labels} />
-                {#for link <- group}
-                  <LiveRedirect
-                    to={link.to}
+                <%= for link <- group do %>
+                  <.link
+                    navigate={link.to}
                     class={
-                      "block px-4 py-2 text-sm ",
-                      "bg-gray-600 text-white hover:bg-gray-700": Map.get(link, :active),
-                      "text-gray-700 hover:bg-gray-100 hover:text-gray-900": !Map.get(link, :active)
+                      classes([
+                        "block px-4 py-2 text-sm ",
+                        "bg-gray-600 text-white hover:bg-gray-700": Map.get(link, :active),
+                        "text-gray-700 hover:bg-gray-100 hover:text-gray-900": !Map.get(link, :active)
+                      ])
                     }
-                    opts={role: "menuitem"}
+                    role="menuotem"
                   >
-                    {link.text}
-                  </LiveRedirect>
-                {/for}
+                    <%= link.text %>
+                  </.link>
+                <% end %>
               </div>
-            {/for}
+            <% end %>
           </div>
-        {/if}
+        <% end %>
       </div>
     </div>
     """
   end
 
+  def mount(socket) do
+    {:ok,
+     socket
+     |> assign(:open, false)
+     |> assign_new(:class, fn -> "" end)
+     |> assign_new(:group_labels, fn -> [] end)}
+  end
+
   defp group_label(assigns) do
     assigns = Map.put(assigns, :label_text, group_label_text(assigns))
 
-    ~F"""
-    {#if @label_text}
+    ~H"""
+    <%= if @label_text do %>
       <span class="block px-4 py-2 text-xs text-gray-400 font-semibold italic">{@label_text}</span>
-    {/if}
+    <% end %>
     """
   end
 

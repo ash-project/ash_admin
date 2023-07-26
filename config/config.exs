@@ -8,10 +8,6 @@ config :phoenix, :json_library, Jason
 config :ash_admin, ecto_repos: [Demo.Repo]
 config :ash, :use_all_identities_in_manage_relationship?, false
 
-config :surface, :components, [
-  {Surface.Components.Form.ErrorTag, default_class: "invalid-feedback"}
-]
-
 config :ash_admin, DemoWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "Hu4qQN3iKzTV4fJxhorPQlA/osH9fAMtbtjVS58PFgfw3ja5Z18Q/WSNR9wP4OfW",

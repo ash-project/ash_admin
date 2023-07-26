@@ -1,19 +1,13 @@
 defmodule AshAdmin.Components.HeroIcon do
   @moduledoc false
-  use Surface.Component
+  use Phoenix.Component
 
-  prop(name, :string)
-  prop(type, :string, values: ["solid", "outline"], default: "solid")
-  prop(class, :css_class)
+  attr :name, :string
+  attr :type, :string, values: ["solid", "outline"], default: "solid"
+  attr :class, :string, default: ""
 
-  def render(assigns) do
-    ~F"""
-    {render_heroicon(@name, @type, assigns)}
-    """
-  end
-
-  defp render_heroicon("minus", "solid", assigns) do
-    ~F"""
+  def icon(%{name: "minus", type: "solid"} = assigns) do
+    ~H"""
     <svg
       class={@class}
       xmlns="http://www.w3.org/2000/svg"
@@ -26,8 +20,8 @@ defmodule AshAdmin.Components.HeroIcon do
     """
   end
 
-  defp render_heroicon("plus", "solid", assigns) do
-    ~F"""
+  def icon(%{name: "plus", type: "solid"} = assigns) do
+    ~H"""
     <svg class={@class} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
       <path
         fill-rule="evenodd"
@@ -38,8 +32,8 @@ defmodule AshAdmin.Components.HeroIcon do
     """
   end
 
-  defp render_heroicon("search-circle", "solid", assigns) do
-    ~F"""
+  def icon(%{name: "search-circle", type: "solid"} = assigns) do
+    ~H"""
     <svg class={@class} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
       <path d="M9 9a2 2 0 114 0 2 2 0 01-4 0z" />
       <path
@@ -51,8 +45,8 @@ defmodule AshAdmin.Components.HeroIcon do
     """
   end
 
-  defp render_heroicon("key", "solid", assigns) do
-    ~F"""
+  def icon(%{name: "key", type: "solid"} = assigns) do
+    ~H"""
     <svg class={@class} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
       <path
         fill-rule="evenodd"
@@ -63,8 +57,8 @@ defmodule AshAdmin.Components.HeroIcon do
     """
   end
 
-  defp render_heroicon("check", "solid", assigns) do
-    ~F"""
+  def icon(%{name: "check", type: "solid"} = assigns) do
+    ~H"""
     <svg class={@class} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
       <path
         fill-rule="evenodd"
@@ -75,8 +69,8 @@ defmodule AshAdmin.Components.HeroIcon do
     """
   end
 
-  defp render_heroicon("x", "solid", assigns) do
-    ~F"""
+  def icon(%{name: "x", type: "solid"} = assigns) do
+    ~H"""
     <svg class={@class} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
       <path
         fill-rule="evenodd"
@@ -87,8 +81,8 @@ defmodule AshAdmin.Components.HeroIcon do
     """
   end
 
-  defp render_heroicon("information-circle", "solid", assigns) do
-    ~F"""
+  def icon(%{name: "information-circle", type: "solid"} = assigns) do
+    ~H"""
     <svg class={@class} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
       <path
         fill-rule="evenodd"
@@ -99,16 +93,16 @@ defmodule AshAdmin.Components.HeroIcon do
     """
   end
 
-  defp render_heroicon("pencil", "solid", assigns) do
-    ~F"""
+  def icon(%{name: "pencil", type: "solid"} = assigns) do
+    ~H"""
     <svg class={@class} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
       <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
     </svg>
     """
   end
 
-  defp render_heroicon("x-circle", "solid", assigns) do
-    ~F"""
+  def icon(%{name: "x-circle", type: "solid"} = assigns) do
+    ~H"""
     <svg class={@class} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
       <path
         fill-rule="evenodd"
