@@ -397,6 +397,14 @@ defmodule AshAdmin.Components.Resource.Show do
         """
       end
     else
+      assigns =
+        assign(assigns,
+          resource: resource,
+          record: record,
+          attribute: attribute,
+          nested: nested?
+        )
+
       if attribute.type == Ash.Type.String do
         cond do
           short_text?(resource, attribute) ->
