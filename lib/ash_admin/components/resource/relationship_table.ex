@@ -10,16 +10,20 @@ defmodule AshAdmin.Components.Resource.RelationshipTable do
   def table(assigns) do
     ~H"""
     <div :if={Enum.any?(relationships(@resource))} class="w-full">
-      <h1 class="text-left text-3xl rounded-t py-8">
+      <h1 class="text-3xl rounded-t py-8">
         Relationships
       </h1>
       <table class="table-auto w-full">
         <thead>
           <tr>
-            <th scope="col" class="text-left">Name</th>
-            <th scope="col" class="text-left">Type</th>
-            <th scope="col" class="text-left">Destination</th>
-            <th scope="col" class="text-left">Description</th>
+            <th scope="col" class="px-2 py-3 text-left text-sm font-semibold text-gray-900">Name</th>
+            <th scope="col" class="px-2 py-3 text-left text-sm font-semibold text-gray-900">Type</th>
+            <th scope="col" class="px-2 py-3 text-left text-sm font-semibold text-gray-900">
+              Destination
+            </th>
+            <th scope="col" class="px-2 py-3 text-left text-sm font-semibold text-gray-900">
+              Description
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -27,18 +31,20 @@ defmodule AshAdmin.Components.Resource.RelationshipTable do
             :for={{relationship, index} <- Enum.with_index(relationships(@resource))}
             class={classes(["h-10", "bg-gray-200": rem(index, 2) == 0])}
           >
-            <th scope="row">
+            <th scope="row" class="px-2 py-3 text-left text-sm font-semibold text-gray-900">
               <%= relationship.name %>
             </th>
-            <td class="text-left">
+            <td class="px-2 py-3 text-left text-sm text-gray-900">
               <%= relationship.type %>
             </td>
-            <td class="text-left">
+            <td class="px-2 py-3 text-left text-sm text-gray-900">
               <.link navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(relationship.destination)}"}>
                 <%= AshAdmin.Resource.name(relationship.destination) %>
               </.link>
             </td>
-            <td class="text-left max-w-sm min-w-sm"><%= relationship.description %></td>
+            <td class="max-w-sm min-w-sm px-2 py-3 text-left text-sm text-gray-900">
+              <%= relationship.description %>
+            </td>
           </tr>
         </tbody>
       </table>
