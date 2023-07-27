@@ -72,6 +72,7 @@ defmodule AshAdmin.MixProject do
       credo: "credo --strict",
       migrate: "ash_postgres.migrate --migrations-path dev/repo/migrations",
       migrate_tenants: "ash_postgres.migrate --migrations-path dev/repo/tenant_migrations",
+      seed: "run dev/repo/seeds.exs --truncate",
       setup: ["deps.get", "cmd npm install --prefix assets"],
       dev: "run --no-halt dev.exs --config config",
       sobelow: "sobelow --ignore XSS.Raw",
