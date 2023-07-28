@@ -57,6 +57,10 @@ defmodule AshAdmin.Components.TopNav.TenantForm do
     """
   end
 
+  def mount(socket) do
+    {:ok, assign(socket, :editing_tenant, false)}
+  end
+
   def handle_event("start_editing_tenant", _, socket) do
     {:noreply, assign(socket, :editing_tenant, true)}
   end
