@@ -5,6 +5,29 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.9.0](https://github.com/ash-project/ash_admin/compare/v0.8.2...v0.9.0) (2023-07-28)
+
+
+
+
+### Features:
+
+* Add seed with Admin, User, Customer, Organization and Ticket (#56)
+
+### Bug Fixes:
+
+* set assigns for show block
+
+* fix behaviour and support on_mount and session
+
+### Improvements:
+
+* style the metadata tables consistently (#54)
+
+* remove surface
+
+* support setting an actor
+
 ## [v0.8.2](https://github.com/ash-project/ash_admin/compare/v0.8.1...v0.8.2) (2023-07-25)
 
 
