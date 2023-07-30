@@ -22,7 +22,7 @@ defmodule AshAdmin.Components.TopNav.TenantForm do
           value={@tenant}
           class={classes("text-black": @editing_tenant)}
         />
-        <button phx-click="stop_editing_tenant">
+        <button phx-click="stop_editing_tenant" phx-target={@myself}>
           <svg
             width="1em"
             height="1em"
