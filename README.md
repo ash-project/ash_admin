@@ -27,15 +27,33 @@ Ensure your apis are configured in `config.exs`
 config :my_app, ash_apis: [MyApp.Foo, MyApp.Bar]
 ```
 
-Add the admin extension to each api you want to show in the admin dashboard, and configure it to show
+Add the admin extension to each api you want to show in the admin dashboard, and configure it to 
+show. See [`AshAdmin.Api`](https://hexdocs.pm/ash_admin/AshAdmin.Api.html) for more configuration
+options.
 
 ```elixir
+# In your Api(s)
 use Ash.Api,
   extensions: [AshAdmin.Api]
 
 admin do
   show? true
 end
+```
+
+Resources in each Api will be automagically included in Admin. See 
+[`AshAdmin.Resource`](https://hexdocs.pm/ash_admin/AshAdmin.Resource.html) for resource configuration
+options. Specifically, if you app has an actor you will want to configure that. Ash Admin allows
+you to change actors and therefore doesn't rely on `Ash.set_actor`
+
+```elixir
+# In your resource that acts as an actor (e.g. User)
+use Ash.Resource,
+  extensions: [AshAdmin.Resource]
+
+  admin do
+    actor?(true)
+  end
 ```
 
 Modify your router to add ash admin at whatever path you'd like to serve it at.
@@ -60,6 +78,10 @@ defmodule MyAppWeb.Router do
 end
 ```
 
+**Note: there is no builtin security for your AshAdmin (except your apps normal policies). In most 
+cases you will want to secure you `/admin` routes in some way to prevent them from being 
+public**
+
 Now start your project (usually by running `mix phx.server` in a terminal) and visit `/admin` in your browser (or whatever path you gave to `ash_admin` in your router).
 
 ### Content Security Policy
@@ -83,6 +105,10 @@ This will allow AshAdmin-generated inline CSS and JS blocks to execute normally.
 ## Configuration
 
 See the documentation in [`AshAdmin.Resource`](https://hexdocs.pm/ash_admin/AshAdmin.Resource.html) and [`AshAdmin.Api`](https://hexdocs.pm/ash_admin/AshAdmin.Api.html) for information on the available configuration.
+
+## Troubleshooting
+
+If you Admin UI is not responding as expected. Check your browser's developer console for content-security-policy violations (see above).
 
 ## Development
 
