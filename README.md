@@ -27,9 +27,7 @@ Ensure your apis are configured in `config.exs`
 config :my_app, ash_apis: [MyApp.Foo, MyApp.Bar]
 ```
 
-Add the admin extension to each api you want to show in the admin dashboard, and configure it to 
-show. See [`AshAdmin.Api`](https://hexdocs.pm/ash_admin/AshAdmin.Api.html) for more configuration
-options.
+Add the admin extension to each api you want to show in AshAdmin dashboard, and configure it to show. See [`AshAdmin.Api`](https://hexdocs.pm/ash_admin/AshAdmin.Api.html) for more configuration options.
 
 ```elixir
 # In your Api(s)
@@ -41,10 +39,7 @@ admin do
 end
 ```
 
-Resources in each Api will be automagically included in Admin. See 
-[`AshAdmin.Resource`](https://hexdocs.pm/ash_admin/AshAdmin.Resource.html) for resource configuration
-options. Specifically, if you app has an actor you will want to configure that. Ash Admin allows
-you to change actors and therefore doesn't rely on `Ash.set_actor`
+Resources in each Api will be automagically included in AshAdmin. See [`AshAdmin.Resource`](https://hexdocs.pm/ash_admin/AshAdmin.Resource.html) for more resource  configuration options. Specifically, if you app has an actor you will want to configure that. Ash Admin allows you to change actors and therefore doesn't rely on `Ash.set_actor`
 
 ```elixir
 # In your resource that acts as an actor (e.g. User)
@@ -56,7 +51,7 @@ use Ash.Resource,
   end
 ```
 
-Modify your router to add ash admin at whatever path you'd like to serve it at.
+Modify your router to add AshAdmin at whatever path you'd like to serve it at.
 
 ```elixir
 defmodule MyAppWeb.Router do
@@ -78,9 +73,7 @@ defmodule MyAppWeb.Router do
 end
 ```
 
-**Note: there is no builtin security for your AshAdmin (except your apps normal policies). In most 
-cases you will want to secure you `/admin` routes in some way to prevent them from being 
-public**
+**Note: there is no builtin security for your AshAdmin (except your apps normal policies). In most cases you will want to secure your AshAdmin routes in some way to prevent them from being public**
 
 Now start your project (usually by running `mix phx.server` in a terminal) and visit `/admin` in your browser (or whatever path you gave to `ash_admin` in your router).
 
@@ -108,7 +101,7 @@ See the documentation in [`AshAdmin.Resource`](https://hexdocs.pm/ash_admin/AshA
 
 ## Troubleshooting
 
-If you Admin UI is not responding as expected. Check your browser's developer console for content-security-policy violations (see above).
+If your Admin UI is not responding as expected. Check your browser's developer console for content-security-policy violations (see above).
 
 ## Development
 
