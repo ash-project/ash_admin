@@ -10,7 +10,12 @@ defmodule AshAdmin.Components.TopNav.TenantForm do
   def render(assigns) do
     ~H"""
     <div id={@id} class="relative text-white" phx-hook="Tenant" phx-target={@myself}>
-      <.form :if={@editing_tenant} for={to_form(%{}, as: :tenant)} phx-submit={@set_tenant}>
+      <.form
+        :if={@editing_tenant}
+        for={to_form(%{}, as: :tenant)}
+        phx-submit={@set_tenant}
+        phx-target={@myself}
+      >
         <input
           type="text"
           name="tenant"
@@ -36,7 +41,7 @@ defmodule AshAdmin.Components.TopNav.TenantForm do
           </svg>
         </button>
       </.form>
-      <button :if={@tenant} phx-click={@clear_tenant}>
+      <button :if={@tenant} phx-click={@clear_tenant} phx-target={@myself}>
         <svg
           width="1em"
           height="1em"
