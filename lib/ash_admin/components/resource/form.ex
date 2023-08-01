@@ -262,18 +262,18 @@ defmodule AshAdmin.Components.Resource.Form do
       </div>
     </div>
     <div :for={{relationship, argument, opts} <- relationship_args}>
-      <%= if relationship not in @skip and @argument.name not in @skip do %>
+      <%= if relationship not in @skip and argument.name not in @skip do %>
         <label
           class="block text-sm font-medium text-gray-700"
-          for={@form.name <> "[#{@argument.name}]"}
+          for={@form.name <> "[#{argument.name}]"}
         >
           <%= to_name(argument.name) %>
         </label>
         <%= render_relationship_input(
           assigns,
-          Ash.Resource.Info.relationship(@form.source.resource, @relationship),
+          Ash.Resource.Info.relationship(@form.source.resource, relationship),
           @form,
-          @argument,
+          argument,
           opts
         ) %>
       <% end %>
