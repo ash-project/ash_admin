@@ -506,14 +506,32 @@ defmodule AshAdmin.Components.Resource.Show do
   end
 
   defp destroy?(resource) do
-    resource
-    |> Ash.Resource.Info.actions()
-    |> Enum.any?(&(&1.type == :destroy && &1.primary?))
+    case AshAdmin.Resource.destroy_actions(resource) do
+      nil ->
+        resource
+        |> Ash.Resource.Info.actions()
+        |> Enum.any?(&(&1.type == :destroy))
+
+      [] ->
+        false
+
+      _ ->
+        true
+    end
   end
 
   defp update?(resource) do
-    resource
-    |> Ash.Resource.Info.actions()
-    |> Enum.any?(&(&1.type == :update && &1.primary?))
+    case AshAdmin.Resource.update_actions(resource) do
+      nil ->
+        resource
+        |> Ash.Resource.Info.actions()
+        |> Enum.any?(&(&1.type == :update))
+
+      [] ->
+        false
+
+      _ ->
+        true
+    end
   end
 end
