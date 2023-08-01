@@ -1,49 +1,27 @@
-defmodule AshAdmin.PageNotFound do
+defmodule AshAdmin.ResourceLive.Index do
   @moduledoc false
-  defexception [:message, plug_status: 404]
-end
 
-defmodule AshAdmin.PageLive do
-  @moduledoc false
-  use Phoenix.LiveView
+  use AshAdmin.Web, :live_view
+
   import AshAdmin.Helpers
   require Ash.Query
+
   alias AshAdmin.Components.{Resource, TopNav}
 
   require Logger
 
-  def mount(socket) do
-    {:ok, socket}
-  end
-
   @impl true
   def mount(
         _params,
-        %{
-          "prefix" => prefix
-        } = session,
+        session,
         socket
       ) do
     otp_app = socket.endpoint.config(:otp_app)
-
-    prefix =
-      case prefix do
-        "/" ->
-          session["request_path"]
-
-        _ ->
-          request_path = session["request_path"]
-          [scope, _] = String.split(request_path, prefix)
-          scope <> prefix
-      end
-
-    socket = assign(socket, :prefix, prefix)
 
     apis = apis(otp_app)
 
     {:ok,
      socket
-     |> assign(:prefix, prefix)
      |> assign(:primary_key, nil)
      |> assign(:record, nil)
      |> assign(:apis, apis)
@@ -77,7 +55,7 @@ defmodule AshAdmin.PageLive do
       toggle_authorizing="toggle_authorizing"
       toggle_actor_paused="toggle_actor_paused"
       clear_actor="clear_actor"
-      prefix={@prefix}
+      prefix={ash_admin_path(@socket, "")}
     />
     <.live_component
       :if={@resource}
@@ -99,7 +77,7 @@ defmodule AshAdmin.PageLive do
       table={@table}
       tables={@tables}
       polymorphic_actions={@polymorphic_actions}
-      prefix={@prefix}
+      prefix={ash_admin_path(@socket, "")}
     />
     """
   end

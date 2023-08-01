@@ -16,7 +16,7 @@ defmodule AshAdmin.Test.PageLiveTest do
     assert html =~ "body"
     assert html =~ "String"
 
-    {:ok, _view, html} = live(conn, "/api/admin/test")
+    {:ok, _view, html} = live(conn, "/api/admin?resource=test")
 
     assert html =~ "Attributes"
     assert html =~ "body"

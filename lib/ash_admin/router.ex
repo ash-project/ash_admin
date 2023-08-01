@@ -60,20 +60,34 @@ defmodule AshAdmin.Router do
   """
   defmacro ash_admin(path, opts \\ []) do
     quote bind_quoted: [path: path, opts: opts] do
-      import Phoenix.LiveView.Router
-      live_socket_path = Keyword.get(opts, :live_socket_path, "/live")
+      scope path, alias: false, as: false do
+        import Phoenix.LiveView.Router
+        live_socket_path = Keyword.get(opts, :live_socket_path, "/live")
 
-      live_session :ash_admin,
-        on_mount: List.wrap(opts[:on_mount]),
-        session:
-          {AshAdmin.Router, :__session__, [%{"prefix" => path}, List.wrap(opts[:session])]},
-        root_layout: {AshAdmin.Layouts, :root} do
-        live(
-          "#{path}/*route",
-          AshAdmin.PageLive,
-          :page,
-          private: %{live_socket_path: live_socket_path}
-        )
+        live_session :ash_admin,
+          on_mount: List.wrap(opts[:on_mount]),
+          session:
+            {AshAdmin.Router, :__session__, [%{"prefix" => path}, List.wrap(opts[:session])]},
+          root_layout: {AshAdmin.Layouts, :root} do
+          live "/", AshAdmin.ResourceLive.Index, :index,
+            private: %{live_socket_path: live_socket_path}
+
+          forward "/", Plug.Static,
+            at: "/statics",
+            from: :ash_admin,
+            gzip: false,
+            only: AshAdmin.Web.static_paths()
+        end
+      end
+
+      unless Module.get_attribute(__MODULE__, :live_ash_admin_prefix) do
+        @live_ash_admin_prefix Phoenix.Router.scoped_path(__MODULE__, path)
+        def __live_ash_admin_prefix__ do
+          case @live_ash_admin_prefix do
+            "/" -> ""
+            path -> path
+          end
+        end
       end
     end
   end

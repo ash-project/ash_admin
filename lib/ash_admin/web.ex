@@ -2,27 +2,9 @@ defmodule AshAdmin.Web do
   @moduledoc false
   def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
 
-  def router do
-    quote do
-      use Phoenix.Router, helpers: false
-
-      # Import common connection and controller functions to use in pipelines
-      import Plug.Conn
-      import Phoenix.Controller
-      import Phoenix.LiveView.Router
-    end
-  end
-
-  def channel do
-    quote do
-      use Phoenix.Channel
-    end
-  end
-
   def live_view do
     quote do
-      use Phoenix.LiveView,
-        layout: {AshAdmin.Layouts, :app}
+      use Phoenix.LiveView
 
       unquote(html_helpers())
     end
@@ -61,15 +43,35 @@ defmodule AshAdmin.Web do
       alias Phoenix.LiveView.JS
 
       # Routes generation with the ~p sigil
-      unquote(verified_routes())
+      unquote(unverified_routes())
     end
   end
 
-  def verified_routes do
+  defp unverified_routes do
     quote do
-      use Phoenix.VerifiedRoutes,
-        router: AshAdmin.Router,
-        statics: AshAdmin.Web.static_paths()
+      alias Phoenix.LiveView.Socket
+
+      def ash_admin_path(conn_or_socket, path, params \\ %{})
+
+      def ash_admin_path(%Socket{router: phoenix_router} = socket, path, params) do
+        prefix = phoenix_router.__live_ash_admin_prefix__()
+
+        Phoenix.VerifiedRoutes.unverified_path(
+          socket,
+          phoenix_router,
+          "#{prefix}#{path}",
+          params
+        )
+      end
+
+      def ash_admin_path(
+            %Plug.Conn{private: %{phoenix_router: phoenix_router}} = conn,
+            path,
+            params
+          ) do
+        prefix = phoenix_router.__live_ash_admin_prefix__()
+        Phoenix.VerifiedRoutes.unverified_path(conn, phoenix_router, "#{prefix}#{path}", params)
+      end
     end
   end
 
