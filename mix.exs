@@ -99,7 +99,7 @@ defmodule AshAdmin.MixProject do
       {:phoenix_live_view, "~> 0.19"},
       {:phoenix_html, "~> 3.2"},
       {:jason, "~> 1.0"},
-      {:tails, "~> 0.1.6"},
+      {:tails, "~> 0.1"},
       # Dev dependencies
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
