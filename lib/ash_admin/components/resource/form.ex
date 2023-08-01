@@ -1020,6 +1020,8 @@ defmodule AshAdmin.Components.Resource.Form do
     |> Enum.join("-")
   end
 
+  defp value({:value, value}, _, _), do: value
+
   defp value(value, form, attribute) do
     if value do
       value
@@ -1270,7 +1272,10 @@ defmodule AshAdmin.Components.Resource.Form do
       end
     end
 
-    case AshPhoenix.Form.submit(form, params: form.source.params, before_submit: before_submit) do
+    case AshPhoenix.Form.submit(form,
+           params: form.source.params,
+           before_submit: before_submit
+         ) do
       {:ok, result} ->
         redirect_to(socket, result)
 
