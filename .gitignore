@@ -13,8 +13,6 @@
 # Ignore .fetch files in case you like to edit your project deps locally.
 /.fetch
 
-/assets/node_modules
-
 # If the VM crashes, it generates a dump, let's ignore it too.
 erl_crash.dump
 
@@ -24,3 +22,4 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 ash_admin-*.tar
 
+.DS_Store

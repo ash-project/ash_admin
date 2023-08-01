@@ -3,7 +3,7 @@ defmodule AshAdmin.Components.Resource.Table do
   use Phoenix.Component
 
   import AshAdmin.Helpers
-  alias AshAdmin.Components.HeroIcon
+  import AshAdmin.CoreComponents
   alias Ash.Resource.Relationships.{BelongsTo, HasOne}
 
   attr :attributes, :any, default: nil
@@ -34,19 +34,19 @@ defmodule AshAdmin.Components.Resource.Table do
               <div class="flex h-max justify-items-center">
                 <div :if={AshAdmin.Resource.show_action(@resource)}>
                   <.link navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&tab=show&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
-                    <HeroIcon.icon name="information-circle" class="h-5 w-5 text-gray-500" />
+                    <.icon name="hero-information-circle-solid" class="h-5 w-5 text-gray-500" />
                   </.link>
                 </div>
 
                 <div :if={AshAdmin.Helpers.primary_action(@resource, :update)}>
                   <.link navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&action=#{AshAdmin.Helpers.primary_action(@resource, :update).name}&tab=update&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
-                    <HeroIcon.icon name="pencil" class="h-5 w-5 text-gray-500" />
+                    <.icon name="hero-pencil-solid" class="h-5 w-5 text-gray-500" />
                   </.link>
                 </div>
 
                 <div :if={AshAdmin.Helpers.primary_action(@resource, :destroy)}>
                   <.link navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&action=#{AshAdmin.Helpers.primary_action(@resource, :destroy).name}&tab=destroy&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
-                    <HeroIcon.icon name="x-circle" class="h-5 w-5 text-gray-500" />
+                    <.icon name="hero-x-circle-solid" class="h-5 w-5 text-gray-500" />
                   </.link>
                 </div>
 
@@ -57,7 +57,7 @@ defmodule AshAdmin.Components.Resource.Table do
                   phx-value-api={@api}
                   phx-value-pkey={encode_primary_key(record)}
                 >
-                  <HeroIcon.icon name="key" class="h-5 w-5 text-gray-500" />
+                  <.icon name="hero-key-solid" class="h-5 w-5 text-gray-500" />
                 </button>
               </div>
             </td>
