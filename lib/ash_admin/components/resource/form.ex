@@ -111,7 +111,7 @@ defmodule AshAdmin.Components.Resource.Form do
           <label for="action">Action</label>
           <%= Phoenix.HTML.Form.select(form, :action, actions(@resource, @type),
             disabled: Enum.count(actions(@resource, @type)) <= 1,
-            select: to_string(@action.name)
+            selected: to_string(@action.name)
           ) %>
         </.form>
       </div>
@@ -1101,19 +1101,19 @@ defmodule AshAdmin.Components.Resource.Form do
     case socket.assigns.action.type do
       :create ->
         {:noreply,
-         push_redirect(socket,
+         push_patch(socket,
            to: self_path(socket.assigns.url_path, socket.assigns.params, %{"table" => table})
          )}
 
       :update ->
         {:noreply,
-         push_redirect(socket,
+         push_patch(socket,
            to: self_path(socket.assigns.url_path, socket.assigns.params, %{"table" => table})
          )}
 
       :destroy ->
         {:noreply,
-         push_redirect(socket,
+         push_patch(socket,
            to: self_path(socket.assigns.url_path, socket.assigns.params, %{"table" => table})
          )}
     end
@@ -1132,28 +1132,11 @@ defmodule AshAdmin.Components.Resource.Form do
         end
       )
 
-    case action.type do
-      :create ->
-        {:noreply,
-         push_redirect(socket,
-           to:
-             self_path(socket.assigns.url_path, socket.assigns.params, %{"action" => action.name})
-         )}
-
-      :update ->
-        {:noreply,
-         push_redirect(socket,
-           to:
-             self_path(socket.assigns.url_path, socket.assigns.params, %{"action" => action.name})
-         )}
-
-      :destroy ->
-        {:noreply,
-         push_redirect(socket,
-           to:
-             self_path(socket.assigns.url_path, socket.assigns.params, %{"action" => action.name})
-         )}
-    end
+    {:noreply,
+     push_patch(socket,
+       to: self_path(socket.assigns.url_path, socket.assigns.params, %{"action" => action.name}),
+       replace: true
+     )}
   end
 
   def handle_event("change_action", _, socket) do
