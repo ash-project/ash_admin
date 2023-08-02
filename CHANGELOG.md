@@ -5,6 +5,21 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.9.3](https://github.com/ash-project/ash_admin/compare/v0.9.2...v0.9.3) (2023-08-02)
+
+
+
+
+### Bug Fixes:
+
+* support cross-api relationships in show links
+
+* use `push_patch` instead of `push_redirect`
+
+### Improvements:
+
+* Ui consistency (#62)
+
 ## [v0.9.2](https://github.com/ash-project/ash_admin/compare/v0.9.1...v0.9.2) (2023-08-02)
 
 
