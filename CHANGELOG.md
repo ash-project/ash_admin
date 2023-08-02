@@ -5,6 +5,35 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.9.1](https://github.com/ash-project/ash_admin/compare/v0.9.0...v0.9.1) (2023-08-02)
+
+
+
+
+### Bug Fixes:
+
+* use connect params for persisted state
+
+* properly persist cookies
+
+* create-form: errors from removal of surface (#60)
+
+* properly detect update and destroy actions
+
+* revalidate with params on submit
+
+* send set tenant to parent liveview
+
+* set phx-target
+
+* set phx-target on tenant form
+
+* fix editing_tenant in top_nav
+
+### Improvements:
+
+* loosen tails dependency
+
 ## [v0.9.0](https://github.com/ash-project/ash_admin/compare/v0.8.2...v0.9.0) (2023-07-28)
 
 
