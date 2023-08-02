@@ -9,6 +9,9 @@ defmodule AshAdmin.ActorPlug.Plug do
     otp_app = socket.endpoint.config(:otp_app)
     apis = apis(otp_app)
 
+    session =
+      Phoenix.LiveView.get_connect_params(socket) || session
+
     actor_paused =
       if is_nil(session["actor_paused"]) do
         true

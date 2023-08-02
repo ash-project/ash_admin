@@ -128,15 +128,6 @@ Hooks.Actor = {
     this.handleEvent("toggle_actor_paused", (payload) => {
       document.cookie = "actor_paused" + "=" + payload.actor_paused + ";path=/";
     });
-
-    this.pushEvent("set_actor_from_session", {
-      actor_resource: document.cookie.actor_resource,
-      actor_primary_key: document.cookie.actor_primary_key,
-      actor_action: document.cookie.actor_action,
-      actor_api: document.cookie.actor_api,
-      actor_authorizing: document.cookie.actor_authorizing,
-      actor_paused: document.cookie.actor_paused
-    })
   },
 };
 
@@ -166,8 +157,27 @@ Hooks.MaintainAttrs = {
   },
 };
 
+function getCookie(name) {
+  var re = new RegExp(name + "=([^;]+)");
+  var value = re.exec(document.cookie);
+  return (value != null) ? unescape(value[1]) : null;
+};
+
+
+let params = () => {
+  return {
+    _csrf_token: csrfToken, 
+    actor_resource: getCookie("actor_resource"),
+    actor_primary_key: getCookie("actor_primary_key"),
+    actor_action: getCookie("actor_action"),
+    actor_api: getCookie("actor_api"),
+    actor_authorizing: getCookie("actor_authorizing"),
+    actor_paused: getCookie("actor_paused")
+  }
+}
+
 let liveSocket = new LiveSocket(socketPath, Socket, {
-  params: { _csrf_token: csrfToken },
+  params: params,
   hooks: Hooks,
   dom: {
     onBeforeElUpdated(from, to) {

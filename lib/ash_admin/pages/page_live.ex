@@ -267,10 +267,6 @@ defmodule AshAdmin.PageLive do
      socket
      |> assign(:url_path, url.path)
      |> assign(:params, params)}
-
-    #   :error ->
-    #     {:error, "Not Found"}
-    # end
   end
 
   defp to_one_relationships(resource) do
@@ -304,19 +300,6 @@ defmodule AshAdmin.PageLive do
      |> assign(:actor_paused, true)
      |> assign(:authorizing, false)
      |> push_event("clear_actor", %{})}
-  end
-
-  def handle_event("set_actor_from_session", payload, socket) do
-    assigns =
-      payload
-      |> Map.take(
-        ~w[actor_resource actor_primary_key actor_action actor_api actor_authorizing actor_paused]
-      )
-      |> Enum.map(fn {key, value} ->
-        {String.to_existing_atom(key), value}
-      end)
-
-    {:noreply, assign(socket, assigns)}
   end
 
   def handle_event(
