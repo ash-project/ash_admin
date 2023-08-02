@@ -32,7 +32,7 @@ defmodule AshAdmin.Router do
         plug(:accepts, ["html"])
         plug(:fetch_session)
         plug(:fetch_live_flash)
-        plug(:put_root_layout, {ThingyWeb.LayoutView, :root})
+        plug(:put_root_layout, html: {AshAdmin.Layouts, :root})
         plug(:protect_from_forgery)
         plug(:put_secure_browser_headers)
       end
@@ -67,7 +67,7 @@ defmodule AshAdmin.Router do
         on_mount: List.wrap(opts[:on_mount]),
         session:
           {AshAdmin.Router, :__session__, [%{"prefix" => path}, List.wrap(opts[:session])]},
-        root_layout: {AshAdmin.LayoutView, :root} do
+        root_layout: {AshAdmin.Layouts, :root} do
         live(
           "#{path}/*route",
           AshAdmin.PageLive,

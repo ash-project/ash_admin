@@ -2,10 +2,10 @@ defmodule AshAdmin.Components.Resource.Show do
   @moduledoc false
   use Phoenix.LiveComponent
 
-  alias AshAdmin.Components.HeroIcon
   alias AshAdmin.Components.Resource.Table
   import AshAdmin.Helpers
   import Tails
+  import AshAdmin.CoreComponents
 
   attr :resource, :any
   attr :record, :any, default: nil
@@ -48,7 +48,7 @@ defmodule AshAdmin.Components.Resource.Show do
         phx-value-api={@api}
         phx-value-pkey={encode_primary_key(@record)}
       >
-        <HeroIcon.icon name="key" class="h-5 w-5 text-gray-500" />
+        <.icon name="hero-key" class="h-5 w-5 text-gray-500" />
       </button>
       <div class="px-4 py-5 sm:p-6">
         <div>
@@ -346,17 +346,17 @@ defmodule AshAdmin.Components.Resource.Show do
     case Map.get(record, name) do
       true ->
         ~H"""
-        <HeroIcon.icon name="check" class="h-4 w-4 text-gray-600" />
+        <.icon name="hero-check" class="h-4 w-4 text-gray-600" />
         """
 
       false ->
         ~H"""
-        <HeroIcon.icon name="x" class="h-4 w-4 text-gray-600" />
+        <.icon name="hero-x-mark" class="h-4 w-4 text-gray-600" />
         """
 
       nil ->
         ~H"""
-        <HeroIcon.icon name="minus" class="h-4 w-4 text-gray-600" />
+        <.icon name="hero-minus" class="h-4 w-4 text-gray-600" />
         """
     end
   end
@@ -506,14 +506,32 @@ defmodule AshAdmin.Components.Resource.Show do
   end
 
   defp destroy?(resource) do
-    resource
-    |> Ash.Resource.Info.actions()
-    |> Enum.any?(&(&1.type == :destroy && &1.primary?))
+    case AshAdmin.Resource.destroy_actions(resource) do
+      nil ->
+        resource
+        |> Ash.Resource.Info.actions()
+        |> Enum.any?(&(&1.type == :destroy))
+
+      [] ->
+        false
+
+      _ ->
+        true
+    end
   end
 
   defp update?(resource) do
-    resource
-    |> Ash.Resource.Info.actions()
-    |> Enum.any?(&(&1.type == :update && &1.primary?))
+    case AshAdmin.Resource.update_actions(resource) do
+      nil ->
+        resource
+        |> Ash.Resource.Info.actions()
+        |> Enum.any?(&(&1.type == :update))
+
+      [] ->
+        false
+
+      _ ->
+        true
+    end
   end
 end

@@ -110,6 +110,7 @@ To work on ash_admin, you'll want to be able to run the dev app. You'll need to 
 1. `mix ash_postgres.create`
 2. `mix migrate`
 3. `mix migrate_tenants`
+4. `mix setup`
 
 Then, you can start the app with: `mix dev`
 

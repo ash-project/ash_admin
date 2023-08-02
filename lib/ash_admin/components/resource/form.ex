@@ -4,10 +4,9 @@ defmodule AshAdmin.Components.Resource.Form do
 
   import AshAdmin.Helpers
   import Tails
+  import AshAdmin.CoreComponents
 
   require Logger
-
-  alias AshAdmin.Components.HeroIcon
 
   attr :resource, :any, required: true
   attr :api, :any, required: true
@@ -263,18 +262,18 @@ defmodule AshAdmin.Components.Resource.Form do
       </div>
     </div>
     <div :for={{relationship, argument, opts} <- relationship_args}>
-      <%= if relationship not in @skip and @argument.name not in @skip do %>
+      <%= if relationship not in @skip and argument.name not in @skip do %>
         <label
           class="block text-sm font-medium text-gray-700"
-          for={@form.name <> "[#{@argument.name}]"}
+          for={@form.name <> "[#{argument.name}]"}
         >
           <%= to_name(argument.name) %>
         </label>
         <%= render_relationship_input(
           assigns,
-          Ash.Resource.Info.relationship(@form.source.resource, @relationship),
+          Ash.Resource.Info.relationship(@form.source.resource, relationship),
           @form,
-          @argument,
+          argument,
           opts
         ) %>
       <% end %>
@@ -402,10 +401,9 @@ defmodule AshAdmin.Components.Resource.Form do
           phx-value-path={inner_form.name}
           class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
         >
-          <HeroIcon.icon name="minus" class="h-4 w-4 text-gray-500" />
+          <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
         </button>
       </.inputs_for>
-
       <button
         :if={can_add_related?(@form, :read_action, @argument)}
         type="button"
@@ -416,7 +414,7 @@ defmodule AshAdmin.Components.Resource.Form do
         phx-value-cardinality={to_string(@relationship.cardinality)}
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
-        <HeroIcon.icon name="search-circle" class="h-4 w-4 text-gray-500" />
+        <.icon name="hero-magnifying-glass-circle" class="h-4 w-4 text-gray-500" />
       </button>
 
       <button
@@ -428,7 +426,7 @@ defmodule AshAdmin.Components.Resource.Form do
         phx-value-type="create"
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
-        <HeroIcon.icon name="plus" class="h-4 w-4 text-gray-500" />
+        <.icon name="hero-plus" class="h-4 w-4 text-gray-500" />
       </button>
       <button
         :if={
@@ -442,7 +440,7 @@ defmodule AshAdmin.Components.Resource.Form do
         phx-value-type="lookup"
         class="flex h-6 w-6 m-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
-        <HeroIcon.icon name="plus" class="h-4 w-4 text-gray-500" />
+        <.icon name="hero-plus" class="h-4 w-4 text-gray-500" />
       </button>
     </div>
     <div :if={must_load?(@opts) && !loaded?(@form.source.source, @relationship.name)}>
@@ -852,7 +850,7 @@ defmodule AshAdmin.Components.Resource.Form do
             phx-value-path={inner_form.name}
             class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
           >
-            <HeroIcon.icon name="minus" class="h-4 w-4 text-gray-500" />
+            <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
           </button>
 
           <%= render_attributes(
@@ -871,7 +869,7 @@ defmodule AshAdmin.Components.Resource.Form do
           phx-value-path={@name || @form.name <> "[#{@attribute.name}]"}
           class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
         >
-          <HeroIcon.icon name="plus" class="h-4 w-4 text-gray-500" />
+          <.icon name="hero-plus" class="h-4 w-4 text-gray-500" />
         </button>
       <% is_atom(@attribute.type) && function_exported?(@attribute.type, :values, 0) -> %>
         <%= Phoenix.HTML.Form.select(
@@ -922,7 +920,7 @@ defmodule AshAdmin.Components.Resource.Form do
           phx-value-index={index}
           class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
         >
-          <HeroIcon.icon name="minus" class="h-4 w-4 text-gray-500" />
+          <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
         </button>
       </div>
       <button
@@ -933,7 +931,7 @@ defmodule AshAdmin.Components.Resource.Form do
         phx-value-field={@attribute.name}
         class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
-        <HeroIcon.icon name="plus" class="h-4 w-4 text-gray-500" />
+        <.icon name="hero-plus" class="h-4 w-4 text-gray-500" />
       </button>
     </div>
     """
@@ -1019,6 +1017,8 @@ defmodule AshAdmin.Components.Resource.Form do
     end)
     |> Enum.join("-")
   end
+
+  defp value({:value, value}, _, _), do: value
 
   defp value(value, form, attribute) do
     if value do
@@ -1270,7 +1270,10 @@ defmodule AshAdmin.Components.Resource.Form do
       end
     end
 
-    case AshPhoenix.Form.submit(form, before_submit: before_submit) do
+    case AshPhoenix.Form.submit(form,
+           params: form.source.params,
+           before_submit: before_submit
+         ) do
       {:ok, result} ->
         redirect_to(socket, result)
 

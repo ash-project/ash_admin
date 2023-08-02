@@ -37,7 +37,7 @@ defmodule AshAdmin.MixProject do
   end
 
   defp elixirc_paths(:test) do
-    ["lib", "test/support"]
+    ["test/support", "lib"]
   end
 
   defp elixirc_paths(:prod) do
@@ -73,11 +73,15 @@ defmodule AshAdmin.MixProject do
       migrate: "ash_postgres.migrate --migrations-path dev/repo/migrations",
       migrate_tenants: "ash_postgres.migrate --migrations-path dev/repo/tenant_migrations",
       seed: "run dev/repo/seeds.exs --truncate",
-      setup: ["deps.get", "cmd npm install --prefix assets"],
+      setup: ["deps.get", "assets.setup", "assets.build"],
       dev: "run --no-halt dev.exs --config config",
       sobelow: "sobelow --ignore XSS.Raw",
       docs: ["docs", "ash.replace_doc_links"],
-      "spark.formatter": "spark.formatter --extensions AshAdmin.Api,AshAdmin.Resource"
+      test: ["setup", "test"],
+      "spark.formatter": "spark.formatter --extensions AshAdmin.Api,AshAdmin.Resource",
+      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "assets.build": ["tailwind default", "esbuild default"],
+      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
     ]
   end
 
@@ -99,8 +103,11 @@ defmodule AshAdmin.MixProject do
       {:phoenix_live_view, "~> 0.19"},
       {:phoenix_html, "~> 3.2"},
       {:jason, "~> 1.0"},
-      {:tails, "~> 0.1.6"},
+      {:tails, "~> 0.1"},
+      {:gettext, "~> 0.20"},
       # Dev dependencies
+      {:esbuild, "~> 0.7", only: [:dev, :test]},
+      {:tailwind, "~> 0.2.0", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
       {:ash_postgres, "~> 1.0", only: [:dev, :test]},

@@ -3,7 +3,7 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
   use Phoenix.Component
   import Tails
 
-  alias AshAdmin.Components.HeroIcon
+  alias AshAdmin.CoreComponents
 
   attr :resource, :any, required: true
 
@@ -38,26 +38,26 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
               <%= attribute.description %>
             </.td>
             <.td>
-              <HeroIcon.icon
-                name={if attribute.primary_key?, do: "check", else: "x"}
+              <CoreComponents.icon
+                name={if attribute.primary_key?, do: "hero-check", else: "hero-x-mark"}
                 class="h-4 w-4 text-gray-500"
               />
             </.td>
             <.td>
-              <HeroIcon.icon
-                name={if attribute.private?, do: "check", else: "x"}
+              <CoreComponents.icon
+                name={if attribute.private?, do: "hero-check", else: "hero-x-mark"}
                 class="h-4 w-4 text-gray-500"
               />
             </.td>
             <.td>
-              <HeroIcon.icon
-                name={if attribute.allow_nil?, do: "check", else: "x"}
+              <CoreComponents.icon
+                name={if attribute.allow_nil?, do: "hero-check", else: "hero-x-mark"}
                 class="h-4 w-4 text-gray-500"
               />
             </.td>
             <.td>
-              <HeroIcon.icon
-                name={if attribute.writable?, do: "check", else: "x"}
+              <CoreComponents.icon
+                name={if attribute.writable?, do: "hero-check", else: "hero-x-mark"}
                 class="h-4 w-4 text-gray-500"
               />
             </.td>
