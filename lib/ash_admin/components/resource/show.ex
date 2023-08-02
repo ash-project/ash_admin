@@ -146,7 +146,7 @@ defmodule AshAdmin.Components.Resource.Show do
           <div class="px-4 py-3 text-right sm:px-6">
             <.link
               :if={AshAdmin.Resource.show_action(@destination)}
-              navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&tab=show&table=#{@context[:data_layer][:table]}&primary_key=#{encode_primary_key(@record)}"}
+              navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@destination)}&tab=show&table=#{@context[:data_layer][:table]}&primary_key=#{encode_primary_key(@record)}"}
               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Show
