@@ -41,7 +41,7 @@ defmodule AshAdmin.Components.TopNav.TenantForm do
           </svg>
         </button>
       </.form>
-      <button :if={@tenant} phx-click={@clear_tenant} phx-target={@myself}>
+      <button :if={@tenant} phx-click={@clear_tenant}>
         <svg
           width="1em"
           height="1em"
