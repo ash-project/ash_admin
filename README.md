@@ -16,7 +16,7 @@ https://www.youtube.com/watch?v=aFMLz3cpQ8c
 First, ensure you've added ash_admin to your `mix.exs` file.
 
 ```elixir
-{:ash_admin, "~> 0.9.2"}
+{:ash_admin, "~> 0.9.3"}
 ```
 
 ## Setup
