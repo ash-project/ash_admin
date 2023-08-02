@@ -128,6 +128,15 @@ Hooks.Actor = {
     this.handleEvent("toggle_actor_paused", (payload) => {
       document.cookie = "actor_paused" + "=" + payload.actor_paused + ";path=/";
     });
+
+    this.pushEvent("set_actor_from_session", {
+      actor_resource: document.cookie.actor_resource,
+      actor_primary_key: document.cookie.actor_primary_key,
+      actor_action: document.cookie.actor_action,
+      actor_api: document.cookie.actor_api,
+      actor_authorizing: document.cookie.actor_authorizing,
+      actor_paused: document.cookie.actor_paused
+    })
   },
 };
 
