@@ -1581,56 +1581,52 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp assign_form(socket) do
-    if socket.assigns[:initialized] do
-      socket
-    else
-      transform_errors = fn
-        _, %{class: :forbidden} ->
-          {nil, "Forbidden", []}
+    transform_errors = fn
+      _, %{class: :forbidden} ->
+        {nil, "Forbidden", []}
 
-        _, other ->
-          other
+      _, other ->
+        other
+    end
+
+    auto_forms =
+      AshPhoenix.Form.Auto.auto(socket.assigns.resource, socket.assigns.action.name,
+        include_non_map_types?: true
+      )
+
+    form =
+      case socket.assigns.action.type do
+        :create ->
+          socket.assigns.resource
+          |> AshPhoenix.Form.for_create(socket.assigns.action.name,
+            api: socket.assigns.api,
+            actor: socket.assigns[:actor],
+            authorize?: socket.assigns[:authorizing],
+            forms: auto_forms,
+            transform_errors: transform_errors
+          )
+
+        :update ->
+          socket.assigns.record
+          |> AshPhoenix.Form.for_update(socket.assigns.action.name,
+            api: socket.assigns.api,
+            forms: auto_forms,
+            actor: socket.assigns[:actor],
+            authorize?: socket.assigns[:authorizing],
+            transform_errors: transform_errors
+          )
+
+        :destroy ->
+          socket.assigns.record
+          |> AshPhoenix.Form.for_destroy(socket.assigns.action.name,
+            api: socket.assigns.api,
+            forms: auto_forms,
+            actor: socket.assigns[:actor],
+            authorize?: socket.assigns[:authorizing],
+            transform_errors: transform_errors
+          )
       end
 
-      auto_forms =
-        AshPhoenix.Form.Auto.auto(socket.assigns.resource, socket.assigns.action.name,
-          include_non_map_types?: true
-        )
-
-      form =
-        case socket.assigns.action.type do
-          :create ->
-            socket.assigns.resource
-            |> AshPhoenix.Form.for_create(socket.assigns.action.name,
-              api: socket.assigns.api,
-              actor: socket.assigns[:actor],
-              authorize?: socket.assigns[:authorizing],
-              forms: auto_forms,
-              transform_errors: transform_errors
-            )
-
-          :update ->
-            socket.assigns.record
-            |> AshPhoenix.Form.for_update(socket.assigns.action.name,
-              api: socket.assigns.api,
-              forms: auto_forms,
-              actor: socket.assigns[:actor],
-              authorize?: socket.assigns[:authorizing],
-              transform_errors: transform_errors
-            )
-
-          :destroy ->
-            socket.assigns.record
-            |> AshPhoenix.Form.for_destroy(socket.assigns.action.name,
-              api: socket.assigns.api,
-              forms: auto_forms,
-              actor: socket.assigns[:actor],
-              authorize?: socket.assigns[:authorizing],
-              transform_errors: transform_errors
-            )
-        end
-
-      assign(socket, :form, form |> to_form())
-    end
+    assign(socket, :form, form |> to_form())
   end
 end
