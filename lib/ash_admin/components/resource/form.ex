@@ -125,7 +125,7 @@ defmodule AshAdmin.Components.Resource.Form do
           autocomplete={false}
           id={"#{@id}_form"}
         >
-          <input
+          <.input
             :for={kv <- form.hidden}
             name={form.name <> "[#{elem(kv, 0)}]"}
             value={elem(kv, 1)}
@@ -358,7 +358,7 @@ defmodule AshAdmin.Components.Resource.Form do
             </li>
           </ul>
         </div>
-        <input
+        <.input
           :for={kv <- inner_form.hidden}
           :if={@hidden}
           name={inner_form.name <> "[#{elem(kv, 0)}]"}
@@ -367,7 +367,7 @@ defmodule AshAdmin.Components.Resource.Form do
         />
         <%= if inner_form.source.form_keys[:_join] do %>
           <.inputs_for :let={join_form} field={inner_form[:_join]}>
-            <input
+            <.input
               :for={kv <- join_form.hidden}
               :if={@hidden}
               name={inner_form.name <> "[#{elem(kv, 0)}]"}
@@ -619,7 +619,7 @@ defmodule AshAdmin.Components.Resource.Form do
     assigns = assign(assigns, form: form, value: value, name: name, attribute: attribute)
 
     ~H"""
-    <input
+    <.input
       type="date"
       value={value(@value, @form, @attribute)}
       name={@name || @form.name <> "[#{@attribute.name}]"}
@@ -633,7 +633,7 @@ defmodule AshAdmin.Components.Resource.Form do
     assigns = assign(assigns, form: form, value: value, name: name, attribute: attribute)
 
     ~H"""
-    <input
+    <.input
       type="datetime-local"
       value={value(@value, @form, @attribute)}
       name={@name || @form.name <> "[#{@attribute.name}]"}
@@ -655,7 +655,7 @@ defmodule AshAdmin.Components.Resource.Form do
     assigns = assign(assigns, attribute: attribute, form: form, value: value, name: name)
 
     ~H"""
-    <input
+    <.input
       type="checkbox"
       value={value(@value, @form, @attribute)}
       name={@name || @form.name <> "[#{@attribute.name}]"}
@@ -748,7 +748,7 @@ defmodule AshAdmin.Components.Resource.Form do
           placeholder={placeholder(@default)}
         ><%= value(@value, @form, @attribute) %></textarea>
       <% short_text?(@form.source.resource, @attribute) -> %>
-        <input
+        <.input
           type={text_input_type(@attribute)}
           id={@form.id <> "_#{@attribute.name}"}
           value={value(@value, @form, @attribute)}
@@ -757,7 +757,7 @@ defmodule AshAdmin.Components.Resource.Form do
           placeholder={placeholder(@default)}
         />
       <% true -> %>
-        <input
+        <.input
           type={text_input_type(@attribute)}
           placeholder={placeholder(@default)}
           id={@form.id <> "_#{@attribute.name}"}
@@ -800,7 +800,7 @@ defmodule AshAdmin.Components.Resource.Form do
         id={@form.id <> "_#{@attribute.name}_json"}
       />
 
-      <input
+      <.input
         type="hidden"
         phx-hook="JsonEditorSource"
         data-editor-id={@form.id <> "_#{@attribute.name}_json"}
@@ -814,7 +814,7 @@ defmodule AshAdmin.Components.Resource.Form do
   rescue
     _ ->
       ~H"""
-      <input
+      <.input
         type="text"
         disabled
         value="..."
@@ -837,7 +837,7 @@ defmodule AshAdmin.Components.Resource.Form do
     <%= cond do %>
       <% Ash.Type.embedded_type?(@attribute.type) -> %>
         <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
-          <input
+          <.input
             :for={kv <- inner_form.hidden}
             name={inner_form.name <> "[#{elem(kv, 0)}]"}
             value={elem(kv, 1)}
@@ -950,7 +950,7 @@ defmodule AshAdmin.Components.Resource.Form do
       )
 
     ~H"""
-    <input
+    <.input
       type={text_input_type(@attribute)}
       placeholder={placeholder(@attribute.default)}
       value={@casted_value}
@@ -966,7 +966,7 @@ defmodule AshAdmin.Components.Resource.Form do
           assigns = assign(assigns, value: value)
 
           ~H"""
-          <input
+          <.input
             type={text_input_type(@attribute)}
             placeholder={placeholder(@attribute.default)}
             value={@value}
@@ -978,7 +978,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
         :error ->
           ~H"""
-          <input
+          <.input
             type="text"
             disabled
             value="..."
