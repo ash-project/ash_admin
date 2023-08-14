@@ -719,9 +719,9 @@ defmodule AshAdmin.Components.Resource.Form do
         <%= Phoenix.HTML.Form.select(
           @form,
           @attribute.name,
-          Enum.map(@attribute.constraints[:one_of], &{to_name(&1), &1}) ++
-            allow_nil_option(@attribute),
+          Enum.map(@attribute.constraints[:one_of], &{to_name(&1), &1}),
           selected: value(@value, @form, @attribute),
+          prompt: allow_nil_option(@attribute),
           name: @name || @form.name <> "[#{@attribute.name}]"
         ) %>
       <% markdown?(@form.source.resource, @attribute) -> %>
@@ -875,8 +875,9 @@ defmodule AshAdmin.Components.Resource.Form do
         <%= Phoenix.HTML.Form.select(
           @form,
           @attribute.name,
-          Enum.map(@attribute.type.values(), &{to_name(&1), &1}) ++ allow_nil_option(@attribute),
+          Enum.map(@attribute.type.values(), &{to_name(&1), &1}),
           selected: value(@value, @form, @attribute),
+          prompt: allow_nil_option(@attribute),
           name: @name || @form.name <> "[#{@attribute.name}]"
         ) %>
       <% true -> %>
@@ -1043,9 +1044,9 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
-  defp allow_nil_option(%{allow_nil?: true}), do: [{"", nil}]
-  defp allow_nil_option(%{default: nil}), do: [{"", nil}]
-  defp allow_nil_option(_), do: []
+  defp allow_nil_option(%{allow_nil?: true}), do: "-"
+  defp allow_nil_option(%{default: default, allow_nil?: false}) when not is_nil(default), do: nil
+  defp allow_nil_option(_), do: "Select an option"
 
   defp can_append_embed?(changeset, attribute) do
     case Ash.Changeset.get_attribute(changeset, attribute) do
