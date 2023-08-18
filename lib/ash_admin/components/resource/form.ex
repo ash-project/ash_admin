@@ -1256,7 +1256,8 @@ defmodule AshAdmin.Components.Resource.Form do
 
     case AshPhoenix.Form.submit(form,
            params: form.source.params,
-           before_submit: before_submit
+           before_submit: before_submit,
+           force?: true
          ) do
       {:ok, result} ->
         redirect_to(socket, result)
