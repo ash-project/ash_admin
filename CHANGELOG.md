@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.9.5](https://github.com/ash-project/ash_admin/compare/v0.9.4...v0.9.5) (2023-10-11)
+
+
+
+
+### Improvements:
+
+* force submit forms
+
 ## [v0.9.4](https://github.com/ash-project/ash_admin/compare/v0.9.3...v0.9.4) (2023-08-04)
 
 
