@@ -79,11 +79,12 @@ defmodule AshAdmin.Components.Resource.DataTable do
         <div :if={@action.arguments == [] || @params["args"]} class="h-full overflow-auto md:mx-4">
           <div class="shadow-lg overflow-auto sm:rounded-md bg-white">
             <div :if={match?({:error, _}, @data)}>
-              <% {:error, %{query: query}} = @data %>
               <ul>
-                <li :for={error <- query.errors}>
-                  <%= message(error) %>
-                </li>
+                <%= for {path, error} <- AshPhoenix.Form.errors(@query, for_path: :all) do %>
+                  <%= for {field, message} <- error do %>
+                    <li><%= Enum.join(path ++ [field], ".") %>: <%= message %></li>
+                  <% end %>
+                <% end %>
               </ul>
             </div>
             <div class="px-2">
@@ -207,10 +208,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
               else
                 socket.assigns.query.source
                 |> set_table(socket.assigns[:table])
-                |> Ash.Query.for_read(socket.assigns[:action].name, %{},
-                  actor: socket.assigns[:actor],
-                  authorize?: socket.assigns[:authorizing]
-                )
                 |> assigns[:api].read(page: page_params)
               end
             end,
@@ -227,10 +224,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
               else
                 socket.assigns.query.source
                 |> set_table(socket.assigns[:table])
-                |> Ash.Query.for_read(socket.assigns[:action].name, %{},
-                  actor: socket.assigns[:actor],
-                  authorize?: socket.assigns[:authorizing]
-                )
                 |> Ash.Query.limit(1000)
                 |> assigns[:api].read()
               end
@@ -449,14 +442,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
   end
 
   defp last(_), do: nil
-
-  defp message(error) do
-    if is_exception(error) do
-      Exception.message(error)
-    else
-      inspect(error)
-    end
-  end
 
   defp render_middle_page_num(assigns, num, trailing_page_nums) do
     ellipsis? = num in trailing_page_nums || num <= 3
