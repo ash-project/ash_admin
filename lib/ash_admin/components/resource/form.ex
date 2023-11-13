@@ -679,7 +679,8 @@ defmodule AshAdmin.Components.Resource.Form do
     <%= Phoenix.HTML.Form.select(
       @form,
       @attribute.name,
-      [Nil: nil, True: "true", False: "false"],
+      [True: "true", False: "false"]
+      |> Keyword.merge(if @attribute.allow_nil?, do: [Nil: nil], else: []),
       selected: value(@value, @form, @attribute),
       name: @name || @form.name <> "[#{@attribute.name}]"
     ) %>
@@ -1021,15 +1022,13 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp value({:value, value}, _, _), do: value
 
-  defp value(value, form, attribute) do
-    if value do
-      value
-    else
-      value = Phoenix.HTML.FormData.input_value(form.source, form, attribute.name)
+  defp value(value, _form, _attribute) when not is_nil(value), do: value
 
-      if value do
-        value
-      else
+  defp value(_value, form, attribute) do
+    value = Phoenix.HTML.FormData.input_value(form.source, form, attribute.name)
+
+    case value do
+      nil ->
         case attribute.default do
           nil ->
             nil
@@ -1040,7 +1039,9 @@ defmodule AshAdmin.Components.Resource.Form do
           default ->
             default
         end
-      end
+
+      value ->
+        value
     end
   end
 
