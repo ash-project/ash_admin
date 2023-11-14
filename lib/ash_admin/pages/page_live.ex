@@ -284,17 +284,6 @@ defmodule AshAdmin.PageLive do
      |> assign(:params, params)}
   end
 
-  defmodule YourAdminApi do
-    api Api do
-      resource Resource do
-        actions([:foo, :bar, :baz])
-        custom_pages([...])
-      end
-
-      custom_pages([...])
-    end
-  end
-
   defp to_one_relationships(resource, api) do
     resource
     |> Ash.Resource.Info.relationships()
