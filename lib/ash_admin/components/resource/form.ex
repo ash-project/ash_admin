@@ -1179,7 +1179,7 @@ defmodule AshAdmin.Components.Resource.Form do
             |> Phoenix.HTML.Form.input_value(String.to_existing_atom(field))
             |> Kernel.||([])
             |> indexed_list()
-            |> append_to_and_map(nil)
+            |> append_to_and_map("")
 
           new_params =
             Map.put(
