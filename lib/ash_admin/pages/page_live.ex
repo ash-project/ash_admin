@@ -228,7 +228,6 @@ defmodule AshAdmin.PageLive do
             record =
               socket.assigns.resource
               |> Ash.Query.filter(^primary_key)
-              |> Ash.Query.load(to_one_relationships(socket.assigns.resource))
               |> Ash.Query.set_tenant(socket.assigns[:tenant])
               |> Ash.Query.for_read(
                 AshAdmin.Helpers.primary_action(socket.assigns.resource, :read).name,
@@ -237,6 +236,22 @@ defmodule AshAdmin.PageLive do
                 authorize?: socket.assigns.authorizing
               )
               |> socket.assigns.api.read_one()
+
+            record =
+              socket.assigns.resource
+              |> to_one_relationships(socket.assigns.api)
+              |> Enum.reduce(record, fn rel, record ->
+                case socket.assigns.api.load(record, rel,
+                       actor: actor,
+                       authorize?: socket.assigns.authorizing
+                     ) do
+                  {:ok, record} ->
+                    record
+
+                  _ ->
+                    record
+                end
+              end)
 
             case record do
               {:error, error} ->
@@ -269,10 +284,24 @@ defmodule AshAdmin.PageLive do
      |> assign(:params, params)}
   end
 
-  defp to_one_relationships(resource) do
+  defmodule YourAdminApi do
+    api Api do
+      resource Resource do
+        actions([:foo, :bar, :baz])
+        custom_pages([...])
+      end
+
+      custom_pages([...])
+    end
+  end
+
+  defp to_one_relationships(resource, api) do
     resource
     |> Ash.Resource.Info.relationships()
-    |> Enum.filter(&(&1.cardinality == :one))
+    |> Enum.filter(fn relationship ->
+      api = relationship.api || api
+      AshAdmin.Api.show?(api) && relationship.cardinality == :one
+    end)
     |> Enum.map(& &1.name)
   end
 

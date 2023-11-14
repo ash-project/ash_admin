@@ -15,7 +15,8 @@ defmodule Demo.Accounts.User do
       field :first_name, type: :short_text
       field :last_name, type: :short_text
     end
-    table_columns [:id, :first_name, :last_name, :representative, :admin]
+
+    table_columns [:id, :first_name, :last_name, :representative, :admin, :full_name]
   end
 
   policies do
@@ -58,6 +59,10 @@ defmodule Demo.Accounts.User do
 
   validations do
     validate present([:first_name, :last_name], at_least: 1)
+  end
+
+  calculations do
+    calculate :full_name, :string, expr(first_name <> " " <> last_name)
   end
 
   attributes do

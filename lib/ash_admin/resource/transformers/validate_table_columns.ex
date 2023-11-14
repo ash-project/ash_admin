@@ -6,16 +6,16 @@ defmodule AshAdmin.Resource.Transformers.ValidateTableColumns do
   def transform(dsl_state) do
     relationships =
       dsl_state
-      |> Transformer.get_entities([:relationships])
+      |> Ash.Resource.Info.relationships()
       |> Enum.filter(&(&1.cardinality == :one))
-      |> Enum.map(& &1.name)
 
-    attributes =
+    valid_fields =
       dsl_state
-      |> Transformer.get_entities([:attributes])
+      |> Ash.Resource.Info.attributes()
+      |> Enum.concat(Ash.Resource.Info.calculations(dsl_state))
+      |> Enum.concat(Ash.Resource.Info.aggregates(dsl_state))
+      |> Enum.concat(relationships)
       |> Enum.map(& &1.name)
-
-    valid_fields = Enum.concat(relationships, attributes)
 
     bad_columns =
       dsl_state

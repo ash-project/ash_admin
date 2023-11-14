@@ -12,7 +12,7 @@ defmodule Demo.Tickets.Ticket do
 
   admin do
     show_action :read
-    table_columns [:id, :representative, :reporter, :reporter_id, :subject, :status, :description]
+    table_columns [:id, :representative, :reporter, :reporter_id, :subject, :status, :description, :reporter_name]
     format_fields [
       description: {AdminFieldFormats, :format_field, [:description]}
     ]
@@ -141,6 +141,10 @@ defmodule Demo.Tickets.Ticket do
     end
 
     timestamps()
+  end
+
+  aggregates do
+    first :reporter_name, [:reporter], :first_name
   end
 
   relationships do

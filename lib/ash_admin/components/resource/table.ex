@@ -78,7 +78,7 @@ defmodule AshAdmin.Components.Resource.Table do
   defp attributes(resource, attributes, skip) do
     attributes
     |> Enum.map(fn x ->
-      value = Ash.Resource.Info.attribute(resource, x)
+      value = Ash.Resource.Info.field(resource, x)
 
       if is_nil(value) do
         Ash.Resource.Info.relationship(resource, x)
@@ -125,7 +125,8 @@ defmodule AshAdmin.Components.Resource.Table do
     end
   end
 
-  defp process_attribute(_, record, %Ash.Resource.Attribute{} = attribute, formats, _actor) do
+  defp process_attribute(_, record, %struct{} = attribute, formats, _actor)
+       when struct in [Ash.Resource.Attribute, Ash.Resource.Aggregate, Ash.Resource.Calculation] do
     {mod, func, args} =
       Keyword.get(formats || [], attribute.name, {Phoenix.HTML.Safe, :to_iodata, []})
 

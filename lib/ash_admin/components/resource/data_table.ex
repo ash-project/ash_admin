@@ -138,7 +138,8 @@ defmodule AshAdmin.Components.Resource.DataTable do
         |> AshPhoenix.Form.for_read(socket.assigns.action.name,
           as: "query",
           actor: socket.assigns[:actor],
-          tenant: socket.assigns[:tenant]
+          tenant: socket.assigns[:tenant],
+          authorize?: socket.assigns[:authorizing]
         )
 
       query =
@@ -209,6 +210,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
               else
                 socket.assigns.query.source
                 |> set_table(socket.assigns[:table])
+                |> load_fields()
                 |> assigns[:api].read(page: page_params)
               end
             end,
@@ -226,6 +228,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 socket.assigns.query.source
                 |> set_table(socket.assigns[:table])
                 |> Ash.Query.limit(1000)
+                |> load_fields()
                 |> assigns[:api].read()
               end
             end,
@@ -237,6 +240,12 @@ defmodule AshAdmin.Components.Resource.DataTable do
        socket
        |> assign(:initialized, true)}
     end
+  end
+
+  defp load_fields(query) do
+    query
+    |> Ash.Query.select([])
+    |> Ash.Query.load(AshAdmin.Resource.table_columns(query.resource))
   end
 
   def handle_event("next_page", _, socket) do
