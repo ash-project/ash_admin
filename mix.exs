@@ -76,12 +76,20 @@ defmodule AshAdmin.MixProject do
       setup: ["deps.get", "assets.setup", "assets.build"],
       dev: "run --no-halt dev.exs --config config",
       sobelow: "sobelow --ignore XSS.Raw",
-      docs: ["docs", "ash.replace_doc_links"],
+      docs: [
+        "spark.cheat_sheets",
+        "docs",
+        "spark.replace_doc_links",
+        "spark.cheat_sheets_in_search"
+      ],
       test: ["setup", "test"],
       "spark.formatter": "spark.formatter --extensions AshAdmin.Api,AshAdmin.Resource",
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
-      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
+      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
+      "spark.cheat_sheets_in_search":
+        "spark.cheat_sheets_in_search --extensions AshAdmin.Api,AshAdmin.Resource",
+      "spark.cheat_sheets": "spark.cheat_sheets --extensions AshAdmin.Api,AshAdmin.Resource"
     ]
   end
 
