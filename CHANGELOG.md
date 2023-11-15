@@ -5,6 +5,29 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.9.6](https://github.com/ash-project/ash_admin/compare/v0.9.5...v0.9.6) (2023-11-15)
+
+
+
+
+### Bug Fixes:
+
+* Fix JS syntax error and compile latest version of `app.js` (#77)
+
+* don't use nil as new {:array, type} value (#76)
+
+* load each to_one relationship independently and ignore it if it errors
+
+* allow showing false values for boolean selects (#74)
+
+* pass actor when fetching relationships attributes (#73)
+
+* properly provide `arguments` to read actions
+
+### Improvements:
+
+* support calculations & aggregates in table columns
+
 ## [v0.9.5](https://github.com/ash-project/ash_admin/compare/v0.9.4...v0.9.5) (2023-10-11)
 
 
