@@ -116,6 +116,8 @@ Then, you can start the app with: `mix dev`
 
 If you make changes to the resources, you can generate migrations with `mix generate_migrations`
 
+If you make changes to any of the assets (CSS or JavaScript), including updating dependencies that include assets such as LiveView, you will need to recompile the assets with `mix assets.build`.
+
 ## Contributors
 
 Ash is made possible by its excellent community!
