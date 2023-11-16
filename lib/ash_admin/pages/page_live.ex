@@ -248,20 +248,14 @@ defmodule AshAdmin.PageLive do
                   {:ok, record} ->
                     record
 
-                  _ ->
+                  {:error, error} ->
+                    Logger.warning(
+                      "Error while loading relationship #{inspect(rel)} on admin dashboard\n: #{Exception.format(:error, error)}"
+                    )
+
                     record
                 end
               end)
-
-            case record do
-              {:error, error} ->
-                Logger.warning(
-                  "Error while loading record on admin dashboard\n: #{Exception.format(:error, error)}"
-                )
-
-              {:ok, _} ->
-                :ok
-            end
 
             socket
             |> assign(:id, params["primary_key"])
