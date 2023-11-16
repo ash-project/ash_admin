@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.9.7](https://github.com/ash-project/ash_admin/compare/v0.9.6...v0.9.7) (2023-11-16)
+
+
+
+
+### Bug Fixes:
+
+* properly match on errored loads
+
 ## [v0.9.6](https://github.com/ash-project/ash_admin/compare/v0.9.5...v0.9.6) (2023-11-15)
 
 
