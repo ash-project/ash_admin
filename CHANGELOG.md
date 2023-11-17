@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.9.8](https://github.com/ash-project/ash_admin/compare/v0.9.7...v0.9.8) (2023-11-17)
+
+
+
+
+### Bug Fixes:
+
+* default table_columns to all attributes for proper selecting
+
 ## [v0.9.7](https://github.com/ash-project/ash_admin/compare/v0.9.6...v0.9.7) (2023-11-16)
 
 
