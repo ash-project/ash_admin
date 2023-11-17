@@ -123,7 +123,8 @@ defmodule AshAdmin.Resource do
   end
 
   def table_columns(resource) do
-    Spark.Dsl.Extension.get_opt(resource, [:admin], :table_columns, nil, true)
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :table_columns, nil, true) ||
+      Enum.map(Ash.Resource.Info.attributes(resource), & &1.name)
   end
 
   def format_fields(resource) do
