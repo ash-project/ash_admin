@@ -104,7 +104,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
 
     ~H"""
     <%= if @label_text do %>
-      <span class="block px-4 py-2 text-xs text-gray-400 font-semibold italic">{@label_text}</span>
+      <span class="block px-4 py-2 text-xs text-gray-400 font-semibold italic"><%= @label_text %></span>
     <% end %>
     """
   end
