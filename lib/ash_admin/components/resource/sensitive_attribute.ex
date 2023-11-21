@@ -1,4 +1,5 @@
 defmodule AshAdmin.Components.Resource.SensitiveAttribute do
+  @moduledoc false
   use Phoenix.LiveComponent
 
   import AshAdmin.CoreComponents
