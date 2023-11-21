@@ -5,6 +5,7 @@ defmodule AshAdmin.Components.Resource.Table do
   import AshAdmin.Helpers
   import AshAdmin.CoreComponents
   alias Ash.Resource.Relationships.{BelongsTo, HasOne}
+  alias AshAdmin.Components.Resource.SensitiveAttribute
 
   attr :attributes, :any, default: nil
   attr :data, :list, default: nil
@@ -135,11 +136,29 @@ defmodule AshAdmin.Components.Resource.Table do
       |> Map.get(attribute.name)
       |> (&apply(mod, func, [&1] ++ args)).()
 
-    format_attribute_value(data, attribute)
+    if struct == Ash.Resource.Attribute && attribute.sensitive? do
+      format_sensitive_value(data, attribute, record)
+    else
+      format_attribute_value(data, attribute)
+    end
   end
 
   defp process_attribute(_api, _record, _attr, _formats, _actor) do
     "..."
+  end
+
+  defp format_sensitive_value(value, attribute, record) do
+    assigns = %{value: value, attribute: attribute, record: record}
+
+    ~H"""
+    <.live_component
+      id={"#{@record.id}-#{@attribute.name}"}
+      module={SensitiveAttribute}
+      value={@value}
+    >
+      <%= format_attribute_value(@value, @attribute) %>
+    </.live_component>
+    """
   end
 
   defp format_attribute_value(data, %{type: Ash.Type.Binary}) when data not in [[], nil, ""] do

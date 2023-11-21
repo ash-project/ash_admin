@@ -16,7 +16,7 @@ defmodule Demo.Accounts.User do
       field :last_name, type: :short_text
     end
 
-    table_columns [:id, :first_name, :last_name, :representative, :admin, :full_name]
+    table_columns [:id, :first_name, :last_name, :representative, :admin, :full_name, :api_key, :date_of_birth]
   end
 
   policies do
@@ -92,6 +92,15 @@ defmodule Demo.Accounts.User do
     attribute :admin, :boolean do
       allow_nil? false
       default false
+    end
+
+    attribute :api_key, :string do
+      private? true
+      sensitive? true
+    end
+
+    attribute :date_of_birth, :date do
+      sensitive? true
     end
 
     attribute :profile, Demo.Accounts.Profile

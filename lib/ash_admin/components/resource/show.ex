@@ -2,7 +2,7 @@ defmodule AshAdmin.Components.Resource.Show do
   @moduledoc false
   use Phoenix.LiveComponent
 
-  alias AshAdmin.Components.Resource.Table
+  alias AshAdmin.Components.Resource.{SensitiveAttribute, Table}
   import AshAdmin.Helpers
   import Tails
   import AshAdmin.CoreComponents
@@ -221,7 +221,9 @@ defmodule AshAdmin.Components.Resource.Show do
         }
       >
         <div class="block text-sm font-medium text-gray-700"><%= to_name(attribute.name) %></div>
-        <div><%= render_attribute(assigns, @resource, @record, attribute) %></div>
+        <div>
+          <%= render_maybe_sensitive_attribute(assigns, @resource, @record, attribute) %>
+        </div>
       </div>
     </div>
     <div :if={!Enum.empty?(@flags)} class="hidden sm:block" aria-hidden="true">
@@ -241,7 +243,9 @@ defmodule AshAdmin.Components.Resource.Show do
         }
       >
         <div class="block text-sm font-medium text-gray-700"><%= to_name(attribute.name) %></div>
-        <div><%= render_attribute(assigns, @resource, @record, attribute) %></div>
+        <div>
+          <%= render_maybe_sensitive_attribute(assigns, @resource, @record, attribute) %>
+        </div>
       </div>
     </div>
     <div :if={!Enum.empty?(@bottom_attributes)} class="hidden sm:block" aria-hidden="true">
@@ -262,10 +266,30 @@ defmodule AshAdmin.Components.Resource.Show do
         }
       >
         <div class="block text-sm font-medium text-gray-700"><%= to_name(attribute.name) %></div>
-        <div><%= render_attribute(assigns, @resource, @record, attribute) %></div>
+        <div>
+          <%= render_maybe_sensitive_attribute(assigns, @resource, @record, attribute) %>
+        </div>
       </div>
     </div>
     """
+  end
+
+  defp render_maybe_sensitive_attribute(assigns, resource, record, attribute) do
+    assigns = assign(assigns, attribute: attribute)
+
+    if attribute.sensitive? do
+      ~H"""
+      <.live_component
+        id={"#{@record.id}-#{@attribute.name}"}
+        module={SensitiveAttribute}
+        value={Map.get(@record, @attribute.name)}
+      >
+        <%= render_attribute(assigns, @resource, @record, @attribute) %>
+      </.live_component>
+      """
+    else
+      render_attribute(assigns, resource, record, attribute)
+    end
   end
 
   defp render_attribute(assigns, resource, record, attribute, nested? \\ false)
