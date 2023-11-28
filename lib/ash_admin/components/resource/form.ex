@@ -679,9 +679,8 @@ defmodule AshAdmin.Components.Resource.Form do
     <%= Phoenix.HTML.Form.select(
       @form,
       @attribute.name,
-      [True: "true", False: "false"]
-      |> Keyword.merge(if @attribute.allow_nil?, do: [Nil: nil], else: []),
-      selected: value(@value, @form, @attribute),
+      [Nil: nil, True: "true", False: "false"],
+      selected: value(@value, @form, @attribute, "true"),
       name: @name || @form.name <> "[#{@attribute.name}]"
     ) %>
     """
@@ -720,7 +719,7 @@ defmodule AshAdmin.Components.Resource.Form do
         <%= Phoenix.HTML.Form.select(
           @form,
           @attribute.name,
-          Enum.map(@attribute.constraints[:one_of], &{to_name(&1), &1}),
+          [{"-", nil} | Enum.map(@attribute.constraints[:one_of], &{to_name(&1), &1})],
           selected: value(@value, @form, @attribute, List.first(@attribute.constraints[:one_of])),
           prompt: allow_nil_option(@attribute),
           name: @name || @form.name <> "[#{@attribute.name}]"
@@ -876,7 +875,7 @@ defmodule AshAdmin.Components.Resource.Form do
         <%= Phoenix.HTML.Form.select(
           @form,
           @attribute.name,
-          Enum.map(@attribute.type.values(), &{to_name(&1), &1}),
+          [{"-", nil} | Enum.map(@attribute.type.values(), &{to_name(&1), &1})],
           selected: value(@value, @form, @attribute, List.first(@attribute.type.values())),
           prompt: allow_nil_option(@attribute),
           name: @name || @form.name <> "[#{@attribute.name}]"
@@ -1022,6 +1021,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp value(value, form, attribute, default \\ nil)
 
+  defp value({:value, nil}, _, _, default), do: default
   defp value({:value, value}, _, _, _), do: value
 
   defp value(value, _form, _attribute, _) when not is_nil(value), do: value
@@ -1181,7 +1181,7 @@ defmodule AshAdmin.Components.Resource.Form do
             |> Phoenix.HTML.Form.input_value(String.to_existing_atom(field))
             |> Kernel.||([])
             |> indexed_list()
-            |> append_to_and_map("")
+            |> append_to_and_map(nil)
 
           new_params =
             Map.put(

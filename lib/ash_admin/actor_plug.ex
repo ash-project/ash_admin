@@ -15,10 +15,10 @@ defmodule AshAdmin.ActorPlug do
   end
 
   def actor_assigns(socket, session) do
-    @plug.actor_assigns(socket, session)
+    apply(@plug, :actor_assigns, [socket, session])
   end
 
   def set_actor_session(conn) do
-    @plug.set_actor_session(conn)
+    apply(@plug, :set_actor_session, [conn])
   end
 end
