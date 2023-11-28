@@ -1048,7 +1048,7 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
-  defp allow_nil_option(_, {:array, _}), do: "-"
+  defp allow_nil_option(_, {:list_value, _}), do: "-"
   defp allow_nil_option(%{allow_nil?: true}, _), do: "-"
 
   defp allow_nil_option(%{default: default, allow_nil?: false}, _) when not is_nil(default),
