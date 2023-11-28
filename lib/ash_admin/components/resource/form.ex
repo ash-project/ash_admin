@@ -679,7 +679,7 @@ defmodule AshAdmin.Components.Resource.Form do
     <%= Phoenix.HTML.Form.select(
       @form,
       @attribute.name,
-      [Nil: nil, True: "true", False: "false"],
+      add_nil_option([True: "true", False: "false"], @value, @attribute.allow_nil?),
       selected: value(@value, @form, @attribute, "true"),
       name: @name || @form.name <> "[#{@attribute.name}]"
     ) %>
@@ -719,7 +719,7 @@ defmodule AshAdmin.Components.Resource.Form do
         <%= Phoenix.HTML.Form.select(
           @form,
           @attribute.name,
-          [{"-", nil} | Enum.map(@attribute.constraints[:one_of], &{to_name(&1), &1})],
+          add_nil_option(Enum.map(@attribute.constraints[:one_of], &{to_name(&1), &1}), @value),
           selected: value(@value, @form, @attribute, List.first(@attribute.constraints[:one_of])),
           prompt: allow_nil_option(@attribute),
           name: @name || @form.name <> "[#{@attribute.name}]"
@@ -875,7 +875,7 @@ defmodule AshAdmin.Components.Resource.Form do
         <%= Phoenix.HTML.Form.select(
           @form,
           @attribute.name,
-          [{"-", nil} | Enum.map(@attribute.type.values(), &{to_name(&1), &1})],
+          add_nil_option(Enum.map(@attribute.type.values(), &{to_name(&1), &1}), @value),
           selected: value(@value, @form, @attribute, List.first(@attribute.type.values())),
           prompt: allow_nil_option(@attribute),
           name: @name || @form.name <> "[#{@attribute.name}]"
@@ -909,7 +909,7 @@ defmodule AshAdmin.Components.Resource.Form do
             @form
             | params: %{"#{@attribute.name}" => @form.params["#{@attribute.name}"]["#{index}"]}
           },
-          {:value, this_value},
+          {:list_value, this_value},
           @name <> "[#{index}]"
         ) %>
         <button
@@ -991,6 +991,18 @@ defmodule AshAdmin.Components.Resource.Form do
       end
   end
 
+  defp add_nil_option(options, value, condition \\ true)
+
+  defp add_nil_option(options, {:list_value, _}, _condition) do
+    [{"-", nil} | options]
+  end
+
+  defp add_nil_option(options, _, condition) when condition == true do
+    [{"-", nil} | options]
+  end
+
+  defp add_nil_option(options, _, _), do: options
+
   defp list_value(value) do
     if is_map(value) do
       value
@@ -1021,8 +1033,8 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp value(value, form, attribute, default \\ nil)
 
-  defp value({:value, nil}, _, _, default), do: default
-  defp value({:value, value}, _, _, _), do: value
+  defp value({:list_value, nil}, _, _, default), do: default
+  defp value({:list_value, value}, _, _, _), do: value
 
   defp value(value, _form, _attribute, _) when not is_nil(value), do: value
 
