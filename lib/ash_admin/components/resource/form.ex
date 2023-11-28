@@ -722,7 +722,7 @@ defmodule AshAdmin.Components.Resource.Form do
           @attribute.name,
           Enum.map(@attribute.constraints[:one_of], &{to_name(&1), &1}),
           selected: value(@value, @form, @attribute, List.first(@attribute.constraints[:one_of])),
-          prompt: allow_nil_option(@attribute, @attribute),
+          prompt: allow_nil_option(@attribute, @value),
           name: @name || @form.name <> "[#{@attribute.name}]"
         ) %>
       <% markdown?(@form.source.resource, @attribute) -> %>
