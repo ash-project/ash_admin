@@ -721,7 +721,7 @@ defmodule AshAdmin.Components.Resource.Form do
           @form,
           @attribute.name,
           Enum.map(@attribute.constraints[:one_of], &{to_name(&1), &1}),
-          selected: value(@value, @form, @attribute),
+          selected: value(@value, @form, @attribute, List.first(@attribute.constraints[:one_of])),
           prompt: allow_nil_option(@attribute),
           name: @name || @form.name <> "[#{@attribute.name}]"
         ) %>
@@ -877,7 +877,7 @@ defmodule AshAdmin.Components.Resource.Form do
           @form,
           @attribute.name,
           Enum.map(@attribute.type.values(), &{to_name(&1), &1}),
-          selected: value(@value, @form, @attribute),
+          selected: value(@value, @form, @attribute, List.first(@attribute.type.values())),
           prompt: allow_nil_option(@attribute),
           name: @name || @form.name <> "[#{@attribute.name}]"
         ) %>
@@ -1020,24 +1020,26 @@ defmodule AshAdmin.Components.Resource.Form do
     |> Enum.join("-")
   end
 
-  defp value({:value, value}, _, _), do: value
+  defp value(value, form, attribute, default \\ nil)
 
-  defp value(value, _form, _attribute) when not is_nil(value), do: value
+  defp value({:value, value}, _, _, _), do: value
 
-  defp value(_value, form, attribute) do
+  defp value(value, _form, _attribute, _) when not is_nil(value), do: value
+
+  defp value(_value, form, attribute, default) do
     value = Phoenix.HTML.FormData.input_value(form.source, form, attribute.name)
 
     case value do
       nil ->
         case attribute.default do
           nil ->
-            nil
+            default
 
           func when is_function(func) ->
-            nil
-
-          default ->
             default
+
+          attribute_default ->
+            attribute_default
         end
 
       value ->
