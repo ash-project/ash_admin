@@ -5,6 +5,33 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.10.0](https://github.com/ash-project/ash_admin/compare/v0.9.8...v0.10.0) (2023-11-30)
+
+
+
+
+### Features:
+
+* Hide sensitive attributes by default (#82)
+
+### Bug Fixes:
+
+* fix cases where data may not match expected patterns
+
+* allow nil values for all dropdowns to handle list behavior
+
+* Dropdown component has Surface hangover (#81)
+
+### Improvements:
+
+* use prompt instead of adding a nil option for dropdowns
+
+* only ensure `nil` value is present on dropdowns when inside of lists
+
+* fix warnings on actor plug
+
+* use the first enum value as the default for dropdowns
+
 ## [v0.9.8](https://github.com/ash-project/ash_admin/compare/v0.9.7...v0.9.8) (2023-11-17)
 
 
