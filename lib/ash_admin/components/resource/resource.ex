@@ -36,7 +36,10 @@ defmodule AshAdmin.Components.Resource do
         prefix={@prefix}
       />
       <div class="mx-24 relative grid grid-cols-1 justify-items-center"></div>
-      <div :if={@record && match?({:ok, record} when not is_nil(record), @record) && @tab == "update"}>
+      <div :if={
+        @record && match?({:ok, record} when not is_nil(record), @record) &&
+          @tab == "update"
+      }>
         <% {:ok, record} = @record %>
         <.live_component
           module={Form}

@@ -240,21 +240,25 @@ defmodule AshAdmin.PageLive do
             record =
               socket.assigns.resource
               |> to_one_relationships(socket.assigns.api)
-              |> Enum.reduce(record, fn rel, record ->
-                case socket.assigns.api.load(record, rel,
-                       actor: actor,
-                       authorize?: socket.assigns.authorizing
-                     ) do
-                  {:ok, record} ->
-                    record
+              |> Enum.reduce(record, fn
+                rel, {:ok, record} ->
+                  case socket.assigns.api.load(record, rel,
+                         actor: actor,
+                         authorize?: socket.assigns.authorizing
+                       ) do
+                    {:ok, record} ->
+                      {:ok, record}
 
-                  {:error, error} ->
-                    Logger.warning(
-                      "Error while loading relationship #{inspect(rel)} on admin dashboard\n: #{Exception.format(:error, error)}"
-                    )
+                    {:error, error} ->
+                      Logger.warning(
+                        "Error while loading relationship #{inspect(rel)} on admin dashboard\n: #{Exception.format(:error, error)}"
+                      )
 
-                    record
-                end
+                      record
+                  end
+
+                _rel, other ->
+                  other
               end)
 
             socket
