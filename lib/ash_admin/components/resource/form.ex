@@ -1253,13 +1253,6 @@ defmodule AshAdmin.Components.Resource.Form do
       changeset
       |> set_table(socket.assigns[:table])
       |> Map.put(:actor, socket.assigns[:actor])
-      |> case do
-        %Ash.Changeset{} ->
-          Ash.Changeset.set_tenant(changeset, socket.assigns[:tenant])
-
-        %Ash.Query{} ->
-          Ash.Query.set_tenant(changeset, socket.assigns[:tenant])
-      end
     end
 
     case AshPhoenix.Form.submit(form,
@@ -1613,7 +1606,8 @@ defmodule AshAdmin.Components.Resource.Form do
             actor: socket.assigns[:actor],
             authorize?: socket.assigns[:authorizing],
             forms: auto_forms,
-            transform_errors: transform_errors
+            transform_errors: transform_errors,
+            tenant: socket.assigns[:tenant]
           )
 
         :update ->
@@ -1623,7 +1617,8 @@ defmodule AshAdmin.Components.Resource.Form do
             forms: auto_forms,
             actor: socket.assigns[:actor],
             authorize?: socket.assigns[:authorizing],
-            transform_errors: transform_errors
+            transform_errors: transform_errors,
+            tenant: socket.assigns[:tenant]
           )
 
         :destroy ->
@@ -1633,7 +1628,8 @@ defmodule AshAdmin.Components.Resource.Form do
             forms: auto_forms,
             actor: socket.assigns[:actor],
             authorize?: socket.assigns[:authorizing],
-            transform_errors: transform_errors
+            transform_errors: transform_errors,
+            tenant: socket.assigns[:tenant]
           )
       end
 
