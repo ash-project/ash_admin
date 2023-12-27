@@ -171,7 +171,7 @@ defmodule AshAdmin.Components.Resource.Form do
       attributes(@resource, @action, @exactly) %>
     <div class="grid grid-cols-6 gap-6">
       <div
-        :for={attribute <- Enum.reject(attributes, &(&1.name in @skip))}
+        :for={attribute <- Enum.reject(attributes, &(is_nil(@exactly) && &1.name in @skip))}
         class={
           classes([
             "col-span-6",
@@ -281,6 +281,7 @@ defmodule AshAdmin.Components.Resource.Form do
     """
   end
 
+  @spec error_tag(any()) :: Phoenix.LiveView.Rendered.t()
   def error_tag(assigns) do
     ~H"""
     <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 phx-no-feedback:hidden">
