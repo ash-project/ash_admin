@@ -5,6 +5,17 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.10.1](https://github.com/ash-project/ash_admin/compare/v0.10.0...v0.10.1) (2023-12-27)
+
+
+
+
+### Bug Fixes:
+
+* don't hide fields required for managing relationships
+
+* pass tenant to `Changeset.for_*` directly (#84)
+
 ## [v0.10.0](https://github.com/ash-project/ash_admin/compare/v0.9.8...v0.10.0) (2023-11-30)
 
 
