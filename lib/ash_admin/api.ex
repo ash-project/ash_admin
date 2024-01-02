@@ -32,13 +32,6 @@ defmodule AshAdmin.Api do
 
   @moduledoc """
   An API extension to alter the behavior of an API in the admin UI.
-
-  Table of Contents:
-  #{Spark.Dsl.Extension.doc_index([@admin])}
-
-  DSL Docs:
-
-  #{Spark.Dsl.Extension.doc([@admin])}
   """
 
   def name(api) do

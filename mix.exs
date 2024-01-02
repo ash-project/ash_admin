@@ -59,9 +59,59 @@ defmodule AshAdmin.MixProject do
       main: "readme",
       source_ref: "v#{@version}",
       logo: "logos/small-logo.png",
-      extras: [
-        "README.md"
-      ]
+      extras: ["README.md"] ++ extras(),
+      groups_for_extras: groups_for_extras()
+    ]
+  end
+
+  defp extras do
+    # Sorting can be done adding numbers at the begining of filenames
+    "documentation/**/*.{md,livemd,cheatmd}"
+    |> Path.wildcard()
+    |> Enum.map(fn path ->
+      html_filename =
+        path
+        |> Path.basename(".md")
+        |> Path.basename(".livemd")
+        |> Path.basename(".cheatmd")
+
+      title =
+        html_filename
+        |> String.split(~r/[-_]/)
+        |> Enum.map_join(" ", &capitalize/1)
+        |> case do
+          "F A Q" ->
+            "FAQ"
+
+          other ->
+            other
+        end
+
+      {String.to_atom(path),
+       [
+         title: title,
+         default: title == "Get Started"
+       ]}
+    end)
+  end
+
+  defp capitalize(string) do
+    string
+    |> String.split(" ")
+    |> Enum.map(fn string ->
+      [hd | tail] = String.graphemes(string)
+      String.capitalize(hd) <> Enum.join(tail)
+    end)
+  end
+
+  defp groups_for_extras do
+    [
+      Tutorials: [
+        ~r'documentation/tutorials'
+      ],
+      "How To": ~r'documentation/how_to',
+      Topics: ~r'documentation/topics',
+      DSLs: ~r'documentation/dsls'
     ]
   end
 

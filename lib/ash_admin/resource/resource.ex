@@ -94,13 +94,6 @@ defmodule AshAdmin.Resource do
 
   @moduledoc """
   An API extension to alter the behaviour of a resource in the admin UI.
-
-  Table of Contents:
-  #{Spark.Dsl.Extension.doc_index([@admin])}
-
-  DSL Docs:
-
-  #{Spark.Dsl.Extension.doc([@admin])}
   """
 
   def polymorphic?(resource, apis) do
