@@ -19,6 +19,12 @@ defmodule Demo.Accounts.User do
     table_columns [:id, :first_name, :last_name, :representative, :admin, :full_name, :api_key, :date_of_birth]
   end
 
+  multitenancy do
+    strategy :attribute
+    attribute :id
+    global? true
+  end
+
   policies do
     bypass always() do
       authorize_if actor_attribute_equals(:admin, true)

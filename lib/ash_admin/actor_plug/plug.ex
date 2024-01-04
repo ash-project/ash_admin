@@ -24,12 +24,24 @@ defmodule AshAdmin.ActorPlug.Plug do
       actor_api: actor_api_from_session(socket.endpoint, session),
       actor_resources: actor_resources(apis),
       authorizing: session_bool(session["actor_authorizing"]),
+      tenant: session["tenant"],
       actor_paused: actor_paused
     ]
   end
 
   @impl true
   def set_actor_session(conn) do
+    conn =
+      case conn.cookies do
+        %{"tenant" => tenant} when tenant != "undefined" ->
+          conn
+          |> Plug.Conn.put_session(:tenant, tenant)
+          |> Plug.Conn.assign(:tenant, tenant)
+
+        _ ->
+          conn
+      end
+
     case conn.cookies do
       %{"actor_resource" => "undefined"} ->
         conn

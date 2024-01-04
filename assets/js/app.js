@@ -167,6 +167,7 @@ function getCookie(name) {
 let params = () => {
   return {
     _csrf_token: csrfToken, 
+    tenant: getCookie("tenant"),
     actor_resource: getCookie("actor_resource"),
     actor_primary_key: getCookie("actor_primary_key"),
     actor_action: getCookie("actor_action"),

@@ -61,11 +61,10 @@ defmodule AshAdmin.Components.TopNav do
                     api={@api}
                     prefix={@prefix}
                   />
-                  <.live_component
+                  <TenantForm.tenant_form
                     :if={show_tenant_form?(@apis)}
-                    module={TenantForm}
                     tenant={@tenant}
-                    id="tenant_editor"
+                    editing_tenant={@editing_tenant}
                     set_tenant={@set_tenant}
                     clear_tenant={@clear_tenant}
                   />

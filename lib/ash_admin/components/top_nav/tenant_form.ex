@@ -1,15 +1,16 @@
 defmodule AshAdmin.Components.TopNav.TenantForm do
   @moduledoc false
-  use Phoenix.LiveComponent
+  use Phoenix.Component
   import Tails
 
   attr :tenant, :string, required: true
   attr :clear_tenant, :string, required: true
   attr :set_tenant, :string, required: true
+  attr :editing_tenant, :boolean, required: true
 
-  def render(assigns) do
+  def tenant_form(assigns) do
     ~H"""
-    <div id={@id} class="relative text-white" phx-hook="Tenant" phx-target={@myself}>
+    <div id="tenant-form" class="relative text-white" phx-hook="Tenant">
       <.form :if={@editing_tenant} for={to_form(%{}, as: :tenant)} phx-submit={@set_tenant}>
         <input
           type="text"
@@ -17,7 +18,7 @@ defmodule AshAdmin.Components.TopNav.TenantForm do
           value={@tenant}
           class={classes("text-black": @editing_tenant)}
         />
-        <button phx-click="stop_editing_tenant" phx-target={@myself}>
+        <button phx-click="stop_editing_tenant">
           <svg
             width="1em"
             height="1em"
@@ -36,7 +37,7 @@ defmodule AshAdmin.Components.TopNav.TenantForm do
           </svg>
         </button>
       </.form>
-      <a :if={!@editing_tenant} href="#" phx-click="start_editing_tenant" phx-target={@myself}>
+      <a :if={!@editing_tenant} href="#" phx-click="start_editing_tenant">
         <%= if @tenant, do: "Tenant: #{@tenant}", else: "No tenant" %>
       </a>
       <button :if={@tenant} phx-click={@clear_tenant}>
@@ -59,17 +60,5 @@ defmodule AshAdmin.Components.TopNav.TenantForm do
       </button>
     </div>
     """
-  end
-
-  def mount(socket) do
-    {:ok, assign(socket, :editing_tenant, false)}
-  end
-
-  def handle_event("start_editing_tenant", _, socket) do
-    {:noreply, assign(socket, :editing_tenant, true)}
-  end
-
-  def handle_event("stop_editing_tenant", _, socket) do
-    {:noreply, assign(socket, :editing_tenant, false)}
   end
 end

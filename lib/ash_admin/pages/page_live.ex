@@ -48,6 +48,7 @@ defmodule AshAdmin.PageLive do
      |> assign(:record, nil)
      |> assign(:apis, apis)
      |> assign(:tenant, session["tenant"])
+     |> assign(:editing_tenant, false)
      |> then(fn socket ->
        assign(socket, AshAdmin.ActorPlug.actor_assigns(socket, session))
      end)
@@ -65,6 +66,7 @@ defmodule AshAdmin.PageLive do
       id="top_nav"
       apis={@apis}
       api={@api}
+      editing_tenant={@editing_tenant}
       actor_api={@actor_api}
       resource={@resource}
       tenant={@tenant}
@@ -316,6 +318,14 @@ defmodule AshAdmin.PageLive do
      |> assign(:actor_paused, true)
      |> assign(:authorizing, false)
      |> push_event("clear_actor", %{})}
+  end
+
+  def handle_event("start_editing_tenant", _, socket) do
+    {:noreply, assign(socket, :editing_tenant, true)}
+  end
+
+  def handle_event("stop_editing_tenant", _, socket) do
+    {:noreply, assign(socket, :editing_tenant, false)}
   end
 
   def handle_event(
