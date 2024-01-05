@@ -103,6 +103,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 api={@api}
                 attributes={AshAdmin.Resource.table_columns(@resource)}
                 format_fields={AshAdmin.Resource.format_fields(@resource)}
+                show_sensitive_fields={AshAdmin.Resource.show_sensitive_fields(@resource)}
                 prefix={@prefix}
                 actor={@actor}
               />

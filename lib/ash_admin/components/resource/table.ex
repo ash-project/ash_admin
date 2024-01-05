@@ -16,6 +16,7 @@ defmodule AshAdmin.Components.Resource.Table do
   attr :prefix, :any, required: true
   attr :skip, :list, default: []
   attr :format_fields, :any, default: []
+  attr :show_sensitive_fields, :list, default: []
   attr :actor, :any, default: nil
 
   def table(assigns) do
@@ -30,7 +31,14 @@ defmodule AshAdmin.Components.Resource.Table do
         <tbody>
           <tr :for={record <- @data} class="border-b-2">
             <td :for={attribute <- attributes(@resource, @attributes, @skip)} class="py-3">
-              <%= render_attribute(@api, record, attribute, @format_fields, @actor) %>
+              <%= render_attribute(
+                @api,
+                record,
+                attribute,
+                @format_fields,
+                @show_sensitive_fields,
+                @actor
+              ) %>
             </td>
             <td :if={@actions && actions?(@resource)}>
               <div class="flex h-max justify-items-center">
@@ -91,14 +99,21 @@ defmodule AshAdmin.Components.Resource.Table do
     |> Enum.reject(&(&1.name in skip))
   end
 
-  defp render_attribute(api, record, attribute, formats, actor) do
-    process_attribute(api, record, attribute, formats, actor)
+  defp render_attribute(api, record, attribute, formats, show_sensitive_fields, actor) do
+    process_attribute(api, record, attribute, formats, show_sensitive_fields, actor)
   rescue
     _ ->
       "..."
   end
 
-  defp process_attribute(api, record, %module{} = attribute, formats, actor)
+  defp process_attribute(
+         api,
+         record,
+         %module{} = attribute,
+         formats,
+         show_sensitive_fields,
+         actor
+       )
        when module in [HasOne, BelongsTo] do
     display_attributes = AshAdmin.Resource.relationship_display_fields(attribute.destination)
 
@@ -120,13 +135,13 @@ defmodule AshAdmin.Components.Resource.Table do
         attributes = attributes(attribute.destination, display_attributes, [])
 
         Enum.map_join(attributes, " - ", fn x ->
-          render_attribute(api, relationship, x, formats, actor)
+          render_attribute(api, relationship, x, formats, show_sensitive_fields, actor)
         end)
       end
     end
   end
 
-  defp process_attribute(_, record, %struct{} = attribute, formats, _actor)
+  defp process_attribute(_, record, %struct{} = attribute, formats, show_sensitive_fields, _actor)
        when struct in [Ash.Resource.Attribute, Ash.Resource.Aggregate, Ash.Resource.Calculation] do
     {mod, func, args} =
       Keyword.get(formats || [], attribute.name, {Phoenix.HTML.Safe, :to_iodata, []})
@@ -136,14 +151,15 @@ defmodule AshAdmin.Components.Resource.Table do
       |> Map.get(attribute.name)
       |> (&apply(mod, func, [&1] ++ args)).()
 
-    if struct == Ash.Resource.Attribute && attribute.sensitive? do
+    if struct == Ash.Resource.Attribute && attribute.sensitive? &&
+         not Enum.member?(show_sensitive_fields, attribute.name) do
       format_sensitive_value(data, attribute, record)
     else
       format_attribute_value(data, attribute)
     end
   end
 
-  defp process_attribute(_api, _record, _attr, _formats, _actor) do
+  defp process_attribute(_api, _record, _attr, _formats, _show_sensitive_fields, _actor) do
     "..."
   end
 

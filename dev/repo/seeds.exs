@@ -13,8 +13,8 @@ defmodule Demo.Seeder do
     })
   end
 
-  @spec insert_user!(String.t(), String.t(), String.t(), String.t()) :: User.t()
-  def insert_user!(first_name, last_name, bio, history) do
+  @spec insert_user!(String.t(), String.t(), String.t(), String.t(), String.t()) :: User.t()
+  def insert_user!(first_name, last_name, bio, history, api_key) do
     Seed.seed!(User, %{
       first_name: first_name,
       last_name: last_name,
@@ -22,6 +22,7 @@ defmodule Demo.Seeder do
         bio: bio,
         history: history,
       },
+      api_key: api_key,
       alternate_profiles: []
     })
   end
@@ -84,7 +85,7 @@ System.argv()
 
 Demo.Seeder.insert_admin!("Super", "Admin");
 org = Demo.Seeder.insert_organization!("Ash Project");
-Demo.Seeder.insert_user!("Alice", "Courtney", "Lorem ipsum dolor sit amet", "Duis aute irure dolor in reprehenderit in voluptate velit esse");
+Demo.Seeder.insert_user!("Alice", "Courtney", "Lorem ipsum dolor sit amet", "Duis aute irure dolor in reprehenderit in voluptate velit esse", "123456");
 bob = Demo.Seeder.insert_customer!("Bob", "Maclean");
 carol = Demo.Seeder.insert_representative!("Carol", "White");
 

@@ -26,6 +26,14 @@ defmodule AshAdmin.Helpers do
     |> Enum.map_join(" ", &String.capitalize/1)
   end
 
+  def sensitive?(%Ash.Resource.Attribute{sensitive?: true}) do
+    true
+  end
+
+  def sensitive?(_) do
+    false
+  end
+
   def short_description(nil), do: {:not_split, nil}
 
   def short_description(description) do

@@ -276,8 +276,9 @@ defmodule AshAdmin.Components.Resource.Show do
 
   defp render_maybe_sensitive_attribute(assigns, resource, record, attribute) do
     assigns = assign(assigns, attribute: attribute)
+    show_sensitive_fields = AshAdmin.Resource.show_sensitive_fields(resource)
 
-    if attribute.sensitive? do
+    if attribute.sensitive? && not Enum.member?(show_sensitive_fields, attribute.name) do
       ~H"""
       <.live_component
         id={"#{@record.id}-#{@attribute.name}"}
