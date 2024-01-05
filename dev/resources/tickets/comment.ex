@@ -35,6 +35,6 @@ defmodule Demo.Tickets.Comment do
 
   relationships do
     belongs_to :commenting_customer, Demo.Tickets.Customer
-    belongs_to :commenting_representative, Demo.Tickets.Customer
+    belongs_to :commenting_representative, Demo.Tickets.Representative
   end
 end
