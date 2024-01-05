@@ -84,6 +84,11 @@ defmodule AshAdmin.Resource do
       resource_group: [
         type: :atom,
         doc: "The group in the top resource dropdown that the resource appears in."
+      ],
+      show_sensitive_fields: [
+        type: {:list, :atom},
+        doc:
+          "The list of fields that should not be redacted in the admin UI even if they are marked as sensitive."
       ]
     ]
   }
@@ -133,6 +138,10 @@ defmodule AshAdmin.Resource do
 
   def resource_group(resource) do
     Spark.Dsl.Extension.get_opt(resource, [:admin], :resource_group, nil, true)
+  end
+
+  def show_sensitive_fields(resource) do
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :show_sensitive_fields, [], true)
   end
 
   def actor?(resource) do

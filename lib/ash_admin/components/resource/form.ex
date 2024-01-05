@@ -751,7 +751,7 @@ defmodule AshAdmin.Components.Resource.Form do
         ><%= value(@value, @form, @attribute) %></textarea>
       <% short_text?(@form.source.resource, @attribute) -> %>
         <.input
-          type={text_input_type(@attribute)}
+          type={text_input_type(@form.source.resource, @attribute)}
           id={@form.id <> "_#{@attribute.name}"}
           value={value(@value, @form, @attribute)}
           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
@@ -760,7 +760,7 @@ defmodule AshAdmin.Components.Resource.Form do
         />
       <% true -> %>
         <.input
-          type={text_input_type(@attribute)}
+          type={text_input_type(@form.source.resource, @attribute)}
           placeholder={placeholder(@default)}
           id={@form.id <> "_#{@attribute.name}"}
           value={value(@value, @form, @attribute)}
@@ -954,7 +954,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
     ~H"""
     <.input
-      type={text_input_type(@attribute)}
+      type={text_input_type(@form.source.resource, @attribute)}
       placeholder={placeholder(@attribute.default)}
       value={@casted_value}
       name={@name || @form.name <> "[#{@attribute.name}]"}
@@ -970,7 +970,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
           ~H"""
           <.input
-            type={text_input_type(@attribute)}
+            type={text_input_type(@form.source.resource, @attribute)}
             placeholder={placeholder(@attribute.default)}
             value={@value}
             name={@name || @form.name <> "[#{@attribute.name}]"}
@@ -1076,8 +1076,17 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp placeholder(_), do: nil
 
-  defp text_input_type(%{sensitive?: true}), do: "password"
-  defp text_input_type(_), do: "text"
+  defp text_input_type(resource, %{name: name, sensitive?: true}) do
+    show_sensitive_fields = AshAdmin.Resource.show_sensitive_fields(resource)
+
+    if Enum.member?(show_sensitive_fields, name) do
+      "text"
+    else
+      "password"
+    end
+  end
+
+  defp text_input_type(_, _), do: "text"
 
   defp redirect_to(socket, record) do
     if AshAdmin.Resource.show_action(socket.assigns.resource) do
