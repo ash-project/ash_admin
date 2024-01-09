@@ -109,10 +109,13 @@ defmodule AshAdmin.Components.Resource.Form do
           id="_action_form"
         >
           <label for="action">Action</label>
-          <%= Phoenix.HTML.Form.select(form, :action, actions(@resource, @type),
-            disabled: Enum.count(actions(@resource, @type)) <= 1,
-            selected: to_string(@action.name)
-          ) %>
+          <.input
+            type="select"
+            field={form[:action]}
+            disabled={Enum.count(actions(@resource, @type)) <= 1}
+            options={actions(@resource, @type)}
+            value={to_string(@action.name)}
+          />
         </.form>
       </div>
       <div class="px-4 py-5 sm:p-6">
@@ -677,14 +680,13 @@ defmodule AshAdmin.Components.Resource.Form do
     assigns = assign(assigns, attribute: attribute, form: form, value: value, name: name)
 
     ~H"""
-    <%= Phoenix.HTML.Form.select(
-      @form,
-      @attribute.name,
-      [True: "true", False: "false"],
-      prompt: allow_nil_option(@attribute, @value),
-      selected: value(@value, @form, @attribute, "true"),
-      name: @name || @form.name <> "[#{@attribute.name}]"
-    ) %>
+    <.input
+      type="select"
+      id={@form.id <> "_#{@attribute.name}"}
+      name={@name || @form.name <> "[#{@attribute.name}]"}
+      options={[True: "true", False: "false"]}
+      value={value(@value, @form, @attribute, "true")}
+    />
     """
   end
 
@@ -718,14 +720,14 @@ defmodule AshAdmin.Components.Resource.Form do
     ~H"""
     <%= cond do %>
       <% @type == Ash.Type.Atom && @attribute.constraints[:one_of] -> %>
-        <%= Phoenix.HTML.Form.select(
-          @form,
-          @attribute.name,
-          Enum.map(@attribute.constraints[:one_of], &{to_name(&1), &1}),
-          selected: value(@value, @form, @attribute, List.first(@attribute.constraints[:one_of])),
-          prompt: allow_nil_option(@attribute, @value),
-          name: @name || @form.name <> "[#{@attribute.name}]"
-        ) %>
+        <.input
+          type="select"
+          id={@form.id <> "_#{@attribute.name}"}
+          options={Enum.map(@attribute.constraints[:one_of] || [], &{to_name(&1), &1})}
+          value={value(@value, @form, @attribute, List.first(@attribute.constraints[:one_of] || []))}
+          prompt={allow_nil_option(@attribute, @value)}
+          name={@name || @form.name <> "[#{@attribute.name}]"}
+        />
       <% markdown?(@form.source.resource, @attribute) -> %>
         <div
           phx-hook="MarkdownEditor"
@@ -874,14 +876,14 @@ defmodule AshAdmin.Components.Resource.Form do
           <.icon name="hero-plus" class="h-4 w-4 text-gray-500" />
         </button>
       <% is_atom(@attribute.type) && function_exported?(@attribute.type, :values, 0) -> %>
-        <%= Phoenix.HTML.Form.select(
-          @form,
-          @attribute.name,
-          Enum.map(@attribute.type.values(), &{to_name(&1), &1}),
-          selected: value(@value, @form, @attribute, List.first(@attribute.type.values())),
-          prompt: allow_nil_option(@attribute, @value),
-          name: @name || @form.name <> "[#{@attribute.name}]"
-        ) %>
+        <.input
+          type="select"
+          id={@form.id <> "_#{@attribute.name}"}
+          options={Enum.map(@attribute.type.values(), &{to_name(&1), &1})}
+          value={value(@value, @form, @attribute, List.first(@attribute.type.values()))}
+          prompt={allow_nil_option(@attribute, @value)}
+          name={@name || @form.name <> "[#{@attribute.name}]"}
+        />
       <% true -> %>
         <%= render_fallback_attribute(assigns, @form, @attribute, @value, @name) %>
     <% end %>
@@ -898,11 +900,7 @@ defmodule AshAdmin.Components.Resource.Form do
     <div>
       <div :for={
         {this_value, index} <-
-          Enum.with_index(
-            list_value(
-              @value || Phoenix.HTML.FormData.input_value(@form.source, @form, @attribute.name)
-            )
-          )
+          Enum.with_index(list_value(@value || AshPhoenix.Form.value(@form.source, @attribute.name)))
       }>
         <%= render_attribute_input(
           assigns,
@@ -1023,37 +1021,16 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp value(value, form, attribute, default \\ nil)
 
-  defp value({:list_value, nil}, _, _, default), do: default
   defp value({:list_value, value}, _, _, _), do: value
 
   defp value(value, _form, _attribute, _) when not is_nil(value), do: value
 
-  defp value(_value, form, attribute, default) do
-    value = Phoenix.HTML.FormData.input_value(form.source, form, attribute.name)
-
-    case value do
-      nil ->
-        case attribute.default do
-          nil ->
-            default
-
-          func when is_function(func) ->
-            default
-
-          attribute_default ->
-            attribute_default
-        end
-
-      value ->
-        value
-    end
+  defp value(_value, form, attribute, _default) do
+    AshPhoenix.Form.value(form.source, attribute.name)
   end
 
   defp allow_nil_option(_, {:list_value, _}), do: "-"
   defp allow_nil_option(%{allow_nil?: true}, _), do: "-"
-
-  defp allow_nil_option(%{default: default, allow_nil?: false}, _) when not is_nil(default),
-    do: nil
 
   defp allow_nil_option(_, _), do: "Select an option"
 
@@ -1192,8 +1169,7 @@ defmodule AshAdmin.Components.Resource.Form do
         fn adding_form ->
           new_value =
             adding_form
-            |> Phoenix.HTML.Form.form_for("foo")
-            |> Phoenix.HTML.Form.input_value(String.to_existing_atom(field))
+            |> AshPhoenix.Form.value(String.to_existing_atom(field))
             |> Kernel.||([])
             |> indexed_list()
             |> append_to_and_map(nil)

@@ -1,6 +1,7 @@
 defmodule AshAdmin.Components.Resource.SelectTable do
   @moduledoc false
   use Phoenix.Component
+  import AshAdmin.CoreComponents
 
   attr :resource, :any, required: true
   attr :on_change, :string, required: true
@@ -18,7 +19,7 @@ defmodule AshAdmin.Components.Resource.SelectTable do
           (is_nil(@polymorphic_actions) || @action.name in @polymorphic_actions)
       }>
         <.form :let={form} for={to_form(%{}, as: :table)} phx-change={@on_change} phx-target={@target}>
-          <%= Phoenix.HTML.Form.select(form, :table, @tables) %>
+          <.input type="select" field={form[:table]} options={@tables} />
         </.form>
       </div>
     </div>

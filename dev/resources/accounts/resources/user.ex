@@ -111,6 +111,14 @@ defmodule Demo.Accounts.User do
 
     attribute :profile, Demo.Accounts.Profile
     attribute :alternate_profiles, {:array, Demo.Accounts.Profile}
+    attribute :type, :atom do
+      constraints one_of: [:type1, :type2]
+      default :type1
+    end
+
+    attribute :types, {:array, :atom} do
+      constraints items: [one_of: [:type1, :type2]]
+    end
     attribute :tags, {:array, :string}
 
     timestamps()

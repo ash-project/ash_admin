@@ -159,7 +159,7 @@ defmodule AshAdmin.MixProject do
       {:phoenix_view, "~> 2.0"},
       {:phoenix, "~> 1.7"},
       {:phoenix_live_view, "~> 0.19"},
-      {:phoenix_html, "~> 3.2"},
+      {:phoenix_html, "~> 3.2 or ~> 4.0"},
       {:jason, "~> 1.0"},
       {:tails, "~> 0.1"},
       {:gettext, "~> 0.20"},
