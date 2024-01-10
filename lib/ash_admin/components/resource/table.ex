@@ -151,7 +151,7 @@ defmodule AshAdmin.Components.Resource.Table do
       |> Map.get(attribute.name)
       |> (&apply(mod, func, [&1] ++ args)).()
 
-    if struct == Ash.Resource.Attribute && attribute.sensitive? &&
+    if Map.get(attribute, :sensitive?) &&
          not Enum.member?(show_sensitive_fields, attribute.name) do
       format_sensitive_value(data, attribute, record)
     else

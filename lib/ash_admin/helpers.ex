@@ -26,7 +26,7 @@ defmodule AshAdmin.Helpers do
     |> Enum.map_join(" ", &String.capitalize/1)
   end
 
-  def sensitive?(%Ash.Resource.Attribute{sensitive?: true}) do
+  def sensitive?(%{sensitive?: true}) do
     true
   end
 
