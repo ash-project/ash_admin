@@ -59,8 +59,17 @@ defmodule AshAdmin.MixProject do
       main: "readme",
       source_ref: "v#{@version}",
       logo: "logos/small-logo.png",
-      extras: ["README.md"] ++ extras(),
-      groups_for_extras: groups_for_extras()
+      extras: [
+        "README.md",
+        "documentation/dsls/DSL:-AshAdmin.Api.cheatmd",
+        "documentation/dsls/DSL:-AshAdmin.Resource.cheatmd"
+      ],
+      groups_for_extras: [
+        Tutorials: ~r'documentation/tutorials',
+        "How To": ~r'documentation/how_to',
+        Topics: ~r'documentation/topics',
+        DSLs: ~r'documentation/dsls'
+      ]
     ]
   end
 
@@ -105,14 +114,7 @@ defmodule AshAdmin.MixProject do
   end
 
   defp groups_for_extras do
-    [
-      Tutorials: [
-        ~r'documentation/tutorials'
-      ],
-      "How To": ~r'documentation/how_to',
-      Topics: ~r'documentation/topics',
-      DSLs: ~r'documentation/dsls'
-    ]
+    []
   end
 
   defp aliases() do
