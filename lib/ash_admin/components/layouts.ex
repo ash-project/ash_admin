@@ -23,7 +23,7 @@ defmodule AshAdmin.Layouts do
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
-        <%= Phoenix.HTML.Tag.csrf_meta_tag() %>
+        <meta name="csrf-token" content={get_csrf_token()} />
         <title><%= assigns[:page_title] || "Ash Admin" %></title>
         <style nonce="ash_admin-Ed55GFnX">
           <%= raw(render("app.css", %{})) %>

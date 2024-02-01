@@ -73,50 +73,6 @@ defmodule AshAdmin.MixProject do
     ]
   end
 
-  defp extras do
-    # Sorting can be done adding numbers at the begining of filenames
-    "documentation/**/*.{md,livemd,cheatmd}"
-    |> Path.wildcard()
-    |> Enum.map(fn path ->
-      html_filename =
-        path
-        |> Path.basename(".md")
-        |> Path.basename(".livemd")
-        |> Path.basename(".cheatmd")
-
-      title =
-        html_filename
-        |> String.split(~r/[-_]/)
-        |> Enum.map_join(" ", &capitalize/1)
-        |> case do
-          "F A Q" ->
-            "FAQ"
-
-          other ->
-            other
-        end
-
-      {String.to_atom(path),
-       [
-         title: title,
-         default: title == "Get Started"
-       ]}
-    end)
-  end
-
-  defp capitalize(string) do
-    string
-    |> String.split(" ")
-    |> Enum.map(fn string ->
-      [hd | tail] = String.graphemes(string)
-      String.capitalize(hd) <> Enum.join(tail)
-    end)
-  end
-
-  defp groups_for_extras do
-    []
-  end
-
   defp aliases() do
     [
       generate_migrations:
@@ -161,7 +117,7 @@ defmodule AshAdmin.MixProject do
       {:phoenix_view, "~> 2.0"},
       {:phoenix, "~> 1.7"},
       {:phoenix_live_view, "~> 0.19"},
-      {:phoenix_html, "~> 3.2 or ~> 4.0"},
+      {:phoenix_html, "~> 4.0"},
       {:jason, "~> 1.0"},
       {:tails, "~> 0.1"},
       {:gettext, "~> 0.20"},
