@@ -5,6 +5,25 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.10.3](https://github.com/ash-project/ash_admin/compare/v0.10.2...v0.10.3) (2024-02-04)
+
+
+
+
+### Bug Fixes:
+
+* ensure starting state of dropdowns is honored
+
+### Improvements:
+
+* update to phoenix_html 4.0
+
+* support any sensitive value
+
+* support PhoenixHTML 4.0
+
+* Adds show_sensitive_fields option to Resource to allow unredacting seâ¦ (#86)
+
 ## [v0.10.2](https://github.com/ash-project/ash_admin/compare/v0.10.1...v0.10.2) (2024-01-04)
 
 
