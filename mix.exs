@@ -61,8 +61,8 @@ defmodule AshAdmin.MixProject do
       logo: "logos/small-logo.png",
       extras: [
         "README.md",
-        "documentation/dsls/DSL:-AshAdmin.Api.cheatmd",
-        "documentation/dsls/DSL:-AshAdmin.Resource.cheatmd"
+        "documentation/dsls/DSL:-AshAdmin.Api.md",
+        "documentation/dsls/DSL:-AshAdmin.Resource.md"
       ],
       groups_for_extras: [
         Tutorials: ~r'documentation/tutorials',
