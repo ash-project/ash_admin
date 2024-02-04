@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.10.4](https://github.com/ash-project/ash_admin/compare/v0.10.3...v0.10.4) (2024-02-04)
+
+
+
+
+### Improvements:
+
+* fix large gap in header in safari
+
 ## [v0.10.3](https://github.com/ash-project/ash_admin/compare/v0.10.2...v0.10.3) (2024-02-04)
 
 
