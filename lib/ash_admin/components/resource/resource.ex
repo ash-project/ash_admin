@@ -26,7 +26,7 @@ defmodule AshAdmin.Components.Resource do
 
   def render(assigns) do
     ~H"""
-    <div class="content-center h-screen">
+    <div class="h-screen">
       <Nav.nav
         resource={@resource}
         api={@api}
