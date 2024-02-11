@@ -67,7 +67,15 @@ defmodule AshAdmin.Components.Resource.Form do
     |> AshPhoenix.Form.errors(for_path: :all)
     |> Enum.flat_map(fn {path, errors} ->
       Enum.map(errors, fn {field, message} ->
-        {Enum.join(List.wrap(path) ++ List.wrap(field), "."), message}
+        path = List.wrap(path)
+
+        case Enum.reject(path ++ List.wrap(field), &is_nil/1) do
+          [] ->
+            {nil, message}
+
+          items ->
+            {Enum.join(items, "."), message}
+        end
       end)
     end)
   end
@@ -1575,7 +1583,11 @@ defmodule AshAdmin.Components.Resource.Form do
         {nil, "Forbidden", []}
 
       _, other ->
-        other
+        if AshPhoenix.FormData.Error.impl_for(other) do
+          other
+        else
+          {nil, "Internal Error: " <> Exception.message(other), []}
+        end
     end
 
     auto_forms =
