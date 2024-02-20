@@ -1,4 +1,4 @@
-defmodule Demo.Accounts.Profile do
+defmodule Demo.Accounts.NestedEmbed do
   use Ash.Resource,
     data_layer: :embedded,
     extensions: [AshAdmin.Resource]
@@ -11,10 +11,6 @@ defmodule Demo.Accounts.Profile do
   end
 
   attributes do
-    attribute :bio, :string, allow_nil?: false
-    attribute :history, :string
     attribute :tags, {:array, :string}, default: []
-    attribute :metadata, :map
-    attribute :nested_embed, Demo.Accounts.NestedEmbed
   end
 end

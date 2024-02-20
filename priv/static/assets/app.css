@@ -1379,10 +1379,6 @@ select {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
-.content-center {
-  align-content: center;
-}
-
 .items-center {
   align-items: center;
 }
