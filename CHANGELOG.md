@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.10.6](https://github.com/ash-project/ash_admin/compare/v0.10.5...v0.10.6) (2024-02-20)
+
+
+
+
+### Bug Fixes:
+
+* fix lists of values in deeply nested embeds
+
 ## [v0.10.5](https://github.com/ash-project/ash_admin/compare/v0.10.4...v0.10.5) (2024-02-11)
 
 
