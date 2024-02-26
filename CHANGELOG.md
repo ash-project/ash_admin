@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.10.7](https://github.com/ash-project/ash_admin/compare/v0.10.6...v0.10.7) (2024-02-26)
+
+
+
+
+### Bug Fixes:
+
+* properly prevent access to actions not configured to be in the UI
+
 ## [v0.10.6](https://github.com/ash-project/ash_admin/compare/v0.10.5...v0.10.6) (2024-02-20)
 
 

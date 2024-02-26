@@ -5,7 +5,7 @@ defmodule AshAdmin.MixProject do
   An admin UI for Ash Framework
   """
 
-  @version "0.10.6"
+  @version "0.10.7"
 
   def project do
     [
