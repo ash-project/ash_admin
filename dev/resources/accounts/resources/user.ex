@@ -16,6 +16,8 @@ defmodule Demo.Accounts.User do
       field :last_name, type: :short_text
     end
 
+    read_actions [:me, :read, :by_id, :by_name]
+
     table_columns [:id, :first_name, :last_name, :representative, :admin, :full_name, :api_key, :date_of_birth]
   end
 
@@ -43,6 +45,8 @@ defmodule Demo.Accounts.User do
 
       filter expr(id == ^arg(:id))
     end
+
+    read :should_be_hidden
 
     read :by_name do
       argument :first_name, :string, allow_nil?: false
