@@ -43,6 +43,23 @@ defmodule AshAdmin.Router do
   Defines an AshAdmin route.
   It expects the `path` the admin dashboard will be mounted at
   and a set of options.
+
+  ## Options
+
+    * `:live_socket_path` - Optional override for the socket path. it must match
+      the `socket "/live", Phoenix.LiveView.Socket` in your endpoint. Defaults to `/live`.
+
+    * `:on_mount` - Optional list of hooks to attach to the mount lifecycle.
+
+    * `:session` - Optional extra session map or MFA tuple to be merged with the session.
+
+    * `:csp_nonce_assign_key` - Optional assign key to find the CSP nonce value used for assets
+      Supports either `atom()` or
+        `%{optional(:img) => atom(), optional(:script) => atom(), optional(:style) => atom()}`   
+        Defaults to `ash_admin-Ed55GFnX` for backwards compatibility.
+    
+    * `:live_session_name` - Optional atom to name the `live_session`. Defaults to `:ash_admin`.
+
   ## Examples
       defmodule MyAppWeb.Router do
         use Phoenix.Router
@@ -55,6 +72,7 @@ defmodule AshAdmin.Router do
           pipe_through [:browser]
 
           ash_admin "/admin"
+          ash_admin "/csp/admin", live_session_name: :ash_admin_csp, csp_nonce_assign_key: :csp_nonce_value
         end
       end
   """
@@ -63,7 +81,14 @@ defmodule AshAdmin.Router do
       import Phoenix.LiveView.Router
       live_socket_path = Keyword.get(opts, :live_socket_path, "/live")
 
-      live_session :ash_admin,
+      csp_nonce_assign_key =
+        case opts[:csp_nonce_assign_key] do
+          nil -> %{img: "ash_admin-Ed55GFnX", style: "ash_admin-Ed55GFnX", script: "ash_admin-Ed55GFnX"}
+          key when is_atom(key) -> %{img: key, style: key, script: key}
+          %{} = keys -> Map.take(keys, [:img, :style, :script])
+        end
+
+      live_session opts[:live_session_name] || :ash_admin,
         on_mount: List.wrap(opts[:on_mount]),
         session:
           {AshAdmin.Router, :__session__, [%{"prefix" => path}, List.wrap(opts[:session])]},
@@ -72,7 +97,10 @@ defmodule AshAdmin.Router do
           "#{path}/*route",
           AshAdmin.PageLive,
           :page,
-          private: %{live_socket_path: live_socket_path}
+          private: %{
+            live_socket_path: live_socket_path,
+            ash_admin_csp_nonce: csp_nonce_assign_key
+          }
         )
       end
     end

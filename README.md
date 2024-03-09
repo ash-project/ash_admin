@@ -87,10 +87,16 @@ plug :put_secure_browser_headers, %{"content-security-policy" => "default-src 's
 
 in your router, then all of the styles and JavaScript used to power AshAdmin will be blocked by your browser.
 
-To avoid this, you can add the specific AshAdmin nonces to the `default-src` allowlist, ie.
+To avoid this, you can add the default AshAdmin nonces to the `default-src` allowlist, ie.
 
 ```elixir
 plug :put_secure_browser_headers, %{"content-security-policy" => "default-src 'nonce-ash_admin-Ed55GFnX' 'self'"}
+```
+
+alternatively you can supply your own nonces to the `ash_admin` route by setting a `:csp_nonce_assign_key` in the options list, ie.
+
+```elixir
+ash_admin "/admin", csp_nonce_assign_key: :csp_nonce_value
 ```
 
 This will allow AshAdmin-generated inline CSS and JS blocks to execute normally.
