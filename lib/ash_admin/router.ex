@@ -46,19 +46,19 @@ defmodule AshAdmin.Router do
 
   ## Options
 
-    * `:live_socket_path` - Configures the socket path. it must match
-      the `socket "/live", Phoenix.LiveView.Socket` in your endpoint.
+    * `:live_socket_path` - Optional override for the socket path. it must match
+      the `socket "/live", Phoenix.LiveView.Socket` in your endpoint. Defaults to `/live`.
 
-    * `:on_mount` - An optional list of hooks to attach to the mount lifecycle.
+    * `:on_mount` - Optional list of hooks to attach to the mount lifecycle.
 
-    * `:session` - An optional extra session map or MFA tuple to be merged with the session
+    * `:session` - Optional extra session map or MFA tuple to be merged with the session.
 
-    * `:csp_nonce_assign_key` - an assign key to find the CSP nonce value used for assets
+    * `:csp_nonce_assign_key` - Optional assign key to find the CSP nonce value used for assets
       Supports either `atom()` or
-        `%{optional(:img) => atom(), optional(:script) => atom(), optional(:style) => atom()}`
-      Defaults to `ash_admin-Ed55GFnX` for backwards compatibility
+        `%{optional(:img) => atom(), optional(:script) => atom(), optional(:style) => atom()}`   
+        Defaults to `ash_admin-Ed55GFnX` for backwards compatibility.
     
-    * `:live_session_name` - An optional atom to name the live_session. Defaults to :ash_admin
+    * `:live_session_name` - Optional atom to name the `live_session`. Defaults to `:ash_admin`.
 
   ## Examples
       defmodule MyAppWeb.Router do
