@@ -96,7 +96,7 @@ plug :put_secure_browser_headers, %{"content-security-policy" => "default-src 'n
 alternatively you can supply your own nonces to the `ash_admin` route by setting a `:csp_nonce_assign_key` in the options list, ie.
 
 ```elixir
-ash_admin "/csp/admin", csp_nonce_assign_key: :csp_nonce_value
+ash_admin "/admin", csp_nonce_assign_key: :csp_nonce_value
 ```
 
 This will allow AshAdmin-generated inline CSS and JS blocks to execute normally.
