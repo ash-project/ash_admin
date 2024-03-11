@@ -736,7 +736,7 @@ defmodule AshAdmin.Components.Resource.Form do
           type="select"
           id={@id || @form.id <> "_#{@attribute.name}"}
           options={Enum.map(@attribute.constraints[:one_of] || [], &{to_name(&1), &1})}
-          value={value(@value, @form, @attribute, List.first(@attribute.constraints[:one_of] || []))}
+          value={value(@value, @form, @attribute, default_atom_list_value(@attribute))}
           prompt={allow_nil_option(@attribute, @value)}
           name={@name || @form.name <> "[#{@attribute.name}]"}
         />
@@ -1061,6 +1061,11 @@ defmodule AshAdmin.Components.Resource.Form do
   defp value(_value, form, attribute, _default) do
     AshPhoenix.Form.value(form.source, attribute.name)
   end
+
+  defp default_atom_list_value(%{allow_nil?: false, constraints: [one_of: [atom | _]]}), do: atom
+  defp default_atom_list_value(%{default: default}), do: default
+  defp default_atom_list_value(%{constraints: [one_of: [atom | _]]}), do: atom
+  defp default_atom_list_value(_), do: nil
 
   defp allow_nil_option(_, {:list_value, _}), do: "-"
   defp allow_nil_option(%{allow_nil?: true}, _), do: "-"

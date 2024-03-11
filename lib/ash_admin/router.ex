@@ -83,9 +83,18 @@ defmodule AshAdmin.Router do
 
       csp_nonce_assign_key =
         case opts[:csp_nonce_assign_key] do
-          nil -> %{img: "ash_admin-Ed55GFnX", style: "ash_admin-Ed55GFnX", script: "ash_admin-Ed55GFnX"}
-          key when is_atom(key) -> %{img: key, style: key, script: key}
-          %{} = keys -> Map.take(keys, [:img, :style, :script])
+          nil ->
+            %{
+              img: "ash_admin-Ed55GFnX",
+              style: "ash_admin-Ed55GFnX",
+              script: "ash_admin-Ed55GFnX"
+            }
+
+          key when is_atom(key) ->
+            %{img: key, style: key, script: key}
+
+          %{} = keys ->
+            Map.take(keys, [:img, :style, :script])
         end
 
       live_session opts[:live_session_name] || :ash_admin,
