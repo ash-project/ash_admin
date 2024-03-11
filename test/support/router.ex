@@ -17,7 +17,15 @@ defmodule AshAdmin.Test.Router do
     }
 
     ash_admin("/admin")
-    ash_admin("/csp/admin", live_session_name: :ash_admin_csp, csp_nonce_assign_key: :csp_nonce_value)
-    ash_admin("/csp-full/admin", live_session_name: :ash_admin_csp_full, csp_nonce_assign_key: csp_full)
+
+    ash_admin("/csp/admin",
+      live_session_name: :ash_admin_csp,
+      csp_nonce_assign_key: :csp_nonce_value
+    )
+
+    ash_admin("/csp-full/admin",
+      live_session_name: :ash_admin_csp_full,
+      csp_nonce_assign_key: csp_full
+    )
   end
 end
