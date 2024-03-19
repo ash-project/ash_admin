@@ -86,6 +86,8 @@ defmodule Demo.Accounts.User do
       constraints min_length: 1
     end
 
+    attribute :metadata, :map
+
     attribute :representative, :boolean do
       allow_nil? false
       default false

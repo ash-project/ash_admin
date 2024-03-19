@@ -291,6 +291,87 @@ defmodule AshAdmin.Components.Resource.DataTable do
      )}
   end
 
+  def handle_event("add_form", %{"path" => path} = params, socket) do
+    type =
+      case params["type"] do
+        "lookup" -> :read
+        _ -> :create
+      end
+
+    form = AshPhoenix.Form.add_form(socket.assigns.form, path, type: type)
+
+    {:noreply,
+     socket
+     |> assign(:form, form)}
+  end
+
+  def handle_event("remove_form", %{"path" => path}, socket) do
+    form = AshPhoenix.Form.remove_form(socket.assigns.form, path)
+
+    {:noreply,
+     socket
+     |> assign(:form, form)}
+  end
+
+  def handle_event("append_value", %{"path" => path, "field" => field}, socket) do
+    list =
+      AshPhoenix.Form.get_form(socket.assigns.form, path)
+      |> AshPhoenix.Form.value(String.to_existing_atom(field))
+      |> Kernel.||([])
+      |> indexed_list()
+      |> append_to_and_map(nil)
+
+    params =
+      put_in_creating(
+        socket.assigns.form.params || %{},
+        Enum.map(AshPhoenix.Form.parse_path!(socket.assigns.form, path) ++ [field], &to_string/1),
+        list
+      )
+
+    form = AshPhoenix.Form.validate(socket.assigns.form, params)
+
+    {:noreply,
+     socket
+     |> assign(:form, form)}
+  end
+
+  defp indexed_list(map) when is_map(map) do
+    map
+    |> Map.keys()
+    |> Enum.map(&String.to_integer/1)
+    |> Enum.sort()
+    |> Enum.map(&map[to_string(&1)])
+  rescue
+    _ ->
+      List.wrap(map)
+  end
+
+  defp indexed_list(other), do: List.wrap(other)
+
+  defp append_to_and_map(list, value) do
+    list
+    |> Enum.concat([value])
+    |> Enum.with_index()
+    |> Map.new(fn {v, i} ->
+      {"#{i}", v}
+    end)
+  end
+
+  defp put_in_creating(map, [key], value) do
+    Map.put(map || %{}, key, value)
+  end
+
+  defp put_in_creating(list, [key | rest], value) when is_list(list) do
+    List.update_at(list, String.to_integer(key), &put_in_creating(&1, rest, value))
+  end
+
+  defp put_in_creating(map, [key | rest], value) do
+    map
+    |> Kernel.||(%{})
+    |> Map.put_new(key, %{})
+    |> Map.update!(key, &put_in_creating(&1, rest, value))
+  end
+
   defp render_pagination_links(assigns, placement) do
     assigns = assign(assigns, :placement, placement)
 
