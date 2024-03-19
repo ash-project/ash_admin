@@ -7,857 +7,652 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 ## [v0.10.8](https://github.com/ash-project/ash_admin/compare/v0.10.7...v0.10.8) (2024-03-19)
 
-
-
-
 ### Bug Fixes:
 
-* missing handle event in read forms
+- missing handle event in read forms
 
-* Allow blank/nil default values in :atom inputs when allow_nil? is true (#93)
+- Allow blank/nil default values in :atom inputs when allow_nil? is true (#93)
 
-* Allow blank/default default values in :atom inputs when allow_nil? is true
+- Allow blank/default default values in :atom inputs when allow_nil? is true
 
 ### Improvements:
 
-* Add :csp_nonce_assign_key to ash_admin options (fix for /issues/91) (#92)
+- Add :csp_nonce_assign_key to ash_admin options (fix for /issues/91) (#92)
 
 ## [v0.10.7](https://github.com/ash-project/ash_admin/compare/v0.10.6...v0.10.7) (2024-02-26)
 
-
-
-
 ### Bug Fixes:
 
-* properly prevent access to actions not configured to be in the UI
+- properly prevent access to actions not configured to be in the UI
 
 ## [v0.10.6](https://github.com/ash-project/ash_admin/compare/v0.10.5...v0.10.6) (2024-02-20)
 
-
-
-
 ### Bug Fixes:
 
-* fix lists of values in deeply nested embeds
+- fix lists of values in deeply nested embeds
 
 ## [v0.10.5](https://github.com/ash-project/ash_admin/compare/v0.10.4...v0.10.5) (2024-02-11)
 
-
-
-
 ### Improvements:
 
-* show internal errors in ash_admin form
+- show internal errors in ash_admin form
 
 ## [v0.10.4](https://github.com/ash-project/ash_admin/compare/v0.10.3...v0.10.4) (2024-02-04)
 
-
-
-
 ### Improvements:
 
-* fix large gap in header in safari
+- fix large gap in header in safari
 
 ## [v0.10.3](https://github.com/ash-project/ash_admin/compare/v0.10.2...v0.10.3) (2024-02-04)
 
-
-
-
 ### Bug Fixes:
 
-* ensure starting state of dropdowns is honored
+- ensure starting state of dropdowns is honored
 
 ### Improvements:
 
-* update to phoenix_html 4.0
+- update to phoenix_html 4.0
 
-* support any sensitive value
+- support any sensitive value
 
-* support PhoenixHTML 4.0
+- support PhoenixHTML 4.0
 
-* Adds show_sensitive_fields option to Resource to allow unredacting seâ¦ (#86)
+- Adds show_sensitive_fields option to Resource to allow unredacting seâ¦ (#86)
 
 ## [v0.10.2](https://github.com/ash-project/ash_admin/compare/v0.10.1...v0.10.2) (2024-01-04)
 
-
-
-
 ### Bug Fixes:
 
-* ensure tenant stays set after navigating from page
+- ensure tenant stays set after navigating from page
 
 ## [v0.10.1](https://github.com/ash-project/ash_admin/compare/v0.10.0...v0.10.1) (2023-12-27)
 
-
-
-
 ### Bug Fixes:
 
-* don't hide fields required for managing relationships
+- don't hide fields required for managing relationships
 
-* pass tenant to `Changeset.for_*` directly (#84)
+- pass tenant to `Changeset.for_*` directly (#84)
 
 ## [v0.10.0](https://github.com/ash-project/ash_admin/compare/v0.9.8...v0.10.0) (2023-11-30)
 
-
-
-
 ### Features:
 
-* Hide sensitive attributes by default (#82)
+- Hide sensitive attributes by default (#82)
 
 ### Bug Fixes:
 
-* fix cases where data may not match expected patterns
+- fix cases where data may not match expected patterns
 
-* allow nil values for all dropdowns to handle list behavior
+- allow nil values for all dropdowns to handle list behavior
 
-* Dropdown component has Surface hangover (#81)
+- Dropdown component has Surface hangover (#81)
 
 ### Improvements:
 
-* use prompt instead of adding a nil option for dropdowns
+- use prompt instead of adding a nil option for dropdowns
 
-* only ensure `nil` value is present on dropdowns when inside of lists
+- only ensure `nil` value is present on dropdowns when inside of lists
 
-* fix warnings on actor plug
+- fix warnings on actor plug
 
-* use the first enum value as the default for dropdowns
+- use the first enum value as the default for dropdowns
 
 ## [v0.9.8](https://github.com/ash-project/ash_admin/compare/v0.9.7...v0.9.8) (2023-11-17)
 
-
-
-
 ### Bug Fixes:
 
-* default table_columns to all attributes for proper selecting
+- default table_columns to all attributes for proper selecting
 
 ## [v0.9.7](https://github.com/ash-project/ash_admin/compare/v0.9.6...v0.9.7) (2023-11-16)
 
-
-
-
 ### Bug Fixes:
 
-* properly match on errored loads
+- properly match on errored loads
 
 ## [v0.9.6](https://github.com/ash-project/ash_admin/compare/v0.9.5...v0.9.6) (2023-11-15)
 
-
-
-
 ### Bug Fixes:
 
-* Fix JS syntax error and compile latest version of `app.js` (#77)
+- Fix JS syntax error and compile latest version of `app.js` (#77)
 
-* don't use nil as new {:array, type} value (#76)
+- don't use nil as new {:array, type} value (#76)
 
-* load each to_one relationship independently and ignore it if it errors
+- load each to_one relationship independently and ignore it if it errors
 
-* allow showing false values for boolean selects (#74)
+- allow showing false values for boolean selects (#74)
 
-* pass actor when fetching relationships attributes (#73)
+- pass actor when fetching relationships attributes (#73)
 
-* properly provide `arguments` to read actions
+- properly provide `arguments` to read actions
 
 ### Improvements:
 
-* support calculations & aggregates in table columns
+- support calculations & aggregates in table columns
 
 ## [v0.9.5](https://github.com/ash-project/ash_admin/compare/v0.9.4...v0.9.5) (2023-10-11)
 
-
-
-
 ### Improvements:
 
-* force submit forms
+- force submit forms
 
 ## [v0.9.4](https://github.com/ash-project/ash_admin/compare/v0.9.3...v0.9.4) (2023-08-04)
 
-
-
-
 ### Bug Fixes:
 
-* properly reassign form on update
+- properly reassign form on update
 
 ## [v0.9.3](https://github.com/ash-project/ash_admin/compare/v0.9.2...v0.9.3) (2023-08-02)
 
-
-
-
 ### Bug Fixes:
 
-* support cross-api relationships in show links
+- support cross-api relationships in show links
 
-* use `push_patch` instead of `push_redirect`
+- use `push_patch` instead of `push_redirect`
 
 ### Improvements:
 
-* Ui consistency (#62)
+- Ui consistency (#62)
 
 ## [v0.9.2](https://github.com/ash-project/ash_admin/compare/v0.9.1...v0.9.2) (2023-08-02)
 
-
-
-
 ### Bug Fixes:
 
-* fix links to show related resources
+- fix links to show related resources
 
 ## [v0.9.1](https://github.com/ash-project/ash_admin/compare/v0.9.0...v0.9.1) (2023-08-02)
 
-
-
-
 ### Bug Fixes:
 
-* use connect params for persisted state
+- use connect params for persisted state
 
-* properly persist cookies
+- properly persist cookies
 
-* create-form: errors from removal of surface (#60)
+- create-form: errors from removal of surface (#60)
 
-* properly detect update and destroy actions
+- properly detect update and destroy actions
 
-* revalidate with params on submit
+- revalidate with params on submit
 
-* send set tenant to parent liveview
+- send set tenant to parent liveview
 
-* set phx-target
+- set phx-target
 
-* set phx-target on tenant form
+- set phx-target on tenant form
 
-* fix editing_tenant in top_nav
+- fix editing_tenant in top_nav
 
 ### Improvements:
 
-* loosen tails dependency
+- loosen tails dependency
 
 ## [v0.9.0](https://github.com/ash-project/ash_admin/compare/v0.8.2...v0.9.0) (2023-07-28)
 
-
-
-
 ### Features:
 
-* Add seed with Admin, User, Customer, Organization and Ticket (#56)
+- Add seed with Admin, User, Customer, Organization and Ticket (#56)
 
 ### Bug Fixes:
 
-* set assigns for show block
+- set assigns for show block
 
-* fix behaviour and support on_mount and session
+- fix behaviour and support on_mount and session
 
 ### Improvements:
 
-* style the metadata tables consistently (#54)
+- style the metadata tables consistently (#54)
 
-* remove surface
+- remove surface
 
-* support setting an actor
+- support setting an actor
 
 ## [v0.8.2](https://github.com/ash-project/ash_admin/compare/v0.8.1...v0.8.2) (2023-07-25)
 
-
-
-
 ### Bug Fixes:
 
-* don't show create button if no create actions are configured
+- don't show create button if no create actions are configured
 
-* use `authorize?: false` when reading actor from session
+- use `authorize?: false` when reading actor from session
 
 ### Improvements:
 
-* show all errors on form submit
+- show all errors on form submit
 
-* Improve frontend a little bit (#52)
+- Improve frontend a little bit (#52)
 
-* Use overflow-auto instead of overflow-scroll on table
+- Use overflow-auto instead of overflow-scroll on table
 
 ## [v0.8.1](https://github.com/ash-project/ash_admin/compare/v0.8.0...v0.8.1) (2023-04-22)
 
-
-
-
 ### Bug Fixes:
 
-* don't authorize actor read
+- don't authorize actor read
 
-* Admin links are not aware of the scope where ash_admin is called (#49)
+- Admin links are not aware of the scope where ash_admin is called (#49)
 
-* handle cases where actions of a given type don't exist
+- handle cases where actions of a given type don't exist
 
 ### Improvements:
 
-* Update Surface to 0.10.0 (#50)
+- Update Surface to 0.10.0 (#50)
 
 ## [v0.8.0](https://github.com/ash-project/ash_admin/compare/v0.7.1...v0.8.0) (2023-03-01)
 
-
-
-
 ### Features:
 
-* Inline style nonce (#42)
+- Inline style nonce (#42)
 
-* Specify nonces on inline styles/JavaScript so they can be allowed by CSPs
+- Specify nonces on inline styles/JavaScript so they can be allowed by CSPs
 
 ### Bug Fixes:
 
-* Add missing mix.lock changes (#43)
+- Add missing mix.lock changes (#43)
 
-* Add missing mix.lock changes
+- Add missing mix.lock changes
 
 ## [v0.7.1](https://github.com/ash-project/ash_admin/compare/v0.7.0...v0.7.1) (2022-11-01)
 
-
-
-
 ### Bug Fixes:
 
-* fix markdown editor and make things cleaner
+- fix markdown editor and make things cleaner
 
 ## [v0.7.0](https://github.com/ash-project/ash_admin/compare/v0.6.2...v0.7.0) (2022-10-31)
 
-
-
-
 ### Features:
 
-* add markdown attributes
+- add markdown attributes
 
 ### Improvements:
 
-* add markdown editor
+- add markdown editor
 
 ## [v0.6.2](https://github.com/ash-project/ash_admin/compare/v0.6.1...v0.6.2) (2022-10-20)
 
-
-
-
 ### Bug Fixes:
 
-* handle missing api/resource better
+- handle missing api/resource better
 
-* if pagination is available but not required, opt to use it
+- if pagination is available but not required, opt to use it
 
 ## [v0.6.1](https://github.com/ash-project/ash_admin/compare/v0.6.0-rc.2...v0.6.1) (2022-10-20)
 
-
-
-
 ### Improvements:
 
-* update to latest ash
+- update to latest ash
 
 ## [v0.6.0-rc.2](https://github.com/ash-project/ash_admin/compare/v0.6.0-rc.1...v0.6.0-rc.2) (2022-09-28)
 
-
-
-
 ### Improvements:
 
-* update to latest ash
+- update to latest ash
 
-* unlock unused deps
+- unlock unused deps
 
-* support latest ash_phoenix
+- support latest ash_phoenix
 
-* update to latest ash
+- update to latest ash
 
 ## [v0.6.0-rc.1](https://github.com/ash-project/ash_admin/compare/v0.6.0-rc.0...v0.6.0-rc.1) (2022-09-15)
 
-
-
-
 ### Bug Fixes:
 
-* don't call into ash_postgres for tables anymore
+- don't call into ash_postgres for tables anymore
 
-* properly match on `Code.ensrue_compiled/1` output
+- properly match on `Code.ensrue_compiled/1` output
 
 ### Improvements:
 
-* update to the latest ash
+- update to the latest ash
 
 ## [v0.5.2](https://github.com/ash-project/ash_admin/compare/v0.5.1-rc.0...v0.5.2) (2022-08-22)
 
-
-
-
 ### Improvements:
 
-* update to latest ash
+- update to latest ash
 
-* support value-backed nested forms
+- support value-backed nested forms
 
 ## [v0.5.1-rc.0](https://github.com/ash-project/ash_admin/compare/v0.5.0...v0.5.1-rc.0) (2022-08-15)
 
-
-
-
 ### Bug Fixes:
 
-* remove unnecessary code
+- remove unnecessary code
 
-* fix data loading, change tracking (handled by AshPhoenix.Form)
+- fix data loading, change tracking (handled by AshPhoenix.Form)
 
-* changelog URL in release tweet (#24)
+- changelog URL in release tweet (#24)
 
 ## [v0.5.0](https://github.com/ash-project/ash_admin/compare/v0.4.5-rc.0...v0.5.0) (2022-08-10)
 
-
-
-
 ### Features:
 
-* allow setting primary read action as default resource page (#19)
+- allow setting primary read action as default resource page (#19)
 
 ### Bug Fixes:
 
-* failing error case for nested forms (#21)
+- failing error case for nested forms (#21)
 
 ### Improvements:
 
-* use new authorize? configuration
+- use new authorize? configuration
 
 ## [v0.4.5-rc.0](https://github.com/ash-project/ash_admin/compare/v0.4.4...v0.4.5-rc.0) (2022-05-23)
 
-
-
-
 ### Bug Fixes:
 
-* update to latest ash for bugfix
+- update to latest ash for bugfix
 
-* get the original value using `AshPhoenix.Form.value/2`
+- get the original value using `AshPhoenix.Form.value/2`
 
 ### Improvements:
 
-* Top nav resource grouping (#15)
+- Top nav resource grouping (#15)
 
-* update ash version and fix build
+- update ash version and fix build
 
-* add DateInput for dates
+- add DateInput for dates
 
 ## [v0.4.4](https://github.com/ash-project/ash_admin/compare/v0.4.3...v0.4.4) (2022-03-17)
 
-
-
-
 ### Bug Fixes:
 
-* don't depend on an rc version
+- don't depend on an rc version
 
 ## [v0.4.3](https://github.com/ash-project/ash_admin/compare/v0.4.2...v0.4.3) (2022-03-17)
 
-
-
-
 ### Bug Fixes:
 
-* a bunch of behavior fixes, getting the demo to snuff with new Ash
+- a bunch of behavior fixes, getting the demo to snuff with new Ash
 
-* fix tenant/actor session w/ new phx version
+- fix tenant/actor session w/ new phx version
 
 ### Improvements:
 
-* update tons of dependencies
+- update tons of dependencies
 
 ## [v0.4.2](https://github.com/ash-project/ash_admin/compare/v0.4.1...v0.4.2) (2022-03-17)
 
-
-
-
 ### Bug Fixes:
 
-* a bunch of behavior fixes, getting the demo to snuff with new Ash
+- a bunch of behavior fixes, getting the demo to snuff with new Ash
 
-* fix tenant/actor session w/ new phx version
+- fix tenant/actor session w/ new phx version
 
 ### Improvements:
 
-* update tons of dependencies
+- update tons of dependencies
 
 ## [v0.4.2](https://github.com/ash-project/ash_admin/compare/v0.4.1...v0.4.2) (2022-03-17)
 
-
-
-
 ### Bug Fixes:
 
-* don't lock phoenix version
+- don't lock phoenix version
 
 ## [v0.4.1](https://github.com/ash-project/ash_admin/compare/v0.4.0...v0.4.1) (2022-03-17)
 
-
-
-
 ### Bug Fixes:
 
-* various other fixes for events and hooks
+- various other fixes for events and hooks
 
-* fix issues w/ admin UI not rendering
+- fix issues w/ admin UI not rendering
 
 ## [v0.4.0](https://github.com/ash-project/ash_admin/compare/v0.3.0-rc.0...v0.4.0) (2021-11-14)
 
-
-
-
 ### Bug Fixes:
 
-* handle new liveview arg pattern
+- handle new liveview arg pattern
 
 ## [v0.3.0-rc.0](https://github.com/ash-project/ash_admin/compare/v0.2.22...v0.3.0-rc.0) (2021-09-01)
+
 ### Breaking Changes:
 
-* support latest surface/phoenix
-
-
+- support latest surface/phoenix
 
 ### Improvements:
 
-* remove compile-time router, use params instead
+- remove compile-time router, use params instead
 
 ## [v0.2.22](https://github.com/ash-project/ash_admin/compare/v0.2.21...v0.2.22) (2021-07-24)
 
-
-
-
 ### Bug Fixes:
 
-* render values properly when no format set
+- render values properly when no format set
 
 ## [v0.2.21](https://github.com/ash-project/ash_admin/compare/v0.2.20...v0.2.21) (2021-07-24)
 
-
-
-
 ### Improvements:
 
-* define custom formats for any field (#7)
+- define custom formats for any field (#7)
 
 ## [v0.2.20](https://github.com/ash-project/ash_admin/compare/v0.2.19...v0.2.20) (2021-07-23)
 
-
-
-
 ### Improvements:
 
-* relationships in datatable (#6)
+- relationships in datatable (#6)
 
 ## [v0.2.19](https://github.com/ash-project/ash_admin/compare/v0.2.18...v0.2.19) (2021-07-23)
 
-
-
-
 ### Improvements:
 
-* update to latest ash
+- update to latest ash
 
 ## [v0.2.18](https://github.com/ash-project/ash_admin/compare/v0.2.17...v0.2.18) (2021-07-20)
 
-
-
-
 ### Bug Fixes:
 
-* digest assets
+- digest assets
 
-* show proper values in update forms on initial render
+- show proper values in update forms on initial render
 
 ## [v0.2.17](https://github.com/ash-project/ash_admin/compare/v0.2.16-rc.1...v0.2.17) (2021-07-20)
 
-
-
-
 ### Improvements:
 
-* add json editor
+- add json editor
 
 ## [v0.2.16-rc.1](https://github.com/ash-project/ash_admin/compare/v0.2.16-rc.0...v0.2.16-rc.1) (2021-07-18)
 
-
-
-
 ### Improvements:
 
-* update to latest ash
+- update to latest ash
 
 ## [v0.2.16-rc.0](https://github.com/ash-project/ash_admin/compare/v0.2.15...v0.2.16-rc.0) (2021-07-18)
 
-
-
-
 ### Bug Fixes:
 
-* show boolean default values better
+- show boolean default values better
 
 ### Improvements:
 
-* update to new form logic
+- update to new form logic
 
 ## [v0.2.15](https://github.com/ash-project/ash_admin/compare/v0.2.14...v0.2.15) (2021-05-18)
 
-
-
-
 ### Bug Fixes:
 
-* retain `manage_relationship_source` context where possible
+- retain `manage_relationship_source` context where possible
 
 ## [v0.2.14](https://github.com/ash-project/ash_admin/compare/v0.2.13...v0.2.14) (2021-05-14)
 
-
-
-
 ### Improvements:
 
-* general manage relationship improvements
+- general manage relationship improvements
 
 ## [v0.2.13](https://github.com/ash-project/ash_admin/compare/v0.2.12...v0.2.13) (2021-05-13)
 
-
-
-
 ### Bug Fixes:
 
-* track pkey of embeds when adding
+- track pkey of embeds when adding
 
 ## [v0.2.12](https://github.com/ash-project/ash_admin/compare/v0.2.11...v0.2.12) (2021-05-10)
 
-
-
-
 ### Improvements:
 
-* support explicit enum types
+- support explicit enum types
 
 ## [v0.2.11](https://github.com/ash-project/ash_admin/compare/v0.2.10...v0.2.11) (2021-05-06)
 
-
-
-
 ### Bug Fixes:
 
-* fix special text fields
+- fix special text fields
 
 ### Improvements:
 
-* always show action dropdown
+- always show action dropdown
 
-* log on failures in the UI
+- log on failures in the UI
 
 ## [v0.2.10](https://github.com/ash-project/ash_admin/compare/v0.2.9...v0.2.10) (2021-04-17)
 
-
-
-
 ### Bug Fixes:
 
-* update to ash_phoenix, fix relationship embeds
+- update to ash_phoenix, fix relationship embeds
 
 ## [v0.2.9](https://github.com/ash-project/ash_admin/compare/v0.2.8...v0.2.9) (2021-04-16)
 
-
-
-
 ### Improvements:
 
-* support array attribute/arguments properly
+- support array attribute/arguments properly
 
 ## [v0.2.8](https://github.com/ash-project/ash_admin/compare/v0.2.7...v0.2.8) (2021-04-15)
 
-
-
-
 ### Bug Fixes:
 
-* properly track embedded attribute targets
+- properly track embedded attribute targets
 
 ## [v0.2.7](https://github.com/ash-project/ash_admin/compare/v0.2.6...v0.2.7) (2021-04-09)
 
-
-
-
 ### Bug Fixes:
 
-* set actor in datatable
+- set actor in datatable
 
 ## [v0.2.6](https://github.com/ash-project/ash_admin/compare/v0.2.5...v0.2.6) (2021-04-09)
 
-
-
-
 ### Bug Fixes:
 
-* support binary data (by not showing it)
+- support binary data (by not showing it)
 
 ## [v0.2.5](https://github.com/ash-project/ash_admin/compare/v0.2.4...v0.2.5) (2021-03-30)
 
-
-
-
 ### Bug Fixes:
 
-* don't send empty params on save
+- don't send empty params on save
 
 ### Improvements:
 
-* update to latest ash_phoenix
+- update to latest ash_phoenix
 
 ## [v0.2.4](https://github.com/ash-project/ash_admin/compare/v0.2.3...v0.2.4) (2021-03-30)
 
-
-
-
 ### Bug Fixes:
 
-* show add button on array input relationships
+- show add button on array input relationships
 
 ## [v0.2.3](https://github.com/ash-project/ash_admin/compare/v0.2.2...v0.2.3) (2021-03-29)
 
-
-
-
 ### Bug Fixes:
 
-* remove path dependency on ash
+- remove path dependency on ash
 
 ## [v0.2.2](https://github.com/ash-project/ash_admin/compare/v0.2.1...v0.2.2) (2021-03-29)
 
-
-
-
 ### Bug Fixes:
 
-* allow removing to_one relationships on creates
+- allow removing to_one relationships on creates
 
 ### Improvements:
 
-* support lookup forms *or* create forms
+- support lookup forms _or_ create forms
 
 ## [v0.2.1](https://github.com/ash-project/ash_admin/compare/v0.2.0...v0.2.1) (2021-03-28)
 
-
-
-
 ### Bug Fixes:
 
-* update ash_admin dependency
+- update ash_admin dependency
 
 ## [v0.2.0](https://github.com/ash-project/ash_admin/compare/v0.1.6...v0.2.0) (2021-03-28)
 
-
-
-
 ### Features:
 
-* more testing resources + relationship argument forms!
+- more testing resources + relationship argument forms!
 
 ## [v0.1.6](https://github.com/ash-project/ash_admin/compare/v0.1.5...v0.1.6) (2021-03-25)
 
-
-
-
 ### Improvements:
 
-* use new relationship management logic
+- use new relationship management logic
 
 ## [v0.1.5](https://github.com/ash-project/ash_admin/compare/v0.1.4...v0.1.5) (2021-03-24)
 
-
-
-
 ### Bug Fixes:
 
-* remove IO.inspect
+- remove IO.inspect
 
-* properly only provide changing fields to actions
+- properly only provide changing fields to actions
 
 ## [v0.1.4](https://github.com/ash-project/ash_admin/compare/v0.1.3...v0.1.4) (2021-03-24)
 
-
-
-
 ### Bug Fixes:
 
-* support tenant on read actions
+- support tenant on read actions
 
-* remove IO.inspect
+- remove IO.inspect
 
 ### Improvements:
 
-* only send changing fields
+- only send changing fields
 
-* don't show `destination_field` on related tables
+- don't show `destination_field` on related tables
 
 ## [v0.1.3](https://github.com/ash-project/ash_admin/compare/v0.1.2...v0.1.3) (2021-03-23)
 
-
-
-
 ### Bug Fixes:
 
-* use version properly
+- use version properly
 
 ## [v0.1.2](https://github.com/ash-project/ash_admin/compare/v0.1.1...v0.1.2) (2021-03-22)
 
-
-
-
 ### Bug Fixes:
 
-* fix build
+- fix build
 
 ## [v0.1.1](https://github.com/ash-project/ash_admin/compare/v0.1.0...v0.1.1) (2021-03-22)
 
-
-
-
 ### Bug Fixes:
 
-* use static routes
+- use static routes
 
 ## [v0.1.0](https://github.com/ash-project/ash_admin/compare/v0.1.0...v0.1.0) (2021-03-22)
 
-
-
-
 ### Features:
 
-* draw the rest of the owl
+- draw the rest of the owl
 
-* support fully managed relationships
+- support fully managed relationships
 
-* set actor from show page
+- set actor from show page
 
-* support destroy actions
+- support destroy actions
 
-* lots of new features, including related id updates
+- lots of new features, including related id updates
 
 ### Bug Fixes:
 
-* various fixes
+- various fixes
 
-* various fixes/improvements
+- various fixes/improvements
 
-* various bug fixes
+- various bug fixes
 
-* update dep versions
+- update dep versions
 
-* fix action changing
+- fix action changing
 
 ### Improvements:
 
-* general fixes, configurable action lists
+- general fixes, configurable action lists
 
-* add pagination support
+- add pagination support
 
-* support read actions with arguments
+- support read actions with arguments
 
-* add "log in" button
+- add "log in" button

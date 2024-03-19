@@ -1059,9 +1059,7 @@ defmodule AshAdmin.Components.Resource.Form do
   defp value(value, _form, _attribute, _) when not is_nil(value), do: value
 
   defp value(_value, form, attribute, _default) do
-    IO.inspect(attribute, label: "foobar")
-    IO.inspect(form.source.source)
-    AshPhoenix.Form.value(form.source, attribute.name) |> IO.inspect(label: "foobar")
+    AshPhoenix.Form.value(form.source, attribute.name)
   end
 
   defp default_atom_list_value(%{allow_nil?: false, constraints: [one_of: [atom | _]]}), do: atom
