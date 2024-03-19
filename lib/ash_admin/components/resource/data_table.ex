@@ -313,6 +313,19 @@ defmodule AshAdmin.Components.Resource.DataTable do
      |> assign(:query, query)}
   end
 
+  def handle_event("remove_value", %{"path" => path, "field" => field, "index" => index}, socket) do
+    query =
+      AshPhoenix.Form.update_form(
+        socket.assigns.query,
+        path,
+        &remove_value(&1, field, index)
+      )
+
+    {:noreply,
+     socket
+     |> assign(:query, query)}
+  end
+
   def handle_event("append_value", %{"path" => path, "field" => field}, socket) do
     list =
       AshPhoenix.Form.get_form(socket.assigns.query, path)
@@ -373,6 +386,37 @@ defmodule AshAdmin.Components.Resource.DataTable do
     |> Kernel.||(%{})
     |> Map.put_new(key, %{})
     |> Map.update!(key, &put_in_creating(&1, rest, value))
+  end
+
+  defp remove_value(form, field, index) do
+    current_value =
+      form
+      |> AshPhoenix.Form.value(String.to_existing_atom(field))
+      |> case do
+        map when is_map(map) ->
+          map
+
+        list ->
+          list
+          |> List.wrap()
+          |> Enum.with_index()
+          |> Map.new(fn {value, index} ->
+            {to_string(index), value}
+          end)
+      end
+
+    new_value = Map.delete(current_value, index)
+
+    new_value =
+      if new_value == %{} do
+        nil
+      else
+        new_value
+      end
+
+    new_params = Map.put(form.params, field, new_value)
+
+    AshPhoenix.Form.validate(form, new_params)
   end
 
   defp render_pagination_links(assigns, placement) do
