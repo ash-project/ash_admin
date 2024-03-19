@@ -1059,7 +1059,9 @@ defmodule AshAdmin.Components.Resource.Form do
   defp value(value, _form, _attribute, _) when not is_nil(value), do: value
 
   defp value(_value, form, attribute, _default) do
-    AshPhoenix.Form.value(form.source, attribute.name)
+    IO.inspect(attribute, label: "foobar")
+    IO.inspect(form.source.source)
+    AshPhoenix.Form.value(form.source, attribute.name) |> IO.inspect(label: "foobar")
   end
 
   defp default_atom_list_value(%{allow_nil?: false, constraints: [one_of: [atom | _]]}), do: atom
@@ -1558,7 +1560,7 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp manages_relationship(argument, action) do
-    if action.changes do
+    if action.changes && map_type?(argument.type) do
       Enum.find_value(action.changes, fn
         %{change: {Ash.Resource.Change.ManageRelationship, opts}} ->
           if opts[:argument] == argument.name do
