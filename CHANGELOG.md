@@ -5,6 +5,23 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.10.8](https://github.com/ash-project/ash_admin/compare/v0.10.7...v0.10.8) (2024-03-19)
+
+
+
+
+### Bug Fixes:
+
+* missing handle event in read forms
+
+* Allow blank/nil default values in :atom inputs when allow_nil? is true (#93)
+
+* Allow blank/default default values in :atom inputs when allow_nil? is true
+
+### Improvements:
+
+* Add :csp_nonce_assign_key to ash_admin options (fix for /issues/91) (#92)
+
 ## [v0.10.7](https://github.com/ash-project/ash_admin/compare/v0.10.6...v0.10.7) (2024-02-26)
 
 
