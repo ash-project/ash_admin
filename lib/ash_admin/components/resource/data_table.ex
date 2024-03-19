@@ -298,24 +298,24 @@ defmodule AshAdmin.Components.Resource.DataTable do
         _ -> :create
       end
 
-    form = AshPhoenix.Form.add_form(socket.assigns.form, path, type: type)
+    query = AshPhoenix.Form.add_form(socket.assigns.query, path, type: type)
 
     {:noreply,
      socket
-     |> assign(:form, form)}
+     |> assign(:query, query)}
   end
 
   def handle_event("remove_form", %{"path" => path}, socket) do
-    form = AshPhoenix.Form.remove_form(socket.assigns.form, path)
+    query = AshPhoenix.Form.remove_form(socket.assigns.query, path)
 
     {:noreply,
      socket
-     |> assign(:form, form)}
+     |> assign(:query, query)}
   end
 
   def handle_event("append_value", %{"path" => path, "field" => field}, socket) do
     list =
-      AshPhoenix.Form.get_form(socket.assigns.form, path)
+      AshPhoenix.Form.get_form(socket.assigns.query, path)
       |> AshPhoenix.Form.value(String.to_existing_atom(field))
       |> Kernel.||([])
       |> indexed_list()
@@ -323,16 +323,19 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
     params =
       put_in_creating(
-        socket.assigns.form.params || %{},
-        Enum.map(AshPhoenix.Form.parse_path!(socket.assigns.form, path) ++ [field], &to_string/1),
+        socket.assigns.query.params || %{},
+        Enum.map(
+          AshPhoenix.Form.parse_path!(socket.assigns.query, path) ++ [field],
+          &to_string/1
+        ),
         list
       )
 
-    form = AshPhoenix.Form.validate(socket.assigns.form, params)
+    query = AshPhoenix.Form.validate(socket.assigns.query, params)
 
     {:noreply,
      socket
-     |> assign(:form, form)}
+     |> assign(:query, query)}
   end
 
   defp indexed_list(map) when is_map(map) do
