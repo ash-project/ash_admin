@@ -8,7 +8,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   alias AshAdmin.Components.Resource.Table
 
   attr :resource, :atom
-  attr :api, :atom
+  attr :domain, :atom
   attr :action, :any
   attr :authorizing, :boolean
   attr :actor, :any
@@ -100,7 +100,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 table={@table}
                 data={data(@data)}
                 resource={@resource}
-                api={@api}
+                domain={@domain}
                 attributes={AshAdmin.Resource.table_columns(@resource)}
                 format_fields={AshAdmin.Resource.format_fields(@resource)}
                 show_sensitive_fields={AshAdmin.Resource.show_sensitive_fields(@resource)}
@@ -212,7 +212,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 socket.assigns.query.source
                 |> set_table(socket.assigns[:table])
                 |> load_fields()
-                |> assigns[:api].read(page: page_params)
+                |> Ash.read(page: page_params, domain: assigns[:domain])
               end
             end,
             load_until_connected?: true
@@ -230,7 +230,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 |> set_table(socket.assigns[:table])
                 |> Ash.Query.limit(1000)
                 |> load_fields()
-                |> assigns[:api].read()
+                |> Ash.read(domain: assigns[:domain])
               end
             end,
             load_until_connected?: true

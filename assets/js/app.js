@@ -40,7 +40,7 @@ Hooks.JsonEditor = {
         },
         modes: ["text", "tree"],
       },
-      JSON.parse(document.getElementById(inputId).value)
+      JSON.parse(document.getElementById(inputId).value),
     );
 
     editors[this.el.id] = this.editor;
@@ -71,7 +71,7 @@ Hooks.JsonView = {
       {
         mode: "preview",
       },
-      json
+      json,
     );
   },
   mounted() {
@@ -81,7 +81,7 @@ Hooks.JsonView = {
       {
         mode: "preview",
       },
-      json
+      json,
     );
   },
 };
@@ -111,13 +111,13 @@ Hooks.Actor = {
       document.cookie =
         "actor_primary_key" + "=" + payload.primary_key + ";path=/";
       document.cookie = "actor_action" + "=" + payload.action + ";path=/";
-      document.cookie = "actor_api" + "=" + payload.api + ";path=/";
+      document.cookie = "actor_domain" + "=" + payload.domain + ";path=/";
     });
     this.handleEvent("clear_actor", () => {
       document.cookie = "actor_resource" + "=" + ";path=/";
       document.cookie = "actor_primary_key" + "=" + ";path=/";
       document.cookie = "actor_action" + ";path=/";
-      document.cookie = "actor_api" + "=" + ";path=/";
+      document.cookie = "actor_domain" + "=" + ";path=/";
       document.cookie = "actor_authorizing=false;path=/";
       document.cookie = "actor_paused=true;path=/";
     });
@@ -160,22 +160,21 @@ Hooks.MaintainAttrs = {
 function getCookie(name) {
   var re = new RegExp(name + "=([^;]+)");
   var value = re.exec(document.cookie);
-  return (value != null) ? unescape(value[1]) : null;
-};
-
+  return value != null ? unescape(value[1]) : null;
+}
 
 let params = () => {
   return {
-    _csrf_token: csrfToken, 
+    _csrf_token: csrfToken,
     tenant: getCookie("tenant"),
     actor_resource: getCookie("actor_resource"),
     actor_primary_key: getCookie("actor_primary_key"),
     actor_action: getCookie("actor_action"),
-    actor_api: getCookie("actor_api"),
+    actor_domain: getCookie("actor_domain"),
     actor_authorizing: getCookie("actor_authorizing"),
-    actor_paused: getCookie("actor_paused")
-  }
-}
+    actor_paused: getCookie("actor_paused"),
+  };
+};
 
 let liveSocket = new LiveSocket(socketPath, Socket, {
   params: params,

@@ -11,8 +11,8 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
   attr :toggle_authorizing, :string, required: true
   attr :toggle_actor_paused, :string, required: true
   attr :clear_actor, :string, required: true
-  attr :api, :any, required: true
-  attr :actor_api, :any, required: true
+  attr :domain, :any, required: true
+  attr :actor_domain, :any, required: true
   attr :prefix, :any, required: true
 
   def actor_select(assigns) do
@@ -73,7 +73,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
           <.link
             :if={@actor}
             class="hover:text-blue-400 hover:underline"
-            target={"#{@prefix}?api=#{AshAdmin.Api.name(@actor_api)}&resource=#{AshAdmin.Resource.name(@actor.__struct__)}&tab=show&primary_key=#{encode_primary_key(@actor)}"}
+            target={"#{@prefix}?domain=#{AshAdmin.Domain.name(@actor_domain)}&resource=#{AshAdmin.Resource.name(@actor.__struct__)}&tab=show&primary_key=#{encode_primary_key(@actor)}"}
           >
             <%= user_display(@actor) %>
           </.link>
@@ -104,27 +104,27 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
     """
   end
 
-  defp render_actor_link(assigns, [{api, resource}]) do
-    assigns = assign(assigns, api: api, resource: resource)
+  defp render_actor_link(assigns, [{domain, resource}]) do
+    assigns = assign(assigns, domain: domain, resource: resource)
 
     ~H"""
-    <.link navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=read"}>
+    <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=read"}>
       Set <%= AshAdmin.Resource.name(@resource) %>
     </.link>
     """
   end
 
-  defp render_actor_link(assigns, apis_and_resources) do
-    assigns = assign(assigns, apis_and_resources: apis_and_resources)
+  defp render_actor_link(assigns, domains_and_resources) do
+    assigns = assign(assigns, domains_and_resources: domains_and_resources)
 
     ~H"""
     <div aria-labelledby="actor-banner">
       <.link
-        :for={{{api, resource}, i} <- Enum.with_index(@apis_and_resources)}
-        navigate={"#{@prefix}?api=#{AshAdmin.Api.name(api)}&resource=#{AshAdmin.Resource.name(resource)}&action_type=read"}
+        :for={{{domain, resource}, i} <- Enum.with_index(@domains_and_resources)}
+        navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(domain)}&resource=#{AshAdmin.Resource.name(resource)}&action_type=read"}
       >
         Set <%= AshAdmin.Resource.name(resource) %>
-        <span :if={i != Enum.count(@apis_and_resources) - 1}>
+        <span :if={i != Enum.count(@domains_and_resources) - 1}>
           |
         </span>
       </.link>

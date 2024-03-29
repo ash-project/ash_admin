@@ -39,20 +39,20 @@ defmodule AshAdmin.PageLive do
 
     socket = assign(socket, :prefix, prefix)
 
-    apis = apis(otp_app)
+    domains = domains(otp_app)
 
     {:ok,
      socket
      |> assign(:prefix, prefix)
      |> assign(:primary_key, nil)
      |> assign(:record, nil)
-     |> assign(:apis, apis)
+     |> assign(:domains, domains)
      |> assign(:tenant, session["tenant"])
      |> assign(:editing_tenant, false)
      |> then(fn socket ->
        assign(socket, AshAdmin.ActorPlug.actor_assigns(socket, session))
      end)
-     |> assign_new(:actor_api, fn -> nil end)
+     |> assign_new(:actor_domain, fn -> nil end)
      |> assign_new(:actor_resources, fn -> [] end)
      |> assign_new(:authorizing, fn -> true end)
      |> assign_new(:actor_paused, fn -> false end)}
@@ -64,10 +64,10 @@ defmodule AshAdmin.PageLive do
     <.live_component
       module={TopNav}
       id="top_nav"
-      apis={@apis}
-      api={@api}
+      domains={@domains}
+      domain={@domain}
       editing_tenant={@editing_tenant}
-      actor_api={@actor_api}
+      actor_domain={@actor_domain}
       resource={@resource}
       tenant={@tenant}
       actor_resources={@actor_resources}
@@ -89,7 +89,7 @@ defmodule AshAdmin.PageLive do
       set_actor="set_actor"
       primary_key={@primary_key}
       record={@record}
-      api={@api}
+      domain={@domain}
       tab={@tab}
       action_type={@action_type}
       url_path={@url_path}
@@ -106,28 +106,28 @@ defmodule AshAdmin.PageLive do
     """
   end
 
-  defp apis(otp_app) do
+  defp domains(otp_app) do
     otp_app
-    |> Application.get_env(:ash_apis)
-    |> Enum.filter(&AshAdmin.Api.show?/1)
+    |> Application.get_env(:ash_domains)
+    |> Enum.filter(&AshAdmin.Domain.show?/1)
   end
 
-  defp assign_api(socket, api) do
-    api =
-      Enum.find(socket.assigns.apis, fn shown_api ->
-        AshAdmin.Api.name(shown_api) == api
-      end) || Enum.at(socket.assigns.apis, 0)
+  defp assign_domain(socket, domain) do
+    domain =
+      Enum.find(socket.assigns.domains, fn shown_domain ->
+        AshAdmin.Domain.name(shown_domain) == domain
+      end) || Enum.at(socket.assigns.domains, 0)
 
-    assign(socket, :api, api)
+    assign(socket, :domain, domain)
   end
 
   defp assign_resource(socket, resource) do
-    if socket.assigns.api do
-      resources = Ash.Api.Info.resources(socket.assigns.api)
+    if socket.assigns.domain do
+      resources = Ash.Domain.Info.resources(socket.assigns.domain)
 
       resource =
-        Enum.find(resources, fn api_resource ->
-          AshAdmin.Resource.name(api_resource) == resource
+        Enum.find(resources, fn domain_resources ->
+          AshAdmin.Resource.name(domain_resources) == resource
         end) || Enum.at(resources, 0)
 
       assign(socket, :resource, resource)
@@ -139,7 +139,7 @@ defmodule AshAdmin.PageLive do
   defp assign_action(socket, action, action_type) do
     requested_action = action
 
-    if socket.assigns.api && socket.assigns.resource do
+    if socket.assigns.domain && socket.assigns.resource do
       action_type =
         case action_type do
           "read" ->
@@ -155,7 +155,7 @@ defmodule AshAdmin.PageLive do
             :destroy
 
           nil ->
-            if AshAdmin.Api.default_resource_page(socket.assigns.api) == :primary_read,
+            if AshAdmin.Domain.default_resource_page(socket.assigns.domain) == :primary_read,
               do: :read,
               else: nil
         end
@@ -242,7 +242,7 @@ defmodule AshAdmin.PageLive do
     if socket.assigns.resource do
       tables =
         if socket.assigns.resource do
-          AshAdmin.Resource.polymorphic_tables(socket.assigns.resource, socket.assigns.apis)
+          AshAdmin.Resource.polymorphic_tables(socket.assigns.resource, socket.assigns.domains)
         else
           []
         end
@@ -271,7 +271,7 @@ defmodule AshAdmin.PageLive do
 
     socket =
       socket
-      |> assign_api(params["api"])
+      |> assign_domain(params["domain"])
       |> assign_resource(params["resource"])
       |> assign_action(params["action"], params["action_type"])
       |> assign_tables(params["table"])
@@ -298,15 +298,16 @@ defmodule AshAdmin.PageLive do
                 actor: actor,
                 authorize?: socket.assigns.authorizing
               )
-              |> socket.assigns.api.read_one()
+              |> Ash.read_one(domain: socket.assigns.domain)
 
             record =
               socket.assigns.resource
-              |> to_one_relationships(socket.assigns.api)
+              |> to_one_relationships(socket.assigns.domain)
               |> Enum.reduce(record, fn
                 rel, {:ok, record} ->
-                  case socket.assigns.api.load(record, rel,
+                  case Ash.load(record, rel,
                          actor: actor,
+                         domain: socket.assigns.domain,
                          authorize?: socket.assigns.authorizing
                        ) do
                     {:ok, record} ->
@@ -345,12 +346,12 @@ defmodule AshAdmin.PageLive do
      |> assign(:params, params)}
   end
 
-  defp to_one_relationships(resource, api) do
+  defp to_one_relationships(resource, domain) do
     resource
     |> Ash.Resource.Info.relationships()
     |> Enum.filter(fn relationship ->
-      api = relationship.api || api
-      AshAdmin.Api.show?(api) && relationship.cardinality == :one
+      domain = relationship.domain || domain || Ash.Resource.Info.domain(relationship.destination)
+      AshAdmin.Domain.show?(domain) && relationship.cardinality == :one
     end)
     |> Enum.map(& &1.name)
   end
@@ -391,23 +392,23 @@ defmodule AshAdmin.PageLive do
 
   def handle_event(
         "set_actor",
-        %{"resource" => resource, "api" => api, "pkey" => primary_key},
+        %{"resource" => resource, "domain" => domain, "pkey" => primary_key},
         socket
       )
-      when not is_nil(resource) and not is_nil(api) do
+      when not is_nil(resource) and not is_nil(domain) do
     resource = Module.concat([resource])
 
     case decode_primary_key(resource, primary_key) do
       {:ok, pkey_filter} ->
-        api = Module.concat([api])
+        domain = Module.concat([domain])
         action = AshAdmin.Helpers.primary_action(resource, :read)
 
         actor =
           resource
           |> Ash.Query.filter(^pkey_filter)
-          |> api.read_one!(action: action, authorize?: false)
+          |> Ash.read_one!(action: action, authorize?: false, domain: domain)
 
-        api_name = AshAdmin.Api.name(api)
+        domain_name = AshAdmin.Domain.name(domain)
         resource_name = AshAdmin.Resource.name(resource)
 
         {:noreply,
@@ -418,10 +419,10 @@ defmodule AshAdmin.PageLive do
              resource: to_string(resource_name),
              primary_key: encode_primary_key(actor),
              action: to_string(action.name),
-             api: to_string(api_name)
+             domain: to_string(domain_name)
            }
          )
-         |> assign(actor: actor, actor_api: api)}
+         |> assign(actor: actor, actor_domain: domain)}
     end
   end
 

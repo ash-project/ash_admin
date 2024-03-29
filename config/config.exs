@@ -44,9 +44,9 @@ config :phoenix, :serve_endpoints, true
 
 if config_env() == :dev do
   config :ash_admin,
-    ash_apis: [
-      Demo.Accounts.Api,
-      Demo.Tickets.Api
+    ash_domains: [
+      Demo.Accounts.Domain,
+      Demo.Tickets.Domain
     ]
 
   config :git_ops,
@@ -73,7 +73,7 @@ if config_env() == :test do
   config :ash, :disable_async?, true
 
   config :ash_admin,
-    ash_apis: [
-      AshAdmin.Test.Api
+    ash_domains: [
+      AshAdmin.Test.Domain
     ]
 end

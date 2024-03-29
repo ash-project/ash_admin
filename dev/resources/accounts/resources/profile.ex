@@ -11,10 +11,10 @@ defmodule Demo.Accounts.Profile do
   end
 
   attributes do
-    attribute :bio, :string, allow_nil?: false
-    attribute :history, :string
-    attribute :tags, {:array, :string}, default: []
-    attribute :metadata, :map
-    attribute :nested_embed, Demo.Accounts.NestedEmbed
+    attribute :bio, :string, allow_nil?: false, public?: true
+    attribute :history, :string, public?: true
+    attribute :tags, {:array, :string}, default: [], public?: true
+    attribute :metadata, :map, public?: true
+    attribute :nested_embed, Demo.Accounts.NestedEmbed, public?: true
   end
 end

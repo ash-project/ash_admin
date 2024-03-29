@@ -8,7 +8,7 @@ defmodule AshAdmin.Components.Resource do
 
   # prop hide_filter, :boolean, default: true
   attr :resource, :any, required: true
-  attr :api, :any, required: true
+  attr :domain, :any, required: true
   attr :tab, :string, required: true
   attr :action, :any
   attr :actor, :any, required: true
@@ -29,7 +29,7 @@ defmodule AshAdmin.Components.Resource do
     <div class="h-screen">
       <Nav.nav
         resource={@resource}
-        api={@api}
+        domain={@domain}
         tab={@tab}
         action={@action}
         table={@table}
@@ -50,7 +50,7 @@ defmodule AshAdmin.Components.Resource do
           url_path={@url_path}
           params={@params}
           action={@action}
-          api={@api}
+          domain={@domain}
           id={update_id(@resource)}
           actor={@actor}
           authorizing={@authorizing}
@@ -73,7 +73,7 @@ defmodule AshAdmin.Components.Resource do
           url_path={@url_path}
           action={@action}
           params={@params}
-          api={@api}
+          domain={@domain}
           id={destroy_id(@resource)}
           actor={@actor}
           authorizing={@authorizing}
@@ -87,7 +87,7 @@ defmodule AshAdmin.Components.Resource do
         :if={@tab == "show" && match?({:ok, %_{}}, @record)}
         module={Show}
         resource={@resource}
-        api={@api}
+        domain={@domain}
         id={show_id(@resource)}
         record={unwrap(@record)}
         actor={@actor}
@@ -99,7 +99,7 @@ defmodule AshAdmin.Components.Resource do
       <Info.info
         :if={@tab == "info" || (is_nil(@tab) && is_nil(@action_type))}
         resource={@resource}
-        api={@api}
+        domain={@domain}
         prefix={@prefix}
       />
       <.live_component
@@ -109,7 +109,7 @@ defmodule AshAdmin.Components.Resource do
         resource={@resource}
         url_path={@url_path}
         params={@params}
-        api={@api}
+        domain={@domain}
         action={@action}
         id={create_id(@resource)}
         actor={@actor}
@@ -127,7 +127,7 @@ defmodule AshAdmin.Components.Resource do
         resource={@resource}
         action={@action}
         actor={@actor}
-        api={@api}
+        domain={@domain}
         url_path={@url_path}
         params={@params}
         id={data_table_id(@resource)}

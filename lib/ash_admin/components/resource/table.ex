@@ -11,7 +11,7 @@ defmodule AshAdmin.Components.Resource.Table do
   attr :data, :list, default: nil
   attr :resource, :any, required: true
   attr :actions, :boolean, default: true
-  attr :api, :any, required: true
+  attr :domain, :any, required: true
   attr :table, :any, required: true
   attr :prefix, :any, required: true
   attr :skip, :list, default: []
@@ -32,7 +32,7 @@ defmodule AshAdmin.Components.Resource.Table do
           <tr :for={record <- @data} class="border-b-2">
             <td :for={attribute <- attributes(@resource, @attributes, @skip)} class="py-3">
               <%= render_attribute(
-                @api,
+                @domain,
                 record,
                 attribute,
                 @format_fields,
@@ -43,19 +43,19 @@ defmodule AshAdmin.Components.Resource.Table do
             <td :if={@actions && actions?(@resource)}>
               <div class="flex h-max justify-items-center">
                 <div :if={AshAdmin.Resource.show_action(@resource)}>
-                  <.link navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&tab=show&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
+                  <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&tab=show&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
                     <.icon name="hero-information-circle-solid" class="h-5 w-5 text-gray-500" />
                   </.link>
                 </div>
 
                 <div :if={AshAdmin.Helpers.primary_action(@resource, :update)}>
-                  <.link navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&action=#{AshAdmin.Helpers.primary_action(@resource, :update).name}&tab=update&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
+                  <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&action=#{AshAdmin.Helpers.primary_action(@resource, :update).name}&tab=update&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
                     <.icon name="hero-pencil-solid" class="h-5 w-5 text-gray-500" />
                   </.link>
                 </div>
 
                 <div :if={AshAdmin.Helpers.primary_action(@resource, :destroy)}>
-                  <.link navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&action=#{AshAdmin.Helpers.primary_action(@resource, :destroy).name}&tab=destroy&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
+                  <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&action=#{AshAdmin.Helpers.primary_action(@resource, :destroy).name}&tab=destroy&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
                     <.icon name="hero-x-circle-solid" class="h-5 w-5 text-gray-500" />
                   </.link>
                 </div>
@@ -64,7 +64,7 @@ defmodule AshAdmin.Components.Resource.Table do
                   :if={AshAdmin.Resource.actor?(@resource)}
                   phx-click="set_actor"
                   phx-value-resource={@resource}
-                  phx-value-api={@api}
+                  phx-value-domain={@domain}
                   phx-value-pkey={encode_primary_key(record)}
                 >
                   <.icon name="hero-key-solid" class="h-5 w-5 text-gray-500" />
@@ -99,15 +99,15 @@ defmodule AshAdmin.Components.Resource.Table do
     |> Enum.reject(&(&1.name in skip))
   end
 
-  defp render_attribute(api, record, attribute, formats, show_sensitive_fields, actor) do
-    process_attribute(api, record, attribute, formats, show_sensitive_fields, actor)
+  defp render_attribute(domain, record, attribute, formats, show_sensitive_fields, actor) do
+    process_attribute(domain, record, attribute, formats, show_sensitive_fields, actor)
   rescue
     _ ->
       "..."
   end
 
   defp process_attribute(
-         api,
+         domain,
          record,
          %module{} = attribute,
          formats,
@@ -124,7 +124,7 @@ defmodule AshAdmin.Components.Resource.Table do
         if loaded?(record, attribute.name) do
           record
         else
-          api.load!(record, [{attribute.name, display_attributes}], actor: actor)
+          Ash.load!(record, [{attribute.name, display_attributes}], actor: actor, domain: domain)
         end
 
       relationship = Map.get(record, attribute.name)
@@ -135,7 +135,7 @@ defmodule AshAdmin.Components.Resource.Table do
         attributes = attributes(attribute.destination, display_attributes, [])
 
         Enum.map_join(attributes, " - ", fn x ->
-          render_attribute(api, relationship, x, formats, show_sensitive_fields, actor)
+          render_attribute(domain, relationship, x, formats, show_sensitive_fields, actor)
         end)
       end
     end
@@ -159,7 +159,7 @@ defmodule AshAdmin.Components.Resource.Table do
     end
   end
 
-  defp process_attribute(_api, _record, _attr, _formats, _show_sensitive_fields, _actor) do
+  defp process_attribute(_domain, _record, _attr, _formats, _show_sensitive_fields, _actor) do
     "..."
   end
 

@@ -4,10 +4,10 @@ defmodule AshAdmin.Components.TopNav do
   import Tails
   alias AshAdmin.Components.TopNav.{ActorSelect, DrawerDropdown, Dropdown, TenantForm}
 
-  attr :api, :any, required: true
+  attr :domain, :any, required: true
   attr :resource, :any, required: true
   attr :actor_resources, :any, required: true
-  attr :apis, :any, required: true
+  attr :domains, :any, required: true
   attr :tenant, :any, required: true
   attr :clear_tenant, :string
   attr :set_tenant, :string
@@ -17,7 +17,7 @@ defmodule AshAdmin.Components.TopNav do
   attr :authorizing, :boolean, required: true
   attr :actor_paused, :boolean, required: true
   attr :actor, :any, required: true
-  attr :actor_api, :any, required: true
+  attr :actor_domain, :any, required: true
   attr :prefix, :any, required: true
 
   def render(assigns) do
@@ -37,14 +37,14 @@ defmodule AshAdmin.Components.TopNav do
               <div class="flex justify-between">
                 <div class="ml-10 flex items-center">
                   <.live_component
-                    :for={api <- @apis}
+                    :for={domain <- @domains}
                     module={Dropdown}
-                    active={api == @api}
+                    active={domain == @domain}
                     class="mr-1"
-                    id={AshAdmin.Api.name(api) <> "_api_nav"}
-                    name={AshAdmin.Api.name(api)}
-                    groups={dropdown_groups(@prefix, @resource, api)}
-                    group_labels={dropdown_group_labels(api)}
+                    id={AshAdmin.Domain.name(domain) <> "_domain_nav"}
+                    name={AshAdmin.Domain.name(domain)}
+                    groups={dropdown_groups(@prefix, @resource, domain)}
+                    group_labels={dropdown_group_labels(domain)}
                   />
                 </div>
                 <div class="ml-10 flex items-center">
@@ -57,12 +57,12 @@ defmodule AshAdmin.Components.TopNav do
                     toggle_authorizing={@toggle_authorizing}
                     toggle_actor_paused={@toggle_actor_paused}
                     clear_actor={@clear_actor}
-                    actor_api={@actor_api}
-                    api={@api}
+                    actor_domain={@actor_domain}
+                    domain={@domain}
                     prefix={@prefix}
                   />
                   <TenantForm.tenant_form
-                    :if={show_tenant_form?(@apis)}
+                    :if={show_tenant_form?(@domains)}
                     tenant={@tenant}
                     editing_tenant={@editing_tenant}
                     set_tenant={@set_tenant}
@@ -111,14 +111,14 @@ defmodule AshAdmin.Components.TopNav do
               toggle_authorizing={@toggle_authorizing}
               toggle_actor_paused={@toggle_actor_paused}
               clear_actor={@clear_actor}
-              actor_api={@actor_api}
-              api={@api}
+              actor_domain={@actor_domain}
+              domain={@domain}
               prefix={@prefix}
             />
           </div>
           <div class="block px-4 py-2 text-sm">
             <.live_component
-              :if={show_tenant_form?(@apis)}
+              :if={show_tenant_form?(@domains)}
               module={TenantForm}
               tenant={@tenant}
               id="tenant_editor_drawer"
@@ -127,12 +127,12 @@ defmodule AshAdmin.Components.TopNav do
             />
           </div>
           <.live_component
-            :for={api <- @apis}
+            :for={domain <- @domains}
             module={DrawerDropdown}
-            id={AshAdmin.Api.name(api) <> "_api_nav_drawer"}
-            name={AshAdmin.Api.name(api)}
-            groups={dropdown_groups(@prefix, @resource, api)}
-            group_labels={dropdown_group_labels(api)}
+            id={AshAdmin.Domain.name(domain) <> "_domain_nav_drawer"}
+            name={AshAdmin.Domain.name(domain)}
+            groups={dropdown_groups(@prefix, @resource, domain)}
+            group_labels={dropdown_group_labels(domain)}
           />
         </div>
       </div>
@@ -140,12 +140,12 @@ defmodule AshAdmin.Components.TopNav do
     """
   end
 
-  defp dropdown_groups(prefix, current_resource, api) do
-    for resource <- Ash.Api.Info.resources(api) do
+  defp dropdown_groups(prefix, current_resource, domain) do
+    for resource <- Ash.Domain.Info.resources(domain) do
       %{
         text: AshAdmin.Resource.name(resource),
         to:
-          "#{prefix}?api=#{AshAdmin.Api.name(api)}&resource=#{AshAdmin.Resource.name(resource)}",
+          "#{prefix}?domain=#{AshAdmin.Domain.name(domain)}&resource=#{AshAdmin.Resource.name(resource)}",
         active: resource == current_resource,
         group: AshAdmin.Resource.resource_group(resource)
       }
@@ -155,8 +155,8 @@ defmodule AshAdmin.Components.TopNav do
     |> Keyword.values()
   end
 
-  defp dropdown_group_labels(api) do
-    AshAdmin.Api.resource_group_labels(api)
+  defp dropdown_group_labels(domain) do
+    AshAdmin.Domain.resource_group_labels(domain)
   end
 
   def mount(socket) do
@@ -175,10 +175,10 @@ defmodule AshAdmin.Components.TopNav do
     {:noreply, assign(socket, :open, !socket.assigns.open)}
   end
 
-  defp show_tenant_form?(apis) do
-    Enum.any?(apis, fn api ->
-      api
-      |> Ash.Api.Info.resources()
+  defp show_tenant_form?(domains) do
+    Enum.any?(domains, fn domain ->
+      domain
+      |> Ash.Domain.Info.resources()
       |> Enum.any?(fn resource ->
         Ash.Resource.Info.multitenancy_strategy(resource)
       end)

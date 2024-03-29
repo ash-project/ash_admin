@@ -1,5 +1,6 @@
 defmodule Demo.Tickets.Customer do
   use Ash.Resource,
+    domain: Demo.Tickets.Domain,
     data_layer: AshPostgres.DataLayer,
     authorizers: [
       Ash.Policy.Authorizer
@@ -33,15 +34,16 @@ defmodule Demo.Tickets.Customer do
   end
 
   actions do
+    default_accept :*
     defaults [:read]
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :first_name, :string
-    attribute :last_name, :string
-    attribute :representative, :boolean
+    attribute :first_name, :string, public?: true
+    attribute :last_name, :string, public?: true
+    attribute :representative, :boolean, public?: true
   end
 
   relationships do

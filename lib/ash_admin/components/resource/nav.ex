@@ -4,7 +4,7 @@ defmodule AshAdmin.Components.Resource.Nav do
   alias AshAdmin.Components.TopNav.Dropdown
 
   attr :resource, :any, required: true
-  attr :api, :any, required: true
+  attr :domain, :any, required: true
   attr :tab, :string, required: true
   attr :action, :any
   attr :table, :any, default: nil
@@ -18,7 +18,7 @@ defmodule AshAdmin.Components.Resource.Nav do
           <div class="flex items-center w-full">
             <div class="flex-shrink-0">
               <h3 class="text-white text-lg">
-                <.link navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}"}>
+                <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}"}>
                   <%= AshAdmin.Resource.name(@resource) %>
                 </.link>
               </h3>
@@ -27,7 +27,7 @@ defmodule AshAdmin.Components.Resource.Nav do
               <div class="ml-12 flex items-center space-x-1">
                 <div :if={has_create_action?(@resource)} class="relative">
                   <.link
-                    navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=create&action=#{create_action(@resource).name}&tab=create&table=#{@table}"}
+                    navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=create&action=#{create_action(@resource).name}&tab=create&table=#{@table}"}
                     class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
                   >
                     Create
@@ -39,7 +39,7 @@ defmodule AshAdmin.Components.Resource.Nav do
                   name="Read"
                   id={"#{@resource}_data_dropdown"}
                   active={@tab == "data"}
-                  groups={data_groups(@prefix, @api, @resource, @action, @table)}
+                  groups={data_groups(@prefix, @domain, @resource, @action, @table)}
                 />
               </div>
             </div>
@@ -55,7 +55,7 @@ defmodule AshAdmin.Components.Resource.Nav do
       Enum.find(Ash.Resource.Info.actions(resource), &(&1.type == :create))
   end
 
-  defp data_groups(prefix, api, resource, current_action, table) do
+  defp data_groups(prefix, domain, resource, current_action, table) do
     read_actions = AshAdmin.Resource.read_actions(resource)
 
     [
@@ -66,7 +66,7 @@ defmodule AshAdmin.Components.Resource.Nav do
         %{
           text: action_name(action),
           to:
-            "#{prefix}?api=#{AshAdmin.Api.name(api)}&resource=#{AshAdmin.Resource.name(resource)}&table=#{table}&action_type=read&action=#{action.name}",
+            "#{prefix}?domain=#{AshAdmin.Domain.name(domain)}&resource=#{AshAdmin.Resource.name(resource)}&table=#{table}&action_type=read&action=#{action.name}",
           active: current_action == action
         }
       end)

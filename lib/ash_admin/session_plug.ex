@@ -7,7 +7,7 @@ defmodule AshAdmin.SessionPlug do
     "actor_resource",
     "actor_primary_key",
     "actor_action",
-    "actor_api",
+    "actor_domain",
     "actor_authorizing",
     "actor_paused"
   ]

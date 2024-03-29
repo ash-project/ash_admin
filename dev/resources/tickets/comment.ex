@@ -1,5 +1,6 @@
 defmodule Demo.Tickets.Comment do
   use Ash.Resource,
+    domain: Demo.Tickets.Domain,
     data_layer: AshPostgres.DataLayer,
     extensions: [AshAdmin.Resource]
 
@@ -10,6 +11,7 @@ defmodule Demo.Tickets.Comment do
   end
 
   actions do
+    default_accept :*
     defaults [:read, :update, :destroy]
     create :create do
       primary? true
@@ -29,12 +31,12 @@ defmodule Demo.Tickets.Comment do
   attributes do
     uuid_primary_key :id
 
-    attribute :comment, :string
-    attribute :resource_id, :uuid, allow_nil?: false
+    attribute :comment, :string, public?: true
+    attribute :resource_id, :uuid, allow_nil?: false, public?: true
   end
 
   relationships do
-    belongs_to :commenting_customer, Demo.Tickets.Customer
-    belongs_to :commenting_representative, Demo.Tickets.Representative
+    belongs_to :commenting_customer, Demo.Tickets.Customer, public?: true
+    belongs_to :commenting_representative, Demo.Tickets.Representative, public?: true
   end
 end

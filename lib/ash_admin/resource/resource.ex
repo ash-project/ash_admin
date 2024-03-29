@@ -59,7 +59,7 @@ defmodule AshAdmin.Resource do
         type: {:list, :string},
         doc: """
         For resources that use ash_postgres' polymorphism capabilities, you can provide a list of tables that should be available to
-        select. These will be added to the list of derivable tables based on scanning all APIs and resources provided to ash_admin.
+        select. These will be added to the list of derivable tables based on scanning all domains and resources provided to ash_admin.
         """
       ],
       polymorphic_actions: [
@@ -98,17 +98,17 @@ defmodule AshAdmin.Resource do
     transformers: [AshAdmin.Resource.Transformers.ValidateTableColumns]
 
   @moduledoc """
-  An API extension to alter the behaviour of a resource in the admin UI.
+  A resource extension to alter the behaviour of a resource in the admin UI.
   """
 
-  def polymorphic?(resource, apis) do
-    polymorphic_tables(resource, apis) not in [nil, []]
+  def polymorphic?(resource, domains) do
+    polymorphic_tables(resource, domains) not in [nil, []]
   end
 
-  def polymorphic_tables(resource, apis) do
+  def polymorphic_tables(resource, domains) do
     resource
     |> Spark.Dsl.Extension.get_opt([:admin], :polymorphic_tables, [], true)
-    |> Enum.concat(find_polymorphic_tables(resource, apis))
+    |> Enum.concat(find_polymorphic_tables(resource, domains))
     |> Enum.uniq()
   end
 
@@ -187,9 +187,9 @@ defmodule AshAdmin.Resource do
     end)
   end
 
-  defp find_polymorphic_tables(resource, apis) do
-    apis
-    |> Enum.flat_map(&Ash.Api.Info.resources/1)
+  defp find_polymorphic_tables(resource, domains) do
+    domains
+    |> Enum.flat_map(&Ash.Domain.Info.resources/1)
     |> Enum.flat_map(&Ash.Resource.Info.relationships/1)
     |> Enum.filter(&(&1.destination == resource))
     |> Enum.map(& &1.context[:data_layer][:table])

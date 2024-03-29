@@ -7,7 +7,7 @@ defmodule AshAdmin.ActorPlug.Plug do
   @impl true
   def actor_assigns(socket, session) do
     otp_app = socket.endpoint.config(:otp_app)
-    apis = apis(otp_app)
+    domains = domains(otp_app)
 
     session =
       Phoenix.LiveView.get_connect_params(socket) || session
@@ -21,8 +21,8 @@ defmodule AshAdmin.ActorPlug.Plug do
 
     [
       actor: actor_from_session(socket.endpoint, session),
-      actor_api: actor_api_from_session(socket.endpoint, session),
-      actor_resources: actor_resources(apis),
+      actor_domain: actor_domain_from_session(socket.endpoint, session),
+      actor_resources: actor_resources(domains),
       authorizing: session_bool(session["actor_authorizing"]),
       tenant: session["tenant"],
       actor_paused: actor_paused
@@ -50,7 +50,7 @@ defmodule AshAdmin.ActorPlug.Plug do
         case session do
           %{
             "actor_resource" => resource,
-            "actor_api" => api,
+            "actor_domain" => domain,
             "actor_action" => action,
             "actor_primary_key" => primary_key
           } ->
@@ -70,7 +70,7 @@ defmodule AshAdmin.ActorPlug.Plug do
 
             conn
             |> Plug.Conn.put_session(:actor_resource, resource)
-            |> Plug.Conn.put_session(:actor_api, api)
+            |> Plug.Conn.put_session(:actor_domain, domain)
             |> Plug.Conn.put_session(:actor_action, action)
             |> Plug.Conn.put_session(:actor_primary_key, primary_key)
             |> Plug.Conn.put_session(:actor_authorizing, authorizing)
@@ -105,60 +105,60 @@ defmodule AshAdmin.ActorPlug.Plug do
     end
   end
 
-  defp actor_resources(apis) do
-    apis
-    |> Enum.flat_map(fn api ->
-      api
-      |> Ash.Api.Info.resources()
+  defp actor_resources(domains) do
+    domains
+    |> Enum.flat_map(fn domain ->
+      domain
+      |> Ash.Domain.Info.resources()
       |> Enum.filter(fn resource ->
         AshAdmin.Helpers.primary_action(resource, :read) && AshAdmin.Resource.actor?(resource)
       end)
-      |> Enum.map(fn resource -> {api, resource} end)
+      |> Enum.map(fn resource -> {domain, resource} end)
     end)
   end
 
-  defp apis(otp_app) do
+  defp domains(otp_app) do
     otp_app
-    |> Application.get_env(:ash_apis)
-    |> Enum.filter(&AshAdmin.Api.show?/1)
+    |> Application.get_env(:ash_domains)
+    |> Enum.filter(&AshAdmin.Domain.show?/1)
   end
 
-  defp actor_api_from_session(endpoint, %{"actor_api" => api}) do
+  defp actor_domain_from_session(endpoint, %{"actor_domain" => domain}) do
     otp_app = endpoint.config(:otp_app)
-    apis = Application.get_env(otp_app, :ash_apis)
+    domains = Application.get_env(otp_app, :ash_domains)
 
-    Enum.find(apis, fn allowed_api ->
-      AshAdmin.Api.show?(allowed_api) && AshAdmin.Api.name(allowed_api) == api
+    Enum.find(domains, fn allowed_domain ->
+      AshAdmin.Domain.show?(allowed_domain) && AshAdmin.Domain.name(allowed_domain) == domain
     end)
   end
 
-  defp actor_api_from_session(_, _), do: nil
+  defp actor_domain_from_session(_, _), do: nil
 
   defp actor_from_session(endpoint, %{
          "actor_resource" => resource,
-         "actor_api" => api,
+         "actor_domain" => domain,
          "actor_primary_key" => primary_key,
          "actor_action" => action
        })
-       when not is_nil(resource) and not is_nil(api) do
+       when not is_nil(resource) and not is_nil(domain) do
     otp_app = endpoint.config(:otp_app)
-    apis = Application.get_env(otp_app, :ash_apis)
+    domains = Application.get_env(otp_app, :ash_domains)
 
-    api =
-      Enum.find(apis, fn allowed_api ->
-        AshAdmin.Api.show?(allowed_api) && AshAdmin.Api.name(allowed_api) == api
+    domain =
+      Enum.find(domains, fn allowed_domain ->
+        AshAdmin.Domain.show?(allowed_domain) && AshAdmin.Domain.name(allowed_domain) == domain
       end)
 
     resource =
-      if api do
-        api
-        |> Ash.Api.Info.resources()
-        |> Enum.find(fn api_resource ->
-          AshAdmin.Resource.name(api_resource) == resource
+      if domain do
+        domain
+        |> Ash.Domain.Info.resources()
+        |> Enum.find(fn domain_resource ->
+          AshAdmin.Resource.name(domain_resource) == resource
         end)
       end
 
-    if api && resource do
+    if domain && resource do
       action =
         if action do
           Ash.Resource.Info.action(resource, String.to_existing_atom(action), :read)
@@ -171,7 +171,7 @@ defmodule AshAdmin.ActorPlug.Plug do
         {:ok, filter} ->
           resource
           |> Ash.Query.filter(^filter)
-          |> api.read_one!(action: action, authorize?: false)
+          |> Ash.read_one!(action: action, authorize?: false, domain: domain)
       end
     end
   end

@@ -1,5 +1,6 @@
 defmodule Demo.Tickets.Ticket do
   use Ash.Resource,
+    domain: Demo.Tickets.Domain,
     data_layer: AshPostgres.DataLayer,
     authorizers: [
       Ash.Policy.Authorizer
@@ -38,6 +39,7 @@ defmodule Demo.Tickets.Ticket do
   end
 
   actions do
+    default_accept :*
     read :reported do
       filter reporter: actor(:id)
 
@@ -82,6 +84,7 @@ defmodule Demo.Tickets.Ticket do
 
     update :assign do
       accept []
+      require_atomic? false
       argument :representative, :map
       argument :reassignment_comment, :map, allow_nil?: false
 
@@ -91,6 +94,7 @@ defmodule Demo.Tickets.Ticket do
 
     update :link do
       accept []
+      require_atomic? false
       argument :tickets, {:array, :map}, allow_nil?: false
       argument :link_comment, :map
 
@@ -102,6 +106,7 @@ defmodule Demo.Tickets.Ticket do
     update :nested_example do
       accept [:subject]
       argument :tickets, {:array, :map}
+      require_atomic? false
 
       change manage_relationship(
         :tickets,
@@ -127,14 +132,20 @@ defmodule Demo.Tickets.Ticket do
 
     attribute :subject, :string do
       allow_nil? false
+      public? true
       constraints min_length: 5
     end
 
-    attribute :description, :string
+    attribute :description, :string do
+      public? true
+    end
 
-    attribute :response, :string
+    attribute :response, :string do
+      public? true
+    end
 
     attribute :status, :atom do
+      public? true
       allow_nil? false
       default "new"
       constraints one_of: [:new, :investigating, :closed]
@@ -148,25 +159,29 @@ defmodule Demo.Tickets.Ticket do
   end
 
   relationships do
-    belongs_to :reporter, Demo.Tickets.Customer
+    belongs_to :reporter, Demo.Tickets.Customer, public?: true
 
-    belongs_to :representative, Demo.Tickets.Representative
+    belongs_to :representative, Demo.Tickets.Representative, public?: true
     belongs_to :organization, Demo.Tickets.Organization do
+      public? true
       allow_nil? false
     end
 
     has_many :comments, Demo.Tickets.Comment do
+      public? true
       relationship_context %{data_layer: %{table: "ticket_comments"}}
       destination_attribute :resource_id
     end
 
     many_to_many :source_links, Demo.Tickets.Ticket do
+      public? true
       through Demo.Tickets.TicketLink
       source_attribute_on_join_resource :source_id
       destination_attribute_on_join_resource :destination_id
     end
 
     many_to_many :destination_links, Demo.Tickets.Ticket do
+      public? true
       through Demo.Tickets.TicketLink
       source_attribute_on_join_resource :destination_id
       destination_attribute_on_join_resource :source_id

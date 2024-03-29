@@ -45,7 +45,7 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
             </.td>
             <.td>
               <CoreComponents.icon
-                name={if attribute.private?, do: "hero-check", else: "hero-x-mark"}
+                name={if !attribute.public?, do: "hero-check", else: "hero-x-mark"}
                 class="h-4 w-4 text-gray-500"
               />
             </.td>
@@ -69,7 +69,7 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
   end
 
   attr :resource, :any, required: true
-  attr :api, :any, required: true
+  attr :domain, :any, required: true
   attr :prefix, :any, required: true
 
   def relationship_table(assigns) do
@@ -98,7 +98,7 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
               <%= relationship.type %>
             </.td>
             <.td>
-              <.link navigate={"#{@prefix}?api=#{AshAdmin.Api.name(@api)}&resource=#{AshAdmin.Resource.name(relationship.destination)}"}>
+              <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(relationship.destination)}"}>
                 <%= AshAdmin.Resource.name(relationship.destination) %>
               </.link>
             </.td>
@@ -157,7 +157,7 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
   defp attributes(resource) do
     resource
     |> Ash.Resource.Info.attributes()
-    |> Enum.sort_by(& &1.private?)
+    |> Enum.sort_by(& not(&1.public?))
   end
 
   defp attribute_type(attribute) do
@@ -173,6 +173,6 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
   defp relationships(resource) do
     resource
     |> Ash.Resource.Info.relationships()
-    |> Enum.sort_by(& &1.private?)
+    |> Enum.sort_by(& not(&1.public?))
   end
 end

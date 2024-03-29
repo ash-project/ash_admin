@@ -1,17 +1,17 @@
-defmodule AshAdmin.Api do
+defmodule AshAdmin.Domain do
   @admin %Spark.Dsl.Section{
-    describe: "Configure the admin dashboard for a given API.",
+    describe: "Configure the admin dashboard for a given domain.",
     name: :admin,
     schema: [
       name: [
         type: :string,
-        doc: "The name of the API in the dashboard. Will be derived if not set."
+        doc: "The name of the domain in the dashboard. Will be derived if not set."
       ],
       show?: [
         type: :boolean,
         default: false,
         doc:
-          "Whether or not this API and its resources should be included in the admin dashboard."
+          "Whether or not this domain and its resources should be included in the admin dashboard."
       ],
       default_resource_page: [
         type: {:in, [:schema, :primary_read]},
@@ -31,30 +31,30 @@ defmodule AshAdmin.Api do
   use Spark.Dsl.Extension, sections: [@admin]
 
   @moduledoc """
-  An API extension to alter the behavior of an API in the admin UI.
+  A domain extension to alter the behavior of a domain in the admin UI.
   """
 
-  def name(api) do
-    Spark.Dsl.Extension.get_opt(api, [:admin], :name, nil, true) || default_name(api)
+  def name(domain) do
+    Spark.Dsl.Extension.get_opt(domain, [:admin], :name, nil, true) || default_name(domain)
   end
 
-  def show?(api) do
-    Spark.Dsl.Extension.get_opt(api, [:admin], :show?, false, true)
+  def show?(domain) do
+    Spark.Dsl.Extension.get_opt(domain, [:admin], :show?, false, true)
   end
 
-  def default_resource_page(api) do
-    Spark.Dsl.Extension.get_opt(api, [:admin], :default_resource_page, :schema, true)
+  def default_resource_page(domain) do
+    Spark.Dsl.Extension.get_opt(domain, [:admin], :default_resource_page, :schema, true)
   end
 
-  def resource_group_labels(api) do
-    Spark.Dsl.Extension.get_opt(api, [:admin], :resource_group_labels, [], true)
+  def resource_group_labels(domain) do
+    Spark.Dsl.Extension.get_opt(domain, [:admin], :resource_group_labels, [], true)
   end
 
-  defp default_name(api) do
-    split = api |> Module.split()
+  defp default_name(domain) do
+    split = domain |> Module.split()
 
     case List.last(split) do
-      "Api" ->
+      "Domain" ->
         Enum.at(split, -2)
 
       last ->

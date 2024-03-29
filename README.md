@@ -21,29 +21,30 @@ First, ensure you've added ash_admin to your `mix.exs` file.
 
 ## Setup
 
-Ensure your apis are configured in `config.exs`
+Ensure your domains are configured in `config.exs`
 
 ```elixir
-config :my_app, ash_apis: [MyApp.Foo, MyApp.Bar]
+config :my_app, ash_domains: [MyApp.Foo, MyApp.Bar]
 ```
 
-Add the admin extension to each api you want to show in AshAdmin dashboard, and configure it to show. See [`AshAdmin.Api`](https://hexdocs.pm/ash_admin/AshAdmin.Api.html) for more configuration options.
+Add the admin extension to each domain you want to show in AshAdmin dashboard, and configure it to show. See [`AshAdmin.Domain`](https://hexdocs.pm/ash_admin/AshAdmin.Domain.html) for more configuration options.
 
 ```elixir
-# In your Api(s)
-use Ash.Api,
-  extensions: [AshAdmin.Api]
+# In your Domain(s)
+use Ash.Domain,
+  extensions: [AshAdmin.Domain]
 
 admin do
   show? true
 end
 ```
 
-Resources in each Api will be automagically included in AshAdmin. See [`AshAdmin.Resource`](https://hexdocs.pm/ash_admin/AshAdmin.Resource.html) for more resource  configuration options. Specifically, if you app has an actor you will want to configure that. Ash Admin allows you to change actors and therefore doesn't rely on `Ash.set_actor`
+Resources in each Domain will be included in AshAdmin. See [`AshAdmin.Resource`](https://hexdocs.pm/ash_admin/AshAdmin.Resource.html) for more resource configuration options. Specifically, if you app has an actor you will want to configure that. Ash Admin allows you to change actors and therefore doesn't rely on `Ash.set_actor`
 
 ```elixir
 # In your resource that acts as an actor (e.g. User)
 use Ash.Resource,
+  domain: YourDomain,
   extensions: [AshAdmin.Resource]
 
   admin do
@@ -103,7 +104,7 @@ This will allow AshAdmin-generated inline CSS and JS blocks to execute normally.
 
 ## Configuration
 
-See the documentation in [`AshAdmin.Resource`](https://hexdocs.pm/ash_admin/AshAdmin.Resource.html) and [`AshAdmin.Api`](https://hexdocs.pm/ash_admin/AshAdmin.Api.html) for information on the available configuration.
+See the documentation in [`AshAdmin.Resource`](https://hexdocs.pm/ash_admin/AshAdmin.Resource.html) and [`AshAdmin.Domain`](https://hexdocs.pm/ash_admin/AshAdmin.Domain.html) for information on the available configuration.
 
 ## Troubleshooting
 

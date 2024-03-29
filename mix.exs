@@ -61,7 +61,7 @@ defmodule AshAdmin.MixProject do
       logo: "logos/small-logo.png",
       extras: [
         "README.md",
-        "documentation/dsls/DSL:-AshAdmin.Api.md",
+        "documentation/dsls/DSL:-AshAdmin.Domain.md",
         "documentation/dsls/DSL:-AshAdmin.Resource.md"
       ],
       groups_for_extras: [
@@ -76,7 +76,7 @@ defmodule AshAdmin.MixProject do
   defp aliases() do
     [
       generate_migrations:
-        "ash_postgres.generate_migrations --apis Demo.Accounts.Api,Demo.Tickets.Api --snapshot-path dev/resource_snapshots --migration-path dev --drop-columns",
+        "ash_postgres.generate_migrations --domains Demo.Accounts.Domain,Demo.Tickets.Domain --snapshot-path dev/resource_snapshots --migration-path dev --drop-columns",
       credo: "credo --strict",
       migrate: "ash_postgres.migrate --migrations-path dev/repo/migrations",
       migrate_tenants: "ash_postgres.migrate --migrations-path dev/repo/tenant_migrations",
@@ -91,13 +91,13 @@ defmodule AshAdmin.MixProject do
         "spark.cheat_sheets_in_search"
       ],
       test: ["setup", "test"],
-      "spark.formatter": "spark.formatter --extensions AshAdmin.Api,AshAdmin.Resource",
+      "spark.formatter": "spark.formatter --extensions AshAdmin.Domain,AshAdmin.Resource",
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
       "spark.cheat_sheets_in_search":
-        "spark.cheat_sheets_in_search --extensions AshAdmin.Api,AshAdmin.Resource",
-      "spark.cheat_sheets": "spark.cheat_sheets --extensions AshAdmin.Api,AshAdmin.Resource"
+        "spark.cheat_sheets_in_search --extensions AshAdmin.Domain,AshAdmin.Resource",
+      "spark.cheat_sheets": "spark.cheat_sheets --extensions AshAdmin.Domain,AshAdmin.Resource"
     ]
   end
 
@@ -112,8 +112,8 @@ defmodule AshAdmin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ash, "~> 2.0"},
-      {:ash_phoenix, "~> 1.1"},
+      {:ash, "~> 3.0.0-rc.0"},
+      {:ash_phoenix, "~> 2.0-rc.0"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix, "~> 1.7"},
       {:phoenix_live_view, "~> 0.19"},
@@ -122,11 +122,12 @@ defmodule AshAdmin.MixProject do
       {:tails, "~> 0.1"},
       {:gettext, "~> 0.20"},
       # Dev dependencies
+      {:simple_sat, "~> 0.1", only: [:dev, :test]},
       {:esbuild, "~> 0.7", only: [:dev, :test]},
       {:tailwind, "~> 0.2.0", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
-      {:ash_postgres, "~> 1.0"},
+      {:ash_postgres, "~> 2.0-rc.0"},
       {:git_ops, "~> 2.4", only: [:dev, :test]},
       {:ex_doc, "~> 0.23", only: [:dev, :test], runtime: false},
       {:ex_check, "~> 0.14", only: [:dev, :test]},

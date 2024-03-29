@@ -1,16 +1,8 @@
 defmodule Demo.Accounts.NestedEmbed do
   use Ash.Resource,
-    data_layer: :embedded,
-    extensions: [AshAdmin.Resource]
-
-  admin do
-    form do
-      field :bio, type: :long_text
-      field :history, type: :long_text
-    end
-  end
+    data_layer: :embedded
 
   attributes do
-    attribute :tags, {:array, :string}, default: []
+    attribute :tags, {:array, :string}, default: [], public?: true
   end
 end
