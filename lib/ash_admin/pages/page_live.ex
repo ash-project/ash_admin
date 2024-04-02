@@ -164,44 +164,16 @@ defmodule AshAdmin.PageLive do
         available_actions =
           case action_type do
             :read ->
-              AshAdmin.Resource.read_actions(socket.assigns.resource) ||
-                Enum.map(
-                  Enum.filter(
-                    Ash.Resource.Info.actions(socket.assigns.resource),
-                    &(&1.type == :read)
-                  ),
-                  & &1.name
-                )
+              AshAdmin.Resource.read_actions(socket.assigns.resource)
 
             :update ->
-              AshAdmin.Resource.update_actions(socket.assigns.resource) ||
-                Enum.map(
-                  Enum.filter(
-                    Ash.Resource.Info.actions(socket.assigns.resource),
-                    &(&1.type == :update)
-                  ),
-                  & &1.name
-                )
+              AshAdmin.Resource.update_actions(socket.assigns.resource)
 
             :create ->
-              AshAdmin.Resource.create_actions(socket.assigns.resource) ||
-                Enum.map(
-                  Enum.filter(
-                    Ash.Resource.Info.actions(socket.assigns.resource),
-                    &(&1.type == :create)
-                  ),
-                  & &1.name
-                )
+              AshAdmin.Resource.create_actions(socket.assigns.resource)
 
             :destroy ->
-              AshAdmin.Resource.destroy_actions(socket.assigns.resource) ||
-                Enum.map(
-                  Enum.filter(
-                    Ash.Resource.Info.actions(socket.assigns.resource),
-                    &(&1.type == :destroy)
-                  ),
-                  & &1.name
-                )
+              AshAdmin.Resource.destroy_actions(socket.assigns.resource)
           end
 
         action =
@@ -216,7 +188,8 @@ defmodule AshAdmin.PageLive do
             action: Ash.Resource.Info.action(socket.assigns.resource, action)
           )
         else
-          action = AshAdmin.Helpers.primary_action(socket.assigns.resource, action_type)
+          action =
+            Ash.Resource.Info.action(socket.assigns.resource, Enum.at(available_actions, 0))
 
           if requested_action &&
                to_string(action.name) != requested_action do

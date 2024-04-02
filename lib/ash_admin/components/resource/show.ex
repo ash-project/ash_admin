@@ -56,7 +56,7 @@ defmodule AshAdmin.Components.Resource.Show do
           <div :if={@buttons} class="px-4 py-3 text-right sm:px-6">
             <.link
               :if={destroy?(@resource)}
-              navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&action=#{primary_action_name(@resource, :destroy)}&tab=destroy&table=#{@table}&primary_key=#{encode_primary_key(@record)}"}
+              navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&tab=destroy&table=#{@table}&primary_key=#{encode_primary_key(@record)}"}
               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Destroy
@@ -64,7 +64,7 @@ defmodule AshAdmin.Components.Resource.Show do
 
             <.link
               :if={update?(@resource)}
-              navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&action=#{primary_action_name(@resource, :update)}&tab=update&table=#{@table}&primary_key=#{encode_primary_key(@record)}"}
+              navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&tab=update&table=#{@table}&primary_key=#{encode_primary_key(@record)}"}
               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Update
@@ -119,11 +119,6 @@ defmodule AshAdmin.Components.Resource.Show do
 
   def mount(socket) do
     {:ok, assign_new(socket, :load_errors, fn -> %{} end)}
-  end
-
-  defp primary_action_name(resource, type) do
-    action = AshAdmin.Helpers.primary_action(resource, type)
-    action && action.name
   end
 
   defp render_relationship_data(assigns, record, %{
