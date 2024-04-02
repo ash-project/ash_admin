@@ -178,7 +178,8 @@ defmodule AshAdmin.Components.Resource.Show do
         data: data,
         destination: destination,
         context: context,
-        destination_attribute: destination_attribute
+        destination_attribute: destination_attribute,
+        relationship_name: name
       )
 
     ~H"""
@@ -190,6 +191,7 @@ defmodule AshAdmin.Components.Resource.Show do
         table={@context[:data_layer][:table]}
         prefix={@prefix}
         skip={[@destination_attribute]}
+        relationship_name={@relationship_name}
       />
     </div>
     """

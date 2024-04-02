@@ -18,6 +18,7 @@ defmodule AshAdmin.Components.Resource.Table do
   attr :format_fields, :any, default: []
   attr :show_sensitive_fields, :list, default: []
   attr :actor, :any, default: nil
+  attr :relationship_name, :atom, default: nil
 
   def table(assigns) do
     ~H"""
@@ -37,7 +38,8 @@ defmodule AshAdmin.Components.Resource.Table do
                 attribute,
                 @format_fields,
                 @show_sensitive_fields,
-                @actor
+                @actor,
+                @relationship_name
               ) %>
             </td>
             <td :if={@actions && actions?(@resource)}>
@@ -99,8 +101,8 @@ defmodule AshAdmin.Components.Resource.Table do
     |> Enum.reject(&(&1.name in skip))
   end
 
-  defp render_attribute(domain, record, attribute, formats, show_sensitive_fields, actor) do
-    process_attribute(domain, record, attribute, formats, show_sensitive_fields, actor)
+  defp render_attribute(domain, record, attribute, formats, show_sensitive_fields, actor, relationship_name) do
+    process_attribute(domain, record, attribute, formats, show_sensitive_fields, actor, relationship_name)
   rescue
     _ ->
       "..."
@@ -112,7 +114,8 @@ defmodule AshAdmin.Components.Resource.Table do
          %module{} = attribute,
          formats,
          show_sensitive_fields,
-         actor
+         actor,
+         relationship_name
        )
        when module in [HasOne, BelongsTo] do
     display_attributes = AshAdmin.Resource.relationship_display_fields(attribute.destination)
@@ -135,13 +138,13 @@ defmodule AshAdmin.Components.Resource.Table do
         attributes = attributes(attribute.destination, display_attributes, [])
 
         Enum.map_join(attributes, " - ", fn x ->
-          render_attribute(domain, relationship, x, formats, show_sensitive_fields, actor)
+          render_attribute(domain, relationship, x, formats, show_sensitive_fields, actor, relationship_name)
         end)
       end
     end
   end
 
-  defp process_attribute(_, record, %struct{} = attribute, formats, show_sensitive_fields, _actor)
+  defp process_attribute(_, record, %struct{} = attribute, formats, show_sensitive_fields, _actor, relationship_name)
        when struct in [Ash.Resource.Attribute, Ash.Resource.Aggregate, Ash.Resource.Calculation] do
     {mod, func, args} =
       Keyword.get(formats || [], attribute.name, {Phoenix.HTML.Safe, :to_iodata, []})
@@ -153,7 +156,7 @@ defmodule AshAdmin.Components.Resource.Table do
 
     if Map.get(attribute, :sensitive?) &&
          not Enum.member?(show_sensitive_fields, attribute.name) do
-      format_sensitive_value(data, attribute, record)
+      format_sensitive_value(data, attribute, record, relationship_name)
     else
       format_attribute_value(data, attribute)
     end
@@ -163,12 +166,12 @@ defmodule AshAdmin.Components.Resource.Table do
     "..."
   end
 
-  defp format_sensitive_value(value, attribute, record) do
-    assigns = %{value: value, attribute: attribute, record: record}
+  defp format_sensitive_value(value, attribute, record, relationship_name) do
+    assigns = %{value: value, attribute: attribute, record: record, relationship_name: relationship_name}
 
     ~H"""
     <.live_component
-      id={"#{@record.id}-#{@attribute.name}"}
+      id={"#{@relationship_name}-#{@record.id}-#{@attribute.name}"}
       module={SensitiveAttribute}
       value={@value}
     >
