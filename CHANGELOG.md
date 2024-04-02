@@ -5,6 +5,21 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.10.9](https://github.com/ash-project/ash_admin/compare/v0.10.8...v0.10.9) (2024-04-02)
+
+
+
+
+### Bug Fixes:
+
+* properly add indexes to embedded list attribtues
+
+* ensure action selection is accurate/consistent
+
+* only consider top-level targets for input pruning
+
+* only show forms for map type inputs
+
 ## [v0.10.8](https://github.com/ash-project/ash_admin/compare/v0.10.7...v0.10.8) (2024-03-19)
 
 ### Bug Fixes:
