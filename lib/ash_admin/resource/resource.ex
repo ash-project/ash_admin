@@ -149,19 +149,23 @@ defmodule AshAdmin.Resource do
   end
 
   def read_actions(resource) do
-    Spark.Dsl.Extension.get_opt(resource, [:admin], :read_actions, nil, true)
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :read_actions, nil, true) ||
+      actions_with_primary_first(resource, :read)
   end
 
   def create_actions(resource) do
-    Spark.Dsl.Extension.get_opt(resource, [:admin], :create_actions, nil, true)
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :create_actions, nil, true) ||
+      actions_with_primary_first(resource, :create)
   end
 
   def update_actions(resource) do
-    Spark.Dsl.Extension.get_opt(resource, [:admin], :update_actions, nil, true)
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :update_actions, nil, true) ||
+      actions_with_primary_first(resource, :update)
   end
 
   def destroy_actions(resource) do
-    Spark.Dsl.Extension.get_opt(resource, [:admin], :destroy_actions, nil, true)
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :destroy_actions, nil, true) ||
+      actions_with_primary_first(resource, :destroy)
   end
 
   def show_action(resource) do
@@ -195,5 +199,13 @@ defmodule AshAdmin.Resource do
     |> Enum.map(& &1.context[:data_layer][:table])
     |> Enum.reject(&is_nil/1)
     |> Enum.uniq()
+  end
+
+  defp actions_with_primary_first(resource, type) do
+    resource
+    |> Ash.Resource.Info.actions()
+    |> Enum.filter(&(&1.type == type))
+    |> Enum.sort_by(&(!&1.primary?))
+    |> Enum.map(& &1.name)
   end
 end

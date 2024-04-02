@@ -585,7 +585,7 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 ### Bug Fixes:
 
-- remove IO.inspect
+- remove inspect
 
 - properly only provide changing fields to actions
 
@@ -595,7 +595,7 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 - support tenant on read actions
 
-- remove IO.inspect
+- remove inspect
 
 ### Improvements:
 

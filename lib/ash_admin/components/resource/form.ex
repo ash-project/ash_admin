@@ -854,6 +854,48 @@ defmodule AshAdmin.Components.Resource.Form do
 
     ~H"""
     <%= cond do %>
+      <% match?({:array, {:array, _}}, @attribute.type) -> %>
+        <%= render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id) %>
+      <% match?({:array, _}, @attribute.type) && Ash.Type.embedded_type?(@attribute.type) -> %>
+        <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
+          <.input
+            :for={kv <- inner_form.hidden}
+            name={inner_form.name <> "[#{elem(kv, 0)}]"}
+            value={elem(kv, 1)}
+            type="hidden"
+          />
+          <button
+            type="button"
+            phx-click="remove_form"
+            phx-target={@myself}
+            phx-value-path={inner_form.name}
+            class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+          >
+            <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
+          </button>
+
+          <%= render_attributes(
+            assigns,
+            inner_form.source.resource,
+            inner_form.source.source.action,
+            %{
+              inner_form
+              | id: nested_form_id(@id, @form.id, @attribute.name, inner_form),
+                name: nested_form_name(@name, @form.name, @attribute.name, inner_form)
+            }
+          ) %>
+        </.inputs_for>
+        <button
+          :if={can_append_embed?(@form.source.source, @attribute.name)}
+          type="button"
+          phx-click="add_form"
+          phx-target={@myself}
+          phx-value-pkey={embedded_type_pkey(@attribute.type)}
+          phx-value-path={@name || @form.name <> "[#{@attribute.name}]"}
+          class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+        >
+          <.icon name="hero-plus" class="h-4 w-4 text-gray-500" />
+        </button>
       <% Ash.Type.embedded_type?(@attribute.type) -> %>
         <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
           <.input
@@ -907,6 +949,22 @@ defmodule AshAdmin.Components.Resource.Form do
         <%= render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id) %>
     <% end %>
     """
+  end
+
+  defp nested_form_id(id, form_id, attribute_name, inner_form) do
+    if id do
+      "#{id}_#{inner_form.index}"
+    else
+      "#{form_id}_#{attribute_name}_#{inner_form.index}"
+    end
+  end
+
+  defp nested_form_name(name, form_name, attribute_name, inner_form) do
+    if name do
+      "#{name}[#{inner_form.index}]"
+    else
+      "#{form_name}[#{attribute_name}][#{inner_form.index}]"
+    end
   end
 
   defp render_fallback_attribute(
@@ -1293,21 +1351,21 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
-  def handle_event("validate", %{"form" => params, "_target" => target}, socket) do
+  def handle_event("validate", %{"form" => params} = event, socket) do
     params =
-      case target do
-        [_] ->
-          socket.assigns.form.params
-
-        target ->
+      case event["_target"] do
+        [_, target | _] ->
           put_in_creating(
             socket.assigns.form.params || %{},
-            tl(target),
-            get_in(params, tl(target))
+            [target],
+            get_in(params, [target])
           )
+
+        _ ->
+          socket.assigns.form.params
       end
 
-    form = AshPhoenix.Form.validate(socket.assigns.form, params || %{})
+    form = AshPhoenix.Form.validate(socket.assigns.form, params)
 
     {:noreply, assign(socket, :form, form)}
   end
@@ -1594,10 +1652,7 @@ defmodule AshAdmin.Components.Resource.Form do
           AshAdmin.Resource.destroy_actions(resource)
       end
 
-    for %{type: ^type, name: name} = action <- Ash.Resource.Info.actions(resource),
-        is_nil(action_names) || name in action_names do
-      {to_name(action.name), to_string(action.name)}
-    end
+    Enum.map(action_names, &{to_name(&1), to_string(&1)})
   end
 
   defp assign_form(socket) do
