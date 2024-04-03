@@ -1,7 +1,7 @@
 defmodule AshAdmin.Test.Post do
   @moduledoc false
   use Ash.Resource,
-    domain: Demo.Tickets.Domain,
+    domain: AshAdmin.Test.Domain,
     data_layer: Ash.DataLayer.Ets
 
   attributes do
@@ -9,7 +9,7 @@ defmodule AshAdmin.Test.Post do
 
     attribute :body, :string do
       allow_nil?(false)
-      public? true
+      public?(true)
     end
   end
 end

@@ -144,7 +144,7 @@ defmodule AshAdmin.Components.Resource.Show do
 
         ~H"""
         <div class="mb-10">
-          <%= render_attributes(assigns, @record, @destination) %>
+          <%= render_attributes(assigns, @record, @destination, @name) %>
           <div class="px-4 py-3 text-right sm:px-6">
             <.link
               :if={AshAdmin.Resource.show_action(@destination)}
@@ -192,7 +192,7 @@ defmodule AshAdmin.Components.Resource.Show do
     """
   end
 
-  defp render_attributes(assigns, record, resource) do
+  defp render_attributes(assigns, record, resource, relationship_name \\ nil) do
     {attributes, flags, bottom_attributes, _} =
       AshAdmin.Components.Resource.Form.attributes(resource, :show)
 
@@ -202,7 +202,8 @@ defmodule AshAdmin.Components.Resource.Show do
         resource: resource,
         attributes: attributes,
         flags: flags,
-        bottom_attributes: bottom_attributes
+        bottom_attributes: bottom_attributes,
+        relationship_name: relationship_name
       )
 
     ~H"""
@@ -219,7 +220,13 @@ defmodule AshAdmin.Components.Resource.Show do
       >
         <div class="block text-sm font-medium text-gray-700"><%= to_name(attribute.name) %></div>
         <div>
-          <%= render_maybe_sensitive_attribute(assigns, @resource, @record, attribute) %>
+          <%= render_maybe_sensitive_attribute(
+            assigns,
+            @resource,
+            @record,
+            attribute,
+            @relationship_name
+          ) %>
         </div>
       </div>
     </div>
@@ -241,7 +248,13 @@ defmodule AshAdmin.Components.Resource.Show do
       >
         <div class="block text-sm font-medium text-gray-700"><%= to_name(attribute.name) %></div>
         <div>
-          <%= render_maybe_sensitive_attribute(assigns, @resource, @record, attribute) %>
+          <%= render_maybe_sensitive_attribute(
+            assigns,
+            @resource,
+            @record,
+            attribute,
+            @relationship_name
+          ) %>
         </div>
       </div>
     </div>
@@ -264,39 +277,46 @@ defmodule AshAdmin.Components.Resource.Show do
       >
         <div class="block text-sm font-medium text-gray-700"><%= to_name(attribute.name) %></div>
         <div>
-          <%= render_maybe_sensitive_attribute(assigns, @resource, @record, attribute) %>
+          <%= render_maybe_sensitive_attribute(
+            assigns,
+            @resource,
+            @record,
+            attribute,
+            @relationship_name
+          ) %>
         </div>
       </div>
     </div>
     """
   end
 
-  defp render_maybe_sensitive_attribute(assigns, resource, record, attribute) do
-    assigns = assign(assigns, attribute: attribute)
+  defp render_maybe_sensitive_attribute(assigns, resource, record, attribute, relationship_name) do
+    assigns = assign(assigns, attribute: attribute, relationship_name: relationship_name)
     show_sensitive_fields = AshAdmin.Resource.show_sensitive_fields(resource)
 
     if attribute.sensitive? && not Enum.member?(show_sensitive_fields, attribute.name) do
       ~H"""
       <.live_component
-        id={"#{@record.id}-#{@attribute.name}"}
+        id={"#{@relationship_name}_#{AshAdmin.Helpers.encode_primary_key(@record)}-#{@attribute.name}"}
         module={SensitiveAttribute}
         value={Map.get(@record, @attribute.name)}
       >
-        <%= render_attribute(assigns, @resource, @record, @attribute) %>
+        <%= render_attribute(assigns, @resource, @record, @attribute, @relationship_name) %>
       </.live_component>
       """
     else
-      render_attribute(assigns, resource, record, attribute)
+      render_attribute(assigns, resource, record, attribute, relationship_name)
     end
   end
 
-  defp render_attribute(assigns, resource, record, attribute, nested? \\ false)
+  defp render_attribute(assigns, resource, record, attribute, relationship_name, nested? \\ false)
 
   defp render_attribute(
          assigns,
          resource,
          record,
          %{type: {:array, type}, name: name} = attribute,
+         relationship_name,
          nested?
        ) do
     if Map.get(record, name) in [[], nil] do
@@ -309,6 +329,7 @@ defmodule AshAdmin.Components.Resource.Show do
           type: type,
           name: name,
           attribute: attribute,
+          relationship_name: relationship_name,
           nested: nested?
         )
 
@@ -321,6 +342,7 @@ defmodule AshAdmin.Components.Resource.Show do
               @resource,
               Map.put(@record, @name, value),
               %{@attribute | type: @type},
+              @relationship_name,
               true
             ) %>
           </li>
@@ -334,6 +356,7 @@ defmodule AshAdmin.Components.Resource.Show do
                 @resource,
                 Map.put(@record, @name, value),
                 %{@attribute | type: @type},
+                @relationship_name,
                 true
               ) %>
             </li>
@@ -349,21 +372,42 @@ defmodule AshAdmin.Components.Resource.Show do
          resource,
          record,
          %{type: {:array, Ash.Type.Map}} = attribute,
+         relationship_name,
          nested?
        ) do
-    render_attribute(assigns, resource, record, %{attribute | type: Ash.Type.Map}, nested?)
+    render_attribute(
+      assigns,
+      resource,
+      record,
+      %{attribute | type: Ash.Type.Map},
+      relationship_name,
+      nested?
+    )
   end
 
-  defp render_attribute(assigns, _resource, record, %{type: Ash.Type.Map} = attribute, _nested?) do
+  defp render_attribute(
+         assigns,
+         _resource,
+         record,
+         %{type: Ash.Type.Map} = attribute,
+         relationship_name,
+         _nested?
+       ) do
     encoded = Jason.encode!(Map.get(record, attribute.name))
 
-    assigns = assign(assigns, record: record, attribute: attribute, encoded: encoded)
+    assigns =
+      assign(assigns,
+        record: record,
+        attribute: attribute,
+        encoded: encoded,
+        relationship_name: relationship_name
+      )
 
     ~H"""
     <div
       phx-hook="JsonView"
       data-json={@encoded}
-      id={"_#{AshAdmin.Helpers.encode_primary_key(@record)}_#{@attribute.name}_json"}
+      id={"#{@relationship_name}_#{AshAdmin.Helpers.encode_primary_key(@record)}_#{@attribute.name}_json"}
     />
     """
   rescue
@@ -371,7 +415,14 @@ defmodule AshAdmin.Components.Resource.Show do
       "..."
   end
 
-  defp render_attribute(assigns, _resource, record, %{name: name, type: Ash.Type.Boolean}, _) do
+  defp render_attribute(
+         assigns,
+         _resource,
+         record,
+         %{name: name, type: Ash.Type.Boolean},
+         _relationship_name,
+         _
+       ) do
     case Map.get(record, name) do
       true ->
         ~H"""
@@ -390,7 +441,14 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   end
 
-  defp render_attribute(assigns, _resource, record, %{name: name, type: Ash.Type.Binary}, _) do
+  defp render_attribute(
+         assigns,
+         _resource,
+         record,
+         %{name: name, type: Ash.Type.Binary},
+         _relationship_name,
+         _
+       ) do
     if Map.get(record, name) do
       ~H"""
       <span class="italic">(binary data)</span>
@@ -400,7 +458,7 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   end
 
-  defp render_attribute(assigns, resource, record, attribute, nested?) do
+  defp render_attribute(assigns, resource, record, attribute, relationship_name, nested?) do
     if Ash.Type.embedded_type?(attribute.type) do
       if Map.get(record, attribute.name) in [nil, []] do
         "None"
@@ -410,17 +468,28 @@ defmodule AshAdmin.Components.Resource.Show do
             resource: resource,
             record: record,
             attribute: attribute,
-            nested: nested?
+            nested: nested?,
+            relationship_name: relationship_name
           )
 
         ~H"""
         <%= if @nested do %>
           <div class="ml-1 pl-2 pr-2">
-            <%= render_attributes(assigns, Map.get(@record, @attribute.name), @attribute.type) %>
+            <%= render_attributes(
+              assigns,
+              Map.get(@record, @attribute.name),
+              @attribute.type,
+              @relationship_name
+            ) %>
           </div>
         <% else %>
           <div class="shadow-md border mt-4 mb-4 rounded py-2 px-2 ml-1 pl-2 pr-2">
-            <%= render_attributes(assigns, Map.get(@record, @attribute.name), @attribute.type) %>
+            <%= render_attributes(
+              assigns,
+              Map.get(@record, @attribute.name),
+              @attribute.type,
+              @relationship_name
+            ) %>
           </div>
         <% end %>
         """

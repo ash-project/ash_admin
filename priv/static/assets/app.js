@@ -2307,14 +2307,17 @@
     findPhxChildren(el, parentId) {
       return this.all(el, `${PHX_VIEW_SELECTOR}[${PHX_PARENT_ID}="${parentId}"]`);
     },
-    findParentCIDs(node, cids) {
-      let initial = new Set(cids);
-      let parentCids = cids.reduce((acc, cid) => {
-        let selector = `[${PHX_COMPONENT}="${cid}"] [${PHX_COMPONENT}]`;
-        this.filterWithinSameLiveView(this.all(node, selector), node).map((el) => parseInt(el.getAttribute(PHX_COMPONENT))).forEach((childCID) => acc.delete(childCID));
-        return acc;
-      }, initial);
-      return parentCids.size === 0 ? new Set(cids) : parentCids;
+    findExistingParentCIDs(node, cids) {
+      let parentCids = /* @__PURE__ */ new Set();
+      let childrenCids = /* @__PURE__ */ new Set();
+      cids.forEach((cid) => {
+        this.filterWithinSameLiveView(this.all(node, `[${PHX_COMPONENT}="${cid}"]`), node).forEach((parent) => {
+          parentCids.add(cid);
+          this.all(parent, `[${PHX_COMPONENT}]`).map((el) => parseInt(el.getAttribute(PHX_COMPONENT))).forEach((childCID) => childrenCids.add(childCID));
+        });
+      });
+      childrenCids.forEach((childCid) => parentCids.delete(childCid));
+      return parentCids;
     },
     filterWithinSameLiveView(nodes, parent) {
       if (parent.querySelector(PHX_VIEW_SELECTOR)) {
@@ -4918,7 +4921,7 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
       let phxChildrenAdded = false;
       if (this.rendered.isComponentOnlyDiff(diff)) {
         this.liveSocket.time("component patch complete", () => {
-          let parentCids = dom_default.findParentCIDs(this.el, this.rendered.componentCIDs(diff));
+          let parentCids = dom_default.findExistingParentCIDs(this.el, this.rendered.componentCIDs(diff));
           parentCids.forEach((parentCID) => {
             if (this.componentPatch(this.rendered.getComponent(diff, parentCID), parentCID)) {
               phxChildrenAdded = true;
@@ -6569,13 +6572,13 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
         document.cookie = "actor_resource=" + payload.resource + ";path=/";
         document.cookie = "actor_primary_key=" + payload.primary_key + ";path=/";
         document.cookie = "actor_action=" + payload.action + ";path=/";
-        document.cookie = "actor_api=" + payload.api + ";path=/";
+        document.cookie = "actor_domain=" + payload.domain + ";path=/";
       });
       this.handleEvent("clear_actor", () => {
         document.cookie = "actor_resource=;path=/";
         document.cookie = "actor_primary_key=;path=/";
         document.cookie = "actor_action;path=/";
-        document.cookie = "actor_api=;path=/";
+        document.cookie = "actor_domain=;path=/";
         document.cookie = "actor_authorizing=false;path=/";
         document.cookie = "actor_paused=true;path=/";
       });
@@ -6623,7 +6626,7 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
       actor_resource: getCookie("actor_resource"),
       actor_primary_key: getCookie("actor_primary_key"),
       actor_action: getCookie("actor_action"),
-      actor_api: getCookie("actor_api"),
+      actor_domain: getCookie("actor_domain"),
       actor_authorizing: getCookie("actor_authorizing"),
       actor_paused: getCookie("actor_paused")
     };

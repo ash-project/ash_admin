@@ -101,8 +101,24 @@ defmodule AshAdmin.Components.Resource.Table do
     |> Enum.reject(&(&1.name in skip))
   end
 
-  defp render_attribute(domain, record, attribute, formats, show_sensitive_fields, actor, relationship_name) do
-    process_attribute(domain, record, attribute, formats, show_sensitive_fields, actor, relationship_name)
+  defp render_attribute(
+         domain,
+         record,
+         attribute,
+         formats,
+         show_sensitive_fields,
+         actor,
+         relationship_name
+       ) do
+    process_attribute(
+      domain,
+      record,
+      attribute,
+      formats,
+      show_sensitive_fields,
+      actor,
+      relationship_name
+    )
   rescue
     _ ->
       "..."
@@ -138,13 +154,29 @@ defmodule AshAdmin.Components.Resource.Table do
         attributes = attributes(attribute.destination, display_attributes, [])
 
         Enum.map_join(attributes, " - ", fn x ->
-          render_attribute(domain, relationship, x, formats, show_sensitive_fields, actor, relationship_name)
+          render_attribute(
+            domain,
+            relationship,
+            x,
+            formats,
+            show_sensitive_fields,
+            actor,
+            relationship_name
+          )
         end)
       end
     end
   end
 
-  defp process_attribute(_, record, %struct{} = attribute, formats, show_sensitive_fields, _actor, relationship_name)
+  defp process_attribute(
+         _,
+         record,
+         %struct{} = attribute,
+         formats,
+         show_sensitive_fields,
+         _actor,
+         relationship_name
+       )
        when struct in [Ash.Resource.Attribute, Ash.Resource.Aggregate, Ash.Resource.Calculation] do
     {mod, func, args} =
       Keyword.get(formats || [], attribute.name, {Phoenix.HTML.Safe, :to_iodata, []})
@@ -162,16 +194,29 @@ defmodule AshAdmin.Components.Resource.Table do
     end
   end
 
-  defp process_attribute(_domain, _record, _attr, _formats, _show_sensitive_fields, _actor) do
+  defp process_attribute(
+         _domain,
+         _record,
+         _attr,
+         _formats,
+         _show_sensitive_fields,
+         _actor,
+         _relationship_name
+       ) do
     "..."
   end
 
   defp format_sensitive_value(value, attribute, record, relationship_name) do
-    assigns = %{value: value, attribute: attribute, record: record, relationship_name: relationship_name}
+    assigns = %{
+      value: value,
+      attribute: attribute,
+      record: record,
+      relationship_name: relationship_name
+    }
 
     ~H"""
     <.live_component
-      id={"#{@relationship_name}-#{@record.id}-#{@attribute.name}"}
+      id={"#{@relationship_name}-#{AshAdmin.Helpers.encode_primary_key(@record)}-#{@attribute.name}"}
       module={SensitiveAttribute}
       value={@value}
     >

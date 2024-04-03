@@ -37,7 +37,7 @@ defmodule AshAdmin.MixProject do
   end
 
   defp elixirc_paths(:test) do
-    ["test/support", "lib"]
+    ["test/support", "lib", "dev"]
   end
 
   defp elixirc_paths(:prod) do

@@ -157,7 +157,7 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
   defp attributes(resource) do
     resource
     |> Ash.Resource.Info.attributes()
-    |> Enum.sort_by(& not(&1.public?))
+    |> Enum.sort_by(&(not &1.public?))
   end
 
   defp attribute_type(attribute) do
@@ -173,6 +173,6 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
   defp relationships(resource) do
     resource
     |> Ash.Resource.Info.relationships()
-    |> Enum.sort_by(& not(&1.public?))
+    |> Enum.sort_by(&(not &1.public?))
   end
 end
