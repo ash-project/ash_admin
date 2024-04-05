@@ -1,5 +1,8 @@
 import Config
 
+config :ash, :validate_domain_resource_inclusion?, false
+config :ash, :validate_domain_config_inclusion?, false
+
 pg_url = System.get_env("PG_URL") || "postgres:postgres@127.0.0.1"
 pg_database = System.get_env("PG_DATABASE") || "ash_admin_dev"
 Application.put_env(:ash_admin, Demo.Repo, url: "ecto://#{pg_url}/#{pg_database}")
