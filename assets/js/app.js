@@ -112,11 +112,13 @@ Hooks.Actor = {
         "actor_primary_key" + "=" + payload.primary_key + ";path=/";
       document.cookie = "actor_action" + "=" + payload.action + ";path=/";
       document.cookie = "actor_domain" + "=" + payload.domain + ";path=/";
+      document.cookie = "actor_tenant" + "=" + payload.tenant + ";path=/";
     });
     this.handleEvent("clear_actor", () => {
       document.cookie = "actor_resource" + "=" + ";path=/";
       document.cookie = "actor_primary_key" + "=" + ";path=/";
       document.cookie = "actor_action" + ";path=/";
+      document.cookie = "actor_tenant" + ";path=/";
       document.cookie = "actor_domain" + "=" + ";path=/";
       document.cookie = "actor_authorizing=false;path=/";
       document.cookie = "actor_paused=true;path=/";
@@ -169,6 +171,7 @@ let params = () => {
     tenant: getCookie("tenant"),
     actor_resource: getCookie("actor_resource"),
     actor_primary_key: getCookie("actor_primary_key"),
+    actor_tenant: getCookie("actor_tenant"),
     actor_action: getCookie("actor_action"),
     actor_domain: getCookie("actor_domain"),
     actor_authorizing: getCookie("actor_authorizing"),

@@ -15,6 +15,7 @@ defmodule AshAdmin.ActorPlug.Plug do
       actor_domain: actor_domain_from_session(socket.endpoint, session),
       actor_resources: actor_resources(domains),
       actor_paused: session_bool(session["actor_paused"], true),
+      actor_tenant: session["actor_tenant"],
       authorizing: session_bool(session["actor_authorizing"], false),
       tenant: session["tenant"]
     ]
@@ -49,10 +50,12 @@ defmodule AshAdmin.ActorPlug.Plug do
         |> Plug.Conn.put_session(:actor_resource, resource)
         |> Plug.Conn.put_session(:actor_domain, domain)
         |> Plug.Conn.put_session(:actor_action, action)
+        |> Plug.Conn.put_session(:actor_tenant, session["actor_tenant"])
         |> Plug.Conn.put_session(:actor_primary_key, primary_key)
         |> Plug.Conn.put_session(:actor_authorizing, authorizing)
         |> Plug.Conn.put_session(:actor_paused, actor_paused)
         |> Plug.Conn.assign(:actor, actor)
+        |> Plug.Conn.assign(:actor_tenant, session["actor_tenant"])
         |> Plug.Conn.assign(:actor_paused, actor_paused)
         |> Plug.Conn.assign(:authorizing, authorizing)
 
@@ -107,7 +110,8 @@ defmodule AshAdmin.ActorPlug.Plug do
            "actor_resource" => resource,
            "actor_domain" => domain,
            "actor_primary_key" => primary_key,
-           "actor_action" => action
+           "actor_action" => action,
+           "actor_tenant" => tenant
          }
        )
        when not is_nil(resource) and not is_nil(domain) do
@@ -129,6 +133,7 @@ defmodule AshAdmin.ActorPlug.Plug do
 
         resource
         |> Ash.Query.filter(^filter)
+        |> Ash.Query.set_tenant(tenant)
         |> Ash.read_one!(action: action, authorize?: false, domain: domain)
 
       _ ->

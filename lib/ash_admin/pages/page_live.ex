@@ -68,6 +68,7 @@ defmodule AshAdmin.PageLive do
       domain={@domain}
       editing_tenant={@editing_tenant}
       actor_domain={@actor_domain}
+      actor_tenant={@actor_tenant}
       resource={@resource}
       tenant={@tenant}
       actor_resources={@actor_resources}
@@ -369,6 +370,7 @@ defmodule AshAdmin.PageLive do
         socket
       )
       when not is_nil(resource) and not is_nil(domain) do
+    IO.inspect(socket.assigns[:tenant])
     resource = Module.concat([resource])
 
     case decode_primary_key(resource, primary_key) do
@@ -379,6 +381,7 @@ defmodule AshAdmin.PageLive do
         actor =
           resource
           |> Ash.Query.filter(^pkey_filter)
+          |> Ash.Query.set_tenant(socket.assigns[:tenant])
           |> Ash.read_one!(action: action, authorize?: false, domain: domain)
 
         domain_name = AshAdmin.Domain.name(domain)
@@ -390,12 +393,13 @@ defmodule AshAdmin.PageLive do
            "set_actor",
            %{
              resource: to_string(resource_name),
+             tenant: socket.assigns[:tenant],
              primary_key: encode_primary_key(actor),
              action: to_string(action.name),
              domain: to_string(domain_name)
            }
          )
-         |> assign(actor: actor, actor_domain: domain)}
+         |> assign(actor: actor, actor_domain: domain, actor_tenant: socket.assigns[:tenant])}
     end
   end
 

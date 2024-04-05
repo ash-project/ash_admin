@@ -24,8 +24,8 @@ defmodule Demo.Accounts.User do
 
   multitenancy do
     strategy :attribute
-    attribute :id
-    global? true
+    attribute :org
+    # global? true
   end
 
   policies do
@@ -142,6 +142,8 @@ defmodule Demo.Accounts.User do
     attribute :tags, {:array, :string} do
       public? true
     end
+
+    attribute :org, :string
 
     timestamps()
   end

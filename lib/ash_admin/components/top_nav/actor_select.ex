@@ -10,6 +10,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
   attr :actor_resources, :any, required: true
   attr :toggle_authorizing, :string, required: true
   attr :toggle_actor_paused, :string, required: true
+  attr :actor_tenant, :string
   attr :clear_actor, :string, required: true
   attr :domain, :any, required: true
   attr :actor_domain, :any, required: true
@@ -75,7 +76,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
             class="hover:text-blue-400 hover:underline"
             target={"#{@prefix}?domain=#{AshAdmin.Domain.name(@actor_domain)}&resource=#{AshAdmin.Resource.name(@actor.__struct__)}&tab=show&primary_key=#{encode_primary_key(@actor)}"}
           >
-            <%= user_display(@actor) %>
+            <%= user_display(@actor, @actor_tenant) %>
           </.link>
           <button :if={@actor} phx-click={@clear_actor} type="button">
             <svg
@@ -132,7 +133,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
     """
   end
 
-  defp user_display(actor) do
+  defp user_display(actor, nil) do
     name = AshAdmin.Resource.name(actor.__struct__)
 
     case Ash.Resource.Info.primary_key(actor.__struct__) do
@@ -144,5 +145,9 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
           "#{field}: #{Map.get(actor, field)}"
         end)
     end
+  end
+
+  defp user_display(actor, tenant) do
+    user_display(actor, nil) <> " (tenant: #{tenant})"
   end
 end
