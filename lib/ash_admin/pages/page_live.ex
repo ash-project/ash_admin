@@ -68,6 +68,7 @@ defmodule AshAdmin.PageLive do
       api={@api}
       editing_tenant={@editing_tenant}
       actor_api={@actor_api}
+      actor_tenant={@actor_tenant}
       resource={@resource}
       tenant={@tenant}
       actor_resources={@actor_resources}
@@ -378,6 +379,7 @@ defmodule AshAdmin.PageLive do
         actor =
           resource
           |> Ash.Query.filter(^pkey_filter)
+          |> Ash.Query.set_tenant(socket.assigns[:tenant])
           |> api.read_one!(action: action, authorize?: false)
 
         api_name = AshAdmin.Api.name(api)
@@ -389,12 +391,13 @@ defmodule AshAdmin.PageLive do
            "set_actor",
            %{
              resource: to_string(resource_name),
+             tenant: socket.assigns[:tenant],
              primary_key: encode_primary_key(actor),
              action: to_string(action.name),
              api: to_string(api_name)
            }
          )
-         |> assign(actor: actor, actor_api: api)}
+         |> assign(actor: actor, actor_api: api, actor_tenant: socket.assigns[:tenant])}
     end
   end
 

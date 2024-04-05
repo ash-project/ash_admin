@@ -16,6 +16,7 @@ defmodule AshAdmin.Components.TopNav do
   attr :clear_actor, :string, required: true
   attr :authorizing, :boolean, required: true
   attr :actor_paused, :boolean, required: true
+  attr :actor_tenant, :string, required: true
   attr :actor, :any, required: true
   attr :actor_api, :any, required: true
   attr :prefix, :any, required: true
@@ -53,6 +54,7 @@ defmodule AshAdmin.Components.TopNav do
                     actor_resources={@actor_resources}
                     authorizing={@authorizing}
                     actor_paused={@actor_paused}
+                    actor_tenant={@actor_tenant}
                     actor={@actor}
                     toggle_authorizing={@toggle_authorizing}
                     toggle_actor_paused={@toggle_actor_paused}

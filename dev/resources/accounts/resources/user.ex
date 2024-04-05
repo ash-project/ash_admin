@@ -23,8 +23,8 @@ defmodule Demo.Accounts.User do
 
   multitenancy do
     strategy :attribute
-    attribute :id
-    global? true
+    attribute :org
+    # global? true
   end
 
   policies do
@@ -126,6 +126,8 @@ defmodule Demo.Accounts.User do
       constraints items: [one_of: [:type1, :type2]]
     end
     attribute :tags, {:array, :string}
+
+    attribute :org, :string
 
     timestamps()
   end
