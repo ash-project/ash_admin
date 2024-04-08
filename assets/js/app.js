@@ -118,7 +118,7 @@ Hooks.Actor = {
       document.cookie = "actor_resource" + "=" + ";path=/";
       document.cookie = "actor_primary_key" + "=" + ";path=/";
       document.cookie = "actor_action" + ";path=/";
-      document.cookie = "actor_tenant" + ";path=/";
+      document.cookie = "actor_tenant" + "=" + ";path=/";
       document.cookie = "actor_domain" + "=" + ";path=/";
       document.cookie = "actor_authorizing=false;path=/";
       document.cookie = "actor_paused=true;path=/";
