@@ -200,7 +200,7 @@ defmodule AshAdmin.PageLive do
           end
 
           assign(socket,
-            action_type: nil,
+            action_type: action.type,
             action: action
           )
         end
