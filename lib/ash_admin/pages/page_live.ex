@@ -370,7 +370,6 @@ defmodule AshAdmin.PageLive do
         socket
       )
       when not is_nil(resource) and not is_nil(domain) do
-    IO.inspect(socket.assigns[:tenant])
     resource = Module.concat([resource])
 
     case decode_primary_key(resource, primary_key) do
