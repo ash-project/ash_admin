@@ -14,12 +14,7 @@ defmodule AshAdmin.MixProject do
       description: @description,
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
-      test_coverage: [tool: ExCoveralls],
       docs: docs(),
-      preferred_cli_env: [
-        coveralls: :test,
-        "coveralls.github": :test
-      ],
       dialyzer: [
         plt_add_apps: [:ex_unit]
       ],
@@ -134,7 +129,6 @@ defmodule AshAdmin.MixProject do
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:sobelow, ">= 0.0.0", only: [:dev, :test], runtime: false},
-      {:excoveralls, "~> 0.14", only: [:dev, :test]},
       {:floki, ">= 0.30.0", only: [:dev, :test]}
     ]
   end
