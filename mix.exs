@@ -96,12 +96,14 @@ defmodule AshAdmin.MixProject do
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
-  def application do
-    [
-      extra_applications: [:logger],
-      mod: {AshAdmin, []}
-    ]
+  if Mix.env() == :text do
+    # Run "mix help compile.app" to learn about applications.
+    def application do
+      [
+        extra_applications: [:logger],
+        mod: {AshAdmin, []}
+      ]
+    end
   end
 
   # Run "mix help deps" to learn about dependencies.
