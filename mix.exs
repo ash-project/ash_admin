@@ -131,7 +131,8 @@ defmodule AshAdmin.MixProject do
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:sobelow, ">= 0.0.0", only: [:dev, :test], runtime: false},
-      {:floki, ">= 0.30.0", only: [:dev, :test]}
+      {:floki, ">= 0.30.0", only: [:dev, :test]},
+      {:mix_audit, ">= 0.0.0", only: [:dev, :test], runtime: false}
     ]
   end
 end
