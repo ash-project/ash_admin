@@ -16,7 +16,6 @@ defmodule AshAdmin.Components.TopNav do
   attr :clear_actor, :string, required: true
   attr :authorizing, :boolean, required: true
   attr :actor_paused, :boolean, required: true
-  attr :actor_tenant, :string, required: true
   attr :actor, :any, required: true
   attr :actor_domain, :any, required: true
   attr :prefix, :any, required: true
@@ -54,7 +53,6 @@ defmodule AshAdmin.Components.TopNav do
                     actor_resources={@actor_resources}
                     authorizing={@authorizing}
                     actor_paused={@actor_paused}
-                    actor_tenant={@actor_tenant}
                     actor={@actor}
                     toggle_authorizing={@toggle_authorizing}
                     toggle_actor_paused={@toggle_actor_paused}
@@ -103,9 +101,9 @@ defmodule AshAdmin.Components.TopNav do
       <div :if={@open} class="md:hidden" x-cloak>
         <div class="relative px-2 pt-2 pb-3 sm:px-3">
           <div class="block px-4 py-2 text-sm">
-            <.live_component
+            <ActorSelect.actor_select
               :if={@actor_resources != []}
-              module={ActorSelect}
+              id="tenant_resources_drawer"
               actor_resources={@actor_resources}
               authorizing={@authorizing}
               actor_paused={@actor_paused}
