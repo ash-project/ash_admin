@@ -103,7 +103,6 @@ defmodule AshAdmin.Components.TopNav do
           <div class="block px-4 py-2 text-sm">
             <ActorSelect.actor_select
               :if={@actor_resources != []}
-              id="tenant_resources_drawer"
               actor_resources={@actor_resources}
               authorizing={@authorizing}
               actor_paused={@actor_paused}
