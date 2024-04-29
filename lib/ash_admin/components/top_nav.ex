@@ -103,12 +103,12 @@ defmodule AshAdmin.Components.TopNav do
       <div :if={@open} class="md:hidden" x-cloak>
         <div class="relative px-2 pt-2 pb-3 sm:px-3">
           <div class="block px-4 py-2 text-sm">
-            <.live_component
+            <ActorSelect.actor_select
               :if={@actor_resources != []}
-              module={ActorSelect}
               actor_resources={@actor_resources}
               authorizing={@authorizing}
               actor_paused={@actor_paused}
+              actor_tenant={@actor_tenant}
               actor={@actor}
               toggle_authorizing={@toggle_authorizing}
               toggle_actor_paused={@toggle_actor_paused}
