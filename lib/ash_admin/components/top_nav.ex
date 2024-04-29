@@ -108,6 +108,7 @@ defmodule AshAdmin.Components.TopNav do
               actor_resources={@actor_resources}
               authorizing={@authorizing}
               actor_paused={@actor_paused}
+              actor_tenant={@actor_tenant}
               actor={@actor}
               toggle_authorizing={@toggle_authorizing}
               toggle_actor_paused={@toggle_actor_paused}
