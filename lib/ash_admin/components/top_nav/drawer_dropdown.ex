@@ -46,12 +46,16 @@ defmodule AshAdmin.Components.TopNav.DrawerDropdown do
             class="block px-4 py-2 text-sm hover:bg-gray-200 hover:text-gray-900"
             role="menuitem"
           >
-            {link.text}
+            <%= link.text %>
           </.link>
         </div>
       </div>
     </div>
     """
+  end
+
+  def mount(socket) do
+    {:ok, assign(socket, :open, false)}
   end
 
   def handle_event("toggle", _, socket) do
