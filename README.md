@@ -6,7 +6,7 @@
 [![Hex version badge](https://img.shields.io/hexpm/v/ash_admin.svg)](https://hex.pm/packages/ash_admin)
 [![Hexdocs badge](https://img.shields.io/badge/docs-hexdocs-purple)](https://hexdocs.pm/ash_admin)
 
-# AshCsv
+# AshAdmin
 
 Welcome! This is a super-admin UI dashboard for [Ash Framework](https://hexdocs.pm/ash) applications, built with Phoenix LiveView.
 
