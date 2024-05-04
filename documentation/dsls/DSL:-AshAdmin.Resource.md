@@ -32,7 +32,7 @@ Configure the admin dashboard for a given resource.
 | [`polymorphic_actions`](#admin-polymorphic_actions){: #admin-polymorphic_actions } | `list(atom)` |  | For resources that use ash_postgres' polymorphism capabilities, you can provide a list of actions that should require a table to be set. If this is not set, then *all* actions will require tables. |
 | [`table_columns`](#admin-table_columns){: #admin-table_columns } | `list(atom)` |  | The list of attributes to render on the table view. |
 | [`format_fields`](#admin-format_fields){: #admin-format_fields } | `list(any)` |  | The list of fields and their formats. |
-| [`relationship_display_fields`](#admin-relationship_display_fields){: #admin-relationship_display_fields } | `list(atom)` |  | The list of attributes to render when it's shown as a relationship on a datatable |
+| [`relationship_display_fields`](#admin-relationship_display_fields){: #admin-relationship_display_fields } | `list(atom)` |  | The list of attributes to render when this resource is shown as a relationship on another resource's datatable. |
 | [`resource_group`](#admin-resource_group){: #admin-resource_group } | `atom` |  | The group in the top resource dropdown that the resource appears in. |
 | [`show_sensitive_fields`](#admin-show_sensitive_fields){: #admin-show_sensitive_fields } | `list(atom)` |  | The list of fields that should not be redacted in the admin UI even if they are marked as sensitive. |
 
