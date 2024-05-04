@@ -79,7 +79,8 @@ defmodule AshAdmin.Resource do
       ],
       relationship_display_fields: [
         type: {:list, :atom},
-        doc: "The list of attributes to render when it's shown as a relationship on a datatable"
+        doc:
+          "The list of attributes to render when this resource is shown as a relationship on another resource's datatable."
       ],
       resource_group: [
         type: :atom,

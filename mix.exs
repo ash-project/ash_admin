@@ -2,7 +2,7 @@ defmodule AshAdmin.MixProject do
   use Mix.Project
 
   @description """
-  An admin UI for Ash Framework
+  A super-admin UI for Ash Framework, built with Phoenix LiveView.
   """
 
   @version "0.10.10-rc.1"
@@ -56,6 +56,8 @@ defmodule AshAdmin.MixProject do
       logo: "logos/small-logo.png",
       extras: [
         "README.md",
+        "documentation/tutorials/getting-started-with-ash-admin.md",
+        "documentation/tutorials/contributing-to-ash-admin.md",
         "documentation/dsls/DSL:-AshAdmin.Domain.md",
         "documentation/dsls/DSL:-AshAdmin.Resource.md"
       ],
