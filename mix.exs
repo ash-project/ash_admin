@@ -66,7 +66,10 @@ defmodule AshAdmin.MixProject do
         Tutorials: ~r'documentation/tutorials',
         "How To": ~r'documentation/how_to',
         Topics: ~r'documentation/topics',
-        DSLs: ~r'documentation/dsls'
+        DSLs: ~r'documentation/dsls',
+        "About AshAdmin": [
+          "CHANGELOG.md"
+        ]
       ]
     ]
   end
