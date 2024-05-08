@@ -59,7 +59,8 @@ defmodule AshAdmin.MixProject do
         "documentation/tutorials/getting-started-with-ash-admin.md",
         "documentation/tutorials/contributing-to-ash-admin.md",
         "documentation/dsls/DSL:-AshAdmin.Domain.md",
-        "documentation/dsls/DSL:-AshAdmin.Resource.md"
+        "documentation/dsls/DSL:-AshAdmin.Resource.md",
+        "CHANGELOG.md"
       ],
       groups_for_extras: [
         Tutorials: ~r'documentation/tutorials',
