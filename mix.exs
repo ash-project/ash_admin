@@ -5,7 +5,7 @@ defmodule AshAdmin.MixProject do
   A super-admin UI for Ash Framework, built with Phoenix LiveView.
   """
 
-  @version "0.10.10-rc.1"
+  @version "0.10.10"
 
   def project do
     [
@@ -115,8 +115,8 @@ defmodule AshAdmin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ash, "~> 3.0.0-rc.0"},
-      {:ash_phoenix, "~> 2.0-rc.0"},
+      {:ash, "~> 3.0"},
+      {:ash_phoenix, "~> 2.0"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix, "~> 1.7"},
       {:phoenix_live_view, "~> 0.19"},
@@ -130,7 +130,7 @@ defmodule AshAdmin.MixProject do
       {:tailwind, "~> 0.2.0", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
-      {:ash_postgres, "~> 2.0-rc.0", only: [:dev, :test]},
+      {:ash_postgres, "~> 2.0", only: [:dev, :test]},
       {:git_ops, "~> 2.4", only: [:dev, :test]},
       {:ex_doc, "~> 0.23", only: [:dev, :test], runtime: false},
       {:ex_check, "~> 0.14", only: [:dev, :test]},

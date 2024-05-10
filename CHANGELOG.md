@@ -5,6 +5,25 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.10.10](https://github.com/ash-project/ash_admin/compare/v0.10.10-rc.1...v0.10.10) (2024-05-10)
+
+
+
+
+### Bug Fixes:
+
+* TopNav when in mobile view (size < md) (#128)
+
+* properly accept private attributes in admin
+
+* clear actor_tenant cookie when clearing actor (#101)
+
+* small refactor in actor plug (#99)
+
+### Improvements:
+
+* track actor tenant, use it for fetching actor
+
 ## [v0.10.10-rc.1](https://github.com/ash-project/ash_admin/compare/v0.10.10-rc.0...v0.10.10-rc.1) (2024-04-03)
 
 
