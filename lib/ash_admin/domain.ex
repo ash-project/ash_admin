@@ -14,7 +14,7 @@ defmodule AshAdmin.Domain do
           "Whether or not this domain and its resources should be included in the admin dashboard."
       ],
       show_resources: [
-        type: :module,
+        type: {:or, [{:list, :atom}, {:literal, :*}]},
         default: :*,
         doc: "List of resources that should be included in the admin dashboard"
       ],
