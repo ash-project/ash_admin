@@ -13,6 +13,11 @@ defmodule AshAdmin.Domain do
         doc:
           "Whether or not this domain and its resources should be included in the admin dashboard."
       ],
+      show_resources: [
+        type: :module,
+        default: :*,
+        doc: "List of resources that should be included in the admin dashboard"
+      ],
       default_resource_page: [
         type: {:in, [:schema, :primary_read]},
         default: :schema,
@@ -40,6 +45,13 @@ defmodule AshAdmin.Domain do
 
   def show?(domain) do
     Spark.Dsl.Extension.get_opt(domain, [:admin], :show?, false, true)
+  end
+
+  def show_resources(domain) do
+    case Spark.Dsl.Extension.get_opt(domain, [:admin], :show_resources, :*, true) do
+      :* -> Ash.Domain.Info.resources(domain)
+      resources -> resources
+    end
   end
 
   def default_resource_page(domain) do
