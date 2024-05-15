@@ -9,5 +9,6 @@ defmodule AshAdmin.Test.Domain do
 
   resources do
     resource(AshAdmin.Test.Post)
+    resource(AshAdmin.Test.Comment)
   end
 end
