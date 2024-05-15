@@ -85,7 +85,7 @@ defmodule AshAdmin.ActorPlug.Plug do
 
   defp actor_resources(domains) do
     for domain <- domains,
-        resource <- Ash.Domain.Info.resources(domain),
+        resource <- AshAdmin.Domain.show_resources(domain),
         AshAdmin.Helpers.primary_action(resource, :read) && AshAdmin.Resource.actor?(resource),
         do: {domain, resource}
   end
@@ -120,7 +120,7 @@ defmodule AshAdmin.ActorPlug.Plug do
     resource =
       if domain do
         domain
-        |> Ash.Domain.Info.resources()
+        |> AshAdmin.Domain.show_resources()
         |> Enum.find(&(AshAdmin.Resource.name(&1) == resource))
       end
 

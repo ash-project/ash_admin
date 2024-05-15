@@ -13,6 +13,11 @@ defmodule AshAdmin.Domain do
         doc:
           "Whether or not this domain and its resources should be included in the admin dashboard."
       ],
+      show_resources: [
+        type: {:wrap_list, :atom},
+        default: :*,
+        doc: "List of resources that should be included in the admin dashboard"
+      ],
       default_resource_page: [
         type: {:in, [:schema, :primary_read]},
         default: :schema,
@@ -28,7 +33,9 @@ defmodule AshAdmin.Domain do
     ]
   }
 
-  use Spark.Dsl.Extension, sections: [@admin]
+  use Spark.Dsl.Extension,
+    sections: [@admin],
+    transformers: [AshAdmin.ShowResourcesTransformer]
 
   @moduledoc """
   A domain extension to alter the behavior of a domain in the admin UI.
@@ -40,6 +47,10 @@ defmodule AshAdmin.Domain do
 
   def show?(domain) do
     Spark.Dsl.Extension.get_opt(domain, [:admin], :show?, false, true)
+  end
+
+  def show_resources(domain) do
+    Spark.Dsl.Extension.get_opt(domain, [:admin], :show_resources, [], true)
   end
 
   def default_resource_page(domain) do

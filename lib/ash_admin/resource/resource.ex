@@ -194,7 +194,7 @@ defmodule AshAdmin.Resource do
 
   defp find_polymorphic_tables(resource, domains) do
     domains
-    |> Enum.flat_map(&Ash.Domain.Info.resources/1)
+    |> Enum.flat_map(&AshAdmin.Domain.show_resources/1)
     |> Enum.flat_map(&Ash.Resource.Info.relationships/1)
     |> Enum.filter(&(&1.destination == resource))
     |> Enum.map(& &1.context[:data_layer][:table])

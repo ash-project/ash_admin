@@ -124,7 +124,7 @@ defmodule AshAdmin.PageLive do
 
   defp assign_resource(socket, resource) do
     if socket.assigns.domain do
-      resources = Ash.Domain.Info.resources(socket.assigns.domain)
+      resources = AshAdmin.Domain.show_resources(socket.assigns.domain)
 
       resource =
         Enum.find(resources, fn domain_resources ->

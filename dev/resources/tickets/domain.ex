@@ -5,6 +5,13 @@ defmodule Demo.Tickets.Domain do
 
   admin do
     show? true
+    show_resources [
+      Demo.Tickets.Customer,
+      Demo.Tickets.Representative,
+      Demo.Tickets.Ticket,
+      Demo.Tickets.Comment,
+      Demo.Tickets.Organization
+    ]
   end
 
   resources do
