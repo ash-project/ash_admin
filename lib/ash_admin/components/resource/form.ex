@@ -177,6 +177,7 @@ defmodule AshAdmin.Components.Resource.Form do
         skip: skip
       )
 
+
     ~H"""
     <% {attributes, flags, bottom_attributes, relationship_args} =
       attributes(@resource, @action, @exactly) %>
@@ -1611,7 +1612,7 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp manages_relationship(argument, action) do
-    if action.changes && map_type?(argument.type) do
+    if action.changes do
       Enum.find_value(action.changes, fn
         %{change: {Ash.Resource.Change.ManageRelationship, opts}} ->
           if opts[:argument] == argument.name do

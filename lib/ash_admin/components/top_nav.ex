@@ -119,11 +119,10 @@ defmodule AshAdmin.Components.TopNav do
             />
           </div>
           <div class="block px-4 py-2 text-sm">
-            <.live_component
+            <TenantForm.tenant_form
               :if={show_tenant_form?(@domains)}
-              module={TenantForm}
               tenant={@tenant}
-              id="tenant_editor_drawer"
+              editing_tenant={@editing_tenant}
               set_tenant={@set_tenant}
               clear_tenant={@clear_tenant}
             />

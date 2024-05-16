@@ -80,7 +80,13 @@ defmodule Demo.Tickets.Ticket do
       change manage_relationship(:tickets, :source_links, on_lookup: {:relate_and_update, :create, :read, :all})
     end
 
-    update :update, primary?: true
+    update :update do
+      primary? true
+      argument :organization_id, :uuid
+      require_atomic? false
+
+      change manage_relationship(:organization_id, :organization, type: :append_and_remove)
+    end
 
     update :assign do
       accept []

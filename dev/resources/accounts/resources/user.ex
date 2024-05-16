@@ -25,7 +25,7 @@ defmodule Demo.Accounts.User do
   multitenancy do
     strategy :attribute
     attribute :org
-    # global? true
+    global? true
   end
 
   policies do
