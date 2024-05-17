@@ -69,7 +69,7 @@ defmodule Demo.Tickets.Ticket do
     end
 
     create :open do
-      accept [:subject]
+      accept [:subject, :metadata]
       primary? true
       argument :representative, :map, allow_nil?: false
       argument :organization, :map, allow_nil?: false
@@ -140,6 +140,10 @@ defmodule Demo.Tickets.Ticket do
       allow_nil? false
       public? true
       constraints min_length: 5
+    end
+
+    attribute :metadata, Demo.Tickets.Ticket.Types.Metadata do
+      public? true
     end
 
     attribute :description, :string do

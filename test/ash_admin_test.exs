@@ -13,15 +13,15 @@ defmodule AshAdmin.Test.AshAdminTest do
       end
 
       resources do
-        resource AshAdmin.Test.Post
-        resource AshAdmin.Test.Comment
+        resource(AshAdmin.Test.Post)
+        resource(AshAdmin.Test.Comment)
       end
     end
 
     assert AshAdmin.Domain.show_resources(Domain) === [
-      AshAdmin.Test.Post,
-      AshAdmin.Test.Comment
-    ]
+             AshAdmin.Test.Post,
+             AshAdmin.Test.Comment
+           ]
   end
 
   test "all resources are shown when :* option is selected", _ do
@@ -36,15 +36,15 @@ defmodule AshAdmin.Test.AshAdminTest do
       end
 
       resources do
-        resource AshAdmin.Test.Post
-        resource AshAdmin.Test.Comment
+        resource(AshAdmin.Test.Post)
+        resource(AshAdmin.Test.Comment)
       end
     end
 
     assert AshAdmin.Domain.show_resources(Domain) === [
-      AshAdmin.Test.Post,
-      AshAdmin.Test.Comment
-    ]
+             AshAdmin.Test.Post,
+             AshAdmin.Test.Comment
+           ]
   end
 
   test "selected resources are shown", _ do
@@ -59,33 +59,37 @@ defmodule AshAdmin.Test.AshAdminTest do
       end
 
       resources do
-        resource AshAdmin.Test.Post
-        resource AshAdmin.Test.Comment
+        resource(AshAdmin.Test.Post)
+        resource(AshAdmin.Test.Comment)
       end
     end
 
     assert AshAdmin.Domain.show_resources(Domain) === [
-      AshAdmin.Test.Post
-    ]
+             AshAdmin.Test.Post
+           ]
   end
 
   test "if shown resrouces option not eixsting resource providede error", _ do
-    assert_raise(Spark.Error.DslError, "[AshAdmin.Test.AshAdminTest.Domain]\n admin -> show_resources:\n  SomeRandom is not a valid resource in AshAdmin.Test.AshAdminTest.Domain", fn ->
-      defmodule Domain do
-        @moduledoc false
-        use Ash.Domain,
-          extensions: [AshAdmin.Domain]
+    assert_raise(
+      Spark.Error.DslError,
+      "[AshAdmin.Test.AshAdminTest.Domain]\n admin -> show_resources:\n  SomeRandom is not a valid resource in AshAdmin.Test.AshAdminTest.Domain",
+      fn ->
+        defmodule Domain do
+          @moduledoc false
+          use Ash.Domain,
+            extensions: [AshAdmin.Domain]
 
-        admin do
-          show? true
-          show_resources [AshAdmin.Test.Post, SomeRandom]
-        end
+          admin do
+            show? true
+            show_resources [AshAdmin.Test.Post, SomeRandom]
+          end
 
-        resources do
-          resource AshAdmin.Test.Post
-          resource AshAdmin.Test.Comment
+          resources do
+            resource(AshAdmin.Test.Post)
+            resource(AshAdmin.Test.Comment)
+          end
         end
       end
-    end)
+    )
   end
 end

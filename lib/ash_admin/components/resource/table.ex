@@ -233,11 +233,24 @@ defmodule AshAdmin.Components.Resource.Table do
     """
   end
 
-  defp format_attribute_value(data, _attribute) do
-    if is_binary(data) and !String.valid?(data) do
-      "..."
+  defp format_attribute_value(%Ash.Union{value: value, type: type}, attribute) do
+    config = attribute.constraints[:types][type]
+    new_attr = %{attribute | type: config[:type], constraints: config[:constraints]}
+    format_attribute_value(value, new_attr)
+  end
+
+  defp format_attribute_value(data, attribute) do
+    if Ash.Type.NewType.new_type?(attribute.type) do
+      constraints = Ash.Type.NewType.constraints(attribute.type, attribute.constraints)
+      type = Ash.Type.NewType.subtype_of(attribute.type)
+      attribute = %{attribute | type: type, constraints: constraints}
+      format_attribute_value(data, attribute)
     else
-      data
+      if is_binary(data) and !String.valid?(data) do
+        "..."
+      else
+        data
+      end
     end
   end
 

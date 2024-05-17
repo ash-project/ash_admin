@@ -177,7 +177,6 @@ defmodule AshAdmin.Components.Resource.Form do
         skip: skip
       )
 
-
     ~H"""
     <% {attributes, flags, bottom_attributes, relationship_args} =
       attributes(@resource, @action, @exactly) %>
@@ -626,9 +625,25 @@ defmodule AshAdmin.Components.Resource.Form do
   defp unwrap_type({:array, type}), do: unwrap_type(type)
   defp unwrap_type(type), do: type
 
-  def render_attribute_input(assigns, attribute, form, value \\ nil, name \\ nil, id \\ nil)
+  def render_attribute_input(
+        assigns,
+        attribute,
+        form,
+        value \\ nil,
+        name \\ nil,
+        id \\ nil,
+        union_type \\ nil
+      )
 
-  def render_attribute_input(assigns, %{type: Ash.Type.Date} = attribute, form, value, name, id) do
+  def render_attribute_input(
+        assigns,
+        %{type: Ash.Type.Date} = attribute,
+        form,
+        value,
+        name,
+        id,
+        _
+      ) do
     assigns = assign(assigns, form: form, value: value, name: name, attribute: attribute, id: id)
 
     ~H"""
@@ -641,7 +656,7 @@ defmodule AshAdmin.Components.Resource.Form do
     """
   end
 
-  def render_attribute_input(assigns, %{type: type} = attribute, form, value, name, id)
+  def render_attribute_input(assigns, %{type: type} = attribute, form, value, name, id, _)
       when type in [Ash.Type.UtcDatetime, Ash.Type.UtcDatetimeUsec] do
     assigns = assign(assigns, form: form, value: value, name: name, attribute: attribute, id: id)
 
@@ -664,7 +679,8 @@ defmodule AshAdmin.Components.Resource.Form do
         form,
         value,
         name,
-        id
+        id,
+        _
       ) do
     assigns = assign(assigns, attribute: attribute, form: form, value: value, name: name, id: id)
 
@@ -686,7 +702,8 @@ defmodule AshAdmin.Components.Resource.Form do
         form,
         value,
         name,
-        id
+        id,
+        _
       ) do
     assigns = assign(assigns, attribute: attribute, form: form, value: value, name: name, id: id)
 
@@ -701,7 +718,7 @@ defmodule AshAdmin.Components.Resource.Form do
     """
   end
 
-  def render_attribute_input(assigns, %{type: Ash.Type.Binary}, _form, _value, _name, _id) do
+  def render_attribute_input(assigns, %{type: Ash.Type.Binary}, _form, _value, _name, _id, _) do
     ~H"""
     <span class="italic">(binary fields cannot be edited)</span>
     """
@@ -716,7 +733,8 @@ defmodule AshAdmin.Components.Resource.Form do
         form,
         value,
         name,
-        id
+        id,
+        _
       )
       when type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID, Ash.Type.Atom] do
     assigns =
@@ -788,16 +806,49 @@ defmodule AshAdmin.Components.Resource.Form do
 
   def render_attribute_input(
         assigns,
+        %{type: number, default: default} = attribute,
+        form,
+        value,
+        name,
+        id,
+        _
+      )
+      when number in [Ash.Type.Integer, Ash.Type.Float, Ash.Type.Decimal] do
+    assigns =
+      assign(assigns,
+        attribute: attribute,
+        form: form,
+        value: value,
+        name: name,
+        default: default,
+        id: id
+      )
+
+    ~H"""
+    <.input
+      type="number"
+      id={@id || @form.id <> "_#{@attribute.name}"}
+      value={value(@value, @form, @attribute)}
+      class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+      name={@name || @form.name <> "[#{@attribute.name}]"}
+      placeholder={placeholder(@default)}
+    />
+    """
+  end
+
+  def render_attribute_input(
+        assigns,
         %{type: {:array, Ash.Type.Map}} = attribute,
         form,
         value,
         name,
-        id
+        id,
+        _
       ) do
     render_attribute_input(assigns, %{attribute | type: Ash.Type.Map}, form, value, name, id)
   end
 
-  def render_attribute_input(assigns, %{type: Ash.Type.Map} = attribute, form, value, name, id) do
+  def render_attribute_input(assigns, %{type: Ash.Type.Map} = attribute, form, value, name, id, _) do
     encoded = Jason.encode!(value(value, form, attribute))
 
     assigns =
@@ -843,113 +894,224 @@ defmodule AshAdmin.Components.Resource.Form do
       """
   end
 
-  def render_attribute_input(assigns, attribute, form, value, name, id) do
+  def render_attribute_input(
+        assigns,
+        %{type: Ash.Type.Union} = attribute,
+        form,
+        value,
+        name,
+        id,
+        _
+      ) do
+    union_type_name =
+      if name do
+        name <> "[_new_union_type]"
+      else
+        form.name <> "[#{attribute.name}][_new_union_type]"
+      end
+
+    actual_union_type_name =
+      with %Phoenix.HTML.FormField{value: [%Phoenix.HTML.Form{} = attr_form]} <-
+             form[attribute.name],
+           union_type <- non_nil_form_field(attr_form, [:_new_union_type, :_union_type]),
+           {match, _} <-
+             Enum.find(attribute.constraints[:types], fn {type_name, _} ->
+               to_string(type_name) == to_string(union_type)
+             end) do
+        match
+      else
+        _ ->
+          elem(Enum.at(attribute.constraints[:types], 0), 0)
+      end
+
+    actual_union_type =
+      Keyword.get(attribute.constraints[:types], actual_union_type_name)[:type] || :string
+
+    actual_union_constraints =
+      Keyword.get(attribute.constraints[:types], actual_union_type_name)[:constraints] || :string
+
+    {name, id} =
+      if Ash.Type.embedded_type?(actual_union_type) do
+        {name, id}
+      else
+        name =
+          if name do
+            name <> "[value]"
+          else
+            form.name <> "[#{attribute.name}][value]"
+          end
+
+        id =
+          if id do
+            id <> "_value"
+          else
+            form.id <> "_#{attribute.name}_value"
+          end
+
+        {name, id}
+      end
+
     assigns =
-      assign(assigns,
+      assign(
+        assigns,
         attribute: attribute,
         form: form,
         value: value,
         name: name,
-        id: id
+        id: id,
+        possible_types: Keyword.keys(attribute.constraints[:types]),
+        actual_union_type: actual_union_type,
+        actual_union_constraints: actual_union_constraints,
+        union_type_name: union_type_name,
+        actual_union_type_name: actual_union_type_name
       )
 
     ~H"""
-    <%= cond do %>
-      <% match?({:array, {:array, _}}, @attribute.type) -> %>
-        <%= render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id) %>
-      <% match?({:array, _}, @attribute.type) && Ash.Type.embedded_type?(@attribute.type) -> %>
-        <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
-          <.input
-            :for={kv <- inner_form.hidden}
-            name={inner_form.name <> "[#{elem(kv, 0)}]"}
-            value={elem(kv, 1)}
-            type="hidden"
-          />
-          <button
-            type="button"
-            phx-click="remove_form"
-            phx-target={@myself}
-            phx-value-path={inner_form.name}
-            class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
-          >
-            <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
-          </button>
-
-          <%= render_attributes(
-            assigns,
-            inner_form.source.resource,
-            inner_form.source.source.action,
-            %{
-              inner_form
-              | id: nested_form_id(@id, @form.id, @attribute.name, inner_form),
-                name: nested_form_name(@name, @form.name, @attribute.name, inner_form)
-            }
-          ) %>
-        </.inputs_for>
-        <button
-          :if={can_append_embed?(@form.source.source, @attribute.name)}
-          type="button"
-          phx-click="add_form"
-          phx-target={@myself}
-          phx-value-pkey={embedded_type_pkey(@attribute.type)}
-          phx-value-path={@name || @form.name <> "[#{@attribute.name}]"}
-          class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
-        >
-          <.icon name="hero-plus" class="h-4 w-4 text-gray-500" />
-        </button>
-      <% Ash.Type.embedded_type?(@attribute.type) -> %>
-        <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
-          <.input
-            :for={kv <- inner_form.hidden}
-            name={inner_form.name <> "[#{elem(kv, 0)}]"}
-            value={elem(kv, 1)}
-            type="hidden"
-          />
-          <button
-            type="button"
-            phx-click="remove_form"
-            phx-target={@myself}
-            phx-value-path={inner_form.name}
-            class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
-          >
-            <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
-          </button>
-
-          <%= render_attributes(
-            assigns,
-            inner_form.source.resource,
-            inner_form.source.source.action,
-            %{
-              inner_form
-              | id: @id || @form.id <> "_#{@attribute.name}",
-                name: @name || @form.name <> "[#{@attribute.name}]"
-            }
-          ) %>
-        </.inputs_for>
-        <button
-          :if={can_append_embed?(@form.source.source, @attribute.name)}
-          type="button"
-          phx-click="add_form"
-          phx-target={@myself}
-          phx-value-pkey={embedded_type_pkey(@attribute.type)}
-          phx-value-path={@name || @form.name <> "[#{@attribute.name}]"}
-          class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
-        >
-          <.icon name="hero-plus" class="h-4 w-4 text-gray-500" />
-        </button>
-      <% is_atom(@attribute.type) && function_exported?(@attribute.type, :values, 0) -> %>
+    <div class="border">
+      <label class="block text-sm font-medium text-gray-700" for={@union_type_name}>
+        Type
+      </label>
+      <div class="w-8">
         <.input
+          phx-change="union-type-changed"
+          name={@union_type_name}
           type="select"
-          id={@form.id <> "_#{@attribute.name}"}
-          options={Enum.map(@attribute.type.values(), &{to_name(&1), &1})}
-          value={value(@value, @form, @attribute, List.first(@attribute.type.values()))}
-          prompt={allow_nil_option(@attribute, @value)}
-          name={@name || @form.name <> "[#{@attribute.name}]"}
+          class="w-8"
+          value={@actual_union_type_name}
+          options={@possible_types}
+          field={@form[:_union_type]}
         />
-      <% true -> %>
-        <%= render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id) %>
-    <% end %>
+        <%= render_attribute_input(
+          assigns,
+          %{@attribute | type: @actual_union_type, constraints: @actual_union_constraints},
+          @form,
+          value(@value, @form, @attribute, @attribute.default),
+          @name,
+          @id,
+          @actual_union_type_name
+        ) %>
+      </div>
+    </div>
     """
+  end
+
+  def render_attribute_input(assigns, attribute, form, value, name, id, union_type) do
+    if Ash.Type.NewType.new_type?(attribute.type) do
+      constraints = Ash.Type.NewType.constraints(attribute.type, attribute.constraints)
+      type = Ash.Type.NewType.subtype_of(attribute.type)
+      attribute = %{attribute | type: type, constraints: constraints}
+      render_attribute_input(assigns, attribute, form, value, name, id)
+    else
+      assigns =
+        assign(assigns,
+          attribute: attribute,
+          form: form,
+          value: value,
+          name: name,
+          union_type: union_type,
+          id: id
+        )
+
+      ~H"""
+      <%= cond do %>
+        <% match?({:array, {:array, _}}, @attribute.type) -> %>
+          <%= render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id) %>
+        <% match?({:array, _}, @attribute.type) && Ash.Type.embedded_type?(@attribute.type) -> %>
+          <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
+            <.input
+              :for={kv <- inner_form.hidden}
+              name={inner_form.name <> "[#{elem(kv, 0)}]"}
+              value={elem(kv, 1)}
+              type="hidden"
+            />
+            <button
+              type="button"
+              phx-click="remove_form"
+              phx-target={@myself}
+              phx-value-path={inner_form.name}
+              class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+            >
+              <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
+            </button>
+
+            <%= render_attributes(
+              assigns,
+              inner_form.source.resource,
+              inner_form.source.source.action,
+              %{
+                inner_form
+                | id: nested_form_id(@id, @form.id, @attribute.name, inner_form),
+                  name: nested_form_name(@name, @form.name, @attribute.name, inner_form)
+              }
+            ) %>
+          </.inputs_for>
+          <button
+            :if={can_append_embed?(@form.source, @attribute.name)}
+            type="button"
+            phx-click="add_form"
+            phx-target={@myself}
+            phx-value-pkey={embedded_type_pkey(@attribute.type)}
+            phx-value-union-type={@union_type}
+            phx-value-path={@name || @form.name <> "[#{@attribute.name}]"}
+            class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+          >
+            <.icon name="hero-plus" class="h-4 w-4 text-gray-500" />
+          </button>
+        <% Ash.Type.embedded_type?(@attribute.type) -> %>
+          <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
+            <.input
+              :for={kv <- inner_form.hidden}
+              name={inner_form.name <> "[#{elem(kv, 0)}]"}
+              value={elem(kv, 1)}
+              type="hidden"
+            />
+            <button
+              type="button"
+              phx-click="remove_form"
+              phx-target={@myself}
+              phx-value-path={inner_form.name}
+              class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+            >
+              <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
+            </button>
+
+            <%= render_attributes(
+              assigns,
+              inner_form.source.resource,
+              inner_form.source.source.action,
+              %{
+                inner_form
+                | id: @id || @form.id <> "_#{@attribute.name}",
+                  name: @name || @form.name <> "[#{@attribute.name}]"
+              }
+            ) %>
+          </.inputs_for>
+          <button
+            :if={can_append_embed?(@form.source, @attribute.name)}
+            type="button"
+            phx-click="add_form"
+            phx-target={@myself}
+            phx-value-union-type={@union_type}
+            phx-value-pkey={embedded_type_pkey(@attribute.type)}
+            phx-value-path={@name || @form.name <> "[#{@attribute.name}]"}
+            class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+          >
+            <.icon name="hero-plus" class="h-4 w-4 text-gray-500" />
+          </button>
+        <% is_atom(@attribute.type) && function_exported?(@attribute.type, :values, 0) -> %>
+          <.input
+            type="select"
+            id={@form.id <> "_#{@attribute.name}"}
+            options={Enum.map(@attribute.type.values(), &{to_name(&1), &1})}
+            value={value(@value, @form, @attribute, List.first(@attribute.type.values()))}
+            prompt={allow_nil_option(@attribute, @value)}
+            name={@name || @form.name <> "[#{@attribute.name}]"}
+          />
+        <% true -> %>
+          <%= render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id) %>
+      <% end %>
+      """
+    end
   end
 
   defp nested_form_id(id, form_id, attribute_name, inner_form) do
@@ -1030,7 +1192,16 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp render_fallback_attribute(assigns, form, attribute, value, name, id) do
-    casted_value = Phoenix.HTML.Safe.to_iodata(value(value, form, attribute))
+    casted_value =
+      case value(value, form, attribute) do
+        %AshPhoenix.Form{resource: AshPhoenix.Form.WrappedValue} = form ->
+          form
+          |> AshPhoenix.Form.value(:value)
+          |> Phoenix.HTML.Safe.to_iodata()
+
+        value ->
+          Phoenix.HTML.Safe.to_iodata(value)
+      end
 
     assigns =
       assign(assigns,
@@ -1083,6 +1254,18 @@ defmodule AshAdmin.Components.Resource.Form do
       end
   end
 
+  defp non_nil_form_field(_form, []), do: nil
+
+  defp non_nil_form_field(form, [field | rest]) do
+    case form[field] do
+      %Phoenix.HTML.FormField{value: value} when not is_nil(value) ->
+        value
+
+      _ ->
+        non_nil_form_field(form, rest)
+    end
+  end
+
   defp list_value(value) do
     if is_map(value) do
       value
@@ -1113,12 +1296,17 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp value(value, form, attribute, default \\ nil)
 
+  defp value({:list_value, %Ash.Union{value: value}}, _, _, _), do: value
   defp value({:list_value, value}, _, _, _), do: value
 
+  defp value(%Ash.Union{value: value}, _form, _attribute, _) when not is_nil(value), do: value
   defp value(value, _form, _attribute, _) when not is_nil(value), do: value
 
   defp value(_value, form, attribute, _default) do
-    AshPhoenix.Form.value(form.source, attribute.name)
+    case AshPhoenix.Form.value(form.source, attribute.name) do
+      %Ash.Union{value: value} -> value
+      value -> value
+    end
   end
 
   defp default_atom_list_value(%{allow_nil?: false, constraints: [one_of: [atom | _]]}), do: atom
@@ -1131,8 +1319,11 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp allow_nil_option(_, _), do: "Select an option"
 
-  defp can_append_embed?(changeset, attribute) do
-    case Ash.Changeset.get_attribute(changeset, attribute) do
+  defp can_append_embed?(form, attribute) do
+    case AshPhoenix.Form.value(form, attribute) do
+      %Ash.Union{value: nil} ->
+        true
+
       nil ->
         true
 
@@ -1190,6 +1381,29 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
+  def handle_event("union-type-changed", %{"_target" => path} = params, socket) do
+    new_type = get_in(params, path)
+    # The last part of the path in this case is the field name
+    path =
+      socket.assigns.form
+      |> AshPhoenix.Form.parse_path!(:lists.droplast(path))
+
+    new_union_types = (socket.assigns[:union_types] || %{}) |> Map.put(path, new_type)
+
+    if AshPhoenix.Form.has_form?(socket.assigns.form, path) do
+      form =
+        socket.assigns.form
+        |> AshPhoenix.Form.remove_form(path)
+        |> AshPhoenix.Form.add_form(path,
+          params: %{"_new_union_type" => new_type, "_union_type" => new_type}
+        )
+
+      {:noreply, assign(socket, form: form, union_types: new_union_types)}
+    else
+      {:noreply, assign(socket, union_types: new_union_types)}
+    end
+  end
+
   def handle_event("change_table", %{"table" => %{"table" => table}}, socket) do
     case socket.assigns.action.type do
       :create ->
@@ -1243,7 +1457,15 @@ defmodule AshAdmin.Components.Resource.Form do
         _ -> :create
       end
 
-    form = AshPhoenix.Form.add_form(socket.assigns.form, path, type: type)
+    params =
+      if params["union-type"] && params["union-type"] != "" do
+        path = AshPhoenix.Form.parse_path!(socket.assigns.form, path)
+        %{"_union_type" => socket.assigns[:union_types][path] || params["union-type"]}
+      else
+        %{}
+      end
+
+    form = AshPhoenix.Form.add_form(socket.assigns.form, path, type: type, params: params)
 
     {:noreply,
      socket
@@ -1331,11 +1553,7 @@ defmodule AshAdmin.Components.Resource.Form do
       |> Map.put(:actor, socket.assigns[:actor])
     end
 
-    case AshPhoenix.Form.submit(form,
-           params: form.source.params,
-           before_submit: before_submit,
-           force?: true
-         ) do
+    case AshPhoenix.Form.submit(form, before_submit: before_submit, force?: true) do
       {:ok, result} ->
         redirect_to(socket, result)
 

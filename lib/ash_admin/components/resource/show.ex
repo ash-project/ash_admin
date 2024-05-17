@@ -458,78 +458,112 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   end
 
+  defp render_attribute(
+         assigns,
+         resource,
+         record,
+         %{type: Ash.Type.Union} = attribute,
+         relationship_name,
+         nested?
+       ) do
+    case Map.get(record, attribute.name) do
+      nil ->
+        ""
+
+      %Ash.Union{type: type, value: value} ->
+        config = attribute.constraints[:types][type]
+        new_attr = %{attribute | type: config[:type], constraints: config[:constraints]}
+
+        render_attribute(
+          assigns,
+          resource,
+          Map.put(record, attribute.name, value),
+          new_attr,
+          relationship_name,
+          nested?
+        )
+    end
+  end
+
   defp render_attribute(assigns, resource, record, attribute, relationship_name, nested?) do
-    if Ash.Type.embedded_type?(attribute.type) do
-      if Map.get(record, attribute.name) in [nil, []] do
-        "None"
+    if Ash.Type.NewType.new_type?(attribute.type) do
+      constraints = Ash.Type.NewType.constraints(attribute.type, attribute.constraints)
+      type = Ash.Type.NewType.subtype_of(attribute.type)
+      attribute = %{attribute | type: type, constraints: constraints}
+      render_attribute(assigns, resource, record, attribute, relationship_name, nested?)
+    else
+      if Ash.Type.embedded_type?(attribute.type) do
+        if Map.get(record, attribute.name) in [nil, []] do
+          "None"
+        else
+          assigns =
+            assign(assigns,
+              resource: resource,
+              record: record,
+              attribute: attribute,
+              nested: nested?,
+              relationship_name: relationship_name
+            )
+
+          ~H"""
+          <%= if @nested do %>
+            <div class="ml-1 pl-2 pr-2">
+              <%= render_attributes(
+                assigns,
+                Map.get(@record, @attribute.name),
+                @attribute.type,
+                @relationship_name
+              ) %>
+            </div>
+          <% else %>
+            <div class="shadow-md border mt-4 mb-4 rounded py-2 px-2 ml-1 pl-2 pr-2">
+              <%= render_attributes(
+                assigns,
+                Map.get(@record, @attribute.name),
+                @attribute.type,
+                @relationship_name
+              ) %>
+            </div>
+          <% end %>
+          """
+        end
       else
         assigns =
           assign(assigns,
             resource: resource,
             record: record,
             attribute: attribute,
-            nested: nested?,
-            relationship_name: relationship_name
+            nested: nested?
           )
 
-        ~H"""
-        <%= if @nested do %>
-          <div class="ml-1 pl-2 pr-2">
-            <%= render_attributes(
-              assigns,
-              Map.get(@record, @attribute.name),
-              @attribute.type,
-              @relationship_name
-            ) %>
-          </div>
-        <% else %>
-          <div class="shadow-md border mt-4 mb-4 rounded py-2 px-2 ml-1 pl-2 pr-2">
-            <%= render_attributes(
-              assigns,
-              Map.get(@record, @attribute.name),
-              @attribute.type,
-              @relationship_name
-            ) %>
-          </div>
-        <% end %>
-        """
-      end
-    else
-      assigns =
-        assign(assigns,
-          resource: resource,
-          record: record,
-          attribute: attribute,
-          nested: nested?
-        )
+        if attribute.type == Ash.Type.String do
+          cond do
+            short_text?(resource, attribute) ->
+              value!(Map.get(record, attribute.name))
 
-      if attribute.type == Ash.Type.String do
-        cond do
-          short_text?(resource, attribute) ->
-            value!(Map.get(record, attribute.name))
+            long_text?(resource, attribute) ->
+              ~H"""
+              <textarea
+                rows="3"
+                cols="40"
+                disabled
+                class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+              ><%= value!(Map.get(@record, @attribute.name)) %></textarea>
+              """
 
-          long_text?(resource, attribute) ->
-            ~H"""
-            <textarea
-              rows="3"
-              cols="40"
-              disabled
-              class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-            ><%= value!(Map.get(@record, @attribute.name)) %></textarea>
-            """
-
-          true ->
-            ~H"""
-            <textarea
-              rows="1"
-              cols="20"
-              disabled
-              class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-            ><%= value!(Map.get(@record, @attribute.name)) %></textarea>
-            """
+            true ->
+              ~H"""
+              <textarea
+                rows="1"
+                cols="20"
+                disabled
+                class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+              ><%= value!(Map.get(@record, @attribute.name)) %></textarea>
+              """
+          end
+        else
+          value!(Map.get(record, attribute.name))
         end
-      else
-        value!(Map.get(record, attribute.name))
       end
     end
   end

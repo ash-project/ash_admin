@@ -1,5 +1,8 @@
 defmodule AshAdmin.ShowResourcesTransformer do
+  @moduledoc false
   use Spark.Dsl.Transformer
+
+  @dialyzer {:nowarn_function, {:transform, 1}}
 
   def transform(dsl) do
     module = Spark.Dsl.Transformer.get_persisted(dsl, :module)
