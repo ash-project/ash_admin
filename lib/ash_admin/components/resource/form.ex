@@ -971,12 +971,11 @@ defmodule AshAdmin.Components.Resource.Form do
       <label class="block text-sm font-medium text-gray-700" for={@union_type_name}>
         Type
       </label>
-      <div class="w-8">
+      <div class="w-full">
         <.input
           phx-change="union-type-changed"
           name={@union_type_name}
           type="select"
-          class="w-8"
           value={@actual_union_type_name}
           options={@possible_types}
           field={@form[:_union_type]}
@@ -1015,7 +1014,7 @@ defmodule AshAdmin.Components.Resource.Form do
       ~H"""
       <%= cond do %>
         <% match?({:array, {:array, _}}, @attribute.type) -> %>
-          <%= render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id) %>
+          <%= render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id, @union_type) %>
         <% match?({:array, _}, @attribute.type) && Ash.Type.embedded_type?(@attribute.type) -> %>
           <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
             <.input
@@ -1108,7 +1107,7 @@ defmodule AshAdmin.Components.Resource.Form do
             name={@name || @form.name <> "[#{@attribute.name}]"}
           />
         <% true -> %>
-          <%= render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id) %>
+          <%= render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id, @union_type) %>
       <% end %>
       """
     end
@@ -1136,7 +1135,8 @@ defmodule AshAdmin.Components.Resource.Form do
          %{type: {:array, type}} = attribute,
          value,
          name,
-         id
+         id,
+         union_type
        ) do
     name = name || form.name <> "[#{attribute.name}]"
     id = id || form.id <> "_#{attribute.name}"
@@ -1148,7 +1148,8 @@ defmodule AshAdmin.Components.Resource.Form do
         type: type,
         value: value,
         name: name,
-        id: id
+        id: id,
+        union_type: union_type || default_union_type(type, attribute.constraints[:items] || [])
       )
 
     ~H"""
@@ -1163,7 +1164,8 @@ defmodule AshAdmin.Components.Resource.Form do
           @form,
           {:list_value, this_value},
           @name <> "[#{index}]",
-          @id <> "_#{index}"
+          @id <> "_#{index}",
+          @union_type
         ) %>
         <button
           type="button"
@@ -1183,6 +1185,7 @@ defmodule AshAdmin.Components.Resource.Form do
         phx-target={@myself}
         phx-value-path={@form.name}
         phx-value-field={@attribute.name}
+        phx-value-union-type={@union_type}
         class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
       >
         <.icon name="hero-plus" class="h-4 w-4 text-gray-500" />
@@ -1191,7 +1194,7 @@ defmodule AshAdmin.Components.Resource.Form do
     """
   end
 
-  defp render_fallback_attribute(assigns, form, attribute, value, name, id) do
+  defp render_fallback_attribute(assigns, form, attribute, value, name, id, _union_type) do
     casted_value =
       case value(value, form, attribute) do
         %AshPhoenix.Form{resource: AshPhoenix.Form.WrappedValue} = form ->
@@ -1253,6 +1256,16 @@ defmodule AshAdmin.Components.Resource.Form do
           """
       end
   end
+
+  defp default_union_type(Ash.Type.Union, constraints) do
+    constraints[:types]
+    |> List.wrap()
+    |> Enum.at(0)
+    |> elem(0)
+    |> to_string()
+  end
+
+  defp default_union_type(_, _), do: nil
 
   defp non_nil_form_field(_form, []), do: nil
 
@@ -1480,13 +1493,20 @@ defmodule AshAdmin.Components.Resource.Form do
      |> assign(:form, form)}
   end
 
-  def handle_event("append_value", %{"path" => path, "field" => field}, socket) do
+  def handle_event("append_value", %{"path" => path, "field" => field} = params, socket) do
+    to_append =
+      case params["union-type"] do
+        nil -> nil
+        value when value != "" -> %{"_union_type" => value}
+        _ -> nil
+      end
+
     list =
       AshPhoenix.Form.get_form(socket.assigns.form, path)
       |> AshPhoenix.Form.value(String.to_existing_atom(field))
       |> Kernel.||([])
       |> indexed_list()
-      |> append_to_and_map(nil)
+      |> append_to_and_map(to_append)
 
     params =
       put_in_creating(
