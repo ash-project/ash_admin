@@ -11,10 +11,10 @@ defmodule Demo.Accounts.NewUser do
   attributes do
     uuid_primary_key :id
 
-    attribute :email, :string, allow_nil?: false
-    attribute :first_name, :string, allow_nil?: false
-    attribute :last_name, :string, allow_nil?: false
-    attribute :mobile, :string, allow_nil?: false
-    attribute :address, :string, allow_nil?: false
+    attribute :email, :string, allow_nil?: false, public?: true
+    attribute :first_name, :string, allow_nil?: false, public?: true
+    attribute :last_name, :string, allow_nil?: false, public?: true
+    attribute :mobile, :string, allow_nil?: false, public?: true
+    attribute :address, :string, allow_nil?: false, public?: true
   end
 end
