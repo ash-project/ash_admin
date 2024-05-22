@@ -5,7 +5,7 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
-## [v0.10.10](https://github.com/ash-project/ash_admin/compare/v0.10.10-rc.1...v0.10.10) (2024-05-10)
+## [v0.11.0](https://github.com/ash-project/ash_admin/compare/v0.10.10-rc.1...v0.11.0) (2024-05-10)
 
 
 
