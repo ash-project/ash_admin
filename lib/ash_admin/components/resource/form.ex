@@ -1718,6 +1718,13 @@ defmodule AshAdmin.Components.Resource.Form do
         list ->
           list
           |> List.wrap()
+          |> Enum.map(fn
+            %AshPhoenix.Form{} = form ->
+              AshPhoenix.Form.params(form)
+
+            other ->
+              other
+          end)
           |> Enum.with_index()
           |> Map.new(fn {value, index} ->
             {to_string(index), value}
