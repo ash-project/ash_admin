@@ -116,7 +116,8 @@ defmodule AshAdmin.MixProject do
   defp deps do
     [
       {:ash, "~> 3.0"},
-      {:ash_phoenix, "~> 2.0 and >= 2.0.2"},
+      # {:ash_phoenix, "~> 2.0 and >= 2.0.2"},
+      {:ash_phoenix, path: "../ash_phoenix"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix, "~> 1.7"},
       {:phoenix_live_view, "~> 0.19"},
