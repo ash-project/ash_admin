@@ -5,6 +5,25 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.11.1](https://github.com/ash-project/ash_admin/compare/v0.11.0...v0.11.1) (2024-06-13)
+
+
+
+
+### Bug Fixes:
+
+* properly support lists of embeds
+
+* render relationship inputs even when type is not a map
+
+* properly render tenant form on mobile sidebar
+
+### Improvements:
+
+* various fixes around unions
+
+* support for unions
+
 ## [v0.11.0](https://github.com/ash-project/ash_admin/compare/v0.10.10-rc.1...v0.11.0) (2024-05-10)
 
 
