@@ -92,7 +92,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
               <div :if={@thousand_records_warning && !@action.get?}>
                 Only showing up to 1000 rows. To show more, enable
-                <a href="http://ash-hq.org/docs/guides/ash/2.5.9/topics/pagination">pagination</a>
+                <a href="https://hexdocs.pm/ash/pagination.html">pagination</a>
                 for the action in question.
               </div>
               <Table.table
