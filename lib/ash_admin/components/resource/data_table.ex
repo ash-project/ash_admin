@@ -278,7 +278,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
   def handle_event("save", %{"query" => query_params}, socket) do
     {:noreply,
-     push_redirect(
+    push_navigate(
        socket,
        to: self_path(socket.assigns.url_path, socket.assigns.params, %{"args" => query_params})
      )}
@@ -286,7 +286,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
   def handle_event("change_table", %{"table" => %{"table" => table}}, socket) do
     {:noreply,
-     push_redirect(socket,
+     push_navigate(socket,
        to: self_path(socket.assigns.url_path, socket.assigns.params, %{"table" => table})
      )}
   end
