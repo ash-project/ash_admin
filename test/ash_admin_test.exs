@@ -72,7 +72,7 @@ defmodule AshAdmin.Test.AshAdminTest do
   test "if shown resrouces option not eixsting resource providede error", _ do
     assert_raise(
       Spark.Error.DslError,
-      "[AshAdmin.Test.AshAdminTest.Domain]\n admin -> show_resources:\n  SomeRandom is not a valid resource in AshAdmin.Test.AshAdminTest.Domain",
+      "[AshAdmin.Test.AshAdminTest.Domain]\nadmin -> show_resources:\n  SomeRandom is not a valid resource in AshAdmin.Test.AshAdminTest.Domain",
       fn ->
         defmodule Domain do
           @moduledoc false
