@@ -5,6 +5,27 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.10.12](https://github.com/ash-project/ash_admin/compare/v0.10.11...v0.10.12) (2024-06-25)
+
+
+
+
+### Bug Fixes:
+
+* don't go to potentially non-existant create actions
+
+* ensure we show all errors on submit
+
+* properly add indexes to embedded list attribtues
+
+* ensure action selection is accurate/consistent
+
+* only consider top-level targets for input pruning
+
+### Improvements:
+
+* track actor tenant, use it for fetching actor
+
 ## [v0.10.11](https://github.com/ash-project/ash_admin/compare/v0.10.9...v0.10.11) (2024-06-25)
 
 
