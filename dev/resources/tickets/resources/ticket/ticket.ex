@@ -49,6 +49,12 @@ defmodule Demo.Tickets.Ticket do
       pagination offset?: true, countable: true, required?: false, default_limit: 25
     end
 
+    read :by_id do
+      argument :id, :uuid, allow_nil?: false
+      get? true
+      filter expr(id == ^arg(:id))
+    end
+
     read :read do
       primary? true
       pagination [
