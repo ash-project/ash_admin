@@ -1084,36 +1084,37 @@ defmodule AshAdmin.Components.Resource.Form do
                   name: @name || @form.name <> "[#{@attribute.name}]"
               }
             ) %>
-        <% end %>
-        <button
-          :if={can_append_embed?(@form.source, @attribute.name, @attribute.type)}
-          type="button"
-          phx-click="add_form"
-          phx-target={@myself}
-          phx-value-union-type={@union_type}
-          phx-value-pkey={embedded_type_pkey(@attribute.type)}
-          phx-value-path={@form.name <> "[#{@attribute.name}]"}
-          class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
-        >
-          <.icon name="hero-plus" class="h-4 w-4 text-gray-500" />
-        </button>
+          <% end %>
+          <button
+            :if={can_append_embed?(@form.source, @attribute.name, @attribute.type)}
+            type="button"
+            phx-click="add_form"
+            phx-target={@myself}
+            phx-value-union-type={@union_type}
+            phx-value-pkey={embedded_type_pkey(@attribute.type)}
+            phx-value-path={@form.name <> "[#{@attribute.name}]"}
+            class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+          >
+            <.icon name="hero-plus" class="h-4 w-4 text-gray-500" />
+          </button>
         <% Ash.Type.embedded_type?(@attribute.type) && match?(%AshPhoenix.Form{}, @value) -> %>
           <% inner_form = to_form(@value) %>
-            <.input
-              :for={kv <- inner_form.hidden}
-              name={inner_form.name <> "[#{elem(kv, 0)}]"}
-              value={elem(kv, 1)}
-              type="hidden"
-            />
-            <%= render_attributes(
-              assigns,
-              inner_form.source.resource,
-              inner_form.source.source.action,
-              %{ inner_form |
-                id: @id || @form.id <> "_#{@attribute.name}",
-                                  name: @name || @form.name <> "[#{@attribute.name}]"
-              }
-            ) %>
+          <.input
+            :for={kv <- inner_form.hidden}
+            name={inner_form.name <> "[#{elem(kv, 0)}]"}
+            value={elem(kv, 1)}
+            type="hidden"
+          />
+          <%= render_attributes(
+            assigns,
+            inner_form.source.resource,
+            inner_form.source.source.action,
+            %{
+              inner_form
+              | id: @id || @form.id <> "_#{@attribute.name}",
+                name: @name || @form.name <> "[#{@attribute.name}]"
+            }
+          ) %>
         <% Ash.Type.embedded_type?(@attribute.type) -> %>
           <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
             <.input
@@ -1196,7 +1197,6 @@ defmodule AshAdmin.Components.Resource.Form do
          id,
          union_type
        ) do
-
     name = name || form.name <> "[#{attribute.name}]"
     id = id || form.id <> "_#{attribute.name}"
 
@@ -1573,7 +1573,6 @@ defmodule AshAdmin.Components.Resource.Form do
         other ->
           other
       end)
-      |> indexed_list()
       |> append_to_and_map(to_append)
 
     params =
@@ -1582,8 +1581,6 @@ defmodule AshAdmin.Components.Resource.Form do
         Enum.map(AshPhoenix.Form.parse_path!(socket.assigns.form, path) ++ [field], &to_string/1),
         list
       )
-
-    IO.inspect(params)
 
     form = AshPhoenix.Form.validate(socket.assigns.form, params)
 
@@ -1693,19 +1690,6 @@ defmodule AshAdmin.Components.Resource.Form do
     |> Map.put_new(key, %{})
     |> Map.update!(key, &put_in_creating(&1, rest, value))
   end
-
-  defp indexed_list(map) when is_map(map) do
-    map
-    |> Map.keys()
-    |> Enum.map(&String.to_integer/1)
-    |> Enum.sort()
-    |> Enum.map(&map[to_string(&1)])
-  rescue
-    _ ->
-      List.wrap(map)
-  end
-
-  defp indexed_list(other), do: List.wrap(other)
 
   defp remove_value(form, field, index) do
     current_value =
