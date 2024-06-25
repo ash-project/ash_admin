@@ -40,6 +40,18 @@ defmodule AshAdmin.Components.Resource.DataTable do
                   phx-submit="save"
                   phx-target={@myself}
                 >
+                  <div :if={form.source.submitted_once?} class="ml-4 mt-4 text-red-500">
+                    <ul>
+                      <li :for={{field, message} <- all_errors(form)}>
+                        <span :if={field}>
+                          <%= field %>:
+                        </span>
+                        <span>
+                          <%= message %>
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
                   <%= AshAdmin.Components.Resource.Form.render_attributes(
                     assigns,
                     @resource,
@@ -78,7 +90,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
         <div :if={@action.arguments == [] || @params["args"]} class="h-full overflow-auto md:mx-4">
           <div class="shadow-lg overflow-auto sm:rounded-md bg-white">
-            <div :if={match?({:error, _}, @data)}>
+            <div :if={match?({:error, _}, @data) && @action.arguments == []}>
               <ul>
                 <%= for {path, error} <- AshPhoenix.Form.errors(@query, for_path: :all) do %>
                   <%= for {field, message} <- error do %>
@@ -90,7 +102,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
             <div class="px-2">
               <%= render_pagination_links(assigns, :top) %>
 
-              <div :if={@thousand_records_warning && !@action.get?}>
+              <div :if={@thousand_records_warning && !@action.get? && match?({:ok, _}, @data)}>
                 Only showing up to 1000 rows. To show more, enable
                 <a href="https://hexdocs.pm/ash/pagination.html">pagination</a>
                 for the action in question.
@@ -138,33 +150,32 @@ defmodule AshAdmin.Components.Resource.DataTable do
         socket.assigns[:resource]
         |> AshPhoenix.Form.for_read(socket.assigns.action.name,
           as: "query",
+          domain: socket.assigns[:domain],
           actor: socket.assigns[:actor],
           tenant: socket.assigns[:tenant],
-          authorize?: socket.assigns[:authorizing]
+          authorize?: socket.assigns[:authorizing],
+          prepare_source: &load_fields/1
         )
 
-      query =
+      {query, run_now?} =
         if arguments do
-          AshPhoenix.Form.validate(query, arguments)
+          {Map.put(AshPhoenix.Form.validate(query, arguments), :submitted_once?, true), true}
         else
-          query
+          {query, socket.assigns.action.arguments == []}
         end
 
       socket = assign(socket, :query, query)
 
       socket =
-        if params["page"] do
+        if params["page"] && socket.assigns.action.pagination do
           default_limit =
-            (socket.assigns[:action] && socket.assigns.action.pagination &&
-               socket.assigns.action.pagination.default_limit) ||
+            socket.assigns.action.pagination.default_limit ||
               socket.assigns.action.pagination.max_page_size || 25
 
-          count? =
-            socket.assigns[:action] && socket.assigns.action.pagination &&
-              socket.assigns.action.pagination.countable
+          count? = !!socket.assigns.action.pagination.countable
 
           page_params =
-            AshPhoenix.LiveView.page_from_params(params["page"], default_limit, !!count?)
+            AshPhoenix.LiveView.page_from_params(params["page"], default_limit, count?)
 
           socket
           |> assign(
@@ -182,59 +193,24 @@ defmodule AshAdmin.Components.Resource.DataTable do
         end
 
       socket =
-        if assigns[:action].pagination do
-          socket
-          |> assign(:thousand_records_warning, false)
-          |> keep_live(
-            :data,
-            fn socket ->
-              default_limit =
-                socket.assigns.action.pagination.default_limit ||
-                  socket.assigns.action.pagination.max_page_size || 50
-
-              count? = socket.assigns.action.pagination.countable
-
-              page_params =
-                if socket.assigns[:params]["page"] do
-                  page_from_params(socket.assigns[:params]["page"], default_limit, !!count?)
-                else
-                  if socket.assigns.action.pagination.countable do
-                    [limit: 50, count: true]
-                  else
-                    [limit: 50]
-                  end
-                end
-
-              if socket.assigns[:tables] != [] &&
-                   !socket.assigns[:table] do
-                {:ok, []}
+        if run_now? do
+          if socket.assigns[:tables] not in [[], nil] && !socket.assigns[:table] do
+            assign(socket, :data, {:ok, []})
+          else
+            action_opts =
+              if page_params = socket.assigns[:page_params] do
+                [page: page_params]
               else
-                socket.assigns.query.source
-                |> set_table(socket.assigns[:table])
-                |> load_fields()
-                |> Ash.read(page: page_params, domain: assigns[:domain])
+                []
               end
-            end,
-            load_until_connected?: true
-          )
+
+            case AshPhoenix.Form.submit(socket.assigns.query, action_opts: action_opts) do
+              {:ok, data} -> assign(socket, :data, {:ok, data})
+              {:error, query} -> assign(socket, data: {:error, all_errors(query)}, query: query)
+            end
+          end
         else
-          socket
-          |> assign(:thousand_records_warning, true)
-          |> keep_live(
-            :data,
-            fn socket ->
-              if socket.assigns[:tables] != [] && !socket.assigns[:table] do
-                {:ok, []}
-              else
-                socket.assigns.query.source
-                |> set_table(socket.assigns[:table])
-                |> Ash.Query.limit(1000)
-                |> load_fields()
-                |> Ash.read(domain: assigns[:domain])
-              end
-            end,
-            load_until_connected?: true
-          )
+          assign(socket, :data, :loading)
         end
 
       {:ok,
@@ -247,6 +223,24 @@ defmodule AshAdmin.Components.Resource.DataTable do
     query
     |> Ash.Query.select([])
     |> Ash.Query.load(AshAdmin.Resource.table_columns(query.resource))
+  end
+
+  defp all_errors(form) do
+    form
+    |> AshPhoenix.Form.errors(for_path: :all)
+    |> Enum.flat_map(fn {path, errors} ->
+      Enum.map(errors, fn {field, message} ->
+        path = List.wrap(path)
+
+        case Enum.reject(path ++ List.wrap(field), &is_nil/1) do
+          [] ->
+            {nil, message}
+
+          items ->
+            {Enum.join(items, "."), message}
+        end
+      end)
+    end)
   end
 
   def handle_event("next_page", _, socket) do
@@ -278,7 +272,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
   def handle_event("save", %{"query" => query_params}, socket) do
     {:noreply,
-    push_navigate(
+     push_navigate(
        socket,
        to: self_path(socket.assigns.url_path, socket.assigns.params, %{"args" => query_params})
      )}
