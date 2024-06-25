@@ -5,6 +5,17 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.11.2](https://github.com/ash-project/ash_admin/compare/v0.11.1...v0.11.2) (2024-06-25)
+
+
+
+
+### Bug Fixes:
+
+* properly render errors data table forms
+
+* update to support 0.20 (#179)
+
 ## [v0.11.1](https://github.com/ash-project/ash_admin/compare/v0.11.0...v0.11.1) (2024-06-13)
 
 
