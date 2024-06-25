@@ -51,8 +51,27 @@ defmodule AshAdmin.Components.Resource.Nav do
   end
 
   defp create_action(resource) do
-    AshAdmin.Helpers.primary_action(resource, :create) ||
-      Enum.find(Ash.Resource.Info.actions(resource), &(&1.type == :create))
+    case AshAdmin.Helpers.primary_action(resource, :create) ||
+           Enum.find(Ash.Resource.Info.actions(resource), &(&1.type == :create)) do
+      nil ->
+        nil
+
+      primary_action ->
+        case AshAdmin.Resource.create_actions(resource) do
+          nil ->
+            primary_action
+
+          list ->
+            if primary_action.name in list do
+              primary_action
+            else
+              case Enum.at(list, 0) do
+                nil -> nil
+                action -> Ash.Resource.Info.action(resource, action)
+              end
+            end
+        end
+    end
   end
 
   defp data_groups(prefix, domain, resource, current_action, table) do
