@@ -153,7 +153,8 @@ defmodule AshAdmin.Components.Resource.DataTable do
           domain: socket.assigns[:domain],
           actor: socket.assigns[:actor],
           tenant: socket.assigns[:tenant],
-          authorize?: socket.assigns[:authorizing]
+          authorize?: socket.assigns[:authorizing],
+          prepare_source: &load_fields/1
         )
 
       {query, run_now?} =
@@ -204,14 +205,8 @@ defmodule AshAdmin.Components.Resource.DataTable do
               end
 
             case AshPhoenix.Form.submit(socket.assigns.query, action_opts: action_opts) do
-              {:ok, data} ->
-                data =
-                  Ash.load!(data, AshAdmin.Resource.table_columns(query.resource))
-
-                assign(socket, :data, {:ok, data})
-
-              {:error, query} ->
-                assign(socket, data: {:error, all_errors(query)}, query: query)
+              {:ok, data} -> assign(socket, :data, {:ok, data})
+              {:error, query} -> assign(socket, data: {:error, all_errors(query)}, query: query)
             end
           end
         else
@@ -227,7 +222,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   defp load_fields(query) do
     query
     |> Ash.Query.select([])
-    |> Ash.Query.load()
+    |> Ash.Query.load(AshAdmin.Resource.table_columns(query.resource))
   end
 
   defp all_errors(form) do
