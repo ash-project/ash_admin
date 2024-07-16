@@ -23,7 +23,9 @@ Hooks.JsonEditor = {
           try {
             JSON.parse(json);
             target.value = json;
-            target.dispatchEvent(new Event("change", { bubbles: true }));
+            target.dispatchEvent(
+              new Event("change", { bubbles: true, target: this.el.name }),
+            );
           } catch (_e) {}
         },
         onChange: () => {
@@ -32,7 +34,9 @@ Hooks.JsonEditor = {
             json = hook.editor.get();
 
             target.value = JSON.stringify(json);
-            target.dispatchEvent(new Event("change", { bubbles: true }));
+            target.dispatchEvent(
+              new Event("change", { bubbles: true, target: this.el.name }),
+            );
           } catch (_e) {}
         },
         onModeChange: (newMode) => {
