@@ -56,6 +56,7 @@ defmodule AshAdmin.PageLive do
      |> assign_new(:actor_resources, fn -> [] end)
      |> assign_new(:authorizing, fn -> true end)
      |> assign_new(:actor_paused, fn -> false end)}
+     |> assign_new(:actor_tenant, fn -> nil end)}
   end
 
   @impl true
