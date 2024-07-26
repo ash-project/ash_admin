@@ -1391,7 +1391,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp allow_nil_option(_, _), do: "Select an option"
 
-  defp can_append_embed?(form, attribute, {:array, _}) do
+  defp can_append_embed?(form, attribute, _) do
     case AshPhoenix.Form.value(form, attribute) do
       %Ash.Union{value: nil} ->
         true
@@ -1406,8 +1406,6 @@ defmodule AshAdmin.Components.Resource.Form do
         false
     end
   end
-
-  defp can_append_embed?(_, _, _), do: false
 
   defp placeholder(value) when is_function(value) do
     "DEFAULT"

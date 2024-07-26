@@ -89,13 +89,7 @@ defmodule AshAdmin.Components.Resource.Table do
   defp attributes(resource, attributes, skip) do
     attributes
     |> Enum.map(fn x ->
-      value = Ash.Resource.Info.field(resource, x)
-
-      if is_nil(value) do
-        Ash.Resource.Info.relationship(resource, x)
-      else
-        value
-      end
+      Ash.Resource.Info.field(resource, x)
     end)
     |> Enum.filter(& &1)
     |> Enum.reject(&(&1.name in skip))
