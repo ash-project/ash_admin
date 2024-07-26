@@ -288,12 +288,15 @@ defmodule AshAdmin.PageLive do
                     {:ok, record} ->
                       {:ok, record}
 
+                    {:error, %Ash.Error.Forbidden{}} ->
+                      {:ok, record}
+
                     {:error, error} ->
                       Logger.warning(
                         "Error while loading relationship #{inspect(rel)} on admin dashboard\n: #{Exception.format(:error, error)}"
                       )
 
-                      record
+                      {:ok, record}
                   end
 
                 _rel, other ->
