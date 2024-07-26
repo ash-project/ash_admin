@@ -325,7 +325,7 @@ defmodule AshAdmin.PageLive do
     resource
     |> Ash.Resource.Info.relationships()
     |> Enum.filter(fn relationship ->
-      domain = relationship.domain || domain || Ash.Resource.Info.domain(relationship.destination)
+      domain = Ash.Resource.Info.domain(relationship.destination) || relationship.domain || domain
       AshAdmin.Domain.show?(domain) && relationship.cardinality == :one
     end)
     |> Enum.map(& &1.name)
