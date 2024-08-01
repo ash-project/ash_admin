@@ -5,6 +5,27 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.11.4](https://github.com/ash-project/ash_admin/compare/v0.11.3...v0.11.4) (2024-08-01)
+
+
+
+
+### Bug Fixes:
+
+* properly support adding embeds for nil values
+
+* upgrade `ash_phoenix` for fix on calculating values
+
+* use resource's configured domain before default domain
+
+* ensure `actor_tenant` is always set
+
+* ensure table columsn are loaded, bypassing (as yet) unknown bug
+
+### Improvements:
+
+* don't log forbidden errors
+
 ## [v0.11.3](https://github.com/ash-project/ash_admin/compare/v0.11.2...v0.11.3) (2024-06-25)
 
 
