@@ -9,7 +9,7 @@ https://www.youtube.com/watch?v=aFMLz3cpQ8c
 Add the `ash_admin` dependency to your `mix.exs` file:
 
 ```elixir
-{:ash_admin, "~> 0.10.10-rc.1"}
+{:ash_admin, "~> 0.11.4"}
 ```
 
 ## Setup
