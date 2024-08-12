@@ -4,7 +4,6 @@ defmodule AshAdmin.Components.Resource.Show do
 
   alias AshAdmin.Components.Resource.{SensitiveAttribute, Table}
   import AshAdmin.Helpers
-  import Tails
   import AshAdmin.CoreComponents
 
   attr :resource, :any

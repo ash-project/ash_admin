@@ -1,7 +1,7 @@
 defmodule AshAdmin.Components.Resource.MetadataTable do
   @moduledoc false
   use Phoenix.Component
-  import Tails
+  import AshAdmin.Helpers
 
   alias AshAdmin.CoreComponents
 

@@ -1,7 +1,7 @@
 defmodule AshAdmin.Components.TopNav.TenantForm do
   @moduledoc false
   use Phoenix.Component
-  import Tails
+  import AshAdmin.Helpers
 
   attr :tenant, :string, required: true
   attr :clear_tenant, :string, required: true

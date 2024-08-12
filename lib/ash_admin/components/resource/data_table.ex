@@ -4,7 +4,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
   import AshAdmin.Helpers
   import AshPhoenix.LiveView
-  import Tails
   alias AshAdmin.Components.Resource.Table
 
   attr :resource, :atom

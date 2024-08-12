@@ -1,7 +1,7 @@
 defmodule AshAdmin.Components.TopNav.Dropdown do
   @moduledoc false
   use Phoenix.LiveComponent
-  import Tails
+  import AshAdmin.Helpers
 
   attr :name, :string, required: true
   attr :groups, :list, required: true

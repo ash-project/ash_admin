@@ -1,7 +1,7 @@
 defmodule AshAdmin.Components.TopNav do
   @moduledoc false
   use Phoenix.LiveComponent
-  import Tails
+  import AshAdmin.Helpers
   alias AshAdmin.Components.TopNav.{ActorSelect, DrawerDropdown, Dropdown, TenantForm}
 
   attr :domain, :any, required: true

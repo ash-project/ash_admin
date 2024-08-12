@@ -1,6 +1,20 @@
 defmodule AshAdmin.Helpers do
   @moduledoc false
 
+  def classes(list) when is_list(list) do
+    Enum.flat_map(list, &classes/1)
+  end
+
+  def classes(string) when is_binary(string) do
+    [string]
+  end
+
+  def classes({classes, true}) do
+    classes(classes)
+  end
+
+  def classes({_, _}), do: []
+
   def set_table(changeset_or_query, nil), do: changeset_or_query
 
   def set_table(%Ash.Query{} = query, table) do

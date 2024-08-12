@@ -3,7 +3,6 @@ defmodule AshAdmin.Components.Resource.Form do
   use Phoenix.LiveComponent
 
   import AshAdmin.Helpers
-  import Tails
   import AshAdmin.CoreComponents
 
   require Logger
