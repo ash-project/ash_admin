@@ -9,6 +9,10 @@ defmodule AshAdmin.Helpers do
     [string]
   end
 
+  def classes(atom) when is_atom(atom) do
+    [to_string(atom)]
+  end
+
   def classes({classes, true}) do
     classes(classes)
   end
