@@ -99,4 +99,24 @@ This will allow AshAdmin-generated inline CSS and JS blocks to execute normally.
 
 ## Troubleshooting
 
+#### UI issues
 If your admin UI is not responding as expected, check your browser's developer console for content-security-policy violations (see above).
+
+#### Router issues
+If you are seeing the following error `(UndefinedFunctionError) function YourAppWeb.AshAdmin.PageLive.__live__/0 is undefined (module YourAppWeb.AshAdmin.PageLive is not available)` it likely means that you added the ash admin route macro under a scope with a prefix. Make sure that you add it under a scope without any prefixes.
+
+```elixir
+  # Incorrect (with YourAppWeb prefix)
+  scope "/", YourAppWeb do
+    pipe_through [:browser]
+
+    ash_admin "/admin"
+  end
+
+  # Correct (without prefix)
+  scope "/", YourAppWeb do
+    pipe_through [:browser]
+
+    ash_admin "/admin"
+  end
+```
