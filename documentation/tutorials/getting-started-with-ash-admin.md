@@ -114,7 +114,7 @@ If you are seeing the following error `(UndefinedFunctionError) function YourApp
   end
 
   # Correct (without prefix)
-  scope "/", YourAppWeb do
+  scope "/" do
     pipe_through [:browser]
 
     ash_admin "/admin"
