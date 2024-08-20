@@ -5,7 +5,7 @@ defmodule AshAdmin.Gettext do
   By using [Gettext](https://hexdocs.pm/gettext),
   your module gains a set of macros for translations, for example:
 
-      import AshAdmin.Gettext
+      use Gettext, backend: AshAdmin.Gettext
 
       # Simple translation
       gettext("Here is the string to translate")
@@ -20,5 +20,5 @@ defmodule AshAdmin.Gettext do
 
   See the [Gettext Docs](https://hexdocs.pm/gettext) for detailed usage.
   """
-  use Gettext, otp_app: :ash_admin
+  use Gettext.Backend, otp_app: :ash_admin
 end
