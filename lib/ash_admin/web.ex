@@ -51,11 +51,12 @@ defmodule AshAdmin.Web do
 
   defp html_helpers do
     quote do
+      use Gettext, backend: AshAdmin.Gettext
+
       # HTML escaping functionality
       import Phoenix.HTML
       # Core UI components and translation
       import AshAdmin.CoreComponents
-      import AshAdmin.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

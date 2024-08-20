@@ -122,7 +122,7 @@ defmodule AshAdmin.MixProject do
       {:phoenix_live_view, "~> 0.20"},
       {:phoenix_html, "~> 4.0"},
       {:jason, "~> 1.0"},
-      {:gettext, "~> 0.20"},
+      {:gettext, "~> 0.26"},
       # Dev dependencies
       {:simple_sat, "~> 0.1", only: [:dev, :test]},
       {:esbuild, "~> 0.7", only: [:dev, :test]},
