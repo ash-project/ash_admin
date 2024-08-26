@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.11.5](https://github.com/ash-project/ash_admin/compare/v0.11.4...v0.11.5) (2024-08-26)
+
+
+
+
+### Improvements:
+
+* remove tails
+
 ## [v0.11.4](https://github.com/ash-project/ash_admin/compare/v0.11.3...v0.11.4) (2024-08-01)
 
 
