@@ -8,7 +8,7 @@ defmodule AshAdmin.PageLive do
   use Phoenix.LiveView
   import AshAdmin.Helpers
   require Ash.Query
-  alias AshAdmin.Components.{Resource, TopNav}
+  alias AshAdmin.Components.{Resource, TopNav, SidebarNav}
 
   require Logger
 
@@ -62,49 +62,74 @@ defmodule AshAdmin.PageLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.live_component
-      module={TopNav}
-      id="top_nav"
-      domains={@domains}
-      domain={@domain}
-      editing_tenant={@editing_tenant}
-      actor_domain={@actor_domain}
-      actor_tenant={@actor_tenant}
-      resource={@resource}
-      tenant={@tenant}
-      actor_resources={@actor_resources}
-      authorizing={@authorizing}
-      actor_paused={@actor_paused}
-      actor={@actor}
-      set_tenant="set_tenant"
-      clear_tenant="clear_tenant"
-      toggle_authorizing="toggle_authorizing"
-      toggle_actor_paused="toggle_actor_paused"
-      clear_actor="clear_actor"
-      prefix={@prefix}
-    />
-    <.live_component
-      :if={@resource}
-      module={Resource}
-      id={@resource}
-      resource={@resource}
-      set_actor="set_actor"
-      primary_key={@primary_key}
-      record={@record}
-      domain={@domain}
-      tab={@tab}
-      action_type={@action_type}
-      url_path={@url_path}
-      params={@params}
-      action={@action}
-      tenant={@tenant}
-      actor={unless @actor_paused, do: @actor}
-      authorizing={@authorizing}
-      table={@table}
-      tables={@tables}
-      polymorphic_actions={@polymorphic_actions}
-      prefix={@prefix}
-    />
+    <div class="flex h-screen bg-gray-100 flex-col">
+      <.live_component
+        module={TopNav}
+        id="top_nav"
+        domains={@domains}
+        domain={@domain}
+        editing_tenant={@editing_tenant}
+        actor_domain={@actor_domain}
+        actor_tenant={@actor_tenant}
+        resource={@resource}
+        tenant={@tenant}
+        actor_resources={@actor_resources}
+        authorizing={@authorizing}
+        actor_paused={@actor_paused}
+        actor={@actor}
+        set_tenant="set_tenant"
+        clear_tenant="clear_tenant"
+        toggle_authorizing="toggle_authorizing"
+        toggle_actor_paused="toggle_actor_paused"
+        clear_actor="clear_actor"
+        prefix={@prefix}
+      />
+      <div class="flex flex-row">
+        <.live_component
+          module={SidebarNav}
+          id="sidebar_nav"
+          domains={@domains}
+          domain={@domain}
+          editing_tenant={@editing_tenant}
+          actor_domain={@actor_domain}
+          actor_tenant={@actor_tenant}
+          resource={@resource}
+          tenant={@tenant}
+          actor_resources={@actor_resources}
+          authorizing={@authorizing}
+          actor_paused={@actor_paused}
+          actor={@actor}
+          set_tenant="set_tenant"
+          clear_tenant="clear_tenant"
+          toggle_authorizing="toggle_authorizing"
+          toggle_actor_paused="toggle_actor_paused"
+          clear_actor="clear_actor"
+          prefix={@prefix}
+        />
+        <.live_component
+          :if={@resource}
+          module={Resource}
+          id={@resource}
+          resource={@resource}
+          set_actor="set_actor"
+          primary_key={@primary_key}
+          record={@record}
+          domain={@domain}
+          tab={@tab}
+          action_type={@action_type}
+          url_path={@url_path}
+          params={@params}
+          action={@action}
+          tenant={@tenant}
+          actor={unless @actor_paused, do: @actor}
+          authorizing={@authorizing}
+          table={@table}
+          tables={@tables}
+          polymorphic_actions={@polymorphic_actions}
+          prefix={@prefix}
+        />
+      </div>
+    </div>
     """
   end
 

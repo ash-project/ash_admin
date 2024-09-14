@@ -20,7 +20,7 @@ defmodule AshAdmin.Domain do
       ],
       default_resource_page: [
         type: {:in, [:schema, :primary_read]},
-        default: :schema,
+        default: :primary_read,
         doc:
           "Set the default page for the resource to be the primary read action or the resource schema. Schema is the default for backwards compatibility, if a resource doesn't have a primary read action it will fallback to the schema view."
       ],
@@ -54,7 +54,7 @@ defmodule AshAdmin.Domain do
   end
 
   def default_resource_page(domain) do
-    Spark.Dsl.Extension.get_opt(domain, [:admin], :default_resource_page, :schema, true)
+    Spark.Dsl.Extension.get_opt(domain, [:admin], :default_resource_page, :primary_read, true)
   end
 
   def resource_group_labels(domain) do

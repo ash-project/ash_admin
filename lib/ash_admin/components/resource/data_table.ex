@@ -22,7 +22,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   def render(assigns) do
     ~H"""
     <div>
-      <div class="sm:mt-0 bg-gray-300 min-h-screen">
+      <div class="sm:mt-0 bg-gray-300 min-h-screen pt-4">
         <div
           :if={@action.arguments != []}
           class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10"

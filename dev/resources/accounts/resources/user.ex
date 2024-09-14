@@ -17,7 +17,7 @@ defmodule Demo.Accounts.User do
       field :last_name, type: :short_text
     end
 
-    read_actions [:me, :read, :by_id, :by_name]
+    read_actions [:read, :me, :by_id, :by_name]
 
     table_columns [:id, :first_name, :last_name, :representative, :admin, :full_name, :api_key, :date_of_birth]
   end

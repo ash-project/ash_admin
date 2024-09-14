@@ -23,7 +23,7 @@ defmodule AshAdmin.Components.TopNav do
 
   def render(assigns) do
     ~H"""
-    <nav phx-keydown="close" phx-key="escape" class="bg-gray-800" phx-target={@myself}>
+    <div class="flex bg-gray-800">
       <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center w-full">
@@ -36,18 +36,7 @@ defmodule AshAdmin.Components.TopNav do
             </div>
             <div class="hidden md:block w-full">
               <div class="flex justify-between">
-                <div class="ml-10 flex items-center">
-                  <.live_component
-                    :for={domain <- @domains}
-                    module={Dropdown}
-                    active={domain == @domain}
-                    class="mr-1"
-                    id={AshAdmin.Domain.name(domain) <> "_domain_nav"}
-                    name={AshAdmin.Domain.name(domain)}
-                    groups={dropdown_groups(@prefix, @resource, domain)}
-                    group_labels={dropdown_group_labels(domain)}
-                  />
-                </div>
+                <div></div>
                 <div class="ml-10 flex items-center">
                   <ActorSelect.actor_select
                     :if={@actor_resources != []}
@@ -127,17 +116,9 @@ defmodule AshAdmin.Components.TopNav do
               clear_tenant={@clear_tenant}
             />
           </div>
-          <.live_component
-            :for={domain <- @domains}
-            module={DrawerDropdown}
-            id={AshAdmin.Domain.name(domain) <> "_domain_nav_drawer"}
-            name={AshAdmin.Domain.name(domain)}
-            groups={dropdown_groups(@prefix, @resource, domain)}
-            group_labels={dropdown_group_labels(domain)}
-          />
         </div>
       </div>
-    </nav>
+    </div>
     """
   end
 
