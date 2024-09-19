@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.11.6](https://github.com/ash-project/ash_admin/compare/v0.11.5...v0.11.6) (2024-09-19)
+
+
+
+
+### Bug Fixes:
+
+* properly handle nested union form types by cleaning/massaging them
+
 ## [v0.11.5](https://github.com/ash-project/ash_admin/compare/v0.11.4...v0.11.5) (2024-08-26)
 
 ### Improvements:
