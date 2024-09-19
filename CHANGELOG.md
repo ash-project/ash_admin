@@ -7,134 +7,107 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 ## [v0.11.5](https://github.com/ash-project/ash_admin/compare/v0.11.4...v0.11.5) (2024-08-26)
 
-
-
-
 ### Improvements:
 
-* remove tails
+- remove tails
 
 ## [v0.11.4](https://github.com/ash-project/ash_admin/compare/v0.11.3...v0.11.4) (2024-08-01)
 
-
-
-
 ### Bug Fixes:
 
-* properly support adding embeds for nil values
+- properly support adding embeds for nil values
 
-* upgrade `ash_phoenix` for fix on calculating values
+- upgrade `ash_phoenix` for fix on calculating values
 
-* use resource's configured domain before default domain
+- use resource's configured domain before default domain
 
-* ensure `actor_tenant` is always set
+- ensure `actor_tenant` is always set
 
-* ensure table columsn are loaded, bypassing (as yet) unknown bug
+- ensure table columsn are loaded, bypassing (as yet) unknown bug
 
 ### Improvements:
 
-* don't log forbidden errors
+- don't log forbidden errors
 
 ## [v0.11.3](https://github.com/ash-project/ash_admin/compare/v0.11.2...v0.11.3) (2024-06-25)
 
-
-
-
 ### Bug Fixes:
 
-* don't go to potentially non-existant create actions
+- don't go to potentially non-existant create actions
 
 ## [v0.11.2](https://github.com/ash-project/ash_admin/compare/v0.11.1...v0.11.2) (2024-06-25)
 
-
-
-
 ### Bug Fixes:
 
-* properly render errors data table forms
+- properly render errors data table forms
 
-* update to support 0.20 (#179)
+- update to support 0.20 (#179)
 
 ## [v0.11.1](https://github.com/ash-project/ash_admin/compare/v0.11.0...v0.11.1) (2024-06-13)
 
-
-
-
 ### Bug Fixes:
 
-* properly support lists of embeds
+- properly support lists of embeds
 
-* render relationship inputs even when type is not a map
+- render relationship inputs even when type is not a map
 
-* properly render tenant form on mobile sidebar
+- properly render tenant form on mobile sidebar
 
 ### Improvements:
 
-* various fixes around unions
+- various fixes around unions
 
-* support for unions
+- support for unions
 
 ## [v0.11.0](https://github.com/ash-project/ash_admin/compare/v0.10.10-rc.1...v0.11.0) (2024-05-10)
 
-
-
-
 ### Bug Fixes:
 
-* TopNav when in mobile view (size < md) (#128)
+- TopNav when in mobile view (size < md) (#128)
 
-* properly accept private attributes in admin
+- properly accept private attributes in admin
 
-* clear actor_tenant cookie when clearing actor (#101)
+- clear actor_tenant cookie when clearing actor (#101)
 
-* small refactor in actor plug (#99)
+- small refactor in actor plug (#99)
 
 ### Improvements:
 
-* track actor tenant, use it for fetching actor
+- track actor tenant, use it for fetching actor
 
 ## [v0.10.10-rc.1](https://github.com/ash-project/ash_admin/compare/v0.10.10-rc.0...v0.10.10-rc.1) (2024-04-03)
 
-
-
-
 ### Bug Fixes:
 
-* get checks passing, fix various bugs
+- get checks passing, fix various bugs
 
-* loading multiple relationships with the same destination resource that has sensitive fields (#98)
+- loading multiple relationships with the same destination resource that has sensitive fields (#98)
 
 ## [v0.10.10-rc.0](https://github.com/ash-project/ash_admin/compare/v0.10.9...v0.10.10-rc.0) (2024-04-02)
 
-
-
-
 ### Bug Fixes:
 
-* properly add indexes to embedded list attribtues
+- properly add indexes to embedded list attribtues
 
-* ensure action selection is accurate/consistent
+- ensure action selection is accurate/consistent
 
-* only consider top-level targets for input pruning
+- only consider top-level targets for input pruning
 
-* only show forms for map type inputs
+- only show forms for map type inputs
 
 ### Improvements:
 
-* upgrade to 3.0
+- upgrade to 3.0
 
 ## [v0.10.9](https://github.com/ash-project/ash_admin/compare/v0.10.8...v0.10.9) (2024-03-29)
 
-
-
-
 ### Bug Fixes:
 
-* only show forms for map type inputs
+- only show forms for map type inputs
 
 ### Improvements:
 
-* upgrade to 3.0
+- upgrade to 3.0
 
 ## [v0.10.8](https://github.com/ash-project/ash_admin/compare/v0.10.7...v0.10.8) (2024-03-19)
 
@@ -428,7 +401,7 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 - don't call into ash_postgres for tables anymore
 
-- properly match on `Code.ensrue_compiled/1` output
+- properly match on `Code.ensure_compiled/1` output
 
 ### Improvements:
 

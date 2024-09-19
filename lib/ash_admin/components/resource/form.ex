@@ -1668,9 +1668,47 @@ defmodule AshAdmin.Components.Resource.Form do
           socket.assigns.form.params
       end
 
-    form = AshPhoenix.Form.validate(socket.assigns.form, params)
+    form =
+      AshPhoenix.Form.validate(socket.assigns.form, replace_new_union_stubs(params))
 
     {:noreply, assign(socket, :form, form)}
+  end
+
+  defp replace_new_union_stubs(value) when is_list(value) do
+    Enum.flat_map(value, fn value ->
+      if new_union_stub?(value) do
+        []
+      else
+        [replace_new_union_stubs(value)]
+      end
+    end)
+  end
+
+  defp replace_new_union_stubs(params) when is_map(params) and not is_struct(params) do
+    params =
+      if Map.has_key?(params, "_new_union_type") and not Map.has_key?(params, "_union_type") do
+        params
+        |> Map.delete("_new_union_type")
+        |> Map.put("_union_type", params["_new_union_type"])
+      else
+        params
+      end
+
+    Enum.reduce(params, %{}, fn {key, value}, acc ->
+      if new_union_stub?(value) do
+        acc
+      else
+        Map.put(acc, key, replace_new_union_stubs(value))
+      end
+    end)
+  end
+
+  defp replace_new_union_stubs(value) do
+    value
+  end
+
+  defp new_union_stub?(value) do
+    is_map(value) and Map.has_key?(value, "_new_union_type") and map_size(value) == 1
   end
 
   defp put_in_creating(map, [key], value) do
