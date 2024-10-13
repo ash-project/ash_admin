@@ -621,6 +621,29 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
+  defp select?(resource, attribute) do
+    case AshAdmin.Resource.field(resource, attribute.name) do
+      %{type: :select} ->
+        true
+
+      _ ->
+        false
+    end
+  end
+
+  defp select_options!(resource, attribute) do
+    case AshAdmin.Resource.field(resource, attribute.name) do
+      %{options: %{module: module}} when is_atom(module) ->
+        module
+        |> Ash.Query.for_read(:select_options)
+        |> Ash.read!()
+        |> Enum.map(&{&1.name, &1.id})
+
+        _ ->
+          []
+    end
+  end
+
   defp unwrap_type({:array, type}), do: unwrap_type(type)
   defp unwrap_type(type), do: type
 
@@ -790,6 +813,15 @@ defmodule AshAdmin.Components.Resource.Form do
           name={@name || @form.name <> "[#{@attribute.name}]"}
           placeholder={placeholder(@default)}
         />
+      <% select?(@form.source.resource, @attribute) -> %>
+        <.input
+         type="select"
+         id={@id || @form.id <> "_#{@attribute.name}"}
+         value={value(@value, @form, @attribute)}
+         name={@name || @form.name <> "[#{@attribute.name}]"}
+         placeholder="Choose"
+         options={select_options!(@form.source.resource, @attribute)}
+         />
       <% true -> %>
         <.input
           type={text_input_type(@form.source.resource, @attribute)}
