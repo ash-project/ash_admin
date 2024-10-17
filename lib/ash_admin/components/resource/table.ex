@@ -45,19 +45,19 @@ defmodule AshAdmin.Components.Resource.Table do
             <td :if={@actions && actions?(@resource)}>
               <div class="flex h-max justify-items-center">
                 <div :if={AshAdmin.Resource.show_action(@resource)}>
-                  <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&tab=show&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
+                  <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
                     <.icon name="hero-information-circle-solid" class="h-5 w-5 text-gray-500" />
                   </.link>
                 </div>
 
                 <div :if={AshAdmin.Helpers.primary_action(@resource, :update)}>
-                  <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&tab=update&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
+                  <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
                     <.icon name="hero-pencil-solid" class="h-5 w-5 text-gray-500" />
                   </.link>
                 </div>
 
                 <div :if={AshAdmin.Helpers.primary_action(@resource, :destroy)}>
-                  <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&tab=destroy&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
+                  <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
                     <.icon name="hero-x-circle-solid" class="h-5 w-5 text-gray-500" />
                   </.link>
                 </div>

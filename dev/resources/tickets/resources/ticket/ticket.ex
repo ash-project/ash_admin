@@ -46,6 +46,26 @@ defmodule Demo.Tickets.Ticket do
       pagination offset?: true, countable: true, required?: false, default_limit: 25
     end
 
+    action :ticket_count, :integer do
+      run fn _, context ->
+        Ash.count(__MODULE__, Ash.Context.to_opts(context))
+      end
+    end
+
+    action :fake_ticket, :struct do
+      constraints instance_of: __MODULE__
+      run fn _, context ->
+        {:ok, %__MODULE__{id: Ash.UUID.generate()}}
+      end
+    end
+
+    action :map_type, :map do
+      constraints fields: [foo: [type: :integer], bar: [type: :string]]
+      run fn _, context ->
+        {:ok, %{foo: 10, bar: "hello"}}
+      end
+    end
+
     read :assigned do
       filter representative: actor(:id)
       pagination offset?: true, countable: true, required?: false, default_limit: 25

@@ -92,7 +92,6 @@ defmodule AshAdmin.PageLive do
       primary_key={@primary_key}
       record={@record}
       domain={@domain}
-      tab={@tab}
       action_type={@action_type}
       url_path={@url_path}
       params={@params}
@@ -156,6 +155,9 @@ defmodule AshAdmin.PageLive do
           "destroy" ->
             :destroy
 
+          "action" ->
+            :action
+
           nil ->
             if AshAdmin.Domain.default_resource_page(socket.assigns.domain) == :primary_read,
               do: :read,
@@ -176,6 +178,9 @@ defmodule AshAdmin.PageLive do
 
             :destroy ->
               AshAdmin.Resource.destroy_actions(socket.assigns.resource)
+
+            :action ->
+              AshAdmin.Resource.generic_actions(socket.assigns.resource)
           end
 
         action =
@@ -250,7 +255,7 @@ defmodule AshAdmin.PageLive do
       |> assign_resource(params["resource"])
       |> assign_action(params["action"], params["action_type"])
       |> assign_tables(params["table"])
-      |> assign(primary_key: params["primary_key"], tab: params["tab"])
+      |> assign(primary_key: params["primary_key"])
 
     socket =
       if socket.assigns[:primary_key] do

@@ -2,10 +2,10 @@ defmodule AshAdmin.Components.Resource.Nav do
   @moduledoc false
   use Phoenix.Component
   alias AshAdmin.Components.TopNav.Dropdown
+  import AshAdmin.Helpers
 
   attr :resource, :any, required: true
   attr :domain, :any, required: true
-  attr :tab, :string, required: true
   attr :action, :any
   attr :table, :any, default: nil
   attr :prefix, :any, default: nil
@@ -27,8 +27,16 @@ defmodule AshAdmin.Components.Resource.Nav do
               <div class="ml-12 flex items-center space-x-1">
                 <div :if={has_create_action?(@resource)} class="relative">
                   <.link
-                    navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=create&action=#{create_action(@resource).name}&tab=create&table=#{@table}"}
-                    class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
+                    navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=create&action=#{create_action(@resource).name}&table=#{@table}"}
+                    class={
+                      classes([
+                        "inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500",
+                        "bg-gray-800 hover:bg-gray-900 text-white":
+                          @action && @action.type == :create,
+                        "bg-white text-gray-700 hover:bg-gray-300":
+                          !@action || @action.type != :create
+                      ])
+                    }
                   >
                     Create
                   </.link>
@@ -36,10 +44,20 @@ defmodule AshAdmin.Components.Resource.Nav do
 
                 <.live_component
                   module={Dropdown}
-                  name="Read"
+                  name={tab_name(@action && @action.name, @action && @action.type == :read, "Read")}
                   id={"#{@resource}_data_dropdown"}
-                  active={@tab == "data"}
+                  active={@action && @action.type == :read}
                   groups={data_groups(@prefix, @domain, @resource, @action, @table)}
+                />
+
+                <.live_component
+                  module={Dropdown}
+                  name={
+                    tab_name(@action && @action.name, @action && @action.type == :action, "Actions")
+                  }
+                  id={"#{@resource}_actions_dropdown"}
+                  active={@action && @action.type == :action}
+                  groups={action_groups(@prefix, @domain, @resource, @action, @table)}
                 />
               </div>
             </div>
@@ -48,6 +66,14 @@ defmodule AshAdmin.Components.Resource.Nav do
       </div>
     </nav>
     """
+  end
+
+  defp tab_name(label, true, _) when not is_nil(label) and label != false do
+    Phoenix.Naming.humanize(label)
+  end
+
+  defp tab_name(_, _, default) do
+    default
   end
 
   defp create_action(resource) do
@@ -86,6 +112,26 @@ defmodule AshAdmin.Components.Resource.Nav do
           text: action_name(action),
           to:
             "#{prefix}?domain=#{AshAdmin.Domain.name(domain)}&resource=#{AshAdmin.Resource.name(resource)}&table=#{table}&action_type=read&action=#{action.name}",
+          active: current_action == action
+        }
+      end)
+    ]
+  end
+
+  defp action_groups(prefix, domain, resource, current_action, table) do
+    generic_actions = AshAdmin.Resource.generic_actions(resource)
+
+    [
+      resource
+      |> Ash.Resource.Info.actions()
+      |> Enum.filter(
+        &(&1.type == :action && (is_nil(generic_actions) || &1.name in generic_actions))
+      )
+      |> Enum.map(fn action ->
+        %{
+          text: action_name(action),
+          to:
+            "#{prefix}?domain=#{AshAdmin.Domain.name(domain)}&resource=#{AshAdmin.Resource.name(resource)}&table=#{table}&action_type=action&action=#{action.name}",
           active: current_action == action
         }
       end)
