@@ -58,15 +58,13 @@ defmodule AshAdmin.Resource do
       polymorphic_tables: [
         type: {:list, :string},
         doc: """
-        For resources that use ash_postgres' polymorphism capabilities, you can provide a list of tables that should be available to
-        select. These will be added to the list of derivable tables based on scanning all domains and resources provided to ash_admin.
+        For resources that use ash_postgres' polymorphism capabilities, you can provide a list of tables that should be available to select. These will be added to the list of derivable tables based on scanning all domains and resources provided to ash_admin.
         """
       ],
       polymorphic_actions: [
         type: {:list, :atom},
         doc: """
-        For resources that use ash_postgres' polymorphism capabilities, you can provide a list of actions that should require a table to be set.
-        If this is not set, then *all* actions will require tables.
+        For resources that use ash_postgres' polymorphism capabilities, you can provide a list of actions that should require a table to be set. If this is not set, then *all* actions will require tables.
         """
       ],
       table_columns: [
@@ -162,6 +160,11 @@ defmodule AshAdmin.Resource do
       actions_with_primary_first(resource, :read)
   end
 
+  def generic_actions(resource) do
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :generic_actions, nil, true) ||
+      actions_with_primary_first(resource, :action)
+  end
+
   def create_actions(resource) do
     Spark.Dsl.Extension.get_opt(resource, [:admin], :create_actions, nil, true) ||
       actions_with_primary_first(resource, :create)
@@ -214,7 +217,7 @@ defmodule AshAdmin.Resource do
     resource
     |> Ash.Resource.Info.actions()
     |> Enum.filter(&(&1.type == type))
-    |> Enum.sort_by(&(!&1.primary?))
+    |> Enum.sort_by(&(!Map.get(&1, :primary?)))
     |> Enum.map(& &1.name)
   end
 end

@@ -1508,7 +1508,7 @@ defmodule AshAdmin.Components.Resource.Form do
        socket
        |> redirect(
          to:
-           "#{socket.assigns.prefix || "/"}?domain=#{AshAdmin.Domain.name(socket.assigns.domain)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}&tab=show&table=#{socket.assigns.table}&primary_key=#{encode_primary_key(record)}"
+           "#{socket.assigns.prefix || "/"}?domain=#{AshAdmin.Domain.name(socket.assigns.domain)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}&table=#{socket.assigns.table}&primary_key=#{encode_primary_key(record)}"
        )}
     else
       case AshAdmin.Helpers.primary_action(socket.assigns.resource, :update) do
@@ -1524,7 +1524,7 @@ defmodule AshAdmin.Components.Resource.Form do
            socket
            |> redirect(
              to:
-               "#{socket.assigns.prefix || "/"}?domain=#{AshAdmin.Domain.name(socket.assigns.domain)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}&action_type=update&tab=update&table=#{socket.assigns.table}&primary_key=#{encode_primary_key(record)}"
+               "#{socket.assigns.prefix || "/"}?domain=#{AshAdmin.Domain.name(socket.assigns.domain)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}&action_type=update&table=#{socket.assigns.table}&primary_key=#{encode_primary_key(record)}"
            )}
       end
     end
@@ -2038,6 +2038,7 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp only_accepted(attributes, %{type: :read}), do: attributes
+  defp only_accepted(_, %{type: :action}), do: []
 
   defp only_accepted(attributes, %{accept: accept}) do
     Enum.filter(attributes, &(&1.name in accept))

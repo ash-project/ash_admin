@@ -74,7 +74,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
           <.link
             :if={@actor}
             class="hover:text-blue-400 hover:underline"
-            target={"#{@prefix}?domain=#{AshAdmin.Domain.name(@actor_domain)}&resource=#{AshAdmin.Resource.name(@actor.__struct__)}&tab=show&primary_key=#{encode_primary_key(@actor)}"}
+            target={"#{@prefix}?domain=#{AshAdmin.Domain.name(@actor_domain)}&resource=#{AshAdmin.Resource.name(@actor.__struct__)}&primary_key=#{encode_primary_key(@actor)}"}
           >
             <%= user_display(@actor, @actor_tenant) %>
           </.link>

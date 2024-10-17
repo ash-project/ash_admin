@@ -4,12 +4,11 @@ defmodule AshAdmin.Components.Resource do
 
   require Ash.Query
 
-  alias AshAdmin.Components.Resource.{DataTable, Form, Info, Nav, Show}
+  alias AshAdmin.Components.Resource.{DataTable, Form, GenericAction, Info, Nav, Show}
 
   # prop hide_filter, :boolean, default: true
   attr :resource, :any, required: true
   attr :domain, :any, required: true
-  attr :tab, :string, required: true
   attr :action, :any
   attr :actor, :any, required: true
   attr :authorizing, :boolean, required: true
@@ -27,18 +26,11 @@ defmodule AshAdmin.Components.Resource do
   def render(assigns) do
     ~H"""
     <div class="h-screen">
-      <Nav.nav
-        resource={@resource}
-        domain={@domain}
-        tab={@tab}
-        action={@action}
-        table={@table}
-        prefix={@prefix}
-      />
+      <Nav.nav resource={@resource} domain={@domain} action={@action} table={@table} prefix={@prefix} />
       <div class="mx-24 relative grid grid-cols-1 justify-items-center"></div>
       <div :if={
         @record && match?({:ok, record} when not is_nil(record), @record) &&
-          @tab == "update"
+          @action_type == :update
       }>
         <% {:ok, record} = @record %>
         <.live_component
@@ -61,7 +53,7 @@ defmodule AshAdmin.Components.Resource do
         />
       </div>
       <div :if={
-        @record && match?({:ok, record} when not is_nil(record), @record) && @tab == "destroy"
+        @record && match?({:ok, record} when not is_nil(record), @record) && @action_type == :destroy
       }>
         <% {:ok, record} = @record %>
         <.live_component
@@ -84,7 +76,7 @@ defmodule AshAdmin.Components.Resource do
         />
       </div>
       <.live_component
-        :if={@tab == "show" && match?({:ok, %_{}}, @record)}
+        :if={match?({:ok, %_{}}, @record) && @action_type == :read}
         module={Show}
         resource={@resource}
         domain={@domain}
@@ -96,14 +88,9 @@ defmodule AshAdmin.Components.Resource do
         table={@table}
         prefix={@prefix}
       />
-      <Info.info
-        :if={@tab == "info" || (is_nil(@tab) && is_nil(@action_type))}
-        resource={@resource}
-        domain={@domain}
-        prefix={@prefix}
-      />
+      <Info.info :if={is_nil(@action_type)} resource={@resource} domain={@domain} prefix={@prefix} />
       <.live_component
-        :if={@tab == "create"}
+        :if={@action_type == :create}
         module={Form}
         type={:create}
         resource={@resource}
@@ -121,7 +108,7 @@ defmodule AshAdmin.Components.Resource do
         polymorphic_actions={@polymorphic_actions}
       />
       <.live_component
-        :if={@action_type == :read && @tab != "show"}
+        :if={@action_type == :read && !match?({:ok, %_{}}, @record)}
         module={DataTable}
         polymorphic_actions={@polymorphic_actions}
         resource={@resource}
@@ -137,6 +124,21 @@ defmodule AshAdmin.Components.Resource do
         prefix={@prefix}
         tenant={@tenant}
       />
+      <.live_component
+        :if={@action_type == :action}
+        module={GenericAction}
+        id={action_id(@resource)}
+        resource={@resource}
+        action={@action}
+        actor={@actor}
+        domain={@domain}
+        url_path={@url_path}
+        params={@params}
+        authorizing={@authorizing}
+        table={@table}
+        prefix={@prefix}
+        tenant={@tenant}
+      />
     </div>
     """
   end
@@ -149,6 +151,10 @@ defmodule AshAdmin.Components.Resource do
 
   defp data_table_id(resource) do
     "#{resource}_table"
+  end
+
+  defp action_id(resource) do
+    "#{resource}_action"
   end
 
   defp create_id(resource) do
