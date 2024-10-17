@@ -40,6 +40,11 @@ defmodule AshAdmin.Resource do
         doc:
           "A list of read actions that can be used to show resource details. By default, all actions are included."
       ],
+      generic_actions: [
+        type: {:list, :atom},
+        doc:
+          "A list of generic actions that can be used to show resource details. By default, all actions are included."
+      ],
       create_actions: [
         type: {:list, :atom},
         doc:
