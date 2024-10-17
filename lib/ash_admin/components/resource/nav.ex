@@ -50,15 +50,23 @@ defmodule AshAdmin.Components.Resource.Nav do
                   groups={data_groups(@prefix, @domain, @resource, @action, @table)}
                 />
 
-                <.live_component
-                  module={Dropdown}
-                  name={
-                    tab_name(@action && @action.name, @action && @action.type == :action, "Actions")
-                  }
-                  id={"#{@resource}_actions_dropdown"}
-                  active={@action && @action.type == :action}
-                  groups={action_groups(@prefix, @domain, @resource, @action, @table)}
-                />
+                <%= case action_groups(@prefix, @domain, @resource, @action, @table) do %>
+                  <% [[]] -> %>
+                  <% groups -> %>
+                    <.live_component
+                      module={Dropdown}
+                      name={
+                        tab_name(
+                          @action && @action.name,
+                          @action && @action.type == :action,
+                          "Actions"
+                        )
+                      }
+                      id={"#{@resource}_actions_dropdown"}
+                      active={@action && @action.type == :action}
+                      groups={groups}
+                    />
+                <% end %>
               </div>
             </div>
           </div>
