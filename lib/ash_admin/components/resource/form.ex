@@ -2024,7 +2024,7 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp manages_relationship(argument, action) do
-    if action.changes do
+    if Map.get(action, :changes) do
       Enum.find_value(action.changes, fn
         %{change: {Ash.Resource.Change.ManageRelationship, opts}} ->
           if opts[:argument] == argument.name do

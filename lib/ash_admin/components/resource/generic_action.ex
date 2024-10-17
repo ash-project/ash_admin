@@ -332,7 +332,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
 
   def handle_event("validate", params, socket) do
     params = params["form"] || %{}
-    form = AshPhoenix.Form.validate(socket.assigns.action, params)
+    form = AshPhoenix.Form.validate(socket.assigns.form, params)
 
     {:noreply, assign(socket, form: form)}
   end
@@ -354,37 +354,37 @@ defmodule AshAdmin.Components.Resource.GenericAction do
         _ -> :create
       end
 
-    query = AshPhoenix.Form.add_form(socket.assigns.query, path, type: type)
+    form = AshPhoenix.Form.add_form(socket.assigns.form, path, type: type)
 
     {:noreply,
      socket
-     |> assign(:query, query)}
+     |> assign(:form, form)}
   end
 
   def handle_event("remove_form", %{"path" => path}, socket) do
-    query = AshPhoenix.Form.remove_form(socket.assigns.query, path)
+    form = AshPhoenix.Form.remove_form(socket.assigns.form, path)
 
     {:noreply,
      socket
-     |> assign(:query, query)}
+     |> assign(:form, form)}
   end
 
   def handle_event("remove_value", %{"path" => path, "field" => field, "index" => index}, socket) do
-    query =
+    form =
       AshPhoenix.Form.update_form(
-        socket.assigns.query,
+        socket.assigns.form,
         path,
         &remove_value(&1, field, index)
       )
 
     {:noreply,
      socket
-     |> assign(:query, query)}
+     |> assign(:form, form)}
   end
 
   def handle_event("append_value", %{"path" => path, "field" => field}, socket) do
     list =
-      AshPhoenix.Form.get_form(socket.assigns.query, path)
+      AshPhoenix.Form.get_form(socket.assigns.form, path)
       |> AshPhoenix.Form.value(String.to_existing_atom(field))
       |> Kernel.||([])
       |> indexed_list()
@@ -392,19 +392,19 @@ defmodule AshAdmin.Components.Resource.GenericAction do
 
     params =
       put_in_creating(
-        socket.assigns.query.params || %{},
+        socket.assigns.form.params || %{},
         Enum.map(
-          AshPhoenix.Form.parse_path!(socket.assigns.query, path) ++ [field],
+          AshPhoenix.Form.parse_path!(socket.assigns.form, path) ++ [field],
           &to_string/1
         ),
         list
       )
 
-    query = AshPhoenix.Form.validate(socket.assigns.query, params)
+    form = AshPhoenix.Form.validate(socket.assigns.form, params)
 
     {:noreply,
      socket
-     |> assign(:query, query)}
+     |> assign(:form, form)}
   end
 
   defp indexed_list(map) when is_map(map) do
