@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.11.7](https://github.com/ash-project/ash_admin/compare/v0.11.6...v0.11.7) (2024-10-17)
+
+
+
+
+### Improvements:
+
+* support for generic actions
+
 ## [v0.11.6](https://github.com/ash-project/ash_admin/compare/v0.11.5...v0.11.6) (2024-09-19)
 
 
