@@ -6,6 +6,7 @@ spark_locals_without_parens = [
   field: 1,
   field: 2,
   format_fields: 1,
+  generic_actions: 1,
   name: 1,
   polymorphic_actions: 1,
   polymorphic_tables: 1,
