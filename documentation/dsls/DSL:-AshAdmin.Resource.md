@@ -25,6 +25,7 @@ Configure the admin dashboard for a given resource.
 | [`actor?`](#admin-actor?){: #admin-actor? } | `boolean` |  | Whether or not this resource can be used as the actor for requests. |
 | [`show_action`](#admin-show_action){: #admin-show_action } | `atom` |  | The action to use when linking to the resource/viewing a single record. Defaults to the primary read action. |
 | [`read_actions`](#admin-read_actions){: #admin-read_actions } | `list(atom)` |  | A list of read actions that can be used to show resource details. By default, all actions are included. |
+| [`generic_actions`](#admin-generic_actions){: #admin-generic_actions } | `list(atom)` |  | A list of generic actions that can be used to show resource details. By default, all actions are included. |
 | [`create_actions`](#admin-create_actions){: #admin-create_actions } | `list(atom)` |  | A list of create actions that can create records. By default, all actions are included. |
 | [`update_actions`](#admin-update_actions){: #admin-update_actions } | `list(atom)` |  | A list of update actions that can be used to update records. By default, all actions are included. |
 | [`destroy_actions`](#admin-destroy_actions){: #admin-destroy_actions } | `list(atom)` |  | A list of destroy actions that can be used to destroy records. By default, all actions are included. |
