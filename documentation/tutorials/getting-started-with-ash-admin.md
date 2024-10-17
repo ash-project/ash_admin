@@ -20,7 +20,7 @@ Ensure your domains are configured in `config.exs`:
 config :my_app, ash_domains: [MyApp.Foo, MyApp.Bar]
 ```
 
-Add the `AshAdmin.Domain` extension to each domain you want to show in the AshAdmin dashboard, and configure it to show. See [DSL: AshAdmin.Domain](/documentation/dsls/DSL:-AshAdmin.Domain.md) for more configuration options.
+Add the `AshAdmin.Domain` extension to each domain you want to show in the AshAdmin dashboard, and configure it to show. See [DSL: AshAdmin.Domain](/documentation/dsls/DSL-AshAdmin.Domain.md) for more configuration options.
 
 ```elixir
 # In your Domain(s)
@@ -32,7 +32,7 @@ admin do
 end
 ```
 
-All resources in each Domain will automatically be included in AshAdmin. To configure a resource, use the `AshAdmin.Resource` extension, and then use the [DSL: AshAdmin.Resource](/documentation/dsls/DSL:-AshAdmin.Resource.md) configuration options. Specifically, if your app has an actor you will want to configure that.
+All resources in each Domain will automatically be included in AshAdmin. To configure a resource, use the `AshAdmin.Resource` extension, and then use the [DSL: AshAdmin.Resource](/documentation/dsls/DSL-AshAdmin.Resource.md) configuration options. Specifically, if your app has an actor you will want to configure that.
 
 ```elixir
 # In your resource that acts as an actor (e.g. User)
@@ -100,9 +100,11 @@ This will allow AshAdmin-generated inline CSS and JS blocks to execute normally.
 ## Troubleshooting
 
 #### UI issues
+
 If your admin UI is not responding as expected, check your browser's developer console for content-security-policy violations (see above).
 
 #### Router issues
+
 If you are seeing the following error `(UndefinedFunctionError) function YourAppWeb.AshAdmin.PageLive.__live__/0 is undefined (module YourAppWeb.AshAdmin.PageLive is not available)` it likely means that you added the ash admin route macro under a scope with a prefix. Make sure that you add it under a scope without any prefixes.
 
 ```elixir

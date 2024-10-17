@@ -18,5 +18,5 @@ If you are using Phoenix LiveView 1.0.0 release candidate, you will need to use 
 
 ## Reference
 
-- [AshAdmin.Domain DSL](documentation/dsls/DSL:-AshAdmin.Domain.md)
-- [AshAdmin.Resource DSL](documentation/dsls/DSL:-AshAdmin.Resource.md)
+- [AshAdmin.Domain DSL](documentation/dsls/DSL-AshAdmin.Domain.md)
+- [AshAdmin.Resource DSL](documentation/dsls/DSL-AshAdmin.Resource.md)
