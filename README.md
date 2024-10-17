@@ -10,7 +10,7 @@
 
 Welcome! This is a super-admin UI dashboard for [Ash Framework](https://hexdocs.pm/ash) applications, built with Phoenix LiveView.
 
-If you are using Phoenix LiveView 1.0.0 release candidate, you will need to use the live_view_1.0 branch of this dependency.
+If you are using Phoenix LiveView 1.0.0 release candidate, you will need to use the live_view_1.0 branch of this repo.
 
 ## Tutorials
 
