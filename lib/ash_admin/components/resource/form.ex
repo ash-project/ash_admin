@@ -196,7 +196,11 @@ defmodule AshAdmin.Components.Resource.Form do
             class="block text-sm font-medium text-gray-700"
             for={@form.name <> "[#{attribute.name}]"}
           >
-            <%= to_name(attribute.name) %>
+            <%= if foreign_key?(@resource, attribute) do %>
+              <%= attribute.name |> to_string() |> String.replace_suffix("_id", "") |> to_name() %>
+            <% else %>
+              <%= to_name(attribute.name) %>
+            <% end %>
           </label>
           <%= render_attribute_input(assigns, attribute, @form) %>
           <.error_tag
@@ -621,6 +625,71 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
+  defp foreign_key?(resource, attribute) do
+    {resource_for_select, _attribute_name} =
+      get_resource_and_attribute_name_for_select(resource, attribute)
+
+    relationships = Ash.Resource.Info.relationships(resource)
+    label_field = AshAdmin.Resource.label_field(resource_for_select)
+
+    label_field &&
+      Enum.any?(relationships, fn
+        %Ash.Resource.Relationships.BelongsTo{
+          source_attribute: source_attribute,
+          destination_attribute: destination_attribute
+        } ->
+          if attribute.primary_key? do
+            destination_attribute == attribute.name
+          else
+            source_attribute == attribute.name
+          end
+
+        _other ->
+          false
+      end)
+  end
+
+  defp select_options!(resource, attribute) do
+    {resource_for_select, attribute_name} =
+      get_resource_and_attribute_name_for_select(resource, attribute)
+
+    label_field = AshAdmin.Resource.label_field(resource_for_select)
+
+    resource_for_select
+    |> Ash.Query.new()
+    |> Ash.Query.load([attribute_name, label_field])
+    |> Ash.read!()
+    |> Enum.map(&{Map.get(&1, label_field), &1.id})
+  end
+
+  defp get_resource_and_attribute_name_for_select(
+         resource,
+         attribute = %Ash.Resource.Attribute{primary_key?: true}
+       ) do
+    {resource, attribute.name}
+  end
+
+  defp get_resource_and_attribute_name_for_select(resource, attribute) do
+    relationships = Ash.Resource.Info.relationships(resource)
+
+    case Enum.find(relationships, fn
+           %Ash.Resource.Relationships.BelongsTo{source_attribute: source_attribute} ->
+             source_attribute == attribute.name
+
+           _other ->
+             false
+         end) do
+      %Ash.Resource.Relationships.BelongsTo{
+        destination: destination,
+        destination_attribute: destination_attribute
+      } ->
+        {destination, destination_attribute}
+
+      nil ->
+        {resource, attribute.name}
+    end
+  end
+
   defp unwrap_type({:array, type}), do: unwrap_type(type)
   defp unwrap_type(type), do: type
 
@@ -789,6 +858,15 @@ defmodule AshAdmin.Components.Resource.Form do
           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
           name={@name || @form.name <> "[#{@attribute.name}]"}
           placeholder={placeholder(@default)}
+        />
+      <% foreign_key?(@form.source.resource, @attribute) -> %>
+        <.input
+          type="select"
+          id={@id || @form.id <> "_#{@attribute.name}"}
+          value={value(@value, @form, @attribute)}
+          name={@name || @form.name <> "[#{@attribute.name}]"}
+          placeholder="Choose"
+          options={select_options!(@form.source.resource, @attribute)}
         />
       <% true -> %>
         <.input
