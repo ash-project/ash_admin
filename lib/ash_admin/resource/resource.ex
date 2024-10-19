@@ -90,6 +90,10 @@ defmodule AshAdmin.Resource do
         type: {:list, :atom},
         doc:
           "The list of fields that should not be redacted in the admin UI even if they are marked as sensitive."
+      ],
+      label_field: [
+        type: :atom,
+        doc: "The attribute to use as the label for the resource in a select field."
       ]
     ]
   }
@@ -143,6 +147,10 @@ defmodule AshAdmin.Resource do
 
   def show_sensitive_fields(resource) do
     Spark.Dsl.Extension.get_opt(resource, [:admin], :show_sensitive_fields, [], true)
+  end
+
+  def label_field(resource) do
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :label_field, nil, true)
   end
 
   def actor?(resource) do
