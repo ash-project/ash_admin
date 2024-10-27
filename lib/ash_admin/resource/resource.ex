@@ -78,7 +78,9 @@ defmodule AshAdmin.Resource do
       ],
       format_fields: [
         type: {:list, :any},
-        doc: "The list of fields and their formats."
+        doc: """
+        The list of fields and their formats represented as a MFA. For example: `updated_at: {Timex, :format!, ["{0D}-{0M}-{YYYY} {h12}:{m} {AM}"]}`.
+        """
       ],
       relationship_display_fields: [
         type: {:list, :atom},
