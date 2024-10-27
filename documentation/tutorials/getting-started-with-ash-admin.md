@@ -58,6 +58,8 @@ defmodule MyAppWeb.Router do
   # Most applications will not need this:
   admin_browser_pipeline :browser
 
+  # NOTE: `scope/2` here does not have a second argument.
+  # If it looks like `scope "/", MyAppWeb`, create a *new* scope, don't copy the contents into your scope
   scope "/" do
     # Pipe it through your browser pipeline
     pipe_through [:browser]
