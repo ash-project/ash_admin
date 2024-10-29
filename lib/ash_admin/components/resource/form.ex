@@ -26,7 +26,8 @@ defmodule AshAdmin.Components.Resource.Form do
     {:ok,
      socket
      |> assign_new(:load_errors, fn -> %{} end)
-     |> assign_new(:loaded, fn -> %{} end)}
+     |> assign_new(:loaded, fn -> %{} end)
+     |> assign(:params, %{})}
   end
 
   def update(assigns, socket) do
@@ -1540,11 +1541,13 @@ defmodule AshAdmin.Components.Resource.Form do
     new_union_types = (socket.assigns[:union_types] || %{}) |> Map.put(path, new_type)
 
     if AshPhoenix.Form.has_form?(socket.assigns.form, path) do
+      nested_form = AshPhoenix.Form.get_form(socket.assigns.form, path)
       form =
         socket.assigns.form
         |> AshPhoenix.Form.remove_form(path)
-        |> AshPhoenix.Form.add_form(path,
-          params: %{"_new_union_type" => new_type, "_union_type" => new_type}
+        |> AshPhoenix.Form.add_form(path |> IO.inspect(),
+          params: %{"_new_union_type" => new_type, "_union_type" => new_type} |> IO.inspect(),
+          type: nested_form.type |> IO.inspect()
         )
 
       {:noreply, assign(socket, form: form, union_types: new_union_types)}
@@ -1652,7 +1655,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
     params =
       put_in_creating(
-        socket.assigns.form.params || %{},
+        socket.assigns.form.source.raw_params || %{},
         Enum.map(AshPhoenix.Form.parse_path!(socket.assigns.form, path) ++ [field], &to_string/1),
         list
       )
@@ -1680,13 +1683,11 @@ defmodule AshAdmin.Components.Resource.Form do
             else
               %{adding_form | data: new_data}
             end
-            |> AshPhoenix.Form.validate(adding_form.params, errors: false)
           else
             adding_form
           end
         end
       )
-      |> AshPhoenix.Form.validate(AshPhoenix.Form.params(socket.assigns.form))
 
     {:noreply,
      socket
@@ -1733,23 +1734,13 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def handle_event("validate", %{"form" => params} = event, socket) do
-    params =
-      case event["_target"] do
-        [_, target | _] ->
-          put_in_creating(
-            socket.assigns.form.params || %{},
-            [target],
-            get_in(params, [target])
-          )
-
-        _ ->
-          socket.assigns.form.params
-      end
-
     form =
-      AshPhoenix.Form.validate(socket.assigns.form, replace_new_union_stubs(params))
+      AshPhoenix.Form.validate(socket.assigns.form, replace_new_union_stubs(params),
+        only_touched?: true,
+        target: event["_target"]
+      )
 
-    {:noreply, assign(socket, :form, form)}
+    {:noreply, assign(socket, form: form)}
   end
 
   defp replace_new_union_stubs(value) when is_list(value) do
@@ -1837,7 +1828,7 @@ defmodule AshAdmin.Components.Resource.Form do
         new_value
       end
 
-    new_params = Map.put(form.params, field, new_value)
+    new_params = Map.put(form.raw_params, field, new_value)
 
     AshPhoenix.Form.validate(form, new_params)
   end
