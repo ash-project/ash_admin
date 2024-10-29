@@ -7,6 +7,8 @@ defmodule AshAdmin.Components.Resource.Form do
 
   require Logger
 
+  alias AshAdmin.Components.Resource.RelationshipField
+
   attr :resource, :any, required: true
   attr :domain, :any, required: true
   attr :record, :any, default: nil
@@ -34,6 +36,7 @@ defmodule AshAdmin.Components.Resource.Form do
     {:ok,
      socket
      |> assign(assigns)
+     |> assign(:typeahead_options, [])
      |> assign_form()
      |> assign(:initialized, true)}
   end
@@ -198,6 +201,12 @@ defmodule AshAdmin.Components.Resource.Form do
             for={@form.name <> "[#{attribute.name}]"}
           >
             {to_name(attribute.name)}
+            <% related_resource = get_related_resource(@resource, attribute) %>
+            <%= if related_resource && AshAdmin.Resource.label_field(related_resource) do %>
+              {RelationshipField.form_control_label(related_resource)}
+            <% else %>
+              {to_name(attribute.name)}
+            <% end %>
           </label>
           {render_attribute_input(assigns, attribute, @form)}
           <.error_tag
@@ -622,6 +631,37 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
+  defp get_related_resource(
+         resource,
+         attribute = %Ash.Resource.Attribute{primary_key?: true}
+       ) do
+    with relationships <- Ash.Resource.Info.relationships(resource),
+         %{source: source} <-
+           Enum.find(relationships, fn
+             %Ash.Resource.Relationships.BelongsTo{destination_attribute: destination_attribute} ->
+               destination_attribute == attribute.name
+
+             _other ->
+               false
+           end) do
+      source
+    end
+  end
+
+  defp get_related_resource(resource, attribute) do
+    with relationships <- Ash.Resource.Info.relationships(resource),
+         %{destination: destination} <-
+           Enum.find(relationships, fn
+             %Ash.Resource.Relationships.BelongsTo{source_attribute: source_attribute} ->
+               source_attribute == attribute.name
+
+             _other ->
+               false
+           end) do
+      destination
+    end
+  end
+
   defp unwrap_type({:array, type}), do: unwrap_type(type)
   defp unwrap_type(type), do: type
 
@@ -745,7 +785,8 @@ defmodule AshAdmin.Components.Resource.Form do
         type: type,
         name: name,
         default: default,
-        id: id
+        id: id,
+        related_resource: get_related_resource(form.source.resource, attribute)
       )
 
     ~H"""
@@ -790,6 +831,15 @@ defmodule AshAdmin.Components.Resource.Form do
           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
           name={@name || @form.name <> "[#{@attribute.name}]"}
           placeholder={placeholder(@default)}
+        />
+      <% @related_resource && AshAdmin.Resource.label_field(@related_resource) -> %>
+        <.live_component
+          module={AshAdmin.Components.Resource.RelationshipField}
+          id={@id || "#{@form.name}-#{@attribute.name}"}
+          value={value(@value, @form, @attribute)}
+          resource={@related_resource}
+          form={@form}
+          attribute={@attribute}
         />
       <% true -> %>
         <.input
