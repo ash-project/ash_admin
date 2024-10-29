@@ -98,14 +98,23 @@ defmodule AshAdmin.Resource do
       ],
       label_field: [
         type: :atom,
-        doc: "The attribute to use as the label for the resource in a select field."
+        doc:
+          "The field to use as the label when the resource appears in a relationship select or typeahead field on another resource's form."
+      ],
+      relationship_select_max_items: [
+        type: :integer,
+        doc:
+          "The maximum number of items to show in a select field when this resource is shown as a relationship on another resource's form. If the number of related resources is higher, a typeahead selector will be used."
       ]
     ]
   }
 
   use Spark.Dsl.Extension,
     sections: [@admin],
-    transformers: [AshAdmin.Resource.Transformers.ValidateTableColumns]
+    transformers: [
+      AshAdmin.Resource.Transformers.ValidateTableColumns,
+      AshAdmin.Resource.Transformers.AddPositionSortCalculation
+    ]
 
   @moduledoc """
   A resource extension to alter the behaviour of a resource in the admin UI.
@@ -156,6 +165,10 @@ defmodule AshAdmin.Resource do
 
   def label_field(resource) do
     Spark.Dsl.Extension.get_opt(resource, [:admin], :label_field, nil, true)
+  end
+
+  def relationship_select_max_items(resource) do
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :relationship_select_max_items, 18, true)
   end
 
   def actor?(resource) do
