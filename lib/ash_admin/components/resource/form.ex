@@ -200,7 +200,6 @@ defmodule AshAdmin.Components.Resource.Form do
             class="block text-sm font-medium text-gray-700"
             for={@form.name <> "[#{attribute.name}]"}
           >
-            {to_name(attribute.name)}
             <% related_resource = get_related_resource(@resource, attribute) %>
             <%= if related_resource && AshAdmin.Resource.label_field(related_resource) do %>
               {RelationshipField.form_control_label(related_resource)}
