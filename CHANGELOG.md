@@ -5,6 +5,17 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.11.11](https://github.com/ash-project/ash_admin/compare/v0.11.10...v0.11.11) (2024-10-30)
+
+
+
+
+### Bug Fixes:
+
+* properly update any kind of form data
+
+* fix relationship loading on Resource Update form (#220) (#221)
+
 ## [v0.11.10](https://github.com/ash-project/ash_admin/compare/v0.11.9...v0.11.10) (2024-10-29)
 
 
