@@ -103,9 +103,11 @@ defmodule Demo.Tickets.Ticket do
     update :update do
       primary? true
       argument :organization_id, :uuid
+      argument :comments, {:array, :map}
       require_atomic? false
 
       change manage_relationship(:organization_id, :organization, type: :append_and_remove)
+      change manage_relationship(:comments, :comments, type: :direct_control)
     end
 
     update :assign do
