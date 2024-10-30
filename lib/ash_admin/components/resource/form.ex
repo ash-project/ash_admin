@@ -1464,6 +1464,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
     if AshPhoenix.Form.has_form?(socket.assigns.form, path) do
       nested_form = AshPhoenix.Form.get_form(socket.assigns.form, path)
+
       form =
         socket.assigns.form
         |> AshPhoenix.Form.remove_form(path)
@@ -1598,12 +1599,29 @@ defmodule AshAdmin.Components.Resource.Form do
         path,
         fn adding_form ->
           if adding_form.data do
-            new_data = Ash.load!(adding_form.data, relationship, domain: socket.assigns.domain)
+            new_data =
+              Ash.load!(adding_form.data, relationship, domain: socket.assigns.domain)
+
+            updated_form =
+              adding_form
+              |> Map.put(:data, new_data)
+              |> AshPhoenix.Form.validate(adding_form.params, errors: false)
+              |> AshPhoenix.Form.update_options(fn opts ->
+                Keyword.put(opts, :forms, [
+                  {relationship,
+                   [
+                     type: :list,
+                     resource:
+                       Ash.Resource.Info.relationship(adding_form.resource, relationship).destination,
+                     data: Map.get(new_data, relationship)
+                   ]}
+                ])
+              end)
 
             if Map.has_key?(adding_form.source, :data) do
-              %{adding_form | data: new_data, source: %{adding_form.source | data: new_data}}
+              %{updated_form | data: new_data, source: %{adding_form.source | data: new_data}}
             else
-              %{adding_form | data: new_data}
+              updated_form
             end
           else
             adding_form
