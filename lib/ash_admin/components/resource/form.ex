@@ -1546,9 +1546,9 @@ defmodule AshAdmin.Components.Resource.Form do
       form =
         socket.assigns.form
         |> AshPhoenix.Form.remove_form(path)
-        |> AshPhoenix.Form.add_form(path |> IO.inspect(),
-          params: %{"_new_union_type" => new_type, "_union_type" => new_type} |> IO.inspect(),
-          type: nested_form.type |> IO.inspect()
+        |> AshPhoenix.Form.add_form(path,
+          params: %{"_new_union_type" => new_type, "_union_type" => new_type},
+          type: nested_form.type
         )
 
       {:noreply, assign(socket, form: form, union_types: new_union_types)}
@@ -1678,22 +1678,32 @@ defmodule AshAdmin.Components.Resource.Form do
         fn adding_form ->
           if adding_form.data do
             new_data =
-              Ash.load!(adding_form.data, relationship, domain: socket.assigns.domain)
+              Ash.load!(adding_form.data, relationship,
+                actor: socket.assigns.actor,
+                tenant: socket.assigns.tenant,
+                domain: socket.assigns.domain
+              )
 
             updated_form =
               adding_form
               |> Map.put(:data, new_data)
-              |> AshPhoenix.Form.validate(adding_form.params, errors: false)
+              |> AshPhoenix.Form.validate(adding_form.raw_params, errors: false)
               |> AshPhoenix.Form.update_options(fn opts ->
-                Keyword.put(opts, :forms, [
-                  {relationship,
-                   [
-                     type: :list,
-                     resource:
-                       Ash.Resource.Info.relationship(adding_form.resource, relationship).destination,
-                     data: Map.get(new_data, relationship)
-                   ]}
-                ])
+                Keyword.update(opts, :forms, [], fn forms ->
+                  Keyword.new(forms, fn {key, val} ->
+                    if val[:managed_relationship] == {adding_form.resource, relationship} do
+                      new_data =
+                        case val[:type] do
+                          :single -> Enum.at(List.wrap(Map.get(new_data, relationship)), 0)
+                          _ -> new_data
+                        end
+
+                      {key, Keyword.put(val, :data, new_data)}
+                    else
+                      {key, val}
+                    end
+                  end)
+                end)
               end)
 
             if Map.has_key?(adding_form.source, :data) do
