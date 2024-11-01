@@ -22,7 +22,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
     {:ok,
      assign(socket,
        suggestions: [],
-       query: "",
+       search_term: "",
        selected_id: nil,
        current_suggestion_id: nil,
        highlighted_index: -1,
@@ -34,6 +34,8 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
     pk_field = Ash.Resource.Info.primary_key(assigns.resource) |> List.first()
     label_field = AshAdmin.Resource.label_field(assigns.resource)
     current_label = get_current_label(assigns.resource, assigns.value, label_field)
+
+    # IO.inspect(assigns.value, label: "value")
 
     {:ok,
      assign(socket, assigns)
@@ -73,7 +75,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
         limited_select_options: select_options,
         field_type: field_type(select_options, assigns.max_items),
         label: form_control_label(assigns.resource),
-        query: assigns.query
+        search_term: assigns.search_term
       )
 
     ~H"""
@@ -161,7 +163,9 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
               phx-target={@myself}
             >
               <% suggestion_name =
-                String.replace(suggestion_name, ~r/(#{@query})/i, "<b>\\0</b>", [:case_insensitive]) %>
+                String.replace(suggestion_name, ~r/(#{@search_term})/i, "<b>\\0</b>", [
+                  :case_insensitive
+                ]) %>
               <%= Phoenix.HTML.raw(suggestion_name) %>
             </li>
           <% end %>
@@ -175,7 +179,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
   # Handle user input and fetch suggestions
   def handle_event(
         "suggest",
-        %{"value" => query, "key" => key},
+        %{"value" => search_term, "key" => key},
         socket
       ) do
     cond do
@@ -202,7 +206,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
          assign(socket, highlighted_index: new_index, current_suggestion_id: new_suggestion_id)}
 
       key == "Enter" ->
-        if length(socket.assigns.suggestions) == 0 do
+        if Enum.empty?(socket.assigns.suggestions) do
           {:noreply, socket.assigns}
         end
 
@@ -211,7 +215,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
 
         {:noreply,
          assign(socket,
-           query: suggestion_name,
+           search_term: suggestion_name,
            current_label: suggestion_name,
            selected_id: suggestion_id,
            suggestions: [],
@@ -238,8 +242,10 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
          )}
 
       true ->
-        suggestions = fetch_suggestions(socket.assigns, query)
-        {:noreply, assign(socket, suggestions: suggestions, query: query, highlighted_index: -1)}
+        suggestions = fetch_suggestions(socket.assigns, search_term)
+
+        {:noreply,
+         assign(socket, suggestions: suggestions, search_term: search_term, highlighted_index: -1)}
     end
   end
 
@@ -247,7 +253,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
   def handle_event("select", %{"id" => id, "name" => name}, socket) do
     {:noreply,
      assign(socket,
-       query: name,
+       search_term: name,
        current_label: name,
        selected_id: id,
        suggestions: [],
@@ -256,7 +262,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
   end
 
   def handle_event("clear", _, socket) do
-    {:noreply, assign(socket, query: "", current_label: "")}
+    {:noreply, assign(socket, search_term: "", current_label: "")}
   end
 
   defp field_type(options, max_items) when length(options) <= max_items, do: :select
@@ -278,7 +284,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
     []
   end
 
-  defp fetch_suggestions(assigns, query) do
+  defp fetch_suggestions(assigns, search_term) do
     assigns.resource
     |> Ash.Query.new()
     |> Ash.Query.load([
@@ -289,10 +295,10 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
     |> Ash.Query.filter(
       contains(
         ^ref(assigns.label_field),
-        ^%Ash.CiString{string: query}
+        ^%Ash.CiString{string: search_term}
       )
     )
-    |> Ash.Query.sort(ash_admin_position_sort: {%{search_term: query}, :asc})
+    |> Ash.Query.sort(ash_admin_position_sort: {%{search_term: search_term}, :asc})
     |> Ash.Query.limit(assigns.max_items)
     |> Ash.read!()
     |> Enum.map(&{Map.get(&1, assigns.label_field), &1.id})
