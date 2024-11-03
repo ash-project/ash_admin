@@ -1,4 +1,4 @@
-defmodule AshAdmin.Test.Post do
+defmodule AshAdmin.Test.Blog do
   @moduledoc false
   use Ash.Resource,
     domain: AshAdmin.Test.Domain,
@@ -15,6 +15,6 @@ defmodule AshAdmin.Test.Post do
   end
 
   admin do
-    resource_group(:group_a)
+    resource_group(:group_b)
   end
 end

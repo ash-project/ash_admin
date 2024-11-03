@@ -12,8 +12,12 @@ defmodule AshAdmin.Components.TopNav.DropdownHelper do
       }
     end
     |> Enum.group_by(fn resource -> resource.group end)
-    |> Enum.sort_by(fn {label, _items} -> label || "_____always_put_me_last" end)
-    |> Keyword.values()
+    |> Enum.with_index()
+    |> Enum.sort_by(fn
+      {{nil, _links}, _index} -> {1, nil}
+      {{_group, _links}, index} -> {0, index}
+    end)
+    |> Enum.map(fn {{_group, links}, _index} -> links end)
   end
 
   def dropdown_group_labels(domain) do

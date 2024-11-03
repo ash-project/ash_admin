@@ -9,9 +9,16 @@ defmodule AshAdmin.Test.Components.TopNav.Helpers.DropdownHelperTest do
       current_resource = AshAdmin.Test.Post
       domain = AshAdmin.Test.Domain
 
+      blog_link = %{
+        active: false,
+        group: :group_b,
+        text: "Blog",
+        to: "/admin?domain=Test&resource=Blog"
+      }
+
       post_link = %{
         active: true,
-        group: nil,
+        group: :group_a,
         text: "Post",
         to: "/admin?domain=Test&resource=Post"
       }
@@ -24,17 +31,30 @@ defmodule AshAdmin.Test.Components.TopNav.Helpers.DropdownHelperTest do
       }
 
       assert_unordered(
-        [[post_link, comment_link]],
+        [[blog_link], [comment_link], [post_link]],
         DropdownHelper.dropdown_groups(prefix, current_resource, domain)
       )
     end
+
+    test "groups resources by given order from the domain" do
+      prefix = "/admin"
+      current_resource = AshAdmin.Test.Post
+      domain = AshAdmin.Test.Domain
+
+      assert [
+               [%{group: :group_b, text: "Blog"} = _blog_link],
+               [%{group: :group_a, text: "Post"} = _post_link],
+               [%{group: nil, text: "Comment"} = _comment_link]
+             ] = DropdownHelper.dropdown_groups(prefix, current_resource, domain)
+    end
   end
 
-  describe "dropdown_group_labels/1" do
+  describe "dropdown_group_labels/3" do
     test "returns groups" do
       domain = AshAdmin.Test.Domain
 
-      assert [] = DropdownHelper.dropdown_group_labels(domain)
+      assert [group_b: "Group B", group_a: "Group A", group_c: "Group C"] =
+               DropdownHelper.dropdown_group_labels(domain)
     end
   end
 

@@ -28,7 +28,7 @@ defmodule AshAdmin.Domain do
         type: :keyword_list,
         default: [],
         doc:
-          "Humanized names for each resource group to appear in the admin area. These will be used as labels in the top navigation dropdown. If a key for a group does not appear in this mapping, the label will not be rendered."
+          "Humanized names for each resource group to appear in the admin area. These will be used as labels in the top navigation dropdown and will be shown sorted as given. If a key for a group does not appear in this mapping, the label will not be rendered."
       ]
     ]
   }
