@@ -2,7 +2,14 @@ defmodule AshAdmin.Components.TopNav do
   @moduledoc false
   use Phoenix.LiveComponent
   import AshAdmin.Helpers
-  alias AshAdmin.Components.TopNav.{ActorSelect, DrawerDropdown, Dropdown, TenantForm}
+
+  alias AshAdmin.Components.TopNav.{
+    ActorSelect,
+    DrawerDropdown,
+    Dropdown,
+    DropdownHelper,
+    TenantForm
+  }
 
   attr :domain, :any, required: true
   attr :resource, :any, required: true
@@ -44,8 +51,8 @@ defmodule AshAdmin.Components.TopNav do
                     class="mr-1"
                     id={AshAdmin.Domain.name(domain) <> "_domain_nav"}
                     name={AshAdmin.Domain.name(domain)}
-                    groups={dropdown_groups(@prefix, @resource, domain)}
-                    group_labels={dropdown_group_labels(domain)}
+                    groups={DropdownHelper.dropdown_groups(@prefix, @resource, domain)}
+                    group_labels={DropdownHelper.dropdown_group_labels(domain)}
                   />
                 </div>
                 <div class="ml-10 flex items-center">
@@ -132,32 +139,13 @@ defmodule AshAdmin.Components.TopNav do
             module={DrawerDropdown}
             id={AshAdmin.Domain.name(domain) <> "_domain_nav_drawer"}
             name={AshAdmin.Domain.name(domain)}
-            groups={dropdown_groups(@prefix, @resource, domain)}
-            group_labels={dropdown_group_labels(domain)}
+            groups={DropdownHelper.dropdown_groups(@prefix, @resource, domain)}
+            group_labels={DropdownHelper.dropdown_group_labels(domain)}
           />
         </div>
       </div>
     </nav>
     """
-  end
-
-  defp dropdown_groups(prefix, current_resource, domain) do
-    for resource <- AshAdmin.Domain.show_resources(domain) do
-      %{
-        text: AshAdmin.Resource.name(resource),
-        to:
-          "#{prefix}?domain=#{AshAdmin.Domain.name(domain)}&resource=#{AshAdmin.Resource.name(resource)}",
-        active: resource == current_resource,
-        group: AshAdmin.Resource.resource_group(resource)
-      }
-    end
-    |> Enum.group_by(fn resource -> resource.group end)
-    |> Enum.sort_by(fn {label, _items} -> label || "_____always_put_me_last" end)
-    |> Keyword.values()
-  end
-
-  defp dropdown_group_labels(domain) do
-    AshAdmin.Domain.resource_group_labels(domain)
   end
 
   def mount(socket) do
