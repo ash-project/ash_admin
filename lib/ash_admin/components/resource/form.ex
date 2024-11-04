@@ -1657,7 +1657,7 @@ defmodule AshAdmin.Components.Resource.Form do
      |> assign(:form, form)}
   end
 
-  def handle_event("save", _, socket) do
+  def handle_event("save", %{"form" => form_params}, socket) do
     form = socket.assigns.form
 
     before_submit = fn changeset ->
@@ -1666,7 +1666,11 @@ defmodule AshAdmin.Components.Resource.Form do
       |> Map.put(:actor, socket.assigns[:actor])
     end
 
-    case AshPhoenix.Form.submit(form, before_submit: before_submit, force?: true) do
+    case AshPhoenix.Form.submit(form,
+           before_submit: before_submit,
+           force?: true,
+           params: form_params
+         ) do
       {:ok, result} ->
         redirect_to(socket, result)
 
