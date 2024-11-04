@@ -309,7 +309,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
     #             []
     #           end
 
-    #         case AshPhoenix.Form.submit(socket.assigns.query, action_opts: action_opts) do
+    #         case AshPhoenix.Form.submit(socket.assigns.query, action_opts: action_opts, params: nil) do
     #           {:ok, data} -> assign(socket, :data, {:ok, data})
     #           {:error, query} -> assign(socket, data: {:error, all_errors(query)}, query: query)
     #         end
