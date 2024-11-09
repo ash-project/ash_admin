@@ -7,4 +7,7 @@ defmodule Demo.Tickets.Ticket.AdminFieldFormats do
       status
     end
   end
+
+  def format_field(datetime, field) when field in [:inserted_at, :updated_at],
+    do: Calendar.strftime(datetime, "%c.%f")
 end

@@ -15,7 +15,9 @@ defmodule Demo.Tickets.Ticket do
     show_action :read
     table_columns [:id, :representative, :reporter, :reporter_id, :subject, :status, :description, :reporter_name]
     format_fields [
-      description: {AdminFieldFormats, :format_field, [:description]}
+      description: {AdminFieldFormats, :format_field, [:description]},
+      inserted_at: {AdminFieldFormats, :format_field, [:inserted_at]},
+      updated_at: {AdminFieldFormats, :format_field, [:updated_at]}
     ]
 
     form do

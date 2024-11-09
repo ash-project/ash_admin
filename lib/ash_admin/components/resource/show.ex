@@ -2,7 +2,7 @@ defmodule AshAdmin.Components.Resource.Show do
   @moduledoc false
   use Phoenix.LiveComponent
 
-  alias AshAdmin.Components.Resource.{SensitiveAttribute, Table}
+  alias AshAdmin.Components.Resource.{Helpers.FormatHelper, SensitiveAttribute, Table}
   import AshAdmin.Helpers
   import AshAdmin.CoreComponents
 
@@ -535,33 +535,48 @@ defmodule AshAdmin.Components.Resource.Show do
             nested: nested?
           )
 
-        if attribute.type == Ash.Type.String do
-          cond do
-            short_text?(resource, attribute) ->
-              value!(Map.get(record, attribute.name))
+        case attribute.type do
+          Ash.Type.String ->
+            cond do
+              short_text?(resource, attribute) ->
+                value!(Map.get(record, attribute.name))
 
-            long_text?(resource, attribute) ->
-              ~H"""
-              <textarea
-                rows="3"
-                cols="40"
-                disabled
-                class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-              ><%= value!(Map.get(@record, @attribute.name)) %></textarea>
-              """
+              long_text?(resource, attribute) ->
+                ~H"""
+                <textarea
+                  rows="3"
+                  cols="40"
+                  disabled
+                  class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                ><%= value!(Map.get(@record, @attribute.name)) %></textarea>
+                """
 
-            true ->
-              ~H"""
-              <textarea
-                rows="1"
-                cols="20"
-                disabled
-                class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-              ><%= value!(Map.get(@record, @attribute.name)) %></textarea>
-              """
-          end
-        else
-          value!(Map.get(record, attribute.name))
+              true ->
+                ~H"""
+                <textarea
+                  rows="1"
+                  cols="20"
+                  disabled
+                  class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                ><%= value!(Map.get(@record, @attribute.name)) %></textarea>
+                """
+            end
+
+          type
+          when type in [
+                 Ash.Type.Date,
+                 Ash.Type.DateTime,
+                 Ash.Type.Time,
+                 Ash.Type.NaiveDatetime,
+                 Ash.Type.UtcDatetime,
+                 Ash.Type.UtcDatetimeUsec
+               ] ->
+            resource
+            |> AshAdmin.Resource.format_fields()
+            |> FormatHelper.format_attribute(record, attribute)
+
+          _ ->
+            value!(Map.get(record, attribute.name))
         end
       end
     end

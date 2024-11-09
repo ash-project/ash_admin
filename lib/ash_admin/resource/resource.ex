@@ -79,7 +79,7 @@ defmodule AshAdmin.Resource do
       format_fields: [
         type: {:list, :any},
         doc: """
-        The list of fields and their formats represented as a MFA. For example: `updated_at: {Timex, :format!, ["{0D}-{0M}-{YYYY} {h12}:{m} {AM}"]}`.
+        The list of fields and their formats represented as a MFA. For example: `updated_at: {Timex, :format!, ["{0D}-{0M}-{YYYY} {h12}:{m} {AM}"]}`. Datatable pages format all given fields. Show and Update pages format given read-only fields of types `Ash.Type.Date, `Ash.Type.DateTime`, `Ash.Type.Time`, `Ash.Type.NaiveDatetime`, `Ash.Type.UtcDatetime` and `Ash.Type.UtcDatetimeUsec`.
         """
       ],
       relationship_display_fields: [
