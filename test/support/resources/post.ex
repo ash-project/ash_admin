@@ -12,6 +12,15 @@ defmodule AshAdmin.Test.Post do
       allow_nil?(false)
       public?(true)
     end
+
+    attribute :expires_at, :utc_datetime_usec do
+      public?(true)
+    end
+  end
+
+  actions do
+    default_accept(:*)
+    defaults(create: :*)
   end
 
   admin do
