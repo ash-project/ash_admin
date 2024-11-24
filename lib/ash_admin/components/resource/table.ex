@@ -5,6 +5,7 @@ defmodule AshAdmin.Components.Resource.Table do
   import AshAdmin.Helpers
   import AshAdmin.CoreComponents
   alias Ash.Resource.Relationships.{BelongsTo, HasOne}
+  alias AshAdmin.Components.Resource.Helpers.FormatHelper
   alias AshAdmin.Components.Resource.SensitiveAttribute
 
   attr :attributes, :any, default: nil
@@ -172,13 +173,7 @@ defmodule AshAdmin.Components.Resource.Table do
          relationship_name
        )
        when struct in [Ash.Resource.Attribute, Ash.Resource.Aggregate, Ash.Resource.Calculation] do
-    {mod, func, args} =
-      Keyword.get(formats || [], attribute.name, {Phoenix.HTML.Safe, :to_iodata, []})
-
-    data =
-      record
-      |> Map.get(attribute.name)
-      |> (&apply(mod, func, [&1] ++ args)).()
+    data = FormatHelper.format_attribute(formats, record, attribute)
 
     if Map.get(attribute, :sensitive?) &&
          not Enum.member?(show_sensitive_fields, attribute.name) do
