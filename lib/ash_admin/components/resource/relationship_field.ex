@@ -35,8 +35,6 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
     label_field = AshAdmin.Resource.label_field(assigns.resource)
     current_label = get_current_label(assigns.resource, assigns.value, label_field)
 
-    # IO.inspect(assigns.value, label: "value")
-
     {:ok,
      assign(socket, assigns)
      |> assign(
@@ -67,8 +65,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
   @spec render(atom() | %{:resource => atom() | Ash.Query.t(), optional(any()) => any()}) ::
           Phoenix.LiveView.Rendered.t()
   def render(assigns) do
-    select_options =
-      select_options!(assigns.resource, assigns.max_items + 1)
+    select_options = select_options!(assigns)
 
     assigns =
       assign(assigns,
@@ -268,7 +265,9 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
   defp field_type(options, max_items) when length(options) <= max_items, do: :select
   defp field_type(_options, _max_items), do: :typeahead
 
-  defp select_options!(resource, limit) do
+  defp select_options!(assigns) do
+    resource = assigns.resource
+    limit = assigns.max_items + 1
     label_field = AshAdmin.Resource.label_field(resource)
     pk_field = Ash.Resource.Info.primary_key(resource)
 
@@ -276,7 +275,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
     |> Ash.Query.new()
     |> Ash.Query.load([pk_field, label_field])
     |> Ash.Query.limit(limit)
-    |> Ash.read!()
+    |> Ash.read!(actor: %{admin: true})
     |> Enum.map(&{Map.get(&1, label_field), &1.id})
   end
 
