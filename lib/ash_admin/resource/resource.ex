@@ -95,6 +95,11 @@ defmodule AshAdmin.Resource do
         type: {:list, :atom},
         doc:
           "The list of fields that should not be redacted in the admin UI even if they are marked as sensitive."
+      ],
+      show_calculations: [
+        type: {:list, :atom},
+        doc:
+          "A list of calculation that can be calculate when this resource is shown. By default, all calculations are included."
       ]
     ]
   }
@@ -190,6 +195,11 @@ defmodule AshAdmin.Resource do
     end
   end
 
+  def show_calculations(resource) do
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :show_calculations, nil, true) ||
+      calculations(resource)
+  end
+
   def fields(resource) do
     Spark.Dsl.Extension.get_entities(resource, [:admin, :form])
   end
@@ -218,5 +228,12 @@ defmodule AshAdmin.Resource do
     |> Enum.filter(&(&1.type == type))
     |> Enum.sort_by(&(!Map.get(&1, :primary?)))
     |> Enum.map(& &1.name)
+  end
+
+  defp calculations(resource) do
+    resource
+    |> Ash.Resource.Info.calculations()
+    |> Enum.map(& &1.name)
+    |> Enum.sort_by(& &1)
   end
 end
