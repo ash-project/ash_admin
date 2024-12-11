@@ -36,6 +36,7 @@ Configure the admin dashboard for a given resource.
 | [`relationship_display_fields`](#admin-relationship_display_fields){: #admin-relationship_display_fields } | `list(atom)` |  | The list of attributes to render when this resource is shown as a relationship on another resource's datatable. |
 | [`resource_group`](#admin-resource_group){: #admin-resource_group } | `atom` |  | The group in the top resource dropdown that the resource appears in. |
 | [`show_sensitive_fields`](#admin-show_sensitive_fields){: #admin-show_sensitive_fields } | `list(atom)` |  | The list of fields that should not be redacted in the admin UI even if they are marked as sensitive. |
+| [`show_calculations`](#admin-show_calculations){: #admin-show_calculations } | `list(atom)` |  | A list of calculation that can be calculate when this resource is shown. By default, all calculations are included. |
 
 
 ## admin.form
