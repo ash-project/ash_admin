@@ -32,20 +32,20 @@ defmodule AshAdmin.Components.Resource.GenericAction do
             <ul>
               <li :for={{field, message} <- all_errors(form)}>
                 <span :if={field}>
-                  <%= field %>:
+                  {field}:
                 </span>
                 <span>
-                  <%= message %>
+                  {message}
                 </span>
               </li>
             </ul>
           </div>
-          <%= AshAdmin.Components.Resource.Form.render_attributes(
+          {AshAdmin.Components.Resource.Form.render_attributes(
             assigns,
             @resource,
             @action,
             form
-          ) %>
+          )}
           <button
             type="submit"
             class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -71,20 +71,20 @@ defmodule AshAdmin.Components.Resource.GenericAction do
                   <ul>
                     <li :for={{field, message} <- all_errors(form)}>
                       <span :if={field}>
-                        <%= field %>:
+                        {field}:
                       </span>
                       <span>
-                        <%= message %>
+                        {message}
                       </span>
                     </li>
                   </ul>
                 </div>
-                <%= AshAdmin.Components.Resource.Form.render_attributes(
+                {AshAdmin.Components.Resource.Form.render_attributes(
                   assigns,
                   @resource,
                   @action,
                   form
-                ) %>
+                )}
                 <div class="px-4 py-3 text-right sm:px-6 my-auto">
                   <button
                     type="submit"
@@ -106,7 +106,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
         <% {:ok, result} -> %>
           <div class="shadow-lg overflow-auto sm:rounded-md bg-white mx-12 px-8">
             <h1>Success</h1>
-            <%= render_value(assigns, result, @action.returns, @action.constraints) %>
+            {render_value(assigns, result, @action.returns, @action.constraints)}
           </div>
         <% :error -> %>
           Action failed
@@ -126,7 +126,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
 
     ~H"""
     <%= for inner_value <- List.wrap(@value) do %>
-      <%= render_value(assigns, inner_value, @type, @constraints) %>
+      {render_value(assigns, inner_value, @type, @constraints)}
       <hr />
     <% end %>
     """
@@ -193,10 +193,10 @@ defmodule AshAdmin.Components.Resource.GenericAction do
       ~H"""
       <%= for {key, config} <- @constraints[:fields] do %>
         <div class="block text-sm font-medium text-gray-700">
-          <%= to_name(key) %>
+          {to_name(key)}
         </div>
         <div>
-          <%= render_value(assigns, get_key(@value, key), config[:type], config[:constraints]) %>
+          {render_value(assigns, get_key(@value, key), config[:type], config[:constraints])}
         </div>
       <% end %>
       """

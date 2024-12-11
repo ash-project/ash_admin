@@ -43,19 +43,19 @@ defmodule AshAdmin.Components.Resource.Form do
     <div class="md:pt-10 sm:mt-0 bg-gray-300 min-h-screen">
       <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
         <div class="mt-5 md:mt-0 md:col-span-2">
-          <%= render_form(assigns) %>
+          {render_form(assigns)}
         </div>
       </div>
 
       <div :if={@type != :create} class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
         <div class="mt-5 md:mt-0 md:col-span-2">
-          <%= AshAdmin.Components.Resource.Show.render_show(
+          {AshAdmin.Components.Resource.Show.render_show(
             assigns,
             @record,
             @resource,
             "Original Record",
             false
-          ) %>
+          )}
         </div>
       </div>
     </div>
@@ -87,16 +87,16 @@ defmodule AshAdmin.Components.Resource.Form do
         <ul>
           <li :for={{field, message} <- all_errors(@form)}>
             <span :if={field}>
-              <%= field %>:
+              {field}:
             </span>
             <span>
-              <%= message %>
+              {message}
             </span>
           </li>
         </ul>
       </div>
       <h1 class="text-lg mt-2 ml-4">
-        <%= String.capitalize(to_string(@action.type)) %> <%= AshAdmin.Resource.name(@resource) %>
+        {String.capitalize(to_string(@action.type))} {AshAdmin.Resource.name(@resource)}
       </h1>
       <div class="flex justify-between col-span-6 mr-4 mt-2 overflow-auto px-4">
         <AshAdmin.Components.Resource.SelectTable.table
@@ -142,13 +142,13 @@ defmodule AshAdmin.Components.Resource.Form do
             value={elem(kv, 1)}
             type="hidden"
           />
-          <%= render_attributes(assigns, @resource, @action, form) %>
+          {render_attributes(assigns, @resource, @action, form)}
           <div class="px-4 py-3 text-right sm:px-6">
             <button
               type="submit"
               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              <%= save_button_text(@type) %>
+              {save_button_text(@type)}
             </button>
           </div>
         </.form>
@@ -197,14 +197,14 @@ defmodule AshAdmin.Components.Resource.Form do
             class="block text-sm font-medium text-gray-700"
             for={@form.name <> "[#{attribute.name}]"}
           >
-            <%= to_name(attribute.name) %>
+            {to_name(attribute.name)}
           </label>
-          <%= render_attribute_input(assigns, attribute, @form) %>
+          {render_attribute_input(assigns, attribute, @form)}
           <.error_tag
             :for={{error, vars} <- Keyword.get_values(@form.errors || [], attribute.name)}
             :if={!Ash.Type.embedded_type?(attribute.type)}
           >
-            <%= replace_vars(error, vars) %>
+            {replace_vars(error, vars)}
           </.error_tag>
         </div>
       </div>
@@ -229,14 +229,14 @@ defmodule AshAdmin.Components.Resource.Form do
           class="block text-sm font-medium text-gray-700"
           for={@form.name <> "[#{attribute.name}]"}
         >
-          <%= to_name(attribute.name) %>
+          {to_name(attribute.name)}
         </label>
-        <%= render_attribute_input(assigns, attribute, @form) %>
+        {render_attribute_input(assigns, attribute, @form)}
         <.error_tag
           :for={{error, vars} <- Keyword.get_values(@form.errors || [], attribute.name)}
           :if={!Ash.Type.embedded_type?(attribute.type)}
         >
-          <%= replace_vars(error, vars) %>
+          {replace_vars(error, vars)}
         </.error_tag>
       </div>
     </div>
@@ -261,14 +261,14 @@ defmodule AshAdmin.Components.Resource.Form do
           class="block text-sm font-medium text-gray-700"
           for={@form.name <> "[#{attribute.name}]"}
         >
-          <%= to_name(attribute.name) %>
+          {to_name(attribute.name)}
         </label>
-        <%= render_attribute_input(assigns, attribute, @form) %>
+        {render_attribute_input(assigns, attribute, @form)}
         <.error_tag
           :for={{error, vars} <- Keyword.get_values(@form.errors || [], attribute.name)}
           :if={!Ash.Type.embedded_type?(attribute.type)}
         >
-          <%= replace_vars(error, vars) %>
+          {replace_vars(error, vars)}
         </.error_tag>
       </div>
     </div>
@@ -278,15 +278,15 @@ defmodule AshAdmin.Components.Resource.Form do
           class="block text-sm font-medium text-gray-700"
           for={@form.name <> "[#{argument.name}]"}
         >
-          <%= to_name(argument.name) %>
+          {to_name(argument.name)}
         </label>
-        <%= render_relationship_input(
+        {render_relationship_input(
           assigns,
           Ash.Resource.Info.relationship(@form.source.resource, relationship),
           @form,
           argument,
           opts
-        ) %>
+        )}
       <% end %>
     </div>
     """
@@ -296,7 +296,7 @@ defmodule AshAdmin.Components.Resource.Form do
   def error_tag(assigns) do
     ~H"""
     <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 phx-no-feedback:hidden">
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </p>
     """
   end
@@ -362,10 +362,10 @@ defmodule AshAdmin.Components.Resource.Form do
           <ul>
             <li :for={{field, message} <- AshPhoenix.Form.errors(inner_form.source)}>
               <span :if={field}>
-                <%= to_name(field) %>:
+                {to_name(field)}:
               </span>
               <span>
-                <%= message %>
+                {message}
               </span>
             </li>
           </ul>
@@ -386,24 +386,24 @@ defmodule AshAdmin.Components.Resource.Form do
               value={elem(kv, 1)}
               type="hidden"
             />
-            <%= render_attributes(
+            {render_attributes(
               assigns,
               @relationship.through,
               join_action(@relationship.through, join_form, inner_form.source.form_keys[:_join]),
               join_form,
               @exactly_fields || inner_form.source.form_keys[:_join][:create_fields],
               skip_through_related(@exactly_fields, @relationship)
-            ) %>
+            )}
           </.inputs_for>
         <% end %>
-        <%= render_attributes(
+        {render_attributes(
           assigns,
           inner_form.source.resource,
           inner_form.source.source.action,
           inner_form,
           @exactly_fields || relationship_fields(inner_form),
           skip_related(@exactly_fields, @relationship)
-        ) %>
+        )}
 
         <button
           :if={can_remove_related?(inner_form, @opts)}
@@ -467,10 +467,10 @@ defmodule AshAdmin.Components.Resource.Form do
         Load
       </button>
       <div :if={is_exception(@load_errors[@relationship.name])}>
-        <%= Exception.message(@load_errors[@relationship.name]) %>
+        {Exception.message(@load_errors[@relationship.name])}
       </div>
       <div :if={@load_errors[@relationship.name] && !is_exception(@load_errors[@relationship.name])}>
-        <%= inspect(@load_errors[@relationship.name]) %>
+        {inspect(@load_errors[@relationship.name])}
       </div>
     </div>
     """
@@ -980,7 +980,7 @@ defmodule AshAdmin.Components.Resource.Form do
           options={@possible_types}
           field={@form[:_union_type]}
         />
-        <%= render_attribute_input(
+        {render_attribute_input(
           assigns,
           %{@attribute | type: @actual_union_type, constraints: @actual_union_constraints},
           @form,
@@ -988,7 +988,7 @@ defmodule AshAdmin.Components.Resource.Form do
           @name,
           @id,
           @actual_union_type_name
-        ) %>
+        )}
       </div>
     </div>
     """
@@ -1014,7 +1014,7 @@ defmodule AshAdmin.Components.Resource.Form do
       ~H"""
       <%= cond do %>
         <% match?({:array, {:array, _}}, @attribute.type) -> %>
-          <%= render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id, @union_type) %>
+          {render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id, @union_type)}
         <% match?({:array, _}, @attribute.type) && Ash.Type.embedded_type?(@attribute.type) -> %>
           <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
             <.input
@@ -1033,7 +1033,7 @@ defmodule AshAdmin.Components.Resource.Form do
               <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
             </button>
 
-            <%= render_attributes(
+            {render_attributes(
               assigns,
               inner_form.source.resource,
               inner_form.source.source.action,
@@ -1042,7 +1042,7 @@ defmodule AshAdmin.Components.Resource.Form do
                 | id: nested_form_id(@id, @form.id, @attribute.name, inner_form),
                   name: nested_form_name(@name, @form.name, @attribute.name, inner_form)
               }
-            ) %>
+            )}
           </.inputs_for>
           <button
             :if={can_append_embed?(@form.source, @attribute.name, @attribute.type)}
@@ -1074,7 +1074,7 @@ defmodule AshAdmin.Components.Resource.Form do
               <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
             </button>
 
-            <%= render_attributes(
+            {render_attributes(
               assigns,
               inner_form.source.resource,
               inner_form.source.source.action,
@@ -1083,7 +1083,7 @@ defmodule AshAdmin.Components.Resource.Form do
                 | id: @id || @form.id <> "_#{@attribute.name}",
                   name: @name || @form.name <> "[#{@attribute.name}]"
               }
-            ) %>
+            )}
           <% end %>
           <button
             :if={can_append_embed?(@form.source, @attribute.name, @attribute.type)}
@@ -1105,7 +1105,7 @@ defmodule AshAdmin.Components.Resource.Form do
             value={elem(kv, 1)}
             type="hidden"
           />
-          <%= render_attributes(
+          {render_attributes(
             assigns,
             inner_form.source.resource,
             inner_form.source.source.action,
@@ -1114,7 +1114,7 @@ defmodule AshAdmin.Components.Resource.Form do
               | id: @id || @form.id <> "_#{@attribute.name}",
                 name: @name || @form.name <> "[#{@attribute.name}]"
             }
-          ) %>
+          )}
         <% Ash.Type.embedded_type?(@attribute.type) -> %>
           <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
             <.input
@@ -1133,7 +1133,7 @@ defmodule AshAdmin.Components.Resource.Form do
               <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
             </button>
 
-            <%= render_attributes(
+            {render_attributes(
               assigns,
               inner_form.source.resource,
               inner_form.source.source.action,
@@ -1142,7 +1142,7 @@ defmodule AshAdmin.Components.Resource.Form do
                 | id: @id || @form.id <> "_#{@attribute.name}",
                   name: @name || @form.name <> "[#{@attribute.name}]"
               }
-            ) %>
+            )}
           </.inputs_for>
           <button
             :if={can_append_embed?(@form.source, @attribute.name, @attribute.type)}
@@ -1166,7 +1166,7 @@ defmodule AshAdmin.Components.Resource.Form do
             name={@name || @form.name <> "[#{@attribute.name}]"}
           />
         <% true -> %>
-          <%= render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id, @union_type) %>
+          {render_fallback_attribute(assigns, @form, @attribute, @value, @name, @id, @union_type)}
       <% end %>
       """
     end
@@ -1217,7 +1217,7 @@ defmodule AshAdmin.Components.Resource.Form do
         {this_value, index} <-
           Enum.with_index(list_value(@value || AshPhoenix.Form.value(@form.source, @attribute.name)))
       }>
-        <%= render_attribute_input(
+        {render_attribute_input(
           assigns,
           %{@attribute | type: @type, constraints: @attribute.constraints[:items] || []},
           @form,
@@ -1225,7 +1225,7 @@ defmodule AshAdmin.Components.Resource.Form do
           @name <> "[#{index}]",
           @id <> "_#{index}",
           @union_type
-        ) %>
+        )}
         <button
           type="button"
           phx-click="remove_value"

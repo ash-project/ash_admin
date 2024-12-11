@@ -28,7 +28,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
           aria-haspopup="true"
           aria-expanded="true"
         >
-          <%= @name %>
+          {@name}
 
           <svg
             class="-mr-1 ml-2 h-5 w-5"
@@ -79,7 +79,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
                     }
                     role="menuotem"
                   >
-                    <%= link.text %>
+                    {link.text}
                   </.link>
                 <% end %>
               </div>
@@ -105,7 +105,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
     ~H"""
     <%= if @label_text do %>
       <span class="block px-4 py-2 text-xs text-gray-400 font-semibold italic">
-        <%= @label_text %>
+        {@label_text}
       </span>
     <% end %>
     """

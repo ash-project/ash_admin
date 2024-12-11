@@ -27,13 +27,13 @@ defmodule AshAdmin.Components.Resource.Table do
       <table class="rounded-t-lg m-5 w-5/6 mx-auto text-left">
         <thead class="text-left border-b-2">
           <th :for={attribute <- attributes(@resource, @attributes, @skip)}>
-            <%= to_name(attribute.name) %>
+            {to_name(attribute.name)}
           </th>
         </thead>
         <tbody>
           <tr :for={record <- @data} class="border-b-2">
             <td :for={attribute <- attributes(@resource, @attributes, @skip)} class="py-3">
-              <%= render_attribute(
+              {render_attribute(
                 @domain,
                 record,
                 attribute,
@@ -41,7 +41,7 @@ defmodule AshAdmin.Components.Resource.Table do
                 @show_sensitive_fields,
                 @actor,
                 @relationship_name
-              ) %>
+              )}
             </td>
             <td :if={@actions && actions?(@resource)}>
               <div class="flex h-max justify-items-center">
@@ -209,7 +209,7 @@ defmodule AshAdmin.Components.Resource.Table do
       module={SensitiveAttribute}
       value={@value}
     >
-      <%= format_attribute_value(@value, @attribute) %>
+      {format_attribute_value(@value, @attribute)}
     </.live_component>
     """
   end

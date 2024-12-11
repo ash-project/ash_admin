@@ -19,7 +19,7 @@ defmodule AshAdmin.Components.Resource.Nav do
             <div class="flex-shrink-0">
               <h3 class="text-white text-lg">
                 <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}"}>
-                  <%= AshAdmin.Resource.name(@resource) %>
+                  {AshAdmin.Resource.name(@resource)}
                 </.link>
               </h3>
             </div>

@@ -20,7 +20,7 @@ defmodule AshAdmin.Components.Resource.SensitiveAttribute do
         </span>
       </span>
       <span :if={@present? && @viewed}>
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
         <span class="cursor-pointer" phx-click="toggle_sensitive_attribute" phx-target={@myself}>
           <.icon name="hero-eye-slash-solid" class="w-5 h-5 text-gray-500" />
         </span>

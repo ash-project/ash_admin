@@ -76,7 +76,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
             class="hover:text-blue-400 hover:underline"
             target={"#{@prefix}?domain=#{AshAdmin.Domain.name(@actor_domain)}&resource=#{AshAdmin.Resource.name(@actor.__struct__)}&primary_key=#{encode_primary_key(@actor)}"}
           >
-            <%= user_display(@actor, @actor_tenant) %>
+            {user_display(@actor, @actor_tenant)}
           </.link>
           <button :if={@actor} phx-click={@clear_actor} type="button">
             <svg
@@ -99,7 +99,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
         </span>
       </div>
       <div :if={!@actor}>
-        <%= render_actor_link(assigns, @actor_resources) %>
+        {render_actor_link(assigns, @actor_resources)}
       </div>
     </div>
     """
@@ -110,7 +110,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
 
     ~H"""
     <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=read"}>
-      Set <%= AshAdmin.Resource.name(@resource) %>
+      Set {AshAdmin.Resource.name(@resource)}
     </.link>
     """
   end
@@ -124,7 +124,7 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
         :for={{{domain, resource}, i} <- Enum.with_index(@domains_and_resources)}
         navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(domain)}&resource=#{AshAdmin.Resource.name(resource)}&action_type=read"}
       >
-        Set <%= AshAdmin.Resource.name(resource) %>
+        Set {AshAdmin.Resource.name(resource)}
         <span :if={i != Enum.count(@domains_and_resources) - 1}>
           |
         </span>
