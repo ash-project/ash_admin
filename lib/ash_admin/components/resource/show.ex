@@ -17,11 +17,38 @@ defmodule AshAdmin.Components.Resource.Show do
   attr :prefix, :any, required: true
 
   def render(assigns) do
+    assigns =
+      assign_new(assigns, :calculations, fn %{resource: resource} ->
+        calculations =
+          AshAdmin.Resource.show_calculations(resource)
+
+        resource
+        |> Ash.Resource.Info.calculations()
+        |> Enum.filter(&(&1.name in calculations))
+        |> Enum.sort_by(
+          &Enum.find_index(calculations, fn name ->
+            name == &1.name
+          end)
+        )
+        |> Enum.map(fn calculation ->
+          form =
+            AshPhoenix.FilterForm.Arguments.new(%{}, calculation.arguments)
+            |> to_form()
+
+          {calculation, form}
+        end)
+      end)
+
     ~H"""
     <div class="md:pt-10 sm:mt-0 bg-gray-300 min-h-screen pb-20">
       <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
         <div class="mt-5 md:mt-0 md:col-span-2">
           {render_show(assigns, @record, @resource)}
+        </div>
+      </div>
+      <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
+        <div class="mt-5 md:mt-0 md:col-span-2">
+          {render_calculations(assigns, @record, @resource)}
         </div>
       </div>
       <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
@@ -75,6 +102,65 @@ defmodule AshAdmin.Components.Resource.Show do
     """
   end
 
+  @spec render_calculations(any(), any(), any()) :: Phoenix.LiveView.Rendered.t()
+  def render_calculations(assigns, record, resource) do
+    assigns = assign(assigns, record: record, resource: resource)
+
+    ~H"""
+    <div
+      :for={{calculation, calculation_form} <- @calculations}
+      class="shadow-lg overflow-hidden sm:rounded-md mb-2 bg-white"
+    >
+      <div class="px-4 py-5 mt-2">
+        <div>{to_name(calculation.name)}</div>
+        <div :if={loaded?(@record, calculation.name)}>
+          {render_maybe_sensitive_attribute(
+            assigns,
+            @resource,
+            @record,
+            calculation
+          )}
+        </div>
+        <div>
+          <.form
+            :let={form}
+            :if={length(calculation.arguments)}
+            as={calculation.name}
+            for={calculation_form}
+            phx-submit="calculate"
+            phx-target={@myself}
+          >
+            <.input type="hidden" name="calculation" value={calculation.name} />
+            {AshAdmin.Components.Resource.Form.render_attributes(
+              assigns,
+              @resource,
+              calculation,
+              form
+            )}
+            <.error :if={is_exception(@calculation_errors[calculation.name])}>
+              {Exception.message(@calculation_errors[calculation.name])}
+            </.error>
+            <.error :if={
+              @calculation_errors[calculation.name] &&
+                !is_exception(@calculation_errors[calculation.name])
+            }>
+              {inspect(@calculation_errors[calculation.name])}
+            </.error>
+            <div class="px-4 py-3 text-right sm:px-6 text-right">
+              <button
+                type="submit"
+                class="py-2 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+              >
+                Calculate
+              </button>
+            </div>
+          </.form>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   defp render_relationships(assigns, _record, resource) do
     assigns = assign(assigns, resource: resource)
 
@@ -117,7 +203,12 @@ defmodule AshAdmin.Components.Resource.Show do
   end
 
   def mount(socket) do
-    {:ok, assign_new(socket, :load_errors, fn -> %{} end)}
+    assign =
+      socket
+      |> assign_new(:load_errors, fn -> %{} end)
+      |> assign_new(:calculation_errors, fn -> %{} end)
+
+    {:ok, assign}
   end
 
   defp render_relationship_data(assigns, record, %{
@@ -289,7 +380,13 @@ defmodule AshAdmin.Components.Resource.Show do
     """
   end
 
-  defp render_maybe_sensitive_attribute(assigns, resource, record, attribute, relationship_name) do
+  defp render_maybe_sensitive_attribute(
+         assigns,
+         resource,
+         record,
+         attribute,
+         relationship_name \\ nil
+       ) do
     assigns = assign(assigns, attribute: attribute, relationship_name: relationship_name)
     show_sensitive_fields = AshAdmin.Resource.show_sensitive_fields(resource)
 
@@ -579,6 +676,38 @@ defmodule AshAdmin.Components.Resource.Show do
             value!(Map.get(record, attribute.name))
         end
       end
+    end
+  end
+
+  def handle_event("calculate", %{"calculation" => calculation} = event, socket) do
+    record = socket.assigns.record
+    domain = socket.assigns.domain
+
+    arguments =
+      event
+      |> Map.get(calculation, [])
+      |> Enum.map(fn {attr, value} -> {String.to_atom(attr), value} end)
+
+    calculation = String.to_atom(calculation)
+
+    calculations =
+      [{calculation, arguments}]
+
+    case Ash.load(
+           record,
+           calculations,
+           domain: domain,
+           actor: socket.assigns[:actor],
+           authorize?: socket.assigns[:authorizing]
+         ) do
+      {:ok, loaded} ->
+        {:noreply, assign(socket, record: loaded)}
+
+      {:error, errors} ->
+        {:noreply,
+         assign(socket,
+           calculation_errors: Map.put(socket.assigns.calculation_errors, calculation, errors)
+         )}
     end
   end
 

@@ -759,7 +759,7 @@ defmodule AshAdmin.Components.Resource.Form do
           prompt={allow_nil_option(@attribute, @value)}
           name={@name || @form.name <> "[#{@attribute.name}]"}
         />
-      <% markdown?(@form.source.resource, @attribute) -> %>
+      <% markdown?(@resource, @attribute) -> %>
         <div
           phx-hook="MarkdownEditor"
           id={if @id, do: @id <> "_container", else: @form.id <> "_#{@attribute.name}_container"}
@@ -773,7 +773,7 @@ defmodule AshAdmin.Components.Resource.Form do
             name={@name || @form.name <> "[#{@attribute.name}]"}
           ><%= value(@value, @form, @attribute) || "" %></textarea>
         </div>
-      <% long_text?(@form.source.resource, @attribute) -> %>
+      <% long_text?(@resource, @attribute) -> %>
         <textarea
           id={@id || @form.id <> "_#{@attribute.name}"}
           name={@name || @form.name <> "[#{@attribute.name}]"}
@@ -782,9 +782,9 @@ defmodule AshAdmin.Components.Resource.Form do
           data-attrs="style"
           placeholder={placeholder(@default)}
         ><%= value(@value, @form, @attribute) %></textarea>
-      <% short_text?(@form.source.resource, @attribute) -> %>
+      <% short_text?(@resource, @attribute) -> %>
         <.input
-          type={text_input_type(@form.source.resource, @attribute)}
+          type={text_input_type(@resource, @attribute)}
           id={@id || @form.id <> "_#{@attribute.name}"}
           value={value(@value, @form, @attribute)}
           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
@@ -793,7 +793,7 @@ defmodule AshAdmin.Components.Resource.Form do
         />
       <% true -> %>
         <.input
-          type={text_input_type(@form.source.resource, @attribute)}
+          type={text_input_type(@resource, @attribute)}
           placeholder={placeholder(@default)}
           id={@id || @form.id <> "_#{@attribute.name}"}
           value={value(@value, @form, @attribute)}
@@ -1374,8 +1374,17 @@ defmodule AshAdmin.Components.Resource.Form do
   defp value(%Ash.Union{value: value}, _form, _attribute, _) when not is_nil(value), do: value
   defp value(value, _form, _attribute, _) when not is_nil(value), do: value
 
-  defp value(_value, form, attribute, _default) do
-    case AshPhoenix.Form.value(form.source, attribute.name) do
+  defp value(
+         _value,
+         %{source: %AshPhoenix.FilterForm.Arguments{input: input}},
+         %{name: attribute_name},
+         _default
+       ) do
+    Map.get(input, attribute_name, nil)
+  end
+
+  defp value(_value, %{source: form}, attribute, _default) do
+    case AshPhoenix.Form.value(form, attribute.name) do
       %Ash.Union{value: value} -> value
       value -> value
     end
@@ -1834,6 +1843,10 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def attributes(resource, action, exactly \\ nil)
+
+  def attributes(resource, %Ash.Resource.Calculation{arguments: arguments}, _exacly) do
+    sort_attributes(arguments, resource)
+  end
 
   def attributes(resource, %{type: :read, arguments: arguments}, exactly)
       when not is_nil(exactly) do

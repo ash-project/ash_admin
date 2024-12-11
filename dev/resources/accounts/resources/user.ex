@@ -20,6 +20,8 @@ defmodule Demo.Accounts.User do
     read_actions [:me, :read, :by_id, :by_name]
 
     table_columns [:id, :first_name, :last_name, :representative, :admin, :full_name, :api_key, :date_of_birth]
+
+    show_calculations [:multi_arguments, :full_name]
   end
 
   multitenancy do
@@ -82,7 +84,28 @@ defmodule Demo.Accounts.User do
   end
 
   calculations do
-    calculate :full_name, :string, expr(first_name <> " " <> last_name)
+    calculate :full_name, :string, {Demo.Calculations.Concat, keys: [:first_name, :last_name]} do
+      argument :separator, :string do
+        allow_nil? false
+        constraints [allow_empty?: true, trim?: false]
+        default " "
+      end
+    end
+
+    calculate :is_super_admin?, :boolean, expr(admin && representative)
+
+    calculate :multi_arguments, :string, expr("Arg1: " <> ^arg(:arg1) <> ", Arg2: " <> (if ^arg(:arg2), do: "Yes", else: "No") <> ", Arg3: " <> ^arg(:arg3)) do
+      argument :arg1, :string do
+        allow_nil? false
+        constraints [allow_empty?: false]
+      end
+
+      argument :arg2, :boolean
+
+      argument :arg3, :float do
+        allow_nil? true
+      end
+    end
   end
 
   attributes do
