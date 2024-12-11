@@ -24,7 +24,7 @@ defmodule AshAdmin.Layouts do
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
         <meta name="csrf-token" content={get_csrf_token()} />
-        <title><%= assigns[:page_title] || "Ash Admin" %></title>
+        <title>{assigns[:page_title] || "Ash Admin"}</title>
         <style nonce={csp_nonce(@conn, :style)}>
           <%= raw(render("app.css", %{})) %>
         </style>
@@ -48,7 +48,7 @@ defmodule AshAdmin.Layouts do
         </script>
       </head>
       <body>
-        <%= @inner_content %>
+        {@inner_content}
       </body>
       <script nonce={csp_nonce(@conn, :script)}>
         <%= raw(render("app.js", %{})) %>

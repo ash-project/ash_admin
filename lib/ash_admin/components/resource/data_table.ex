@@ -43,20 +43,20 @@ defmodule AshAdmin.Components.Resource.DataTable do
                     <ul>
                       <li :for={{field, message} <- all_errors(form)}>
                         <span :if={field}>
-                          <%= field %>:
+                          {field}:
                         </span>
                         <span>
-                          <%= message %>
+                          {message}
                         </span>
                       </li>
                     </ul>
                   </div>
-                  <%= AshAdmin.Components.Resource.Form.render_attributes(
+                  {AshAdmin.Components.Resource.Form.render_attributes(
                     assigns,
                     @resource,
                     @action,
                     form
-                  ) %>
+                  )}
                   <div class="px-4 py-3 text-right sm:px-6">
                     <button
                       type="submit"
@@ -93,13 +93,13 @@ defmodule AshAdmin.Components.Resource.DataTable do
               <ul>
                 <%= for {path, error} <- AshPhoenix.Form.errors(@query, for_path: :all) do %>
                   <%= for {field, message} <- error do %>
-                    <li><%= Enum.join(path ++ [field], ".") %>: <%= message %></li>
+                    <li>{Enum.join(path ++ [field], ".")}: {message}</li>
                   <% end %>
                 <% end %>
               </ul>
             </div>
             <div class="px-2">
-              <%= render_pagination_links(assigns, :top) %>
+              {render_pagination_links(assigns, :top)}
 
               <div :if={@thousand_records_warning && !@action.get? && match?({:ok, _}, @data)}>
                 Only showing up to 1000 rows. To show more, enable
@@ -118,7 +118,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 prefix={@prefix}
                 actor={@actor}
               />
-              <%= render_pagination_links(assigns, :bottom) %>
+              {render_pagination_links(assigns, :bottom)}
             </div>
           </div>
         </div>
@@ -433,7 +433,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
           >
             Previous
           </button>
-          <%= render_pagination_information(assigns, true) %>
+          {render_pagination_information(assigns, true)}
           <button
             :if={next_page?(@data)}
             phx-click="next_page"
@@ -445,7 +445,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <%= render_pagination_information(assigns) %>
+            {render_pagination_information(assigns)}
           </div>
           <div>
             <nav
@@ -475,9 +475,9 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 </svg>
               </button>
               <span :if={offset?(@data)}>
-                <%= render_page_links(assigns, leading_page_nums(@data)) %>
-                <%= render_middle_page_num(assigns, @page_num, trailing_page_nums(@data)) %>
-                <%= render_page_links(assigns, trailing_page_nums(@data)) %>
+                {render_page_links(assigns, leading_page_nums(@data))}
+                {render_middle_page_num(assigns, @page_num, trailing_page_nums(@data))}
+                {render_page_links(assigns, trailing_page_nums(@data))}
               </span>
               <button
                 :if={next_page?(@data)}
@@ -525,7 +525,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
         ])
       }
     >
-      <%= i %>
+      {i}
     </button>
     """
   end
@@ -536,14 +536,14 @@ defmodule AshAdmin.Components.Resource.DataTable do
     ~H"""
     <p class={classes(["text-sm text-gray-700", "sm:hidden": @small])}>
       <span :if={offset?(@data)}>
-        Showing <span class="font-medium"><%= first(@data) %></span>
-        to <span class="font-medium"><%= last(@data) %></span>
+        Showing <span class="font-medium">{first(@data)}</span>
+        to <span class="font-medium">{last(@data)}</span>
         <%= if count(@data) do %>
           of
         <% end %>
       </span>
       <span :if={count(@data)}>
-        <span class="font-medium"><%= count(@data) %></span> results
+        <span class="font-medium">{count(@data)}</span> results
       </span>
     </p>
     """
@@ -598,7 +598,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
         ...
       </span>
       <span :if={!@ellipsis}>
-        <%= @num %>
+        {@num}
       </span>
     </span>
     """

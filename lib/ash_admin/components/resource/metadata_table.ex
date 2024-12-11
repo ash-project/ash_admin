@@ -29,13 +29,13 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
             class={classes("bg-gray-200": rem(index, 2) == 0)}
           >
             <.th scope="row">
-              <%= attribute.name %>
+              {attribute.name}
             </.th>
             <.td>
-              <%= attribute_type(attribute) %>
+              {attribute_type(attribute)}
             </.td>
             <.td class="max-w-sm min-w-sm text-gray-500">
-              <%= attribute.description %>
+              {attribute.description}
             </.td>
             <.td>
               <CoreComponents.icon
@@ -92,18 +92,18 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
             class={classes("bg-gray-200": rem(index, 2) == 0)}
           >
             <.th scope="row">
-              <%= relationship.name %>
+              {relationship.name}
             </.th>
             <.td>
-              <%= relationship.type %>
+              {relationship.type}
             </.td>
             <.td>
               <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(relationship.destination)}"}>
-                <%= AshAdmin.Resource.name(relationship.destination) %>
+                {AshAdmin.Resource.name(relationship.destination)}
               </.link>
             </.td>
             <.td class="max-w-sm min-w-sm text-gray-500">
-              <%= relationship.description %>
+              {relationship.description}
             </.td>
           </tr>
         </tbody>
@@ -117,7 +117,7 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
   def h1(assigns) do
     ~H"""
     <h1 class="text-3xl rounded-t py-8">
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </h1>
     """
   end
@@ -127,7 +127,7 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
   def table(assigns) do
     ~H"""
     <table class="table-auto w-full">
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </table>
     """
   end
@@ -138,7 +138,7 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
   def th(assigns) do
     ~H"""
     <th scope={@scope} class="px-2 py-3 text-left text-sm font-semibold text-gray-900">
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </th>
     """
   end
@@ -149,7 +149,7 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
   def td(assigns) do
     ~H"""
     <td class={classes(["px-2 py-3 text-left text-sm text-gray-900", @class])}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </td>
     """
   end

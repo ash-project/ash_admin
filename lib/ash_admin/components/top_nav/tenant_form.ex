@@ -38,7 +38,7 @@ defmodule AshAdmin.Components.TopNav.TenantForm do
         </button>
       </.form>
       <a :if={!@editing_tenant} href="#" phx-click="start_editing_tenant">
-        <%= if @tenant, do: "Tenant: #{@tenant}", else: "No tenant" %>
+        {if @tenant, do: "Tenant: #{@tenant}", else: "No tenant"}
       </a>
       <button :if={@tenant} phx-click={@clear_tenant}>
         <svg

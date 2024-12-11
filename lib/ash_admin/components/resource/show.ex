@@ -21,12 +21,12 @@ defmodule AshAdmin.Components.Resource.Show do
     <div class="md:pt-10 sm:mt-0 bg-gray-300 min-h-screen pb-20">
       <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
         <div class="mt-5 md:mt-0 md:col-span-2">
-          <%= render_show(assigns, @record, @resource) %>
+          {render_show(assigns, @record, @resource)}
         </div>
       </div>
       <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
         <div class="mt-5 md:mt-0 md:col-span-2">
-          <%= render_relationships(assigns, @record, @resource) %>
+          {render_relationships(assigns, @record, @resource)}
         </div>
       </div>
     </div>
@@ -38,7 +38,7 @@ defmodule AshAdmin.Components.Resource.Show do
 
     ~H"""
     <div class="shadow-lg overflow-hidden sm:rounded-md bg-white">
-      <h1 :if={@title} class="pt-2 pl-4 text-lg"><%= @title %></h1>
+      <h1 :if={@title} class="pt-2 pl-4 text-lg">{@title}</h1>
       <button
         :if={AshAdmin.Resource.actor?(@resource)}
         class="float-right pt-4 pr-4"
@@ -51,7 +51,7 @@ defmodule AshAdmin.Components.Resource.Show do
       </button>
       <div class="px-4 py-5 sm:p-6">
         <div>
-          <%= render_attributes(assigns, @record, @resource) %>
+          {render_attributes(assigns, @record, @resource)}
           <div :if={@buttons} class="px-4 py-3 text-right sm:px-6">
             <.link
               :if={destroy?(@resource)}
@@ -85,7 +85,7 @@ defmodule AshAdmin.Components.Resource.Show do
     >
       <div class="px-4 py-5 mt-2">
         <div>
-          <%= to_name(relationship.name) %>
+          {to_name(relationship.name)}
           <button
             :if={!loaded?(@record, relationship.name)}
             phx-click="load"
@@ -108,7 +108,7 @@ defmodule AshAdmin.Components.Resource.Show do
           </button>
 
           <div :if={loaded?(@record, relationship.name)}>
-            <%= render_relationship_data(assigns, @record, relationship) %>
+            {render_relationship_data(assigns, @record, relationship)}
           </div>
         </div>
       </div>
@@ -143,7 +143,7 @@ defmodule AshAdmin.Components.Resource.Show do
 
         ~H"""
         <div class="mb-10">
-          <%= render_attributes(assigns, @record, @destination, @name) %>
+          {render_attributes(assigns, @record, @destination, @name)}
           <div class="px-4 py-3 text-right sm:px-6">
             <.link
               :if={AshAdmin.Resource.show_action(@destination)}
@@ -217,15 +217,15 @@ defmodule AshAdmin.Components.Resource.Show do
           ])
         }
       >
-        <div class="block text-sm font-medium text-gray-700"><%= to_name(attribute.name) %></div>
+        <div class="block text-sm font-medium text-gray-700">{to_name(attribute.name)}</div>
         <div>
-          <%= render_maybe_sensitive_attribute(
+          {render_maybe_sensitive_attribute(
             assigns,
             @resource,
             @record,
             attribute,
             @relationship_name
-          ) %>
+          )}
         </div>
       </div>
     </div>
@@ -245,15 +245,15 @@ defmodule AshAdmin.Components.Resource.Show do
           ])
         }
       >
-        <div class="block text-sm font-medium text-gray-700"><%= to_name(attribute.name) %></div>
+        <div class="block text-sm font-medium text-gray-700">{to_name(attribute.name)}</div>
         <div>
-          <%= render_maybe_sensitive_attribute(
+          {render_maybe_sensitive_attribute(
             assigns,
             @resource,
             @record,
             attribute,
             @relationship_name
-          ) %>
+          )}
         </div>
       </div>
     </div>
@@ -274,15 +274,15 @@ defmodule AshAdmin.Components.Resource.Show do
           ])
         }
       >
-        <div class="block text-sm font-medium text-gray-700"><%= to_name(attribute.name) %></div>
+        <div class="block text-sm font-medium text-gray-700">{to_name(attribute.name)}</div>
         <div>
-          <%= render_maybe_sensitive_attribute(
+          {render_maybe_sensitive_attribute(
             assigns,
             @resource,
             @record,
             attribute,
             @relationship_name
-          ) %>
+          )}
         </div>
       </div>
     </div>
@@ -300,7 +300,7 @@ defmodule AshAdmin.Components.Resource.Show do
         module={SensitiveAttribute}
         value={Map.get(@record, @attribute.name)}
       >
-        <%= render_attribute(assigns, @resource, @record, @attribute, @relationship_name) %>
+        {render_attribute(assigns, @resource, @record, @attribute, @relationship_name)}
       </.live_component>
       """
     else
@@ -336,28 +336,28 @@ defmodule AshAdmin.Components.Resource.Show do
       <%= if @nested do %>
         <ul>
           <li :for={value <- List.wrap(Map.get(@record, @name))} class="mb-4 pb-4 shadow-md">
-            <%= render_attribute(
+            {render_attribute(
               assigns,
               @resource,
               Map.put(@record, @name, value),
               %{@attribute | type: @type},
               @relationship_name,
               true
-            ) %>
+            )}
           </li>
         </ul>
       <% else %>
         <div class="shadow-md border mt-4 mb-4 ml-4">
           <ul>
             <li :for={value <- List.wrap(Map.get(@record, @name))} class="my-4 mb-4 pb-4 shadow-md">
-              <%= render_attribute(
+              {render_attribute(
                 assigns,
                 @resource,
                 Map.put(@record, @name, value),
                 %{@attribute | type: @type},
                 @relationship_name,
                 true
-              ) %>
+              )}
             </li>
           </ul>
         </div>
@@ -507,21 +507,21 @@ defmodule AshAdmin.Components.Resource.Show do
           ~H"""
           <%= if @nested do %>
             <div class="ml-1 pl-2 pr-2">
-              <%= render_attributes(
+              {render_attributes(
                 assigns,
                 Map.get(@record, @attribute.name),
                 @attribute.type,
                 @relationship_name
-              ) %>
+              )}
             </div>
           <% else %>
             <div class="shadow-md border mt-4 mb-4 rounded py-2 px-2 ml-1 pl-2 pr-2">
-              <%= render_attributes(
+              {render_attributes(
                 assigns,
                 Map.get(@record, @attribute.name),
                 @attribute.type,
                 @relationship_name
-              ) %>
+              )}
             </div>
           <% end %>
           """
