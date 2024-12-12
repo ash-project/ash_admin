@@ -5,61 +5,55 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.12.0](https://github.com/ash-project/ash_admin/compare/v0.11.11...v0.12.0) (2024-12-12)
+
+### Features:
+
+- Calculations: Able to show calculations on show page (#235)
+
+- Format date/time fields also in Show and Update pages (#229)
+
+### Improvements:
+
+- Sort resource_group_labels by given order (#225)
+
 ## [v0.11.11](https://github.com/ash-project/ash_admin/compare/v0.11.10...v0.11.11) (2024-10-30)
-
-
-
 
 ### Bug Fixes:
 
-* properly update any kind of form data
+- properly update any kind of form data
 
-* fix relationship loading on Resource Update form (#220) (#221)
+- fix relationship loading on Resource Update form (#220) (#221)
 
 ## [v0.11.10](https://github.com/ash-project/ash_admin/compare/v0.11.9...v0.11.10) (2024-10-29)
 
-
-
-
 ### Bug Fixes:
 
-* various fixes for unions & form mutations
+- various fixes for unions & form mutations
 
 ## [v0.11.9](https://github.com/ash-project/ash_admin/compare/v0.11.8...v0.11.9) (2024-10-17)
 
-
-
-
 ### Improvements:
 
-* make generic actions list properly configurable
+- make generic actions list properly configurable
 
 ## [v0.11.8](https://github.com/ash-project/ash_admin/compare/v0.11.7...v0.11.8) (2024-10-17)
 
-
-
-
 ### Bug Fixes:
 
-* clean up remaining generic action necessities
+- clean up remaining generic action necessities
 
 ## [v0.11.7](https://github.com/ash-project/ash_admin/compare/v0.11.6...v0.11.7) (2024-10-17)
 
-
-
-
 ### Improvements:
 
-* support for generic actions
+- support for generic actions
 
 ## [v0.11.6](https://github.com/ash-project/ash_admin/compare/v0.11.5...v0.11.6) (2024-09-19)
 
-
-
-
 ### Bug Fixes:
 
-* properly handle nested union form types by cleaning/massaging them
+- properly handle nested union form types by cleaning/massaging them
 
 ## [v0.11.5](https://github.com/ash-project/ash_admin/compare/v0.11.4...v0.11.5) (2024-08-26)
 
