@@ -1330,6 +1330,9 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp non_nil_form_field(form, [field | rest]) do
     case form[field] do
+      %Phoenix.HTML.FormField{form: %{data: %{value: %Ash.Union{type: type}}}} ->
+        type
+
       %Phoenix.HTML.FormField{value: value} when not is_nil(value) ->
         value
 
@@ -1678,7 +1681,7 @@ defmodule AshAdmin.Components.Resource.Form do
     case AshPhoenix.Form.submit(form,
            before_submit: before_submit,
            force?: true,
-           params: form_params
+           params: replace_new_union_stubs(form_params)
          ) do
       {:ok, result} ->
         redirect_to(socket, result)
