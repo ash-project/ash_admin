@@ -951,6 +951,8 @@ defmodule AshAdmin.Components.Resource.Form do
         {name, id}
       end
 
+    union_type_id = "#{id}_#{attribute.name}_union_type"
+
     assigns =
       assign(
         assigns,
@@ -959,6 +961,7 @@ defmodule AshAdmin.Components.Resource.Form do
         value: value,
         name: name,
         id: id,
+        union_type_id: union_type_id,
         possible_types: Keyword.keys(attribute.constraints[:types]),
         actual_union_type: actual_union_type,
         actual_union_constraints: actual_union_constraints,
@@ -974,6 +977,7 @@ defmodule AshAdmin.Components.Resource.Form do
       <div class="w-full">
         <.input
           phx-change="union-type-changed"
+          id={@union_type_id}
           name={@union_type_name}
           type="select"
           value={@actual_union_type_name}
