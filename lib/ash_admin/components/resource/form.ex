@@ -911,17 +911,44 @@ defmodule AshAdmin.Components.Resource.Form do
       end
 
     actual_union_type_name =
-      with %Phoenix.HTML.FormField{value: [%Phoenix.HTML.Form{} = attr_form]} <-
-             form[attribute.name],
-           union_type <- non_nil_form_field(attr_form, [:_new_union_type, :_union_type]),
-           {match, _} <-
-             Enum.find(attribute.constraints[:types], fn {type_name, _} ->
-               to_string(type_name) == to_string(union_type)
-             end) do
-        match
-      else
+      case value do
+        {:list_value, %{params: %{"_new_union_type" => union_type}}} ->
+          case Enum.find(attribute.constraints[:types], fn {type_name, _} ->
+                 to_string(type_name) == union_type
+               end) do
+            {match, _} -> match
+            _ -> elem(Enum.at(attribute.constraints[:types], 0), 0)
+          end
+
+        {:list_value, %{params: %{"_union_type" => union_type}}} ->
+          case Enum.find(attribute.constraints[:types], fn {type_name, _} ->
+                 to_string(type_name) == union_type
+               end) do
+            {match, _} -> match
+            _ -> elem(Enum.at(attribute.constraints[:types], 0), 0)
+          end
+
+        {:list_value,
+         %AshPhoenix.Form{
+           resource: AshPhoenix.Form.WrappedValue,
+           data: %{value: %Ash.Union{type: type}}
+         }}
+        when type in [:string, :integer, :boolean] ->
+          type
+
         _ ->
-          elem(Enum.at(attribute.constraints[:types], 0), 0)
+          with %Phoenix.HTML.FormField{value: [%Phoenix.HTML.Form{} = attr_form]} <-
+                 form[attribute.name],
+               union_type <- non_nil_form_field(attr_form, [:_new_union_type, :_union_type]),
+               {match, _} <-
+                 Enum.find(attribute.constraints[:types], fn {type_name, _} ->
+                   to_string(type_name) == to_string(union_type)
+                 end) do
+            match
+          else
+            _ ->
+              elem(Enum.at(attribute.constraints[:types], 0), 0)
+          end
       end
 
     actual_union_type =
@@ -929,6 +956,15 @@ defmodule AshAdmin.Components.Resource.Form do
 
     actual_union_constraints =
       Keyword.get(attribute.constraints[:types], actual_union_type_name)[:constraints] || :string
+
+    value =
+      case value do
+        %Ash.Union{type: :string, value: string_value} ->
+          string_value
+
+        _ ->
+          value
+      end
 
     {name, id} =
       if Ash.Type.embedded_type?(actual_union_type) do
@@ -951,6 +987,8 @@ defmodule AshAdmin.Components.Resource.Form do
         {name, id}
       end
 
+    union_type_id = "#{id}_#{attribute.name}_union_type"
+
     assigns =
       assign(
         assigns,
@@ -959,6 +997,7 @@ defmodule AshAdmin.Components.Resource.Form do
         value: value,
         name: name,
         id: id,
+        union_type_id: union_type_id,
         possible_types: Keyword.keys(attribute.constraints[:types]),
         actual_union_type: actual_union_type,
         actual_union_constraints: actual_union_constraints,
@@ -974,6 +1013,7 @@ defmodule AshAdmin.Components.Resource.Form do
       <div class="w-full">
         <.input
           phx-change="union-type-changed"
+          id={@union_type_id}
           name={@union_type_name}
           type="select"
           value={@actual_union_type_name}
