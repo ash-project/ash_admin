@@ -166,7 +166,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
       socket = assign(socket, :query, query)
 
       socket =
-        if params["page"] && socket.assigns.action.pagination do
+        if socket.assigns.action.pagination do
           default_limit =
             socket.assigns.action.pagination.default_limit ||
               socket.assigns.action.pagination.max_page_size || 25
