@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.12.2](https://github.com/ash-project/ash_admin/compare/v0.12.1...v0.12.2) (2024-12-17)
+
+
+
+
+### Bug Fixes:
+
+* use pagination if the action supports it
+
 ## [v0.12.1](https://github.com/ash-project/ash_admin/compare/v0.12.0...v0.12.1) (2024-12-17)
 
 
