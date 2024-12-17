@@ -5,6 +5,21 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.12.1](https://github.com/ash-project/ash_admin/compare/v0.12.0...v0.12.1) (2024-12-17)
+
+
+
+
+### Bug Fixes:
+
+* various fixes for new loadable calculation forms
+
+* handling of simple union types in arrays of union types (#240)
+
+* duplicate element ids in form for union arrays
+
+* fix form handling of "simple" union type (#220) (#238)
+
 ## [v0.12.0](https://github.com/ash-project/ash_admin/compare/v0.11.11...v0.12.0) (2024-12-12)
 
 ### Features:
