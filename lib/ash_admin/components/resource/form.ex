@@ -1255,7 +1255,7 @@ defmodule AshAdmin.Components.Resource.Form do
     <div>
       <div :for={
         {this_value, index} <-
-          Enum.with_index(list_value(@value || AshPhoenix.Form.value(@form.source, @attribute.name)))
+          Enum.with_index(list_value(@value || value(@value, @form, @attribute)))
       }>
         {render_attribute_input(
           assigns,
@@ -1419,11 +1419,16 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp value(
          _value,
-         %{source: %AshPhoenix.FilterForm.Arguments{input: input}},
+         %{source: %AshPhoenix.FilterForm.Arguments{} = arguments},
          %{name: attribute_name},
          _default
        ) do
-    Map.get(input, attribute_name, nil)
+    with :error <- Map.fetch(arguments.params, to_string(attribute_name)),
+         :error <- Map.fetch(arguments.input, attribute_name) do
+      nil
+    else
+      {:ok, v} -> v
+    end
   end
 
   defp value(_value, %{source: form}, attribute, _default) do

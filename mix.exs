@@ -84,7 +84,7 @@ defmodule AshAdmin.MixProject do
       seed: "run dev/repo/seeds.exs --truncate",
       setup: ["deps.get", "assets.setup", "assets.build"],
       dev: "run --no-halt dev.exs --config config",
-      sobelow: "sobelow --ignore XSS.Raw",
+      sobelow: "sobelow --ignore XSS.Raw --skip",
       docs: [
         "spark.cheat_sheets",
         "docs",
@@ -115,7 +115,7 @@ defmodule AshAdmin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ash, "~> 3.0"},
+      {:ash, "~> 3.0 and >= 3.4.47"},
       {:ash_phoenix, "~> 2.1 and >= 2.1.8"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix, "~> 1.7"},

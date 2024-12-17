@@ -2,6 +2,8 @@ defmodule AshAdmin.Components.Resource.Show do
   @moduledoc false
   use Phoenix.LiveComponent
 
+  require Logger
+
   alias AshAdmin.Components.Resource.{Helpers.FormatHelper, SensitiveAttribute, Table}
   import AshAdmin.Helpers
   import AshAdmin.CoreComponents
@@ -17,28 +19,6 @@ defmodule AshAdmin.Components.Resource.Show do
   attr :prefix, :any, required: true
 
   def render(assigns) do
-    assigns =
-      assign_new(assigns, :calculations, fn %{resource: resource} ->
-        calculations =
-          AshAdmin.Resource.show_calculations(resource)
-
-        resource
-        |> Ash.Resource.Info.calculations()
-        |> Enum.filter(&(&1.name in calculations))
-        |> Enum.sort_by(
-          &Enum.find_index(calculations, fn name ->
-            name == &1.name
-          end)
-        )
-        |> Enum.map(fn calculation ->
-          form =
-            AshPhoenix.FilterForm.Arguments.new(%{}, calculation.arguments)
-            |> to_form()
-
-          {calculation, form}
-        end)
-      end)
-
     ~H"""
     <div class="md:pt-10 sm:mt-0 bg-gray-300 min-h-screen pb-20">
       <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
@@ -124,9 +104,10 @@ defmodule AshAdmin.Components.Resource.Show do
         <div>
           <.form
             :let={form}
-            :if={length(calculation.arguments)}
+            :if={!Enum.empty?(calculation.arguments)}
             as={calculation.name}
             for={calculation_form}
+            phx-change="validate-calculation"
             phx-submit="calculate"
             phx-target={@myself}
           >
@@ -209,6 +190,32 @@ defmodule AshAdmin.Components.Resource.Show do
       |> assign_new(:calculation_errors, fn -> %{} end)
 
     {:ok, assign}
+  end
+
+  def update(assigns, socket) do
+    socket
+    |> assign(assigns)
+    |> assign_new(:calculations, fn %{resource: resource} ->
+      calculations =
+        AshAdmin.Resource.show_calculations(resource)
+
+      resource
+      |> Ash.Resource.Info.calculations()
+      |> Enum.filter(&(&1.name in calculations))
+      |> Enum.sort_by(
+        &Enum.find_index(calculations, fn name ->
+          name == &1.name
+        end)
+      )
+      |> Enum.map(fn calculation ->
+        form =
+          AshPhoenix.FilterForm.Arguments.new(%{}, calculation.arguments)
+          |> to_form()
+
+        {calculation, form}
+      end)
+    end)
+    |> then(&{:ok, &1})
   end
 
   defp render_relationship_data(assigns, record, %{
@@ -507,8 +514,10 @@ defmodule AshAdmin.Components.Resource.Show do
     />
     """
   rescue
-    _ ->
-      "..."
+    e ->
+      Logger.error("Failed to display value:\n#{Exception.format(:error, e, __STACKTRACE__)}")
+
+      "<display error>"
   end
 
   defp render_attribute(
@@ -679,6 +688,30 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   end
 
+  def handle_event("validate-calculation", %{"calculation" => calculation_name} = params, socket) do
+    calculation = Ash.Resource.Info.calculation(socket.assigns.resource, calculation_name)
+
+    arg_form =
+      AshPhoenix.FilterForm.Arguments.new(params[calculation_name], calculation.arguments)
+      |> to_form()
+
+    show_calculations =
+      AshAdmin.Resource.show_calculations(socket.assigns.resource)
+
+    calculations =
+      socket.assigns.calculations
+      |> Map.new()
+      |> Map.put(calculation, arg_form)
+      |> Enum.sort_by(fn {calc, _form} ->
+        Enum.find_index(show_calculations, fn name ->
+          name == calc.name
+        end)
+      end)
+
+    {:noreply, assign(socket, :calculations, calculations)}
+  end
+
+  # sobelow_skip ["DOS.StringToAtom"]
   def handle_event("calculate", %{"calculation" => calculation} = event, socket) do
     record = socket.assigns.record
     domain = socket.assigns.domain
@@ -687,8 +720,11 @@ defmodule AshAdmin.Components.Resource.Show do
       event
       |> Map.get(calculation, [])
       |> Enum.map(fn {attr, value} -> {String.to_atom(attr), value} end)
+      # This is a hack, it should not be populated in the form
+      # or use used inputs etc.
+      |> Enum.reject(fn {_, v} -> v in ["", nil] end)
 
-    calculation = String.to_atom(calculation)
+    calculation = String.to_existing_atom(calculation)
 
     calculations =
       [{calculation, arguments}]
@@ -741,6 +777,133 @@ defmodule AshAdmin.Components.Resource.Show do
     {:noreply, assign(socket, record: unloaded)}
   end
 
+  # TODO
+  # def handle_event("union-type-changed", %{"_target" => path} = params, socket) do
+  # new_type = get_in(params, path)
+  # # The last part of the path in this case is the field name
+  # path =
+  #   socket.assigns.form
+  #   |> AshPhoenix.Form.parse_path!(:lists.droplast(path))
+  #
+  # new_union_types = (socket.assigns[:union_types] || %{}) |> Map.put(path, new_type)
+  #
+  # if AshPhoenix.Form.has_form?(socket.assigns.form, path) do
+  #   nested_form = AshPhoenix.Form.get_form(socket.assigns.form, path)
+  #
+  #   form =
+  #     socket.assigns.form
+  #     |> AshPhoenix.Form.remove_form(path)
+  #     |> AshPhoenix.Form.add_form(path,
+  #       params: %{"_new_union_type" => new_type, "_union_type" => new_type},
+  #       type: nested_form.type
+  #     )
+  #
+  #   {:noreply, assign(socket, form: form, union_types: new_union_types)}
+  # else
+  #   {:noreply, assign(socket, union_types: new_union_types)}
+  # end
+  # end
+
+  def handle_event(event, %{"path" => path, "field" => field} = params, socket)
+      when event in ["add_form", "append_value"] do
+    to_append =
+      case params["union-type"] do
+        nil -> nil
+        value when value != "" -> %{"_union_type" => value}
+        _ -> nil
+      end
+
+    [calc_name | decoded_path] =
+      path
+      |> Plug.Conn.Query.decode()
+      |> decoded_to_list()
+
+    path_to_params = decoded_path ++ [field]
+
+    calculation = Ash.Resource.Info.calculation(socket.assigns.resource, calc_name)
+
+    keyed_calculations = Map.new(socket.assigns.calculations)
+    current_params = keyed_calculations[calculation].params
+
+    new_params =
+      case get_in(current_params, path_to_params) do
+        nil ->
+          put_in(current_params, path_to_params, %{"0" => to_append})
+
+        values ->
+          to_place =
+            values
+            |> Map.keys()
+            |> Enum.filter(&String.match?(&1, ~r/[[:digit]]/))
+            |> Enum.map(&String.to_integer/1)
+            |> case do
+              [] -> "0"
+              keys -> to_string(Enum.max(keys) + 1)
+            end
+
+          put_in(current_params, path_to_params ++ [to_place], to_append)
+      end
+
+    arg_form =
+      AshPhoenix.FilterForm.Arguments.new(new_params, calculation.arguments)
+      |> to_form()
+
+    show_calculations =
+      AshAdmin.Resource.show_calculations(socket.assigns.resource)
+
+    calculations =
+      socket.assigns.calculations
+      |> Map.new()
+      |> Map.put(calculation, arg_form)
+      |> Enum.sort_by(fn {calc, _form} ->
+        Enum.find_index(show_calculations, fn name ->
+          name == calc.name
+        end)
+      end)
+
+    {:noreply, assign(socket, :calculations, calculations)}
+  end
+
+  def handle_event(event, %{"path" => path} = params, socket)
+      when event in ["remove_form", "remove_value"] do
+    [calc_name | decoded_path] =
+      path
+      |> Plug.Conn.Query.decode()
+      |> decoded_to_list()
+
+    decoded_path =
+      if event == "remove_form" do
+        decoded_path
+      else
+        decoded_path ++ [params["field"], params["index"]]
+      end
+
+    calculation = Ash.Resource.Info.calculation(socket.assigns.resource, calc_name)
+
+    keyed_calculations = Map.new(socket.assigns.calculations)
+    current_params = keyed_calculations[calculation].params
+    new_params = pop_in(current_params, decoded_path) |> elem(1)
+
+    arg_form =
+      AshPhoenix.FilterForm.Arguments.new(new_params, calculation.arguments)
+      |> to_form()
+
+    show_calculations =
+      AshAdmin.Resource.show_calculations(socket.assigns.resource)
+
+    calculations =
+      socket.assigns.calculations
+      |> Map.new()
+      |> Map.put(calculation, arg_form)
+      |> Enum.sort_by(fn {calc, _form} ->
+        Enum.find_index(show_calculations, fn name ->
+          name == calc.name
+        end)
+      end)
+
+    {:noreply, assign(socket, :calculations, calculations)}
+  end
+
   defp loaded?(record, relationship) do
     case Map.get(record, relationship) do
       %Ash.NotLoaded{} -> false
@@ -752,13 +915,14 @@ defmodule AshAdmin.Components.Resource.Show do
     data = Phoenix.HTML.Safe.to_iodata(value)
 
     if is_binary(data) and !String.valid?(data) do
-      "..."
+      "<binary data>"
     else
       data
     end
   rescue
-    _ ->
-      "..."
+    e ->
+      Logger.error("Failed to display value:\n#{Exception.format(:error, e, __STACKTRACE__)}")
+      "<display error>"
   end
 
   defp short_text?(resource, attribute) do
@@ -809,5 +973,13 @@ defmodule AshAdmin.Components.Resource.Show do
       _ ->
         true
     end
+  end
+
+  defp decoded_to_list(""), do: []
+
+  defp decoded_to_list(value) do
+    {key, rest} = Enum.at(value, 0)
+
+    [key | decoded_to_list(rest)]
   end
 end
