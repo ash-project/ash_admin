@@ -104,7 +104,6 @@ defmodule AshAdmin.Components.Resource.Show do
         <div>
           <.form
             :let={form}
-            :if={!Enum.empty?(calculation.arguments)}
             as={calculation.name}
             for={calculation_form}
             phx-change="validate-calculation"

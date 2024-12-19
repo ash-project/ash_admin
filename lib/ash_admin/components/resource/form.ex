@@ -1155,6 +1155,8 @@ defmodule AshAdmin.Components.Resource.Form do
                 name: @name || @form.name <> "[#{@attribute.name}]"
             }
           )}
+        <% Ash.Type.embedded_type?(@attribute.type) && match?(%{source: %AshPhoenix.FilterForm.Arguments{}}, @form) -> %>
+          {"AshPhoenix.FilterForm doesn't support embedded yet"}
         <% Ash.Type.embedded_type?(@attribute.type) -> %>
           <.inputs_for :let={inner_form} field={@form[@attribute.name]}>
             <.input

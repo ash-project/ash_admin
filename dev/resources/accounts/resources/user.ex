@@ -21,7 +21,7 @@ defmodule Demo.Accounts.User do
 
     table_columns [:id, :first_name, :last_name, :representative, :admin, :full_name, :api_key, :date_of_birth]
 
-    show_calculations [:multi_arguments, :full_name]
+    show_calculations [:multi_arguments, :is_super_admin?, :full_name, :nested_embed]
   end
 
   multitenancy do
@@ -106,6 +106,10 @@ defmodule Demo.Accounts.User do
         allow_nil? true
       end
     end
+
+    calculate :nested_embed, :string, expr(tags) do
+      argument :nested_embed, Demo.Accounts.NestedEmbed, allow_nil?: false
+    end
   end
 
   attributes do
@@ -170,6 +174,7 @@ defmodule Demo.Accounts.User do
       public? true
       constraints items: [one_of: [:type1, :type2]]
     end
+
     attribute :tags, {:array, :string} do
       public? true
     end
