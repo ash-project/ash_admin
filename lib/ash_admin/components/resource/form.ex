@@ -192,7 +192,7 @@ defmodule AshAdmin.Components.Resource.Form do
           ])
         }
       >
-        <div phx-feedback-for={@form.name <> "[#{attribute.name}]"}>
+        <div>
           <label
             class="block text-sm font-medium text-gray-700"
             for={@form.name <> "[#{attribute.name}]"}
@@ -295,7 +295,7 @@ defmodule AshAdmin.Components.Resource.Form do
   @spec error_tag(any()) :: Phoenix.LiveView.Rendered.t()
   def error_tag(assigns) do
     ~H"""
-    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 phx-no-feedback:hidden">
+    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600">
       {render_slot(@inner_block)}
     </p>
     """
@@ -1747,8 +1747,13 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def handle_event("validate", %{"form" => params} = event, socket) do
+    params =
+      params
+      |> replace_new_union_stubs()
+      |> replace_unused()
+
     form =
-      AshPhoenix.Form.validate(socket.assigns.form, replace_new_union_stubs(params),
+      AshPhoenix.Form.validate(socket.assigns.form, params,
         only_touched?: true,
         target: event["_target"]
       )
@@ -1788,6 +1793,26 @@ defmodule AshAdmin.Components.Resource.Form do
   defp replace_new_union_stubs(value) do
     value
   end
+
+  defp replace_unused(params) when is_map(params) do
+    params
+    |> Map.to_list()
+    |> replace_unused()
+    |> Map.new()
+  end
+
+  defp replace_unused(params) when is_list(params) do
+    params
+    |> Enum.map(&replace_unused/1)
+    |> Enum.reject(&is_nil(&1))
+  end
+
+  defp replace_unused({"_unused_" <> _attr, _value}), do: nil
+
+  defp replace_unused({attribute, value}) when is_map(value),
+    do: {attribute, replace_unused(value)}
+
+  defp replace_unused({attribute, value}), do: {attribute, value}
 
   defp new_union_stub?(value) do
     is_map(value) and Map.has_key?(value, "_new_union_type") and map_size(value) == 1
