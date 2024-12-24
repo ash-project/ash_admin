@@ -2153,34 +2153,6 @@ select {
   opacity: 0.7;
 }
 
-.phx-no-feedback.phx-no-feedback\:hidden {
-  display: none;
-}
-
-.phx-no-feedback.phx-no-feedback\:border-zinc-300 {
-  --tw-border-opacity: 1;
-  border-color: rgb(212 212 216 / var(--tw-border-opacity));
-}
-
-.phx-no-feedback.phx-no-feedback\:focus\:border-zinc-400:focus {
-  --tw-border-opacity: 1;
-  border-color: rgb(161 161 170 / var(--tw-border-opacity));
-}
-
-.phx-no-feedback .phx-no-feedback\:hidden {
-  display: none;
-}
-
-.phx-no-feedback .phx-no-feedback\:border-zinc-300 {
-  --tw-border-opacity: 1;
-  border-color: rgb(212 212 216 / var(--tw-border-opacity));
-}
-
-.phx-no-feedback .phx-no-feedback\:focus\:border-zinc-400:focus {
-  --tw-border-opacity: 1;
-  border-color: rgb(161 161 170 / var(--tw-border-opacity));
-}
-
 .phx-submit-loading.phx-submit-loading\:opacity-75 {
   opacity: 0.75;
 }

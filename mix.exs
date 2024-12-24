@@ -120,7 +120,7 @@ defmodule AshAdmin.MixProject do
       {:phoenix_view, "~> 2.0"},
       {:phoenix, "~> 1.7"},
       {:phoenix_live_view, "~> 1.0"},
-      {:phoenix_html, "~> 4.0"},
+      {:phoenix_html, "~> 4.1"},
       {:jason, "~> 1.0"},
       {:gettext, "~> 0.26"},
       # Dev dependencies
