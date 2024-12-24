@@ -1725,10 +1725,12 @@ defmodule AshAdmin.Components.Resource.Form do
       |> Map.put(:actor, socket.assigns[:actor])
     end
 
+    params = form_params |> replace_new_union_stubs() |> replace_unused()
+
     case AshPhoenix.Form.submit(form,
            before_submit: before_submit,
            force?: true,
-           params: replace_new_union_stubs(form_params)
+           params: params
          ) do
       {:ok, result} ->
         redirect_to(socket, result)
@@ -1795,10 +1797,7 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp replace_unused(params) when is_map(params) do
-    params
-    |> Map.to_list()
-    |> replace_unused()
-    |> Map.new()
+    Map.new(params, &replace_unused/1)
   end
 
   defp replace_unused(params) when is_list(params) do
