@@ -1797,7 +1797,9 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp replace_unused(params) when is_map(params) do
-    Map.new(params, &replace_unused/1)
+    Map.to_list(params)
+    |> replace_unused()
+    |> Map.new()
   end
 
   defp replace_unused(params) when is_list(params) do
