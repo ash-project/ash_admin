@@ -1813,6 +1813,8 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp replace_unused({attribute, value}), do: {attribute, value}
 
+  defp replace_unused(value), do: value
+
   defp new_union_stub?(value) do
     is_map(value) and Map.has_key?(value, "_new_union_type") and map_size(value) == 1
   end
