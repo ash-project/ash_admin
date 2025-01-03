@@ -5,6 +5,19 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.12.4](https://github.com/ash-project/ash_admin/compare/v0.12.3...v0.12.4) (2025-01-03)
+
+
+
+
+### Bug Fixes:
+
+* UnsuedParams: Filter nil values (#248)
+
+* UnusedParams: handle nil params (#247)
+
+* PhoenixLiveView: remove phx-feedback-for and fix unsued params (#244)
+
 ## [v0.12.3](https://github.com/ash-project/ash_admin/compare/v0.12.2...v0.12.3) (2024-12-19)
 
 
