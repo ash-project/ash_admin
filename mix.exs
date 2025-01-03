@@ -124,6 +124,7 @@ defmodule AshAdmin.MixProject do
       {:jason, "~> 1.0"},
       {:gettext, "~> 0.26"},
       # Dev dependencies
+      {:igniter, "~> 0.5", only: [:dev, :test]},
       {:simple_sat, "~> 0.1", only: [:dev, :test]},
       {:esbuild, "~> 0.7", only: [:dev, :test]},
       {:tailwind, "~> 0.2.0", only: [:dev, :test]},
