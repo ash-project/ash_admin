@@ -115,15 +115,26 @@ defmodule AshAdmin.Helpers do
   end
 
   def primary_action(resource, type) do
-    case Ash.Resource.Info.primary_action(resource, type) do
-      nil ->
-        Ash.Resource.Info.actions(resource) |> Enum.find(&(&1.type == type))
+    actions =
+      case type do
+        :update -> AshAdmin.Resource.update_actions(resource)
+        :destroy -> AshAdmin.Resource.destroy_actions(resource)
+        :read -> AshAdmin.Resource.read_actions(resource)
+        :create -> AshAdmin.Resource.create_actions(resource)
+      end
 
-      other ->
-        other
+    case actions do
+      actions when is_list(actions) ->
+        Ash.Resource.Info.action(resource, Enum.at(actions, 0))
+
+      _ ->
+        case Ash.Resource.Info.primary_action(resource, type) do
+          nil ->
+            Ash.Resource.Info.actions(resource) |> Enum.find(&(&1.type == type))
+
+          other ->
+            other
+        end
     end
-  rescue
-    _ ->
-      Ash.Resource.Info.actions(resource) |> Enum.find(&(&1.type == type))
   end
 end

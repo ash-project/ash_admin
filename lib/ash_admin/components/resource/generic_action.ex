@@ -144,8 +144,8 @@ defmodule AshAdmin.Components.Resource.GenericAction do
       Ash.Type.embedded_type?(type) ->
         AshAdmin.Components.Resource.Show.render_show(assigns, value, type, nil, false)
 
-      type == Ash.Type.Struct and
-        constraints[:instance_of] && Ash.Resource.Info.resource?(constraints[:instance_of]) ->
+      (type == Ash.Type.Struct and
+         constraints[:instance_of]) && Ash.Resource.Info.resource?(constraints[:instance_of]) ->
         AshAdmin.Components.Resource.Show.render_show(
           assigns,
           value,
