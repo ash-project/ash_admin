@@ -28,6 +28,9 @@ defmodule AshAdmin.Components.Resource do
     <div class="h-screen">
       <Nav.nav resource={@resource} domain={@domain} action={@action} table={@table} prefix={@prefix} />
       <div class="mx-24 relative grid grid-cols-1 justify-items-center"></div>
+      <div :if={@record && match?({:error, error} when not is_nil(error), @record)}>
+        <p>Error loading record</p>
+      </div>
       <div :if={
         @record && match?({:ok, record} when not is_nil(record), @record) &&
           @action_type == :update

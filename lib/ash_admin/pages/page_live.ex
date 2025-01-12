@@ -268,12 +268,16 @@ defmodule AshAdmin.PageLive do
                 socket.assigns.actor
               end
 
+            primary_read_action =
+              Ash.Resource.Info.primary_action(socket.assigns.resource, :read) ||
+                AshAdmin.Helpers.primary_action(socket.assigns.resource, :read)
+
             record =
               socket.assigns.resource
               |> Ash.Query.filter(^primary_key)
               |> Ash.Query.set_tenant(socket.assigns[:tenant])
               |> Ash.Query.for_read(
-                AshAdmin.Helpers.primary_action(socket.assigns.resource, :read).name,
+                primary_read_action.name,
                 %{},
                 actor: actor,
                 authorize?: socket.assigns.authorizing
@@ -307,6 +311,12 @@ defmodule AshAdmin.PageLive do
                 _rel, other ->
                   other
               end)
+
+            with {:error, error} <- record do
+              Logger.warning(
+                "Error while loading record #{inspect(primary_key)}\n: #{Exception.format(:error, error)}"
+              )
+            end
 
             socket
             |> assign(:id, params["primary_key"])
