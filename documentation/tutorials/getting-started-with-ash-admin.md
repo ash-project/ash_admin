@@ -14,11 +14,41 @@ Add the `ash_admin` dependency to your `mix.exs` file:
 
 ## Setup
 
-Ensure your domains are configured in `config.exs`:
+<!-- tabs-open -->
+
+### With Igniter (Recommended)
+
+```
+mix igniter.install ash_admin
+```
+
+### Manual
+
+Modify your router to add AshAdmin at whatever path you'd like to serve it at.
 
 ```elixir
-config :my_app, ash_domains: [MyApp.Foo, MyApp.Bar]
+defmodule MyAppWeb.Router do
+  use Phoenix.Router
+
+  import AshAdmin.Router
+
+  # AshAdmin requires a Phoenix LiveView `:browser` pipeline
+  # If you DO NOT have a `:browser` pipeline already, then AshAdmin has a `:browser` pipeline
+  # Most applications will not need this:
+  admin_browser_pipeline :browser
+
+  # NOTE: `scope/2` here does not have a second argument.
+  # If it looks like `scope "/", MyAppWeb`, create a *new* scope, don't copy the contents into your scope
+  scope "/" do
+    # Pipe it through your browser pipeline
+    pipe_through [:browser]
+
+    ash_admin "/admin"
+  end
+end
 ```
+
+<!-- tabs-close -->
 
 Add the `AshAdmin.Domain` extension to each domain you want to show in the AshAdmin dashboard, and configure it to show. See [DSL: AshAdmin.Domain](/documentation/dsls/DSL-AshAdmin.Domain.md) for more configuration options.
 
@@ -45,29 +75,6 @@ admin do
 end
 ```
 
-Modify your router to add AshAdmin at whatever path you'd like to serve it at.
-
-```elixir
-defmodule MyAppWeb.Router do
-  use Phoenix.Router
-
-  import AshAdmin.Router
-
-  # AshAdmin requires a Phoenix LiveView `:browser` pipeline
-  # If you DO NOT have a `:browser` pipeline already, then AshAdmin has a `:browser` pipeline
-  # Most applications will not need this:
-  admin_browser_pipeline :browser
-
-  # NOTE: `scope/2` here does not have a second argument.
-  # If it looks like `scope "/", MyAppWeb`, create a *new* scope, don't copy the contents into your scope
-  scope "/" do
-    # Pipe it through your browser pipeline
-    pipe_through [:browser]
-
-    ash_admin "/admin"
-  end
-end
-```
 
 > #### Warning {: .warning}
 >
