@@ -163,12 +163,12 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
                 String.replace(suggestion_name, ~r/(#{@search_term})/i, "<b>\\0</b>", [
                   :case_insensitive
                 ]) %>
-              <%= Phoenix.HTML.raw(suggestion_name) %>
+              {Phoenix.HTML.raw(suggestion_name)}
             </li>
           <% end %>
         </ul>
       </div>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -267,6 +267,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
 
   defp select_options!(assigns) do
     resource = assigns.resource
+
     limit = assigns.max_items + 1
     label_field = AshAdmin.Resource.label_field(resource)
     pk_field = Ash.Resource.Info.primary_key(resource)
@@ -276,6 +277,10 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
     |> Ash.Query.load([pk_field, label_field])
     |> Ash.Query.limit(limit)
     |> Ash.read!(actor: %{admin: true})
+    |> then(fn
+      %Ash.Page.Offset{results: results} -> results
+      results -> results
+    end)
     |> Enum.map(&{Map.get(&1, label_field), &1.id})
   end
 
