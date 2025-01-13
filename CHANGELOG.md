@@ -5,6 +5,19 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.12.6](https://github.com/ash-project/ash_admin/compare/v0.12.5...v0.12.6) (2025-01-13)
+
+
+
+
+### Bug Fixes:
+
+* guard against problematic primary read action configurations (#255) (#256)
+
+### Improvements:
+
+* add installer
+
 ## [v0.12.5](https://github.com/ash-project/ash_admin/compare/v0.12.4...v0.12.5) (2025-01-06)
 
 
