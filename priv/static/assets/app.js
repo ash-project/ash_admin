@@ -2331,7 +2331,7 @@
       return FOCUSABLE_INPUTS.indexOf(el.type) >= 0;
     },
     isNowTriggerFormExternal(el, phxTriggerExternal) {
-      return el.getAttribute && el.getAttribute(phxTriggerExternal) !== null;
+      return el.getAttribute && el.getAttribute(phxTriggerExternal) !== null && document.body.contains(el);
     },
     cleanChildNodes(container, phxUpdate) {
       if (DOM.isPhxUpdate(container, phxUpdate, ["append", "prepend"])) {
@@ -3530,6 +3530,7 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
       let focused = liveSocket2.getActiveElement();
       let { selectionStart, selectionEnd } = focused && dom_default.hasSelectionRange(focused) ? focused : {};
       let phxUpdate = liveSocket2.binding(PHX_UPDATE);
+      let externalFormTriggered = null;
       morphdom_esm_default(container, clonedTree, {
         childrenOnly: false,
         onBeforeElUpdated: (fromEl, toEl) => {
@@ -3544,8 +3545,15 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
             dom_default.mergeFocusedInput(fromEl, toEl);
             return false;
           }
+          if (dom_default.isNowTriggerFormExternal(toEl, liveSocket2.binding(PHX_TRIGGER_ACTION))) {
+            externalFormTriggered = toEl;
+          }
         }
       });
+      if (externalFormTriggered) {
+        liveSocket2.unload();
+        Object.getPrototypeOf(externalFormTriggered).submit.call(externalFormTriggered);
+      }
       liveSocket2.silenceEvents(() => dom_default.restoreFocus(focused, selectionStart, selectionEnd));
     }
     constructor(view, container, id, html, streams, targetCID) {
@@ -4338,7 +4346,7 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
       let pushOpts = { loading, value, target, page_loading: !!page_loading };
       let targetSrc = eventType === "change" && dispatcher ? dispatcher : sourceEl;
       let phxTarget = target || targetSrc.getAttribute(view.binding("target")) || targetSrc;
-      view.withinTargets(phxTarget, (targetView, targetCtx) => {
+      const handler = (targetView, targetCtx) => {
         if (!targetView.isConnected()) {
           return;
         }
@@ -4355,7 +4363,12 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
         } else {
           targetView.pushEvent(eventType, sourceEl, targetCtx, event || phxEvent, data, pushOpts, callback);
         }
-      });
+      };
+      if (args.targetView && args.targetCtx) {
+        handler(args.targetView, args.targetCtx);
+      } else {
+        view.withinTargets(phxTarget, handler);
+      }
     },
     exec_navigate(e, eventType, phxEvent, view, sourceEl, el, { href, replace }) {
       view.liveSocket.historyRedirect(e, href, replace ? "replace" : "push", null, sourceEl);
@@ -6164,12 +6177,19 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
       this.withinTargets(phxTarget, (targetView, targetCtx) => {
         const cid = this.targetComponentID(newForm, targetCtx);
         pending++;
-        targetView.pushInput(input, targetCtx, cid, phxEvent, { _target: input.name }, () => {
-          pending--;
-          if (pending === 0) {
-            callback();
+        let e = new CustomEvent("phx:form-recovery", { detail: { sourceElement: oldForm } });
+        js_default.exec(e, "change", phxEvent, this, input, ["push", {
+          _target: input.name,
+          targetView,
+          targetCtx,
+          newCid: cid,
+          callback: () => {
+            pending--;
+            if (pending === 0) {
+              callback();
+            }
           }
-        });
+        }]);
       }, templateDom, templateDom);
     }
     pushLinkPatch(e, href, targetEl, callback) {
@@ -6308,7 +6328,7 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
     }
     // public
     version() {
-      return "1.0.1";
+      return "1.0.2";
     }
     isProfileEnabled() {
       return this.sessionStorage.getItem(PHX_LV_PROFILE) === "true";
@@ -6494,7 +6514,11 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
         if (!this.main) {
           this.main = view;
         }
-        window.requestAnimationFrame(() => view.execNewMounted());
+        window.requestAnimationFrame(() => {
+          var _a;
+          view.execNewMounted();
+          this.maybeScroll((_a = history.state) == null ? void 0 : _a.scroll);
+        });
       }
     }
     joinRootViews() {

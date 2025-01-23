@@ -16,7 +16,7 @@ defmodule AshAdmin.MixProject do
       start_permanent: Mix.env() == :prod,
       docs: docs(),
       dialyzer: [
-        plt_add_apps: [:ex_unit]
+        plt_add_apps: [:ex_unit, :mix]
       ],
       package: package(),
       source_url: "https://github.com/ash-project/ash_admin",
