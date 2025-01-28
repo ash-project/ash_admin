@@ -82,6 +82,109 @@ end
 
 Start your project (usually by running `mix phx.server` in a terminal) and visit `/admin` in your browser (or the path you configured `ash_admin` with in your router).
 
+## Security
+
+You can limit access to ash_admin by replacing the usual code in your [example_web/router.ex]
+```
+scope "/" do
+  # Pipe it through your browser pipeline
+  pipe_through [:browser]
+
+  ash_admin "/admin"
+end
+```
+
+with something like this:
+```
+ash_authentication_live_session :admin_dashboard,
+  on_mount: [{ExampleWeb.LiveUserAuth, :admin_only}],  #  <--- Note the addition here
+  session: {AshAdmin.Router, :__session__, [%{"prefix" => "/admin"}, []]},
+  root_layout: {AshAdmin.Layouts, :root} do
+  scope "/" do
+    pipe_through :browser
+
+    live "/admin/*route",
+        AshAdmin.PageLive,
+        :page,
+        private: %{
+          live_socket_path: "/live",
+          ash_admin_csp_nonce: %{
+            img: "ash_admin-Ed55GFnX",
+            style: "ash_admin-Ed55GFnX",
+            script: "ash_admin-Ed55GFnX"
+          }
+        }
+  end
+end
+```
+
+Then, we'll need to define :admin_only in our [example_web/live_user_auth.ex]:
+```
+def on_mount(:admin_only, _params, _session, socket) do
+  # If the user is logged in, check the user role is admin.  Continue if so,
+  # otherwise redirect to main page or a 403 page
+  if socket.assigns[:current_user] do
+    if socket.assigns[:current_user].role == :admin do
+      {:cont, socket}
+    else
+      {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/")}
+    end
+  # If user isn't logged in, redirect to sign in page
+  else
+    {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/sign-in")}
+  end
+end
+```
+
+Of course, the user role attribute will need to be added to our User resource in [example/accounts/user.ex]
+```
+alias Example.Accounts.User
+
+attributes do
+  ## ... previous attributes ...
+  attribute :role, User.Role, default: :user  
+end
+```
+Define our roles in a new file, [example/accounts/user/role.ex].  You can use whatever names you'd like:
+```
+defmodule Example.Accounts.User.Role do
+  use Ash.Type.Enum, values: [:user, :admin, :moderator] 
+end
+```
+If you don't want to use Ash.Type.Enum, you could update the User's attribute as such:
+```
+attribute :role, :atom do
+    constraints [one_of: [:user, :admin, :moderator]]
+    default :user
+end
+```
+Done.  
+
+The following steps are optional:
+if you want users who use the dashboard to act “as themselves” (and thus follow any policy rules with themselves as the actor), you’ll also want to specify an actor plug:
+```
+defmodule ExampleWeb.AshAdminActorPlug do
+  @moduledoc false
+  @behaviour AshAdmin.ActorPlug
+
+  @doc false
+  @impl true
+  def actor_assigns(socket, _session) do
+    dispatcher = socket.assigns[:current_user]
+
+    [actor: dispatcher]
+  end
+
+  @doc false
+  @impl true
+  def set_actor_session(conn), do: conn
+end
+```
+and then configure it like so
+```
+config :ash_admin, :actor_plug, MyAppWeb.AshAdminActorPlug
+```
+
 ### Content Security Policy
 
 If your app specifies a content security policy header, eg. via
