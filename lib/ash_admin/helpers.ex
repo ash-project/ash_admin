@@ -49,8 +49,8 @@ defmodule AshAdmin.Helpers do
     end
   end
 
-  def to_name(%Ash.Resource.Attribute{} = attribute) do
-    attribute.name
+  def to_name(%{name: name}) do
+    name
     |> to_string()
     |> to_name()
   end
