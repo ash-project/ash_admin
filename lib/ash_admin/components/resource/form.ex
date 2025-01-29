@@ -353,7 +353,8 @@ defmodule AshAdmin.Components.Resource.Form do
         opts: opts,
         key: key,
         hidden: hidden?,
-        exactly_fields: exactly_fields
+        exactly_fields: exactly_fields,
+        is_relationship_form: true
       )
 
     ~H"""
@@ -738,6 +739,12 @@ defmodule AshAdmin.Components.Resource.Form do
         _
       )
       when type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID, Ash.Type.Atom] do
+    attribute =
+      case form.source.type do
+        :read -> Map.put(attribute, :related_resource, assigns[:resource])
+        _ -> attribute
+      end
+
     assigns =
       assign(assigns,
         attribute: attribute,
@@ -2059,34 +2066,38 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp relate_attributes({auto_sorted, flags, sorted_defaults, relationship_args}, resource) do
     auto_sorted_with_relationships =
-      Enum.map(auto_sorted, fn attribute ->
-        relationships = Ash.Resource.Info.relationships(resource)
+      Enum.map(auto_sorted, fn
+        %Ash.Resource.Attribute{} = attribute ->
+          relationships = Ash.Resource.Info.relationships(resource)
 
-        cond do
-          attribute.primary_key? ->
-            case Enum.find(relationships, fn
-                   %Ash.Resource.Relationships.BelongsTo{destination_attribute: dest_attr} ->
-                     dest_attr == attribute.name
+          cond do
+            attribute.primary_key? ->
+              case Enum.find(relationships, fn
+                     %Ash.Resource.Relationships.BelongsTo{destination_attribute: dest_attr} ->
+                       dest_attr == attribute.name
 
-                   _other ->
-                     false
-                 end) do
-              %{source: source} -> Map.put(attribute, :related_resource, source)
-              _ -> attribute
-            end
+                     _other ->
+                       false
+                   end) do
+                %{source: source} -> Map.put(attribute, :related_resource, source)
+                _ -> attribute
+              end
 
-          true ->
-            case Enum.find(relationships, fn
-                   %Ash.Resource.Relationships.BelongsTo{source_attribute: src_attr} ->
-                     src_attr == attribute.name
+            true ->
+              case Enum.find(relationships, fn
+                     %Ash.Resource.Relationships.BelongsTo{source_attribute: src_attr} ->
+                       src_attr == attribute.name
 
-                   _other ->
-                     false
-                 end) do
-              %{destination: destination} -> Map.put(attribute, :related_resource, destination)
-              _ -> attribute
-            end
-        end
+                     _other ->
+                       false
+                   end) do
+                %{destination: destination} -> Map.put(attribute, :related_resource, destination)
+                _ -> attribute
+              end
+          end
+
+        attribute ->
+          attribute
       end)
 
     {auto_sorted_with_relationships, flags, sorted_defaults, relationship_args}
