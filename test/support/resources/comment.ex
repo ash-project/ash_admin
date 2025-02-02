@@ -1,7 +1,7 @@
 defmodule AshAdmin.Test.Comment do
   @moduledoc false
   use Ash.Resource,
-    domain: AshAdmin.Test.Domain,
+    domain: AshAdmin.Test.DomainA,
     data_layer: Ash.DataLayer.Ets
 
   attributes do

@@ -59,4 +59,27 @@ defmodule AshAdmin.Test.PageLiveTest do
     assert html =~ ~s|<link nonce="style_nonce"|
     refute html =~ "ash_admin-Ed55GFnX"
   end
+
+  describe "domain grouping" do
+    test "shows domains based on group specification", %{conn: conn} do
+      {:ok, _view, html} =
+        conn
+        |> Plug.Test.init_test_session(%{})
+        |> fetch_session()
+        |> put_session(:group, :group_b)
+        |> live("/api/sub_app/admin")
+
+      # Should show only domains with group_b
+      assert html =~ "DomainB"
+      refute html =~ "DomainA"
+
+      {:ok, _view, html} =
+        conn
+        |> live("/api/admin")
+
+      # Should show only ungrouped domains
+      assert html =~ "DomainA"
+      assert html =~ "DomainB"  # DomainB has group_b, so it shouldn't show up in ungrouped view
+    end
+  end
 end

@@ -1,7 +1,7 @@
 defmodule AshAdmin.Test.Post do
   @moduledoc false
   use Ash.Resource,
-    domain: AshAdmin.Test.Domain,
+    domain: AshAdmin.Test.DomainA,
     data_layer: Ash.DataLayer.Ets,
     extensions: [AshAdmin.Resource]
 
