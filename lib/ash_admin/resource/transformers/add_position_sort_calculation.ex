@@ -7,6 +7,8 @@ defmodule AshAdmin.Resource.Transformers.AddPositionSortCalculation do
   use Spark.Dsl.Transformer
   use Ash.Resource.Calculation
 
+  require Logger
+
   alias Spark.Dsl.Transformer
   alias AshAdmin.Resource.Transformers.AddPositionSortCalculation, as: AddPositionSortCalculation
   @impl true
@@ -72,7 +74,9 @@ defmodule AshAdmin.Resource.Transformers.AddPositionSortCalculation do
   end
 
   defp calculation(_label_field, data_layer) do
-    IO.inspect("Data layer #{inspect(data_layer)} does not support typeahead suggestion sorting.")
+    Logger.warning(
+      "Data layer #{inspect(data_layer)} does not support typeahead suggestion sorting."
+    )
 
     expr(0)
   end
