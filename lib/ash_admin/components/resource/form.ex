@@ -2070,30 +2070,28 @@ defmodule AshAdmin.Components.Resource.Form do
         %Ash.Resource.Attribute{} = attribute ->
           relationships = Ash.Resource.Info.relationships(resource)
 
-          cond do
-            attribute.primary_key? ->
-              case Enum.find(relationships, fn
-                     %Ash.Resource.Relationships.BelongsTo{destination_attribute: dest_attr} ->
-                       dest_attr == attribute.name
+          if attribute.primary_key? do
+            case Enum.find(relationships, fn
+                   %Ash.Resource.Relationships.BelongsTo{destination_attribute: dest_attr} ->
+                     dest_attr == attribute.name
 
-                     _other ->
-                       false
-                   end) do
-                %{source: source} -> Map.put(attribute, :related_resource, source)
-                _ -> attribute
-              end
+                   _other ->
+                     false
+                 end) do
+              %{source: source} -> Map.put(attribute, :related_resource, source)
+              _ -> attribute
+            end
+          else
+            case Enum.find(relationships, fn
+                   %Ash.Resource.Relationships.BelongsTo{source_attribute: src_attr} ->
+                     src_attr == attribute.name
 
-            true ->
-              case Enum.find(relationships, fn
-                     %Ash.Resource.Relationships.BelongsTo{source_attribute: src_attr} ->
-                       src_attr == attribute.name
-
-                     _other ->
-                       false
-                   end) do
-                %{destination: destination} -> Map.put(attribute, :related_resource, destination)
-                _ -> attribute
-              end
+                   _other ->
+                     false
+                 end) do
+              %{destination: destination} -> Map.put(attribute, :related_resource, destination)
+              _ -> attribute
+            end
           end
 
         attribute ->

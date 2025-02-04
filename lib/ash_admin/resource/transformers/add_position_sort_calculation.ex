@@ -9,8 +9,9 @@ defmodule AshAdmin.Resource.Transformers.AddPositionSortCalculation do
 
   require Logger
 
-  alias Spark.Dsl.Transformer
   alias AshAdmin.Resource.Transformers.AddPositionSortCalculation, as: AddPositionSortCalculation
+  alias Spark.Dsl.Transformer
+
   @impl true
   def transform(dsl) do
     case Transformer.get_persisted(dsl, :data_layer) do
