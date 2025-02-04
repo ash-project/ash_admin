@@ -159,10 +159,9 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
               phx-value-name={suggestion_name}
               phx-target={@myself}
             >
+              <% escaped_term = Regex.escape(@search_term) %>
               <% suggestion_name =
-                String.replace(suggestion_name, ~r/(#{@search_term})/i, "<b>\\0</b>", [
-                  :case_insensitive
-                ]) %>
+                String.replace(suggestion_name, ~r/(#{escaped_term})/i, "<b>\\0</b>") %>
               {Phoenix.HTML.raw(suggestion_name)}
             </li>
           <% end %>
