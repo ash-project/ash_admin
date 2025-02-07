@@ -173,7 +173,7 @@ defmodule AshAdmin.Resource do
   end
 
   def relationship_select_max_items(resource) do
-    Spark.Dsl.Extension.get_opt(resource, [:admin], :relationship_select_max_items, 18, true)
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :relationship_select_max_items, 50, true)
   end
 
   def actor?(resource) do
