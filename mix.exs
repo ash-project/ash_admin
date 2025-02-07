@@ -77,7 +77,7 @@ defmodule AshAdmin.MixProject do
   defp aliases() do
     [
       generate_migrations:
-        "ash_postgres.generate_migrations --domains Demo.Accounts.Domain,Demo.Tickets.Domain --snapshot-path dev/resource_snapshots --migration-path dev --drop-columns",
+        "ash_postgres.generate_migrations --domains Demo.Accounts.Domain,Demo.Tickets.Domain --snapshot-path dev/resource_snapshots --migration-path dev/repo/migrations --dont-drop-columns",
       credo: "credo --strict",
       migrate: "ash_postgres.migrate --migrations-path dev/repo/migrations",
       migrate_tenants: "ash_postgres.migrate --migrations-path dev/repo/tenant_migrations",
