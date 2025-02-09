@@ -294,7 +294,6 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
       assigns.pk_field,
       assigns.label_field
     ])
-    |> Ash.Query.load(:ash_admin_position_sort)
     |> Ash.Query.filter(
       contains(
         ^ref(assigns.label_field),
