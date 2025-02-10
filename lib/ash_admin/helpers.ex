@@ -37,6 +37,24 @@ defmodule AshAdmin.Helpers do
 
   def to_name(:id), do: "ID"
 
+  def to_name(%{__struct__: Ash.Resource.Attribute, related_resource: resource} = attribute)
+      when not is_nil(resource) do
+    if _label_field = AshAdmin.Resource.label_field(resource) do
+      attribute.name
+      |> to_string()
+      |> String.replace_suffix("_id", "")
+      |> to_name()
+    else
+      to_name(attribute.name)
+    end
+  end
+
+  def to_name(%{name: name}) do
+    name
+    |> to_string()
+    |> to_name()
+  end
+
   def to_name(name) do
     name
     |> to_string()
