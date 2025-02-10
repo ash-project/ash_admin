@@ -246,21 +246,23 @@ defmodule AshAdmin.Components.Resource.DataTable do
   end
 
   def handle_event("next_page", _, socket) do
-    params = %{"page" => page_link_params(socket.assigns.data, "next")}
+    params = %{"page" => AshPhoenix.LiveView.page_link_params(socket.assigns.data, "next")}
 
     {:noreply,
      push_patch(socket, to: self_path(socket.assigns.url_path, socket.assigns.params, params))}
   end
 
   def handle_event("prev_page", _, socket) do
-    params = %{"page" => page_link_params(socket.assigns.data, "prev")}
+    params = %{"page" => AshPhoenix.LiveView.page_link_params(socket.assigns.data, "prev")}
 
     {:noreply,
      push_patch(socket, to: self_path(socket.assigns.url_path, socket.assigns.params, params))}
   end
 
   def handle_event("specific_page", %{"page" => page}, socket) do
-    params = %{"page" => page_link_params(socket.assigns.data, String.to_integer(page))}
+    params = %{
+      "page" => AshPhoenix.LiveView.page_link_params(socket.assigns.data, String.to_integer(page))
+    }
 
     {:noreply,
      push_patch(socket, to: self_path(socket.assigns.url_path, socket.assigns.params, params))}
