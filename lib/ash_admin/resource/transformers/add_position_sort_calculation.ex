@@ -18,17 +18,10 @@ defmodule AshAdmin.Resource.Transformers.AddPositionSortCalculation do
         {:ok, dsl}
 
       label_field ->
-        calculation_expr =
-          if function_exported?(Ash.Query.Function, :string_position, 2) do
-            expr(string_position(^ref(label_field), ^arg(:search_term)))
-          else
-            expr(string_length(^ref(label_field)))
-          end
-
         opts = [
           name: :ash_admin_position_sort,
           type: :integer,
-          calculation: calculation_expr,
+          calculation: expr(string_position(^ref(label_field), ^arg(:search_term))),
           arguments: [
             %{name: :search_term, type: :string, constraints: [], default: ""}
           ],
