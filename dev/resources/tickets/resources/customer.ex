@@ -11,6 +11,7 @@ defmodule Demo.Tickets.Customer do
 
     admin do
       relationship_display_fields [:id, :first_name]
+      label_field :full_name
     end
 
   resource do
@@ -44,6 +45,10 @@ defmodule Demo.Tickets.Customer do
     attribute :first_name, :string, public?: true
     attribute :last_name, :string, public?: true
     attribute :representative, :boolean, public?: true
+  end
+
+  calculations do
+    calculate :full_name, :string, concat([:first_name, :last_name], " ")
   end
 
   relationships do

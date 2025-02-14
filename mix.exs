@@ -115,7 +115,7 @@ defmodule AshAdmin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ash, "~> 3.0 and >= 3.4.47"},
+      {:ash, "~> 3.0 and >= 3.4.63"},
       {:ash_phoenix, "~> 2.1 and >= 2.1.8"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix, "~> 1.7"},
@@ -131,6 +131,7 @@ defmodule AshAdmin.MixProject do
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
       {:ash_postgres, "~> 2.0", only: [:dev, :test]},
+      {:ash_sql, "~> 0.2 and >= 0.2.56", only: [:dev, :test]},
       {:git_ops, "~> 2.4", only: [:dev, :test]},
       {:ex_doc, "~> 0.23", only: [:dev, :test], runtime: false},
       {:ex_check, "~> 0.14", only: [:dev, :test]},

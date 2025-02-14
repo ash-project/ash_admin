@@ -9,9 +9,10 @@ defmodule Demo.Tickets.Representative do
       AshAdmin.Resource
     ]
 
-    admin do
-      relationship_display_fields [:id, :first_name]
-    end
+  admin do
+    relationship_display_fields [:id, :first_name]
+    label_field :full_name
+  end
 
   resource do
     base_filter representative: true
@@ -35,15 +36,13 @@ defmodule Demo.Tickets.Representative do
     policy action_type(:read) do
       authorize_if actor_attribute_equals(:representative, true)
       authorize_if relates_to_actor_via([:assigned_tickets, :reporter])
+      authorize_if accessing_from(Demo.Tickets.Organization, :representatives)
     end
   end
 
   actions do
     default_accept :*
-    defaults []
-    read :read do
-      primary? true
-    end
+    defaults [:read]
 
     read :me do
       filter id: actor(:id)
@@ -72,6 +71,10 @@ defmodule Demo.Tickets.Representative do
   end
 
   relationships do
+    relationships do
+      belongs_to :organization, Demo.Tickets.Organization, public?: true
+    end
+
     has_many :assigned_tickets, Demo.Tickets.Ticket do
       public? true
       destination_attribute :representative_id

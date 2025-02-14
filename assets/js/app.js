@@ -26,7 +26,7 @@ Hooks.JsonEditor = {
             target.dispatchEvent(
               new Event("change", { bubbles: true, target: this.el.name }),
             );
-          } catch (_e) {}
+          } catch (_e) { }
         },
         onChange: () => {
           try {
@@ -37,7 +37,7 @@ Hooks.JsonEditor = {
             target.dispatchEvent(
               new Event("change", { bubbles: true, target: this.el.name }),
             );
-          } catch (_e) {}
+          } catch (_e) { }
         },
         onModeChange: (newMode) => {
           hook.mode = newMode;
@@ -63,7 +63,7 @@ Hooks.JsonEditorSource = {
         } else {
         }
       }
-    } catch (_e) {}
+    } catch (_e) { }
   },
 };
 
@@ -161,6 +161,43 @@ Hooks.MaintainAttrs = {
   updated() {
     this.prevAttrs.forEach(([name, val]) => this.el.setAttribute(name, val));
   },
+};
+
+Hooks.Typeahead = {
+  mounted() {
+    const target_id = this.el.getAttribute("data-target-id");
+    const target_el = document.getElementById(target_id);
+
+    switch (this.el.tagName) {
+      case "INPUT":
+        this.el.addEventListener("keydown", e => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+          }
+        });
+        this.el.addEventListener("keyup", e => {
+          switch (e.key) {
+            case "Enter":
+            case "Escape":
+              this.el.blur();
+              window.setTimeout(function () { target_el.dispatchEvent(new Event("input", { bubbles: true })) }, 750);
+              break;
+          }
+        });
+        break;
+
+      case "LI":
+        this.el.addEventListener("click", e => {
+          window.setTimeout(function () { target_el.dispatchEvent(new Event("input", { bubbles: true })) }, 750);
+        });
+        break;
+    }
+  },
+  updated() {
+    if (this.el.tagName === "INPUT" && this.el.name.match(/suggest$/) && this.el.value.length === 0) {
+      this.el.focus();
+    }
+  }
 };
 
 function getCookie(name) {
