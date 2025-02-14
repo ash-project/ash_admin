@@ -165,6 +165,9 @@ Hooks.MaintainAttrs = {
 
 Hooks.Typeahead = {
   mounted() {
+    this.aborter = new AbortController();
+    const signal = this.aborter.signal;
+
     const target_id = this.el.getAttribute("data-target-id");
     const target_el = document.getElementById(target_id);
 
@@ -174,7 +177,7 @@ Hooks.Typeahead = {
           if (e.key === "Enter") {
             e.preventDefault();
           }
-        });
+        }, { signal });
         this.el.addEventListener("keyup", e => {
           switch (e.key) {
             case "Enter":
@@ -183,19 +186,24 @@ Hooks.Typeahead = {
               window.setTimeout(function () { target_el.dispatchEvent(new Event("input", { bubbles: true })) }, 750);
               break;
           }
-        });
+        }, { signal });
         break;
 
       case "LI":
         this.el.addEventListener("click", e => {
           window.setTimeout(function () { target_el.dispatchEvent(new Event("input", { bubbles: true })) }, 750);
-        });
+        }, { signal });
         break;
     }
   },
   updated() {
     if (this.el.tagName === "INPUT" && this.el.name.match(/suggest$/) && this.el.value.length === 0) {
       this.el.focus();
+    }
+  },
+  beforeDestroy() {
+    if (this.aborter) {
+      this.aborter.abort();
     }
   }
 };
