@@ -84,37 +84,15 @@ Start your project (usually by running `mix phx.server` in a terminal) and visit
 
 ## Security
 
-You can limit access to ash_admin by replacing the usual code in your [example_web/router.ex]
+You can limit access to ash_admin when using `AshAuthentication` like so:
 ```
 scope "/" do
   # Pipe it through your browser pipeline
   pipe_through [:browser]
 
-  ash_admin "/admin"
-end
-```
-
-with something like this:
-```
-ash_authentication_live_session :admin_dashboard,
-  on_mount: [{ExampleWeb.LiveUserAuth, :admin_only}],  #  <--- Note the addition here
-  session: {AshAdmin.Router, :__session__, [%{"prefix" => "/admin"}, []]},
-  root_layout: {AshAdmin.Layouts, :root} do
-  scope "/" do
-    pipe_through :browser
-
-    live "/admin/*route",
-        AshAdmin.PageLive,
-        :page,
-        private: %{
-          live_socket_path: "/live",
-          ash_admin_csp_nonce: %{
-            img: "ash_admin-Ed55GFnX",
-            style: "ash_admin-Ed55GFnX",
-            script: "ash_admin-Ed55GFnX"
-          }
-        }
-  end
+  ash_admin "/admin", AshAuthentication.Phoenix.LiveSession.opts(
+    on_mount: [{ExampleWeb.LiveUserAuth, :admin_only}] #  <--- You can keep specific users out like so
+  )
 end
 ```
 
