@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.0](https://github.com/ash-project/ash_admin/compare/v0.12.6...v0.13.0) (2025-02-17)
+
+
+
+
+### Features:
+
+* Select/Typeahead for related items using `label_field` (#222)
+
 ## [v0.12.6](https://github.com/ash-project/ash_admin/compare/v0.12.5...v0.12.6) (2025-01-13)
 
 
