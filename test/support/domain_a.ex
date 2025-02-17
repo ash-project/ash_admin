@@ -1,4 +1,4 @@
-defmodule AshAdmin.Test.Domain do
+defmodule AshAdmin.Test.DomainA do
   @moduledoc false
   use Ash.Domain,
     extensions: [AshAdmin.Domain]
