@@ -14,7 +14,7 @@ defmodule AshAdmin.MixProject do
       description: @description,
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
-      docs: docs(),
+      docs: &docs/0,
       dialyzer: [
         plt_add_apps: [:ex_unit, :mix]
       ],
@@ -58,8 +58,10 @@ defmodule AshAdmin.MixProject do
         "README.md",
         "documentation/tutorials/getting-started-with-ash-admin.md",
         "documentation/tutorials/contributing-to-ash-admin.md",
-        "documentation/dsls/DSL-AshAdmin.Domain.md",
-        "documentation/dsls/DSL-AshAdmin.Resource.md",
+        {"documentation/dsls/DSL-AshAdmin.Domain.md",
+         search_data: Spark.Docs.search_data_for(AshAdmin.Domain)},
+        {"documentation/dsls/DSL-AshAdmin.Resource.md",
+         search_data: Spark.Docs.search_data_for(AshAdmin.Resource)},
         "CHANGELOG.md"
       ],
       groups_for_extras: [
@@ -88,8 +90,7 @@ defmodule AshAdmin.MixProject do
       docs: [
         "spark.cheat_sheets",
         "docs",
-        "spark.replace_doc_links",
-        "spark.cheat_sheets_in_search"
+        "spark.replace_doc_links"
       ],
       test: ["setup", "test"],
       "spark.formatter": "spark.formatter --extensions AshAdmin.Domain,AshAdmin.Resource",
