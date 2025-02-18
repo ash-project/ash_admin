@@ -108,6 +108,7 @@ defmodule AshAdmin.Resource do
       ],
       relationship_select_max_items: [
         type: :integer,
+        default: 50,
         doc:
           "The maximum number of items to show in a select field when this resource is shown as a relationship on another resource's form. If the number of related resources is higher, a typeahead selector will be used."
       ]
