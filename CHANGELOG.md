@@ -5,6 +5,19 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.1](https://github.com/ash-project/ash_admin/compare/v0.13.0...v0.13.1) (2025-02-22)
+
+
+
+
+### Bug Fixes:
+
+* use AbortSignal in Typeahead hook to remove up event listeners
+
+### Improvements:
+
+* Search max items default (#274)
+
 ## [v0.13.0](https://github.com/ash-project/ash_admin/compare/v0.12.6...v0.13.0) (2025-02-17)
 
 
