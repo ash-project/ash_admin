@@ -54,6 +54,12 @@ defmodule AshAdmin.MixProject do
       main: "readme",
       source_ref: "v#{@version}",
       logo: "logos/small-logo.png",
+      filter_modules: fn _mod, data ->
+        !String.starts_with?(
+          to_string(data.source_path),
+          Path.expand("./dev")
+        )
+      end,
       extras: [
         "README.md",
         "documentation/tutorials/getting-started-with-ash-admin.md",
