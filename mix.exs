@@ -5,7 +5,7 @@ defmodule AshAdmin.MixProject do
   A super-admin UI for Ash Framework, built with Phoenix LiveView.
   """
 
-  @version "0.13.1"
+  @version "0.13.2"
 
   def project do
     [
