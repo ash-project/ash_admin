@@ -60,6 +60,18 @@ defmodule AshAdmin.Router do
     
     * `:live_session_name` - Optional atom to name the `live_session`. Defaults to `:ash_admin`.
 
+    * `:group` - Optional atom to filter domains by group. Only domains with a matching group will be shown.
+      For example: `group: :sub_app` will only show domains with `group: :sub_app` in their admin configuration.
+      Note: If you specify a group here but haven't set that group in any domain's admin configuration,
+      the admin interface will appear empty. Make sure to configure the group in your domains:
+      ```elixir
+      # In your domain:
+      admin do
+        show? true
+        group :sub_app
+      end
+      ```
+
   ## Examples
       defmodule MyAppWeb.Router do
         use Phoenix.Router
@@ -71,7 +83,9 @@ defmodule AshAdmin.Router do
           # If you don't have one, see `admin_browser_pipeline/1`
           pipe_through [:browser]
 
-          ash_admin "/admin"
+          # Default route - shows all domains that don't have a group set
+          ash_admin "/admin"  # Shows all domains with no group filter
+          ash_admin "/sub_app/admin", group: :sub_app  # Only shows domains with group: :sub_app
           ash_admin "/csp/admin", live_session_name: :ash_admin_csp, csp_nonce_assign_key: :csp_nonce_value
         end
       end
@@ -100,7 +114,13 @@ defmodule AshAdmin.Router do
       live_session opts[:live_session_name] || :ash_admin,
         on_mount: List.wrap(opts[:on_mount]),
         session:
-          {AshAdmin.Router, :__session__, [%{"prefix" => path}, List.wrap(opts[:session])]},
+          {AshAdmin.Router, :__session__, [
+            Map.merge(
+              %{"prefix" => path},
+              if(opts[:group], do: %{"group" => opts[:group]}, else: %{})
+            ),
+            List.wrap(opts[:session])
+          ]},
         root_layout: {AshAdmin.Layouts, :root} do
         live(
           "#{path}/*route",

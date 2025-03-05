@@ -7,27 +7,27 @@ defmodule AshAdmin.Test.Components.TopNav.Helpers.DropdownHelperTest do
     test "groups resources" do
       prefix = "/admin"
       current_resource = AshAdmin.Test.Post
-      domain = AshAdmin.Test.Domain
+      domain = AshAdmin.Test.DomainA
 
       blog_link = %{
         active: false,
         group: :group_b,
         text: "Blog",
-        to: "/admin?domain=Test&resource=Blog"
+        to: "/admin?domain=DomainA&resource=Blog"
       }
 
       post_link = %{
         active: true,
         group: :group_a,
         text: "Post",
-        to: "/admin?domain=Test&resource=Post"
+        to: "/admin?domain=DomainA&resource=Post"
       }
 
       comment_link = %{
         active: false,
         group: nil,
         text: "Comment",
-        to: "/admin?domain=Test&resource=Comment"
+        to: "/admin?domain=DomainA&resource=Comment"
       }
 
       assert_unordered(
@@ -39,7 +39,7 @@ defmodule AshAdmin.Test.Components.TopNav.Helpers.DropdownHelperTest do
     test "groups resources by given order from the domain" do
       prefix = "/admin"
       current_resource = AshAdmin.Test.Post
-      domain = AshAdmin.Test.Domain
+      domain = AshAdmin.Test.DomainA
 
       assert [
                [%{group: :group_b, text: "Blog"} = _blog_link],
@@ -51,7 +51,7 @@ defmodule AshAdmin.Test.Components.TopNav.Helpers.DropdownHelperTest do
 
   describe "dropdown_group_labels/3" do
     test "returns groups" do
-      domain = AshAdmin.Test.Domain
+      domain = AshAdmin.Test.DomainA
 
       assert [group_b: "Group B", group_a: "Group A", group_c: "Group C"] =
                DropdownHelper.dropdown_group_labels(domain)
