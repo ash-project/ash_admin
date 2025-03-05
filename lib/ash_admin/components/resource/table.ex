@@ -46,7 +46,7 @@ defmodule AshAdmin.Components.Resource.Table do
             <td :if={@actions && actions?(@resource)}>
               <div class="flex h-max justify-items-center">
                 <div :if={AshAdmin.Resource.show_action(@resource)}>
-                  <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
+                  <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&table=#{@table}&primary_key=#{encode_primary_key(record)}&action_type=read"}>
                     <.icon name="hero-information-circle-solid" class="h-5 w-5 text-gray-500" />
                   </.link>
                 </div>

@@ -1507,7 +1507,7 @@ defmodule AshAdmin.Components.Resource.Form do
        socket
        |> redirect(
          to:
-           "#{socket.assigns.prefix || "/"}?domain=#{AshAdmin.Domain.name(socket.assigns.domain)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}&table=#{socket.assigns.table}&primary_key=#{encode_primary_key(record)}"
+           "#{socket.assigns.prefix || "/"}?domain=#{AshAdmin.Domain.name(socket.assigns.domain)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}&table=#{socket.assigns.table}&primary_key=#{encode_primary_key(record)}&action_type=read"
        )}
     else
       case AshAdmin.Helpers.primary_action(socket.assigns.resource, :update) do
