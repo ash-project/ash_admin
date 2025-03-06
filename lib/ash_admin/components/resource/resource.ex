@@ -79,7 +79,7 @@ defmodule AshAdmin.Components.Resource do
         />
       </div>
       <.live_component
-        :if={IO.inspect(@action, label: "action") && IO.inspect(@record) && IO.inspect(@action_type) && IO.inspect(match?({:ok, %_{}}, @record) && @action_type == :read)}
+        :if={match?({:ok, %_{}}, @record) && @action_type == :read}
         module={Show}
         resource={@resource}
         domain={@domain}
