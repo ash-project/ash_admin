@@ -804,6 +804,9 @@ defmodule AshAdmin.Components.Resource.Form do
           module={AshAdmin.Components.Resource.RelationshipField}
           id={@id || "#{@form.name}-#{@attribute.name}"}
           value={value(@value, @form, @attribute)}
+          tenant={@tenant}
+          actor={@actor}
+          authorizing={@authorizing}
           resource={@attribute.related_resource}
           form={@form}
           attribute={@attribute}
