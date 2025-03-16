@@ -83,7 +83,16 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp render_form(assigns) do
     ~H"""
-    <div class="shadow-lg overflow-hidden sm:rounded-md bg-white">
+    <div class="shadow-lg overflow-hidden sm:rounded-md bg-white relative">
+      <button
+        type="button"
+        phx-click="close_form"
+        phx-target={@myself}
+        class="text-red-500 absolute top-0 right-2 text-gray-600 hover:text-gray-800"
+        aria-label="Close"
+      >
+        &times;
+      </button>
       <div :if={@form.source.submitted_once?} class="ml-4 mt-4 text-red-500">
         <ul>
           <li :for={{field, message} <- all_errors(@form)}>
@@ -1632,6 +1641,14 @@ defmodule AshAdmin.Components.Resource.Form do
     {:noreply,
      socket
      |> assign(:form, form)}
+  end
+
+  def handle_event("close_form", _params, socket) do
+    domain = AshAdmin.Domain.name(socket.assigns.domain)
+    resource = AshAdmin.Resource.name(socket.assigns.resource)
+    params = "domain=#{domain}&resource=#{resource}"
+    to = "#{socket.assigns.prefix}?#{params}"
+    {:noreply, redirect(socket, to: to)}
   end
 
   def handle_event("append_value", %{"path" => path, "field" => field} = params, socket) do
