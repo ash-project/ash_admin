@@ -275,7 +275,11 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
     |> Ash.Query.new()
     |> Ash.Query.load([pk_field, label_field])
     |> Ash.Query.limit(limit)
-    |> Ash.read!(actor: assigns[:actor], authorize?: assigns[:authorizing], tenant: assigns[:tenant])
+    |> Ash.read!(
+      actor: assigns[:actor],
+      authorize?: assigns[:authorizing],
+      tenant: assigns[:tenant]
+    )
     |> then(fn
       %Ash.Page.Offset{results: results} -> results
       results -> results
