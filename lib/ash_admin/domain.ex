@@ -29,6 +29,18 @@ defmodule AshAdmin.Domain do
         default: [],
         doc:
           "Humanized names for each resource group to appear in the admin area. These will be used as labels in the top navigation dropdown and will be shown sorted as given. If a key for a group does not appear in this mapping, the label will not be rendered."
+      ],
+      group: [
+        type: :atom,
+        default: nil,
+        doc: """
+        The group for filtering multiple admin dashboards. When set, this domain will only appear
+        in admin routes that specify a matching group option. If not set (nil), the domain will
+        only appear in admin routes without group filtering.
+
+        Example:
+          group :sub_app  # This domain will only show up in routes with group: :sub_app
+        """
       ]
     ]
   }
@@ -39,6 +51,36 @@ defmodule AshAdmin.Domain do
 
   @moduledoc """
   A domain extension to alter the behavior of a domain in the admin UI.
+
+  ## Group-based Filtering
+
+  Domains can be assigned to groups using the `group` option in the admin configuration.
+  This allows you to create multiple admin dashboards, each showing only the domains that belong
+  to a specific group.
+
+  ### Example
+
+  ```elixir
+  defmodule MyApp.SomeFeatureDomain do
+    use Ash.Domain,
+      extensions: [AshAdmin.Domain]
+
+    admin do
+      show? true
+      group :sub_app  # This domain will only appear in admin routes with group: :sub_app
+    end
+
+    # ... rest of domain configuration
+  end
+  ```
+
+  Then in your router:
+  ```elixir
+  ash_admin "/sub_app/admin", group: :sub_app  # Will only show domains with group: :sub_app
+  ```
+
+  Note: If you add a group filter to your admin route but haven't set the corresponding group
+  in your domains' admin configuration, those domains won't appear in the admin interface.
   """
 
   def name(domain) do
@@ -59,6 +101,10 @@ defmodule AshAdmin.Domain do
 
   def resource_group_labels(domain) do
     Spark.Dsl.Extension.get_opt(domain, [:admin], :resource_group_labels, [], true)
+  end
+
+  def group(domain) do
+    Spark.Dsl.Extension.get_opt(domain, [:admin], :group, nil, true)
   end
 
   defp default_name(domain) do
