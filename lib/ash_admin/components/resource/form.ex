@@ -1022,16 +1022,22 @@ defmodule AshAdmin.Components.Resource.Form do
         actual_union_type: actual_union_type,
         actual_union_constraints: actual_union_constraints,
         union_type_name: union_type_name,
-        actual_union_type_name: actual_union_type_name
+        actual_union_type_name: actual_union_type_name,
+        actual_union_value: value(value, form, attribute, attribute.default)
       )
 
     ~H"""
-    <div class="border">
-      <label class="block text-sm font-medium text-gray-700" for={@union_type_name}>
+    <div class={if !is_nil(@actual_union_value), do: "border", else: ""}>
+      <label
+        :if={!is_nil(@actual_union_value)}
+        class="block text-sm font-medium text-gray-700"
+        for={@union_type_name}
+      >
         Type
       </label>
       <div class="w-full">
         <.input
+          :if={not is_nil(@actual_union_value)}
           phx-change="union-type-changed"
           id={@union_type_id}
           name={@union_type_name}
@@ -1044,7 +1050,7 @@ defmodule AshAdmin.Components.Resource.Form do
           assigns,
           %{@attribute | type: @actual_union_type, constraints: @actual_union_constraints},
           @form,
-          value(@value, @form, @attribute, @attribute.default),
+          @actual_union_value,
           @name,
           @id,
           @actual_union_type_name
@@ -1165,6 +1171,16 @@ defmodule AshAdmin.Components.Resource.Form do
             value={elem(kv, 1)}
             type="hidden"
           />
+
+          <button
+            type="button"
+            phx-click="remove_form"
+            phx-target={@myself}
+            phx-value-path={inner_form.name}
+            class="flex h-6 w-6 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+          >
+            <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
+          </button>
           {render_attributes(
             assigns,
             inner_form.source.resource,
@@ -1605,6 +1621,8 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def handle_event("add_form", %{"path" => path} = params, socket) do
+    AshPhoenix.Form.params(socket.assigns.form)
+
     type =
       case params["type"] do
         "lookup" -> :read
@@ -1638,7 +1656,7 @@ defmodule AshAdmin.Components.Resource.Form do
     to_append =
       case params["union-type"] do
         nil -> nil
-        value when value != "" -> %{"_union_type" => value}
+        value when value not in ["", nil] -> %{"_union_type" => value}
         _ -> nil
       end
 
