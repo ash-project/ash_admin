@@ -27,5 +27,11 @@ defmodule AshAdmin.Test.Router do
       live_session_name: :ash_admin_csp_full,
       csp_nonce_assign_key: csp_full
     )
+
+    # Test route for group-based admin panel
+    ash_admin("/sub_app/admin",
+      live_session_name: :ash_admin_sub_app,
+      group: :group_b
+    )
   end
 end
