@@ -659,7 +659,7 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   def render_attribute_input(assigns, %{type: type} = attribute, form, value, name, id, _)
-      when type in [Ash.Type.UtcDatetime, Ash.Type.UtcDatetimeUsec] do
+      when type in [Ash.Type.UtcDatetime, Ash.Type.UtcDatetimeUsec, Ash.Type.DateTime] do
     assigns = assign(assigns, form: form, value: value, name: name, attribute: attribute, id: id)
 
     ~H"""
