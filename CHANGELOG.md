@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.4](https://github.com/ash-project/ash_admin/compare/v0.13.3...v0.13.4) (2025-04-09)
+
+
+
+
+### Bug Fixes:
+
+* don't display union type field for `nil` values
+
 ## [v0.13.3](https://github.com/ash-project/ash_admin/compare/v0.13.2...v0.13.3) (2025-03-18)
 
 
