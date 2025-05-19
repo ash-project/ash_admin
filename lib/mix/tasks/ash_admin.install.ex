@@ -89,21 +89,30 @@ if Code.ensure_loaded?(Igniter) do
       if router do
         Igniter.Project.Module.find_and_update_module!(igniter, router, fn zipper ->
           zipper =
-            Igniter.Code.Common.add_code(
-              zipper,
-              """
-              if Application.compile_env(#{inspect(app_name)}, :dev_routes) do
-                import AshAdmin.Router
+            case Igniter.Code.Common.move_to(
+                   zipper,
+                   &Igniter.Code.Function.function_call?(&1, :ash_admin, [1, 2])
+                 ) do
+              :error ->
+                Igniter.Code.Common.add_code(
+                  zipper,
+                  """
+                  if Application.compile_env(#{inspect(app_name)}, :dev_routes) do
+                    import AshAdmin.Router
 
-                scope "/admin" do
-                  pipe_through :browser
+                    scope "/admin" do
+                      pipe_through :browser
 
-                  ash_admin "/"
-                end
-              end
-              """,
-              placement: :after
-            )
+                      ash_admin "/"
+                    end
+                  end
+                  """,
+                  placement: :after
+                )
+
+              _ ->
+                zipper
+            end
 
           {:ok, zipper}
         end)
