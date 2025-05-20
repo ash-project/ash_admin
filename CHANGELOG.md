@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.5](https://github.com/ash-project/ash_admin/compare/v0.13.4...v0.13.5) (2025-05-20)
+
+
+
+
+### Bug Fixes:
+
+* don't duplicate `ash_admin` routes on installation
+
 ## [v0.13.4](https://github.com/ash-project/ash_admin/compare/v0.13.3...v0.13.4) (2025-04-09)
 
 
