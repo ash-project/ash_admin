@@ -18,6 +18,12 @@ defmodule AshAdmin.Test.Post do
     end
   end
 
+  relationships do
+    belongs_to :author, AshAdmin.Test.Author do
+      public?(true)
+    end
+  end
+
   actions do
     default_accept(:*)
     defaults(create: :*)
