@@ -17,6 +17,7 @@ defmodule AshAdmin.Components.Resource.Show do
   attr :tenant, :any
   attr :table, :any, required: true
   attr :prefix, :any, required: true
+  attr :current_group, :any, default: nil
 
   def render(assigns) do
     ~H"""
@@ -142,11 +143,23 @@ defmodule AshAdmin.Components.Resource.Show do
   end
 
   defp render_relationships(assigns, _record, resource) do
-    assigns = assign(assigns, resource: resource)
+    # Filter relationships to only include those with accessible domains
+    accessible_relationships =
+      resource
+      |> AshAdmin.Components.Resource.Form.relationships(:show)
+      |> Enum.filter(fn relationship ->
+        AshAdmin.Domain.domain_accessible_in_group?(
+          Ash.Resource.Info.domain(relationship.destination),
+          assigns[:current_group]
+        )
+      end)
+
+    assigns =
+      assign(assigns, resource: resource, accessible_relationships: accessible_relationships)
 
     ~H"""
     <div
-      :for={relationship <- AshAdmin.Components.Resource.Form.relationships(@resource, :show)}
+      :for={relationship <- @accessible_relationships}
       class="shadow-lg overflow-hidden sm:rounded-md mb-2 bg-white"
     >
       <div class="px-4 py-5 mt-2">
@@ -221,9 +234,10 @@ defmodule AshAdmin.Components.Resource.Show do
          cardinality: :one,
          name: name,
          destination: destination,
-         context: context,
-         domain: destination_domain
+         context: context
        }) do
+    destination_domain = Ash.Resource.Info.domain(destination)
+
     case Map.get(record, name) do
       nil ->
         "None"
@@ -283,6 +297,7 @@ defmodule AshAdmin.Components.Resource.Show do
         prefix={@prefix}
         skip={[@destination_attribute]}
         relationship_name={@relationship_name}
+        current_group={@current_group}
       />
     </div>
     """

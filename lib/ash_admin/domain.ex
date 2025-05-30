@@ -79,6 +79,13 @@ defmodule AshAdmin.Domain do
   ash_admin "/sub_app/admin", group: :sub_app  # Will only show domains with group: :sub_app
   ```
 
+  You might need to define different `live_session_name` for the admin dashboards in your
+  router, depending on the group. For example:
+
+  ```elixir
+  ash_admin "/sub_app/admin", group: :sub_app, live_session_name: :sub_app_admin
+  ```
+
   Note: If you add a group filter to your admin route but haven't set the corresponding group
   in your domains' admin configuration, those domains won't appear in the admin interface.
   """
@@ -105,6 +112,31 @@ defmodule AshAdmin.Domain do
 
   def group(domain) do
     Spark.Dsl.Extension.get_opt(domain, [:admin], :group, nil, true)
+  end
+
+  @doc """
+  Checks if a destination domain is accessible from the current group context.
+
+  Returns true if:
+  - No group filtering is active (current_group is nil)
+  - The destination domain belongs to the same group as current_group
+  - The destination domain has no group (nil) and current_group is also nil
+  """
+  def domain_accessible_in_group?(destination_domain, current_group) do
+    destination_group = group(destination_domain)
+
+    case {current_group, destination_group} do
+      # No group filtering, ungrouped domain
+      {nil, nil} -> true
+      # No group filtering, but domain has a group
+      {nil, _} -> false
+      # Same group
+      {group, group} -> true
+      # Group filtering active, but domain has no group
+      {_, nil} -> false
+      # Different groups
+      {_, _} -> false
+    end
   end
 
   defp default_name(domain) do

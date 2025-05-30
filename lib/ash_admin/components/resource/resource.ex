@@ -22,6 +22,7 @@ defmodule AshAdmin.Components.Resource do
   attr :prefix, :any, default: nil
   attr :action_type, :atom
   attr :polymorphic_actions, :any
+  attr :current_group, :any, default: nil
 
   def render(assigns) do
     ~H"""
@@ -90,8 +91,15 @@ defmodule AshAdmin.Components.Resource do
         tenant={@tenant}
         table={@table}
         prefix={@prefix}
+        current_group={@current_group}
       />
-      <Info.info :if={is_nil(@action_type)} resource={@resource} domain={@domain} prefix={@prefix} />
+      <Info.info
+        :if={is_nil(@action_type)}
+        resource={@resource}
+        domain={@domain}
+        prefix={@prefix}
+        current_group={@current_group}
+      />
       <.live_component
         :if={@action_type == :create}
         module={Form}

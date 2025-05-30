@@ -47,6 +47,7 @@ defmodule AshAdmin.PageLive do
      |> assign(:primary_key, nil)
      |> assign(:record, nil)
      |> assign(:domains, domains)
+     |> assign(:current_group, group)
      |> assign(:tenant, session["tenant"])
      |> assign(:editing_tenant, false)
      |> then(fn socket ->
@@ -103,6 +104,7 @@ defmodule AshAdmin.PageLive do
       tables={@tables}
       polymorphic_actions={@polymorphic_actions}
       prefix={@prefix}
+      current_group={@current_group}
     />
     """
   end
