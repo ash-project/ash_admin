@@ -740,8 +740,8 @@ defmodule AshAdmin.Components.Resource.Form do
       )
       when type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID, Ash.Type.Atom] do
     attribute =
-      case form.source.type do
-        :read -> Map.put(attribute, :related_resource, assigns[:resource])
+      case form.source do
+        %{type: :read} -> Map.put(attribute, :related_resource, assigns[:resource])
         _ -> attribute
       end
 
