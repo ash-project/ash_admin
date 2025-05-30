@@ -68,6 +68,25 @@ defmodule Demo.Accounts.User do
       argument :new_user, Demo.Accounts.NewUser, allow_nil?: false
     end
 
+    update :add_profile_picture do
+      accept []
+      argument :file, Ash.Type.File, allow_nil?: false
+
+      validate fn changeset, _context ->
+        value = Ash.Changeset.get_argument(changeset, :file)
+
+        if value do
+          if Path.extname(value.source) not in [".png", ".jpg", ".jpeg"] do
+            {:error, field: :file, message: "Only .png or .jpg files are allowed"}
+          else
+            :ok
+          end
+        else
+          :ok
+        end
+      end
+    end
+
     update :add_moar_users do
       argument :new_users, {:array, Demo.Accounts.NewUser}, allow_nil?: false
     end
