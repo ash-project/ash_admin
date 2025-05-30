@@ -25,7 +25,7 @@ defmodule AshAdmin.PageLive do
         socket
       ) do
     otp_app = socket.endpoint.config(:otp_app)
-
+    group = session["group"]
     prefix =
       case prefix do
         "/" ->
@@ -39,7 +39,7 @@ defmodule AshAdmin.PageLive do
 
     socket = assign(socket, :prefix, prefix)
 
-    domains = domains(otp_app)
+    domains = domains(otp_app) |> filter_domains_by_group(group)
 
     {:ok,
      socket
@@ -47,6 +47,7 @@ defmodule AshAdmin.PageLive do
      |> assign(:primary_key, nil)
      |> assign(:record, nil)
      |> assign(:domains, domains)
+     |> assign(:current_group, group)
      |> assign(:tenant, session["tenant"])
      |> assign(:editing_tenant, false)
      |> then(fn socket ->
@@ -103,6 +104,7 @@ defmodule AshAdmin.PageLive do
       tables={@tables}
       polymorphic_actions={@polymorphic_actions}
       prefix={@prefix}
+      current_group={@current_group}
     />
     """
   end
@@ -111,6 +113,13 @@ defmodule AshAdmin.PageLive do
     otp_app
     |> Application.get_env(:ash_domains)
     |> Enum.filter(&AshAdmin.Domain.show?/1)
+  end
+
+  defp filter_domains_by_group(domains, nil), do: domains
+  defp filter_domains_by_group(domains, group) do
+    Enum.filter(domains, fn domain ->
+      AshAdmin.Domain.group(domain) == group
+    end)
   end
 
   defp assign_domain(socket, domain) do

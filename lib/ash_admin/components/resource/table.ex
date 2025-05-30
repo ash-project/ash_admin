@@ -20,6 +20,7 @@ defmodule AshAdmin.Components.Resource.Table do
   attr :show_sensitive_fields, :list, default: []
   attr :actor, :any, default: nil
   attr :relationship_name, :atom, default: nil
+  attr :current_group, :any, default: nil
 
   def table(assigns) do
     ~H"""

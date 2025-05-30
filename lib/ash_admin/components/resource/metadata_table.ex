@@ -71,6 +71,7 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
   attr :resource, :any, required: true
   attr :domain, :any, required: true
   attr :prefix, :any, required: true
+  attr :current_group, :any, default: nil
 
   def relationship_table(assigns) do
     ~H"""
@@ -98,9 +99,16 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
               {relationship.type}
             </.td>
             <.td>
-              <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(relationship.destination)}"}>
-                {AshAdmin.Resource.name(relationship.destination)}
-              </.link>
+              <%=  %>
+              <%= if destination_domain_accessible?(relationship, @domain, @current_group) do %>
+                <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(destination_domain(relationship, @domain))}&resource=#{AshAdmin.Resource.name(relationship.destination)}"}>
+                  {AshAdmin.Resource.name(relationship.destination)}
+                </.link>
+              <% else %>
+                <span class="text-gray-400">
+                  {AshAdmin.Resource.name(relationship.destination)} (not accessible)
+                </span>
+              <% end %>
             </.td>
             <.td class="max-w-sm min-w-sm text-gray-500">
               {relationship.description}
@@ -174,5 +182,17 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
     resource
     |> Ash.Resource.Info.relationships()
     |> Enum.sort_by(&(not &1.public?))
+  end
+
+  defp destination_domain(relationship, fallback \\ nil) do
+    Ash.Resource.Info.domain(relationship.destination) || fallback
+  end
+
+  defp destination_domain_accessible?(relationship, domain, current_group) do
+    # Get the destination domain of the relationship
+    destination_domain = destination_domain(relationship, domain)
+
+    # Use the helper function from AshAdmin.Domain to check accessibility
+    AshAdmin.Domain.domain_accessible_in_group?(destination_domain, current_group)
   end
 end

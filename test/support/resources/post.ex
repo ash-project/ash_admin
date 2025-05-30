@@ -1,7 +1,7 @@
 defmodule AshAdmin.Test.Post do
   @moduledoc false
   use Ash.Resource,
-    domain: AshAdmin.Test.Domain,
+    domain: AshAdmin.Test.DomainA,
     data_layer: Ash.DataLayer.Ets,
     extensions: [AshAdmin.Resource]
 
@@ -14,6 +14,12 @@ defmodule AshAdmin.Test.Post do
     end
 
     attribute :expires_at, :utc_datetime_usec do
+      public?(true)
+    end
+  end
+
+  relationships do
+    belongs_to :author, AshAdmin.Test.Author do
       public?(true)
     end
   end

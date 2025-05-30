@@ -1,16 +1,24 @@
-defmodule AshAdmin.Test.Blog do
+defmodule AshAdmin.Test.Author do
   @moduledoc false
   use Ash.Resource,
-    domain: AshAdmin.Test.DomainA,
+    domain: AshAdmin.Test.DomainB,
     data_layer: Ash.DataLayer.Ets,
     extensions: [AshAdmin.Resource]
 
   attributes do
     uuid_primary_key(:id)
 
-    attribute :body, :string do
+    attribute :name, :string do
       allow_nil?(false)
       public?(true)
+    end
+  end
+
+  actions do
+    defaults([:read, :update, :destroy])
+
+    create :create do
+      accept([:name])
     end
   end
 
