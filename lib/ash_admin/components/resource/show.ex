@@ -244,7 +244,7 @@ defmodule AshAdmin.Components.Resource.Show do
           <div class="px-4 py-3 text-right sm:px-6">
             <.link
               :if={AshAdmin.Resource.show_action(@destination)}
-              navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@destination_domain || @domain)}&resource=#{AshAdmin.Resource.name(@destination)}&table=#{@context[:data_layer][:table]}&primary_key=#{encode_primary_key(@record)}&action_type=read"}
+              navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@destination_domain || Ash.Resource.Info.domain(@destination))}&resource=#{AshAdmin.Resource.name(@destination)}&table=#{@context[:data_layer][:table]}&primary_key=#{encode_primary_key(@record)}&action_type=read"}
               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Show
@@ -278,7 +278,7 @@ defmodule AshAdmin.Components.Resource.Show do
       <Table.table
         data={@data}
         resource={@destination}
-        domain={@domain}
+        domain={Ash.Resource.Info.domain(@destination)}
         table={@context[:data_layer][:table]}
         prefix={@prefix}
         skip={[@destination_attribute]}
