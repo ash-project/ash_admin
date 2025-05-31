@@ -102,6 +102,12 @@ defmodule Demo.Tickets.Ticket do
       change manage_relationship(:tickets, :source_links, on_lookup: {:relate_and_update, :create, :read, :all})
     end
 
+
+    update :add_picture do
+      accept []
+      argument :picture, :file
+    end
+
     update :update do
       primary? true
       argument :organization_id, :uuid
