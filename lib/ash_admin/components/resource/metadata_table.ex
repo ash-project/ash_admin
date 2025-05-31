@@ -98,7 +98,7 @@ defmodule AshAdmin.Components.Resource.MetadataTable do
               {relationship.type}
             </.td>
             <.td>
-              <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(Ash.Resource.Info.domain(relationship.destination))}&resource=#{AshAdmin.Resource.name(relationship.destination)}"}>
+              <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(relationship.domain || Ash.Resource.Info.domain(relationship.destination) || @domain)}&resource=#{AshAdmin.Resource.name(relationship.destination)}"}>
                 {AshAdmin.Resource.name(relationship.destination)}
               </.link>
             </.td>
