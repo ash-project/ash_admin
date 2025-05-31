@@ -746,22 +746,64 @@ defmodule AshAdmin.Components.Resource.Form do
 
     ~H"""
     <%= if @uploaded_file do %>
-      <div class="flex items-center">
-        <span>{Path.basename(@uploaded_file.source)}</span>
+      <div class="flex items-center justify-between mt-2 w-full rounded-lg
+          border
+          border-zinc-300
+          text-zinc-900
+          text-sm
+          overflow-hidden">
+        <span class="px-2 py-2.5">{Path.basename(@uploaded_file.source)}</span>
 
         <button
           type="button"
           phx-click="remove_upload"
           phx-target={@myself}
           phx-value-attribute={@attribute.name}
-          class="inline-block flex h-6 w-6 ml-1 mt-2 border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+          class="px-3 py-2.5 bg-gray-100 hover:bg-gray-200"
         >
           <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
         </button>
       </div>
     <% else %>
       <div phx-drop-target={@upload.ref}>
-        <.live_file_input id={@id || @form.id <> "_#{@attribute.name}"} upload={@upload} />
+        <label for={@id || @form.id <> "_#{@attribute.name}"} class="sr-only">Choose File</label>
+        <.live_file_input
+          id={@id || @form.id <> "_#{@attribute.name}"}
+          upload={@upload}
+          class="mt-2 block w-full rounded-lg
+          border
+          border-zinc-300
+          active:border-zinc-400
+          text-zinc-900
+          text-sm
+          file:border-0
+          file:text-sm
+          file:bg-gray-200
+          file:me-4
+          file:py-2.5 file:px-4
+          focus:outline-none
+          focus:border-zinc-400
+          target:border-zinc-400
+          cursor-pointer
+          file:cursor-pointer
+          "
+        />
+        <%= if length(@upload.entries) > 0 do %>
+          <div class="w-full bg-gray-200 rounded-full h-1.5 mb-1 mt-1">
+            <div
+              class="bg-indigo-600 h-1.5 rounded-full"
+              style={"width: #{hd(@upload.entries).progress}%"}
+            >
+            </div>
+          </div>
+
+          <p
+            :for={err <- upload_errors(@upload, hd(@upload.entries))}
+            class="mb-3 flex gap-3 text-sm leading-6 text-rose-600"
+          >
+            {error_to_string(err)}
+          </p>
+        <% end %>
       </div>
     <% end %>
     <p :for={err <- upload_errors(@upload)} class="alert alert-danger">
@@ -2330,7 +2372,7 @@ defmodule AshAdmin.Components.Resource.Form do
     end)
   end
 
-  defp error_to_string(:too_large), do: "Too large"
+  defp error_to_string(:too_large), do: "The file is too large"
   defp error_to_string(:too_many_files), do: "You have selected too many files"
   defp error_to_string(:not_accepted), do: "You have selected an unacceptable file type"
 end
