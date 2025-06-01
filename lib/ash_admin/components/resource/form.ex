@@ -733,7 +733,7 @@ defmodule AshAdmin.Components.Resource.Form do
         id,
         _
       ) do
-    upload_key = form.id <> "_" <> to_string(attribute.name)
+    upload_key = upload_key(form, attribute)
 
     assigns =
       assign(assigns,
@@ -1924,9 +1924,22 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp add_file_uploads(form_params, uploaded_files) do
-    Enum.reduce(uploaded_files, form_params, fn {param_name, file}, params ->
-      Map.put(params, param_name, file)
+    Enum.reduce(uploaded_files, form_params, fn {param_path, file}, params ->
+      update_params_with_path(params, param_path, file)
     end)
+    |> dbg()
+  end
+
+  defp update_params_with_path(params, path, value) do
+    path = String.trim_leading(path, "form")
+
+    path =
+      path
+      |> String.replace("[", "")
+      |> String.split("]")
+      |> Enum.reject(&(&1 == ""))
+
+    put_in(params, Enum.map(path, &Access.key(&1, %{})), value)
   end
 
   defp replace_new_union_stubs(value) when is_list(value) do
@@ -2385,7 +2398,7 @@ defmodule AshAdmin.Components.Resource.Form do
           form.source.action.arguments
           |> Enum.filter(fn %{type: type} -> type == Ash.Type.File end)
           |> Enum.map(fn argument ->
-            form.id <> "_" <> to_string(argument.name)
+            upload_key(form, argument)
           end)
         end)
       end)
@@ -2400,8 +2413,16 @@ defmodule AshAdmin.Components.Resource.Form do
       end)
 
     Enum.reduce(file_attributes(socket.assigns.form), socket, fn attribute, socket ->
-      allow_upload(socket, attribute.name, accept: :any)
+      allow_upload(socket, upload_key(form, attribute), accept: :any)
     end)
+  end
+
+  defp upload_key(form, %Ash.Resource.Actions.Argument{name: name}) do
+    "#{form.name}[#{name}]"
+  end
+
+  defp upload_key(form, %Ash.Resource.Attribute{name: name}) do
+    "#{form.name}[#{name}]"
   end
 
   defp error_to_string(:too_large), do: "The file is too large"

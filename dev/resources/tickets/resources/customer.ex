@@ -39,8 +39,14 @@ defmodule Demo.Tickets.Customer do
     defaults [:read]
 
     update :edit_tickets do
+      argument :picture, :file
       argument :tickets, {:array, :map}
       change manage_relationship(:tickets, :reported_tickets, type: :create)
+
+      change fn changeset, _context ->
+        dbg(changeset)
+        changeset
+      end
     end
   end
 
