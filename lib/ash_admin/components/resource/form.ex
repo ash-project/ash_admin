@@ -27,7 +27,7 @@ defmodule AshAdmin.Components.Resource.Form do
      socket
      |> assign_new(:load_errors, fn -> %{} end)
      |> assign_new(:loaded, fn -> %{} end)
-     |> assign(:uploaded_files, %{})
+     |> assign_new(:uploaded_files, fn -> %{} end)
      |> assign(:params, %{})}
   end
 
@@ -1900,8 +1900,11 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp consume_file_uploads(socket, form) do
+    # TODO: Less hacky way?
+    uploads = Map.delete(socket.assigns.uploads, :__phoenix_refs_to_names__)
+
     uploaded_files =
-      Enum.flat_map(file_attributes(form), fn %{name: name} ->
+      Enum.flat_map(uploads, fn {name, _} ->
         consume_uploaded_entries(socket, name, fn %{path: path}, entry ->
           random_string = for _ <- 1..10, into: "", do: <<Enum.random(~c"0123456789abcdef")>>
 
@@ -2390,7 +2393,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
     socket =
       Enum.reduce(upload_keys, socket, fn upload_key, socket ->
-        if Map.get(socket, :uploads, %{})[upload_key] do
+        if Map.get(socket.assigns, :uploads, %{})[upload_key] do
           socket
         else
           allow_upload(socket, upload_key, accept: :any)
