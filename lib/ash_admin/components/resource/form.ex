@@ -2388,7 +2388,7 @@ defmodule AshAdmin.Components.Resource.Form do
     # path to arguments:
     #   `form.source.forms.tickets[0].source.action.arguments`
     # key to reference it should end up as
-    #   `form[tickets][0][:picture]`
+    #   `form[tickets][0][:photo]`
 
     form = socket.assigns.form
 

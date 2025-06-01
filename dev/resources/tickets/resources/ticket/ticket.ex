@@ -97,16 +97,12 @@ defmodule Demo.Tickets.Ticket do
       argument :representative, :map, allow_nil?: false
       argument :organization, :map, allow_nil?: false
       argument :tickets, {:array, :map}
-      argument :picture, :file
+      argument :photo, :file
 
       change manage_relationship(:organization, on_no_match: :create, on_lookup: :relate, on_match: :ignore)
       change manage_relationship(:representative, type: :append)
       change manage_relationship(:tickets, :source_links, on_lookup: {:relate_and_update, :create, :read, :all})
-    end
-
-    update :add_picture do
-      accept []
-      argument :picture, :file
+      change {Dev.Changes.RecordFilePath, file_attribute: :photo, path_attribute: :photo_path}
     end
 
     update :update do
@@ -195,6 +191,8 @@ defmodule Demo.Tickets.Ticket do
       default "new"
       constraints one_of: [:new, :investigating, :closed]
     end
+
+    attribute :photo_path, :string, public?: true, writable?: false
 
     timestamps()
   end
