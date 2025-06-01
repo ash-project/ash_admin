@@ -37,6 +37,11 @@ defmodule Demo.Tickets.Customer do
   actions do
     default_accept :*
     defaults [:read]
+
+    update :edit_tickets do
+      argument :tickets, {:array, :map}
+      change manage_relationship(:tickets, :reported_tickets, type: :create)
+    end
   end
 
   attributes do

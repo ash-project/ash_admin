@@ -733,6 +733,8 @@ defmodule AshAdmin.Components.Resource.Form do
         id,
         _
       ) do
+    upload_key = form.id <> "_" <> to_string(attribute.name)
+
     assigns =
       assign(assigns,
         attribute: attribute,
@@ -740,8 +742,8 @@ defmodule AshAdmin.Components.Resource.Form do
         value: value,
         name: name,
         id: id,
-        upload: assigns.uploads[attribute.name],
-        uploaded_file: Map.get(assigns.uploaded_files, attribute.name)
+        upload: assigns.uploads[upload_key],
+        uploaded_file: Map.get(assigns.uploaded_files, upload_key)
       )
 
     ~H"""
@@ -1721,7 +1723,8 @@ defmodule AshAdmin.Components.Resource.Form do
 
     {:noreply,
      socket
-     |> assign(:form, form)}
+     |> assign(:form, form)
+     |> allow_uploads()}
   end
 
   def handle_event("remove_form", %{"path" => path}, socket) do
@@ -2367,6 +2370,33 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp allow_uploads(socket) do
+    # path to arguments:
+    #   `form.source.forms.tickets[0].source.action.arguments`
+    # key to reference it should end up as
+    #   `form[tickets][0][:picture]`
+
+    form = socket.assigns.form
+
+    upload_keys =
+      Enum.flat_map(form.source.forms, fn {_name, forms} ->
+        Enum.flat_map(forms, fn form ->
+          form.source.action.arguments
+          |> Enum.filter(fn %{type: type} -> type == Ash.Type.File end)
+          |> Enum.map(fn argument ->
+            form.id <> "_" <> to_string(argument.name)
+          end)
+        end)
+      end)
+
+    socket =
+      Enum.reduce(upload_keys, socket, fn upload_key, socket ->
+        if Map.get(socket, :uploads, %{})[upload_key] do
+          socket
+        else
+          allow_upload(socket, upload_key, accept: :any)
+        end
+      end)
+
     Enum.reduce(file_attributes(socket.assigns.form), socket, fn attribute, socket ->
       allow_upload(socket, attribute.name, accept: :any)
     end)

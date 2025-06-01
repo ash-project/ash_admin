@@ -33,6 +33,7 @@ defmodule Demo.Tickets.Ticket do
     policy action_type(:read) do
       authorize_if actor_attribute_equals(:representative, true)
       authorize_if relates_to_actor_via(:reporter)
+      authorize_if always()
     end
 
     policy changing_relationship(:reporter) do
@@ -91,17 +92,17 @@ defmodule Demo.Tickets.Ticket do
     end
 
     create :open do
-      accept [:subject, :metadata, :metadatas]
+      accept [:subject]
       primary? true
       argument :representative, :map, allow_nil?: false
       argument :organization, :map, allow_nil?: false
       argument :tickets, {:array, :map}
+      argument :picture, :file
 
       change manage_relationship(:organization, on_no_match: :create, on_lookup: :relate, on_match: :ignore)
       change manage_relationship(:representative, type: :append)
       change manage_relationship(:tickets, :source_links, on_lookup: {:relate_and_update, :create, :read, :all})
     end
-
 
     update :add_picture do
       accept []
@@ -172,13 +173,13 @@ defmodule Demo.Tickets.Ticket do
       constraints min_length: 5
     end
 
-    attribute :metadata, Demo.Tickets.Ticket.Types.Metadata do
-      public? true
-    end
+    # attribute :metadata, Demo.Tickets.Ticket.Types.Metadata do
+    #   public? true
+    # end
 
-    attribute :metadatas, {:array, Demo.Tickets.Ticket.Types.Metadata} do
-      public? true
-    end
+    # attribute :metadatas, {:array, Demo.Tickets.Ticket.Types.Metadata} do
+    #   public? true
+    # end
 
     attribute :description, :string do
       public? true
