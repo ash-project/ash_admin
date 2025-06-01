@@ -16,6 +16,8 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 * don't assume `form.source.type` is set
 
+* Handle cross-domain links
+
 ## [v0.13.5](https://github.com/ash-project/ash_admin/compare/v0.13.4...v0.13.5) (2025-05-20)
 
 
