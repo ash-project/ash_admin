@@ -952,8 +952,7 @@ defmodule AshAdmin.Components.Resource.Form do
          %AshPhoenix.Form{
            resource: AshPhoenix.Form.WrappedValue,
            data: %{value: %Ash.Union{type: type}}
-         }}
-        when type in [:string, :integer, :boolean] ->
+         }} ->
           type
 
         _ ->
@@ -972,19 +971,10 @@ defmodule AshAdmin.Components.Resource.Form do
       end
 
     actual_union_type =
-      Keyword.get(attribute.constraints[:types], actual_union_type_name)[:type] || :string
+      Keyword.get(attribute.constraints[:types], actual_union_type_name)[:type] || Ash.Type.String
 
     actual_union_constraints =
-      Keyword.get(attribute.constraints[:types], actual_union_type_name)[:constraints] || :string
-
-    value =
-      case value do
-        %Ash.Union{type: :string, value: string_value} ->
-          string_value
-
-        _ ->
-          value
-      end
+      Keyword.get(attribute.constraints[:types], actual_union_type_name)[:constraints] || []
 
     {name, id} =
       if Ash.Type.embedded_type?(actual_union_type) do
@@ -1037,7 +1027,7 @@ defmodule AshAdmin.Components.Resource.Form do
       </label>
       <div class="w-full">
         <.input
-          :if={not is_nil(@actual_union_value)}
+          :if={not (is_nil(@actual_union_value) && map_type?(@actual_union_type))}
           phx-change="union-type-changed"
           id={@union_type_id}
           name={@union_type_name}
@@ -1332,20 +1322,8 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp render_fallback_attribute(assigns, form, attribute, value, name, id, _union_type) do
-    casted_value =
-      case value(value, form, attribute) do
-        %AshPhoenix.Form{resource: AshPhoenix.Form.WrappedValue} = form ->
-          form
-          |> AshPhoenix.Form.value(:value)
-          |> Phoenix.HTML.Safe.to_iodata()
-
-        value ->
-          Phoenix.HTML.Safe.to_iodata(value)
-      end
-
     assigns =
       assign(assigns,
-        casted_value: casted_value,
         form: form,
         attribute: attribute,
         value: value,
@@ -1357,7 +1335,7 @@ defmodule AshAdmin.Components.Resource.Form do
     <.input
       type={text_input_type(@form.source.resource, @attribute)}
       placeholder={placeholder(@attribute.default)}
-      value={@casted_value}
+      value={@value}
       name={@name || @form.name <> "[#{@attribute.name}]"}
       id={@id || @form.id <> "_#{@attribute.name}"}
       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
@@ -1447,15 +1425,25 @@ defmodule AshAdmin.Components.Resource.Form do
     |> Enum.join("-")
   end
 
-  defp value(value, form, attribute, default \\ nil)
+  defp value(value, form, attribute, default \\ nil) do
+    case do_value(value, form, attribute, default) do
+      %AshPhoenix.Form{resource: AshPhoenix.Form.WrappedValue} = form ->
+        form
+        |> AshPhoenix.Form.value(:value)
+        |> Phoenix.HTML.Safe.to_iodata()
 
-  defp value({:list_value, %Ash.Union{value: value}}, _, _, _), do: value
-  defp value({:list_value, value}, _, _, _), do: value
+      value ->
+        value
+    end
+  end
 
-  defp value(%Ash.Union{value: value}, _form, _attribute, _) when not is_nil(value), do: value
-  defp value(value, _form, _attribute, _) when not is_nil(value), do: value
+  defp do_value({:list_value, %Ash.Union{value: value}}, _, _, _), do: value
+  defp do_value({:list_value, value}, _, _, _), do: value
 
-  defp value(
+  defp do_value(%Ash.Union{value: value}, _form, _attribute, _) when not is_nil(value), do: value
+  defp do_value(value, _form, _attribute, _) when not is_nil(value), do: value
+
+  defp do_value(
          _value,
          %{source: %AshPhoenix.FilterForm.Arguments{} = arguments},
          %{name: attribute_name},
@@ -1469,7 +1457,7 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
-  defp value(_value, %{source: form}, attribute, _default) do
+  defp do_value(_value, %{source: form}, attribute, _default) do
     case AshPhoenix.Form.value(form, attribute.name) do
       %Ash.Union{value: value} -> value
       value -> value
@@ -1763,7 +1751,11 @@ defmodule AshAdmin.Components.Resource.Form do
       |> Map.put(:actor, socket.assigns[:actor])
     end
 
+    IO.inspect(form_params, label: "form_params")
+
     params = form_params |> replace_new_union_stubs() |> replace_unused()
+
+    IO.inspect(params)
 
     case AshPhoenix.Form.submit(form,
            before_submit: before_submit,
