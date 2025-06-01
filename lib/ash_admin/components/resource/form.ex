@@ -742,6 +742,7 @@ defmodule AshAdmin.Components.Resource.Form do
         value: value,
         name: name,
         id: id,
+        upload_key: upload_key,
         upload: assigns.uploads[upload_key],
         uploaded_file: Map.get(assigns.uploaded_files, upload_key)
       )
@@ -760,7 +761,7 @@ defmodule AshAdmin.Components.Resource.Form do
           type="button"
           phx-click="remove_upload"
           phx-target={@myself}
-          phx-value-attribute={@attribute.name}
+          phx-value-upload-key={@upload_key}
           class="px-3 py-2.5 bg-gray-100 hover:bg-gray-200"
         >
           <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
@@ -768,9 +769,9 @@ defmodule AshAdmin.Components.Resource.Form do
       </div>
     <% else %>
       <div phx-drop-target={@upload.ref}>
-        <label for={@id || @form.id <> "_#{@attribute.name}"} class="sr-only">Choose File</label>
+        <label for={@id || @upload_key} class="sr-only">Choose File</label>
         <.live_file_input
-          id={@id || @form.id <> "_#{@attribute.name}"}
+          id={@id || @upload_key}
           upload={@upload}
           class="mt-2 block w-full rounded-lg
           border
@@ -1846,7 +1847,7 @@ defmodule AshAdmin.Components.Resource.Form do
       |> Map.put(:actor, socket.assigns[:actor])
     end
 
-    socket = consume_file_uploads(socket, form)
+    socket = consume_file_uploads(socket)
 
     params =
       form_params
@@ -1875,12 +1876,10 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
-  def handle_event("remove_upload", %{"attribute" => attribute}, socket) do
-    attribute = String.to_atom(attribute)
-
+  def handle_event("remove_upload", %{"upload-key" => upload_key}, socket) do
     {:noreply,
      update(socket, :uploaded_files, fn uploaded_files ->
-       Map.delete(uploaded_files, attribute)
+       Map.delete(uploaded_files, upload_key)
      end)}
   end
 
@@ -1899,7 +1898,7 @@ defmodule AshAdmin.Components.Resource.Form do
     {:noreply, assign(socket, form: form)}
   end
 
-  defp consume_file_uploads(socket, form) do
+  defp consume_file_uploads(socket) do
     # TODO: Less hacky way?
     uploads = Map.delete(socket.assigns.uploads, :__phoenix_refs_to_names__)
 
