@@ -1751,11 +1751,7 @@ defmodule AshAdmin.Components.Resource.Form do
       |> Map.put(:actor, socket.assigns[:actor])
     end
 
-    IO.inspect(form_params, label: "form_params")
-
     params = form_params |> replace_new_union_stubs() |> replace_unused()
-
-    IO.inspect(params)
 
     case AshPhoenix.Form.submit(form,
            before_submit: before_submit,
