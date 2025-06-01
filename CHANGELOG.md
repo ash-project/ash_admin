@@ -5,6 +5,17 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.6](https://github.com/ash-project/ash_admin/compare/v0.13.5...v0.13.6) (2025-06-01)
+
+
+
+
+### Bug Fixes:
+
+* various mistakes in union type handling
+
+* don't assume `form.source.type` is set
+
 ## [v0.13.5](https://github.com/ash-project/ash_admin/compare/v0.13.4...v0.13.5) (2025-05-20)
 
 
