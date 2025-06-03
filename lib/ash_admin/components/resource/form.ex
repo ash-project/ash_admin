@@ -27,6 +27,7 @@ defmodule AshAdmin.Components.Resource.Form do
      socket
      |> assign_new(:load_errors, fn -> %{} end)
      |> assign_new(:loaded, fn -> %{} end)
+     |> assign_new(:uploaded_files, fn -> %{} end)
      |> assign(:params, %{})}
   end
 
@@ -36,6 +37,7 @@ defmodule AshAdmin.Components.Resource.Form do
      |> assign(assigns)
      |> assign(:typeahead_options, [])
      |> assign_form()
+     |> allow_uploading_form_arguments()
      |> assign(:initialized, true)}
   end
 
@@ -717,6 +719,78 @@ defmodule AshAdmin.Components.Resource.Form do
       options={[True: "true", False: "false"]}
       value={value(@value, @form, @attribute, "true")}
     />
+    """
+  end
+
+  def render_attribute_input(
+        assigns,
+        %{
+          type: Ash.Type.File
+        } = attribute,
+        form,
+        value,
+        name,
+        id,
+        _
+      ) do
+    upload_key = upload_key(form, attribute)
+
+    assigns =
+      assign(assigns,
+        attribute: attribute,
+        form: form,
+        value: value,
+        name: name,
+        id: id,
+        upload_key: upload_key,
+        upload: assigns.uploads[upload_key],
+        uploaded_file: Map.get(assigns.uploaded_files, upload_key)
+      )
+
+    ~H"""
+    <%= if @uploaded_file do %>
+      <div class="flex items-center justify-between mt-2 w-full rounded-lg border border-zinc-300 text-zinc-900 text-sm overflow-hidden">
+        <span class="px-2 py-2.5">{Path.basename(@uploaded_file.source)}</span>
+        <button
+          type="button"
+          phx-click="remove_upload"
+          phx-target={@myself}
+          phx-value-upload-key={@upload_key}
+          class="px-3 py-2.5 bg-gray-100 hover:bg-gray-200"
+        >
+          <.icon name="hero-minus" class="h-4 w-4 text-gray-500" />
+        </button>
+      </div>
+    <% else %>
+      <div phx-drop-target={@upload.ref}>
+        <label for={@id || @upload_key} class="sr-only">Choose File</label>
+        <.live_file_input
+          id={@id || @upload_key}
+          upload={@upload}
+          class="mt-2 block w-full rounded-lg border border-zinc-300 active:border-zinc-400 text-zinc-900 text-sm file:border-0 file:text-sm file:bg-gray-200 file:me-4 file:py-2.5 file:px-4 focus:outline-none focus:border-zinc-400 target:border-zinc-400 cursor-pointer file:cursor-pointer"
+        />
+        <%= if length(@upload.entries) > 0 do %>
+          <div class="w-full bg-gray-200 rounded-full h-1.5 mb-1 mt-1">
+            <div
+              class="bg-indigo-600 h-1.5 rounded-full"
+              data-progress={hd(@upload.entries).progress}
+              style={"width: #{hd(@upload.entries).progress}%"}
+            >
+            </div>
+          </div>
+
+          <p
+            :for={err <- upload_errors(@upload, hd(@upload.entries))}
+            class="mb-3 flex gap-3 text-sm leading-6 text-rose-600"
+          >
+            {error_to_string(err)}
+          </p>
+        <% end %>
+      </div>
+    <% end %>
+    <p :for={err <- upload_errors(@upload)} class="alert alert-danger">
+      {error_to_string(err)}
+    </p>
     """
   end
 
@@ -1629,7 +1703,8 @@ defmodule AshAdmin.Components.Resource.Form do
 
     {:noreply,
      socket
-     |> assign(:form, form)}
+     |> assign(:form, form)
+     |> allow_uploading_form_arguments()}
   end
 
   def handle_event("remove_form", %{"path" => path}, socket) do
@@ -1751,7 +1826,13 @@ defmodule AshAdmin.Components.Resource.Form do
       |> Map.put(:actor, socket.assigns[:actor])
     end
 
-    params = form_params |> replace_new_union_stubs() |> replace_unused()
+    socket = consume_file_uploads(socket)
+
+    params =
+      form_params
+      |> replace_new_union_stubs()
+      |> replace_unused()
+      |> add_file_uploads(socket.assigns.uploaded_files)
 
     case AshPhoenix.Form.submit(form,
            before_submit: before_submit,
@@ -1774,6 +1855,13 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
+  def handle_event("remove_upload", %{"upload-key" => upload_key}, socket) do
+    {:noreply,
+     update(socket, :uploaded_files, fn uploaded_files ->
+       Map.delete(uploaded_files, upload_key)
+     end)}
+  end
+
   def handle_event("validate", %{"form" => params} = event, socket) do
     params =
       params
@@ -1783,10 +1871,54 @@ defmodule AshAdmin.Components.Resource.Form do
     form =
       AshPhoenix.Form.validate(socket.assigns.form, params,
         only_touched?: true,
-        target: event["_target"]
+        target: event["_target"] || []
       )
 
     {:noreply, assign(socket, form: form)}
+  end
+
+  defp consume_file_uploads(socket) do
+    uploaded_files =
+      socket.assigns.uploads
+      |> Enum.filter(fn {_, upload_config} ->
+        is_struct(upload_config, Phoenix.LiveView.UploadConfig)
+      end)
+      |> Enum.flat_map(fn {name, _} ->
+        consume_uploaded_entries(socket, name, fn %{path: path}, entry ->
+          random_string = for _ <- 1..10, into: "", do: <<Enum.random(~c"0123456789abcdef")>>
+
+          tmp_dir = Path.join([System.tmp_dir!(), random_string])
+          tmp_file = Path.join([tmp_dir, entry.client_name])
+
+          File.mkdir_p!(tmp_dir)
+          File.cp!(path, tmp_file)
+
+          {:ok, {entry.upload_config, Ash.Type.File.from_path(tmp_file)}}
+        end)
+      end)
+      |> Enum.into(%{})
+
+    update(socket, :uploaded_files, fn existing_files ->
+      Map.merge(existing_files, uploaded_files)
+    end)
+  end
+
+  defp add_file_uploads(form_params, uploaded_files) do
+    Enum.reduce(uploaded_files, form_params, fn {param_path, file}, params ->
+      update_params_with_path(params, param_path, file)
+    end)
+  end
+
+  defp update_params_with_path(params, path, value) do
+    path = String.trim_leading(path, "form")
+
+    path =
+      path
+      |> String.replace("[", "")
+      |> String.split("]")
+      |> Enum.reject(&(&1 == ""))
+
+    put_in(params, Enum.map(path, &Access.key(&1, %{})), value)
   end
 
   defp replace_new_union_stubs(value) when is_list(value) do
@@ -2222,4 +2354,55 @@ defmodule AshAdmin.Components.Resource.Form do
 
     assign(socket, :form, form |> to_form())
   end
+
+  defp collect_forms_recursively(%AshPhoenix.Form{} = form) do
+    collect_recursive(form, [])
+  end
+
+  defp collect_recursive(form, acc) do
+    acc = [form | acc]
+
+    children = List.flatten(Map.values(form.forms))
+
+    Enum.reduce(children, acc, fn child, acc ->
+      collect_recursive(child, acc)
+    end)
+  end
+
+  defp uploadable_arguments(form) do
+    Enum.filter(form.source.action.arguments, fn %{type: type} -> type == Ash.Type.File end)
+  end
+
+  defp allow_uploading_form_arguments(socket) do
+    socket.assigns.form.source
+    |> collect_forms_recursively()
+    |> Enum.flat_map(fn form ->
+      form
+      |> uploadable_arguments()
+      |> Enum.map(fn argument -> upload_key(form, argument) end)
+    end)
+    |> Enum.reduce(socket, fn upload_key, socket ->
+      if upload_allowed?(socket, upload_key) do
+        socket
+      else
+        allow_upload(socket, upload_key, accept: :any)
+      end
+    end)
+  end
+
+  defp upload_allowed?(socket, upload_key) do
+    Map.get(socket.assigns, :uploads, %{})[upload_key]
+  end
+
+  defp upload_key(form, %Ash.Resource.Actions.Argument{name: name}) do
+    "#{form.name}[#{name}]"
+  end
+
+  defp upload_key(form, %Ash.Resource.Attribute{name: name}) do
+    "#{form.name}[#{name}]"
+  end
+
+  defp error_to_string(:too_large), do: "The file is too large"
+  defp error_to_string(:too_many_files), do: "You have selected too many files"
+  defp error_to_string(:not_accepted), do: "You have selected an unacceptable file type"
 end

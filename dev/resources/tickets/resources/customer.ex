@@ -37,6 +37,15 @@ defmodule Demo.Tickets.Customer do
   actions do
     default_accept :*
     defaults [:read]
+
+    update :edit_tickets do
+      require_atomic? false
+
+      argument :photo, :file
+      argument :tickets, {:array, :map}
+      change manage_relationship(:tickets, :reported_tickets, type: :create)
+      change {Dev.Changes.RecordFilePath, file_attribute: :photo, path_attribute: :photo_path}
+    end
   end
 
   attributes do
@@ -45,6 +54,7 @@ defmodule Demo.Tickets.Customer do
     attribute :first_name, :string, public?: true
     attribute :last_name, :string, public?: true
     attribute :representative, :boolean, public?: true
+    attribute :photo_path, :string, public?: true, writable?: false
   end
 
   calculations do

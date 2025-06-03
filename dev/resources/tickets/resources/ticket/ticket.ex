@@ -33,6 +33,7 @@ defmodule Demo.Tickets.Ticket do
     policy action_type(:read) do
       authorize_if actor_attribute_equals(:representative, true)
       authorize_if relates_to_actor_via(:reporter)
+      authorize_if always()
     end
 
     policy changing_relationship(:reporter) do
@@ -96,18 +97,22 @@ defmodule Demo.Tickets.Ticket do
       argument :representative, :map, allow_nil?: false
       argument :organization, :map, allow_nil?: false
       argument :tickets, {:array, :map}
+      argument :photo, :file
 
       change manage_relationship(:organization, on_no_match: :create, on_lookup: :relate, on_match: :ignore)
       change manage_relationship(:representative, type: :append)
       change manage_relationship(:tickets, :source_links, on_lookup: {:relate_and_update, :create, :read, :all})
+      change {Dev.Changes.RecordFilePath, file_attribute: :photo, path_attribute: :photo_path}
     end
 
     update :update do
       primary? true
       argument :organization_id, :uuid
       argument :comments, {:array, :map}
+      argument :photo, :file
       require_atomic? false
 
+      change {Dev.Changes.RecordFilePath, file_attribute: :photo, path_attribute: :photo_path}
       change manage_relationship(:organization_id, :organization, type: :append_and_remove)
       change manage_relationship(:comments, :comments, type: :direct_control)
     end
@@ -188,6 +193,8 @@ defmodule Demo.Tickets.Ticket do
       default "new"
       constraints one_of: [:new, :investigating, :closed]
     end
+
+    attribute :photo_path, :string, public?: true, writable?: false
 
     timestamps()
   end

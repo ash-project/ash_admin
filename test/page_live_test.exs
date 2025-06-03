@@ -59,4 +59,62 @@ defmodule AshAdmin.Test.PageLiveTest do
     assert html =~ ~s|<link nonce="style_nonce"|
     refute html =~ "ash_admin-Ed55GFnX"
   end
+
+  test "allows uploading to an action with an upload argument", %{conn: conn} do
+    {:ok, view, _html} =
+      live(
+        conn,
+        "/api/admin?domain=Domain&resource=Post&action_type=create&action=create_with_photo"
+      )
+
+    file = File.read!("./logos/small-logo.png")
+
+    photo =
+      file_input(view, "#form", "form[photo]", [
+        %{
+          last_modified: 1_551_913_980,
+          name: "small-logo.png",
+          content: file,
+          size: byte_size(file),
+          type: "image/png"
+        }
+      ])
+
+    assert view
+           |> form("#form", user: %{})
+           |> render_change(photo) =~ "data-progress=\"0\""
+
+    assert render_upload(photo, "small-logo.png") =~ "data-progress=\"100\""
+  end
+
+  test "allows uploading to a related resource with an upload argument", %{conn: conn} do
+    {:ok, view, _html} =
+      live(
+        conn,
+        "/api/admin?domain=Domain&resource=Post&action_type=create&action=create_with_photo"
+      )
+
+    file = File.read!("./logos/small-logo.png")
+
+    assert view
+           |> element(~s{[phx-value-path="form[comments]"][phx-value-type="create"]})
+           |> render_click()
+
+    photo =
+      file_input(view, "#form", "form[comments][0][photo]", [
+        %{
+          last_modified: 1_551_913_980,
+          name: "small-logo.png",
+          content: file,
+          size: byte_size(file),
+          type: "image/png"
+        }
+      ])
+
+    assert view
+           |> form("#form", user: %{})
+           |> render_change(photo) =~ "data-progress=\"0\""
+
+    assert render_upload(photo, "small-logo.png") =~ "data-progress=\"100\""
+  end
 end
