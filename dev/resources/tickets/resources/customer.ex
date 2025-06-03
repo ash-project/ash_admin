@@ -9,10 +9,17 @@ defmodule Demo.Tickets.Customer do
       AshAdmin.Resource
     ]
 
-    admin do
-      relationship_display_fields [:id, :first_name]
-      label_field :full_name
+  admin do
+    relationship_display_fields [:id, :first_name]
+    label_field :full_name
+
+    form do
+      field :photo do
+        max_file_size 8_000_000
+        accepted_extensions ["image/*"]
+      end
     end
+  end
 
   resource do
     base_filter representative: false

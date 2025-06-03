@@ -22,6 +22,11 @@ defmodule Demo.Tickets.Ticket do
 
     form do
       field :description, type: :markdown
+
+      field :photo do
+        max_file_size 12_000_000
+        accepted_extensions ["image/*"]
+      end
     end
   end
 

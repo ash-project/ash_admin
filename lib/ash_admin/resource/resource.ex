@@ -120,6 +120,9 @@ defmodule AshAdmin.Resource do
     transformers: [
       AshAdmin.Resource.Transformers.ValidateTableColumns,
       AshAdmin.Resource.Transformers.AddPositionSortCalculation
+    ],
+    verifiers: [
+      AshAdmin.Resource.Verifiers.VerifyFileArgumentsExist
     ]
 
   @moduledoc """

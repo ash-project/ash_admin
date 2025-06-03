@@ -72,7 +72,9 @@ Declare non-default behavior for a specific attribute.
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`type`](#admin-form-field-type){: #admin-form-field-type .spark-required} | `:default \| :long_text \| :short_text \| :markdown` |  | The type of the value in the form. Use `default` if you are just specifying field order |
+| [`type`](#admin-form-field-type){: #admin-form-field-type } | `:default \| :long_text \| :short_text \| :markdown` |  | The type of the value in the form. Use `default` if you are just specifying field order |
+| [`max_file_size`](#admin-form-field-max_file_size){: #admin-form-field-max_file_size } | `integer` |  | The maximum file size in bytes to allow to be uploaded. Only applicable to action arguments of `Ash.Type.File`. |
+| [`accepted_extensions`](#admin-form-field-accepted_extensions){: #admin-form-field-accepted_extensions } | `any \| list(String.t)` |  | A list of unique file extensions (such as ".jpeg") or mime type (such as "image/jpeg" or "image/*"). Only applicable to action arguments of `Ash.Type.File`. |
 
 
 
