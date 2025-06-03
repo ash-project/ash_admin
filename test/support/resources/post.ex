@@ -21,6 +21,10 @@ defmodule AshAdmin.Test.Post do
   actions do
     default_accept(:*)
     defaults(create: :*)
+
+    create :create_with_photo do
+      argument(:photo, :file)
+    end
   end
 
   admin do

@@ -795,6 +795,7 @@ defmodule AshAdmin.Components.Resource.Form do
           <div class="w-full bg-gray-200 rounded-full h-1.5 mb-1 mt-1">
             <div
               class="bg-indigo-600 h-1.5 rounded-full"
+              data-progress={hd(@upload.entries).progress}
               style={"width: #{hd(@upload.entries).progress}%"}
             >
             </div>
@@ -1892,7 +1893,7 @@ defmodule AshAdmin.Components.Resource.Form do
     form =
       AshPhoenix.Form.validate(socket.assigns.form, params,
         only_touched?: true,
-        target: event["_target"]
+        target: event["_target"] || []
       )
 
     {:noreply, assign(socket, form: form)}
@@ -1927,7 +1928,6 @@ defmodule AshAdmin.Components.Resource.Form do
     Enum.reduce(uploaded_files, form_params, fn {param_path, file}, params ->
       update_params_with_path(params, param_path, file)
     end)
-    |> dbg()
   end
 
   defp update_params_with_path(params, path, value) do
@@ -2385,11 +2385,6 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp allow_uploads(socket) do
-    # path to arguments:
-    #   `form.source.forms.tickets[0].source.action.arguments`
-    # key to reference it should end up as
-    #   `form[tickets][0][:photo]`
-
     form = socket.assigns.form
 
     upload_keys =
