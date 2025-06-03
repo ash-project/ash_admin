@@ -1878,11 +1878,12 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp consume_file_uploads(socket) do
-    # TODO: Less hacky way?
-    uploads = Map.delete(socket.assigns.uploads, :__phoenix_refs_to_names__)
-
     uploaded_files =
-      Enum.flat_map(uploads, fn {name, _} ->
+      socket.assigns.uploads
+      |> Enum.filter(fn {_, upload_config} ->
+        is_struct(upload_config, Phoenix.LiveView.UploadConfig)
+      end)
+      |> Enum.flat_map(fn {name, _} ->
         consume_uploaded_entries(socket, name, fn %{path: path}, entry ->
           random_string = for _ <- 1..10, into: "", do: <<Enum.random(~c"0123456789abcdef")>>
 

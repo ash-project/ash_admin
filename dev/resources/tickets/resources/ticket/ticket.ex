@@ -109,8 +109,10 @@ defmodule Demo.Tickets.Ticket do
       primary? true
       argument :organization_id, :uuid
       argument :comments, {:array, :map}
+      argument :photo, :file
       require_atomic? false
 
+      change {Dev.Changes.RecordFilePath, file_attribute: :photo, path_attribute: :photo_path}
       change manage_relationship(:organization_id, :organization, type: :append_and_remove)
       change manage_relationship(:comments, :comments, type: :direct_control)
     end
