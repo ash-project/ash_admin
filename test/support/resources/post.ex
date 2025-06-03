@@ -24,10 +24,20 @@ defmodule AshAdmin.Test.Post do
 
     create :create_with_photo do
       argument(:photo, :file)
+      argument(:comments, {:array, :map})
+
+      change(manage_relationship(:comments, type: :create))
     end
   end
 
   admin do
     resource_group(:group_a)
+  end
+
+  relationships do
+    has_many :comments, AshAdmin.Test.Comment do
+      public?(true)
+      destination_attribute(:post_id)
+    end
   end
 end

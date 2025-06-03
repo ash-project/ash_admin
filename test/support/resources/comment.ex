@@ -11,5 +11,18 @@ defmodule AshAdmin.Test.Comment do
       allow_nil?(false)
       public?(true)
     end
+
+    actions do
+      default_accept(:*)
+
+      create :create do
+        primary? true
+        argument(:photo, :file)
+      end
+    end
+  end
+
+  relationships do
+    belongs_to(:post, AshAdmin.Test.Post, public?: true)
   end
 end
