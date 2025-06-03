@@ -749,14 +749,8 @@ defmodule AshAdmin.Components.Resource.Form do
 
     ~H"""
     <%= if @uploaded_file do %>
-      <div class="flex items-center justify-between mt-2 w-full rounded-lg
-          border
-          border-zinc-300
-          text-zinc-900
-          text-sm
-          overflow-hidden">
+      <div class="flex items-center justify-between mt-2 w-full rounded-lg border border-zinc-300 text-zinc-900 text-sm overflow-hidden">
         <span class="px-2 py-2.5">{Path.basename(@uploaded_file.source)}</span>
-
         <button
           type="button"
           phx-click="remove_upload"
@@ -773,23 +767,7 @@ defmodule AshAdmin.Components.Resource.Form do
         <.live_file_input
           id={@id || @upload_key}
           upload={@upload}
-          class="mt-2 block w-full rounded-lg
-          border
-          border-zinc-300
-          active:border-zinc-400
-          text-zinc-900
-          text-sm
-          file:border-0
-          file:text-sm
-          file:bg-gray-200
-          file:me-4
-          file:py-2.5 file:px-4
-          focus:outline-none
-          focus:border-zinc-400
-          target:border-zinc-400
-          cursor-pointer
-          file:cursor-pointer
-          "
+          class="mt-2 block w-full rounded-lg border border-zinc-300 active:border-zinc-400 text-zinc-900 text-sm file:border-0 file:text-sm file:bg-gray-200 file:me-4 file:py-2.5 file:px-4 focus:outline-none focus:border-zinc-400 target:border-zinc-400 cursor-pointer file:cursor-pointer"
         />
         <%= if length(@upload.entries) > 0 do %>
           <div class="w-full bg-gray-200 rounded-full h-1.5 mb-1 mt-1">
