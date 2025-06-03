@@ -16,7 +16,7 @@ defmodule AshAdmin.Test.Comment do
       default_accept(:*)
 
       create :create do
-        primary? true
+        primary?(true)
         argument(:photo, :file)
       end
     end

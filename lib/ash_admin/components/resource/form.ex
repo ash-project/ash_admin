@@ -37,7 +37,7 @@ defmodule AshAdmin.Components.Resource.Form do
      |> assign(assigns)
      |> assign(:typeahead_options, [])
      |> assign_form()
-     |> allow_uploads()
+     |> allow_uploading_form_arguments()
      |> assign(:initialized, true)}
   end
 
@@ -1726,7 +1726,7 @@ defmodule AshAdmin.Components.Resource.Form do
     {:noreply,
      socket
      |> assign(:form, form)
-     |> allow_uploads()}
+     |> allow_uploading_form_arguments()}
   end
 
   def handle_event("remove_form", %{"path" => path}, socket) do
@@ -2376,40 +2376,43 @@ defmodule AshAdmin.Components.Resource.Form do
     assign(socket, :form, form |> to_form())
   end
 
-  defp file_attributes(form) do
-    {attributes, _, _, _} = attributes(form.source.resource, form.source.source.action)
+  defp collect_forms_recursively(%AshPhoenix.Form{} = form) do
+    collect_recursive(form, [])
+  end
 
-    Enum.filter(attributes, fn attribute ->
-      attribute.type == Ash.Type.File
+  defp collect_recursive(form, acc) do
+    acc = [form | acc]
+
+    children = List.flatten(Map.values(form.forms))
+
+    Enum.reduce(children, acc, fn child, acc ->
+      collect_recursive(child, acc)
     end)
   end
 
-  defp allow_uploads(socket) do
-    form = socket.assigns.form
+  defp uploadable_arguments(form) do
+    Enum.filter(form.source.action.arguments, fn %{type: type} -> type == Ash.Type.File end)
+  end
 
-    upload_keys =
-      Enum.flat_map(form.source.forms, fn {_name, forms} ->
-        Enum.flat_map(forms, fn form ->
-          form.source.action.arguments
-          |> Enum.filter(fn %{type: type} -> type == Ash.Type.File end)
-          |> Enum.map(fn argument ->
-            upload_key(form, argument)
-          end)
-        end)
-      end)
-
-    socket =
-      Enum.reduce(upload_keys, socket, fn upload_key, socket ->
-        if Map.get(socket.assigns, :uploads, %{})[upload_key] do
-          socket
-        else
-          allow_upload(socket, upload_key, accept: :any)
-        end
-      end)
-
-    Enum.reduce(file_attributes(socket.assigns.form), socket, fn attribute, socket ->
-      allow_upload(socket, upload_key(form, attribute), accept: :any)
+  defp allow_uploading_form_arguments(socket) do
+    socket.assigns.form.source
+    |> collect_forms_recursively()
+    |> Enum.flat_map(fn form ->
+      form
+      |> uploadable_arguments()
+      |> Enum.map(fn argument -> upload_key(form, argument) end)
     end)
+    |> Enum.reduce(socket, fn upload_key, socket ->
+      if upload_allowed?(socket, upload_key) do
+        socket
+      else
+        allow_upload(socket, upload_key, accept: :any)
+      end
+    end)
+  end
+
+  defp upload_allowed?(socket, upload_key) do
+    Map.get(socket.assigns, :uploads, %{})[upload_key]
   end
 
   defp upload_key(form, %Ash.Resource.Actions.Argument{name: name}) do
