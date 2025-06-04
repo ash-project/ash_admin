@@ -5,6 +5,25 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.7](https://github.com/ash-project/ash_admin/compare/v0.13.6...v0.13.7) (2025-06-04)
+
+
+
+
+### Bug Fixes:
+
+* allow uploads in nested forms
+
+* lookup and consume upload entries correctly
+
+* Handle cross-domain links (#314)
+
+* Handle cross-domain links
+
+### Improvements:
+
+* add upload options for `Ash.Type.File` arguments (#316)
+
 ## [v0.13.6](https://github.com/ash-project/ash_admin/compare/v0.13.5...v0.13.6) (2025-06-01)
 
 
