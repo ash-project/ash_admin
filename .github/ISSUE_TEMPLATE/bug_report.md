@@ -4,19 +4,15 @@ about: Create a report to help us improve
 title: ''
 labels: bug, needs review
 assignees: ''
-
 ---
 
 **Describe the bug**
-
-A clear and concise description of what the bug is. If you are not sure if the bug is related to `ash` or an extension, log it with [ash](https://github.com/ash-project/ash/issues/new) and we will move it.
+A clear and concise description of what the bug is.
 
 **To Reproduce**
-
 A minimal set of resource definitions and calls that can reproduce the bug.
 
 **Expected behavior**
-
 A clear and concise description of what you expected to happen.
 
 **Runtime**
@@ -24,8 +20,7 @@ A clear and concise description of what you expected to happen.
  - Erlang version
  - OS
  - Ash version
- - any related extension versions
+ - any related package versions
 
 **Additional context**
-
 Add any other context about the problem here.

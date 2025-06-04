@@ -2379,13 +2379,22 @@ defmodule AshAdmin.Components.Resource.Form do
     |> Enum.flat_map(fn form ->
       form
       |> uploadable_arguments()
-      |> Enum.map(fn argument -> upload_key(form, argument) end)
+      |> Enum.map(fn argument ->
+        %{
+          upload_key: upload_key(form, argument),
+          field: AshAdmin.Resource.field(form.resource, argument.name)
+        }
+      end)
     end)
-    |> Enum.reduce(socket, fn upload_key, socket ->
+    |> Enum.reduce(socket, fn %{upload_key: upload_key, field: field}, socket ->
       if upload_allowed?(socket, upload_key) do
         socket
       else
-        allow_upload(socket, upload_key, accept: :any)
+        allow_upload(socket, upload_key,
+          accept: field[:accepted_extensions] || :any,
+          # 8 megabyte (SI) default
+          max_file_size: field[:max_file_size] || 8_000_000
+        )
       end
     end)
   end

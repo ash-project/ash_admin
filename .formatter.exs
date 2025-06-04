@@ -1,4 +1,5 @@
 spark_locals_without_parens = [
+  accepted_extensions: 1,
   actor?: 1,
   create_actions: 1,
   default_resource_page: 1,
@@ -8,6 +9,7 @@ spark_locals_without_parens = [
   format_fields: 1,
   generic_actions: 1,
   label_field: 1,
+  max_file_size: 1,
   name: 1,
   polymorphic_actions: 1,
   polymorphic_tables: 1,
