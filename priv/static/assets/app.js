@@ -2348,7 +2348,7 @@
       return el.getAttribute && el.getAttribute(phxTriggerExternal) !== null && document.body.contains(el);
     },
     cleanChildNodes(container, phxUpdate) {
-      if (DOM.isPhxUpdate(container, phxUpdate, ["append", "prepend"])) {
+      if (DOM.isPhxUpdate(container, phxUpdate, ["append", "prepend", PHX_STREAM])) {
         let toRemove = [];
         container.childNodes.forEach((childNode) => {
           if (!childNode.id) {
@@ -2668,7 +2668,7 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
       return classes.find((name) => instance instanceof name);
     },
     isFocusable(el, interactiveOnly) {
-      return el instanceof HTMLAnchorElement && el.rel !== "ignore" || el instanceof HTMLAreaElement && el.href !== void 0 || !el.disabled && this.anyOf(el, [HTMLInputElement, HTMLSelectElement, HTMLTextAreaElement, HTMLButtonElement]) || el instanceof HTMLIFrameElement || (el.tabIndex >= 0 || !interactiveOnly && el.getAttribute("tabindex") !== null && el.getAttribute("aria-hidden") !== "true");
+      return el instanceof HTMLAnchorElement && el.rel !== "ignore" || el instanceof HTMLAreaElement && el.href !== void 0 || !el.disabled && this.anyOf(el, [HTMLInputElement, HTMLSelectElement, HTMLTextAreaElement, HTMLButtonElement]) || el instanceof HTMLIFrameElement || (el.tabIndex >= 0 && el.getAttribute("aria-hidden") !== "true" || !interactiveOnly && el.getAttribute("tabindex") !== null && el.getAttribute("aria-hidden") !== "true");
     },
     attemptFocus(el, interactiveOnly) {
       if (this.isFocusable(el, interactiveOnly)) {
@@ -6327,7 +6327,8 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
         const clonedForm = form.cloneNode(false);
         dom_default.copyPrivates(clonedForm, form);
         Array.from(form.elements).forEach((el) => {
-          const clonedEl = el.cloneNode(false);
+          const clonedEl = el.cloneNode(true);
+          morphdom_esm_default(clonedEl, el);
           dom_default.copyPrivates(clonedEl, el);
           clonedForm.appendChild(clonedEl);
         });
@@ -6441,7 +6442,7 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
     }
     // public
     version() {
-      return "1.0.14";
+      return "1.0.17";
     }
     isProfileEnabled() {
       return this.sessionStorage.getItem(PHX_LV_PROFILE) === "true";
@@ -6712,7 +6713,13 @@ removing illegal node: "${(childNode.outerHTML || childNode.nodeValue).trim()}"
       return view;
     }
     owner(childEl, callback) {
-      let view = maybe(childEl.closest(PHX_VIEW_SELECTOR), (el) => this.getViewByEl(el)) || this.main;
+      let view;
+      const closestViewEl = childEl.closest(PHX_VIEW_SELECTOR);
+      if (closestViewEl) {
+        view = this.getViewByEl(closestViewEl);
+      } else {
+        view = this.main;
+      }
       return view && callback ? callback(view) : view;
     }
     withinOwners(childEl, callback) {

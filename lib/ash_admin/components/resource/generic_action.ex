@@ -4,6 +4,8 @@ defmodule AshAdmin.Components.Resource.GenericAction do
 
   import AshAdmin.Helpers
 
+  alias Phoenix.LiveView.AsyncResult
+
   attr :resource, :atom
   attr :domain, :atom
   attr :action, :any
@@ -48,9 +50,20 @@ defmodule AshAdmin.Components.Resource.GenericAction do
           )}
           <button
             type="submit"
-            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            disabled={@result.loading}
+            class={[
+              "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2",
+              if(@result.loading,
+                do: "bg-gray-400 cursor-not-allowed",
+                else: "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500"
+              )
+            ]}
           >
-            Run
+            <%= if @result.loading do %>
+              Running...
+            <% else %>
+              Run
+            <% end %>
           </button>
         </.form>
       <% else %>
@@ -88,9 +101,20 @@ defmodule AshAdmin.Components.Resource.GenericAction do
                 <div class="px-4 py-3 text-right sm:px-6 my-auto">
                   <button
                     type="submit"
-                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    disabled={@result.loading}
+                    class={[
+                      "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2",
+                      if(@result.loading,
+                        do: "bg-gray-400 cursor-not-allowed",
+                        else: "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500"
+                      )
+                    ]}
                   >
-                    Run
+                    <%= if @result.loading do %>
+                      Running...
+                    <% else %>
+                      Run
+                    <% end %>
                   </button>
                 </div>
               </.form>
@@ -100,16 +124,22 @@ defmodule AshAdmin.Components.Resource.GenericAction do
       <% end %>
 
       <%= case @result do %>
-        <% :pending -> %>
-        <% :ok -> %>
-          Success
-        <% {:ok, result} -> %>
-          <div class="shadow-lg overflow-auto sm:rounded-md bg-white mx-12 px-8">
-            <h1>Success</h1>
+        <% %AsyncResult{ok?: true, result: :pending} -> %>
+        <% %AsyncResult{loading: true} -> %>
+        <% %AsyncResult{ok?: true, result: :ok} -> %>
+          <div class="shadow-lg overflow-auto sm:rounded-md bg-white px-8 py-4 mx-12 my-4">
+            <h1 class="text-2xl text-green-500">Success</h1>
+          </div>
+        <% %AsyncResult{ok?: true, result: {:ok, result}} -> %>
+          <div class="shadow-lg overflow-auto sm:rounded-md bg-white px-8 py-4 mx-12 my-4">
+            <h1 class="text-2xl text-green-500">Success</h1>
             {render_value(assigns, result, @action.returns, @action.constraints)}
           </div>
-        <% :error -> %>
-          Action failed
+        <% %AsyncResult{failed: failed} when not is_nil(failed) -> %>
+          <div class="shadow-lg overflow-auto sm:rounded-md bg-white px-8 py-4 mx-12 my-4">
+            <h1 class="text-2xl text-red-500">Failure</h1>
+            <pre>{inspect(failed, pretty: true)}</pre>
+          </div>
       <% end %>
     </div>
     """
@@ -218,7 +248,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
   def mount(socket) do
     {:ok,
      socket
-     |> assign_new(:result, fn -> :pending end)
+     |> assign_new(:result, fn -> AsyncResult.ok(:pending) end)
      |> assign_new(:initialized, fn -> false end)}
   end
 
@@ -330,6 +360,26 @@ defmodule AshAdmin.Components.Resource.GenericAction do
   #   |> Ash.Query.load(AshAdmin.Resource.table_columns(query.resource))
   # end
 
+  def handle_async(:action_task, {:ok, action_result}, socket) do
+    %{result: result} = socket.assigns
+
+    case action_result do
+      :ok ->
+        {:noreply, assign(socket, result: AsyncResult.ok(result, :ok))}
+
+      {:ok, res} ->
+        {:noreply, assign(socket, result: AsyncResult.ok(result, {:ok, res}))}
+
+      {:error, form} ->
+        {:noreply, assign(socket, form: form, result: AsyncResult.failed(result, :error))}
+    end
+  end
+
+  def handle_async(:action_task, {:exit, reason}, socket) do
+    %{result: result} = socket.assigns
+    {:noreply, assign(socket, :result, AsyncResult.failed(result, {:exit, reason}))}
+  end
+
   def handle_event("validate", params, socket) do
     params = params["form"] || %{}
     form = AshPhoenix.Form.validate(socket.assigns.form, params)
@@ -339,12 +389,14 @@ defmodule AshAdmin.Components.Resource.GenericAction do
 
   def handle_event("save", params, socket) do
     params = params["form"] || %{}
+    form = socket.assigns.form
 
-    case AshPhoenix.Form.submit(socket.assigns.form, params: params) do
-      :ok -> {:noreply, assign(socket, result: :ok)}
-      {:ok, res} -> {:noreply, assign(socket, result: {:ok, res})}
-      {:error, form} -> {:noreply, assign(socket, form: form, result: :error)}
-    end
+    {:noreply,
+     socket
+     |> assign(:result, AsyncResult.loading())
+     |> start_async(:action_task, fn ->
+       AshPhoenix.Form.submit(form, params: params)
+     end)}
   end
 
   def handle_event("add_form", %{"path" => path} = params, socket) do
