@@ -743,7 +743,7 @@ defmodule AshAdmin.Components.Resource.Form do
         name: name,
         id: id,
         upload_key: upload_key,
-        upload: assigns.uploads[upload_key],
+        upload: assigns[:uploads][upload_key],
         uploaded_file: Map.get(assigns.uploaded_files, upload_key)
       )
 
@@ -1879,7 +1879,11 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp consume_file_uploads(socket) do
     uploaded_files =
-      socket.assigns.uploads
+      socket.assigns[:uploads]
+      |> case do
+        nil -> %{}
+        uploads -> uploads
+      end
       |> Enum.filter(fn {_, upload_config} ->
         is_struct(upload_config, Phoenix.LiveView.UploadConfig)
       end)
