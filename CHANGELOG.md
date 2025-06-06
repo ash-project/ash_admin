@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.8](https://github.com/ash-project/ash_admin/compare/v0.13.7...v0.13.8) (2025-06-06)
+
+
+
+
+### Bug Fixes:
+
+* handle case where no uploads are present by Zach Daniel
+
 ## [v0.13.7](https://github.com/ash-project/ash_admin/compare/v0.13.6...v0.13.7) (2025-06-04)
 
 
