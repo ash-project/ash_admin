@@ -2391,13 +2391,15 @@ defmodule AshAdmin.Components.Resource.Form do
       end)
     end)
     |> Enum.reduce(socket, fn %{upload_key: upload_key, field: field}, socket ->
+      field = field || %{accepted_extensions: :any, max_file_size: 8_000_000}
+
       if upload_allowed?(socket, upload_key) do
         socket
       else
         allow_upload(socket, upload_key,
-          accept: field[:accepted_extensions] || :any,
+          accept: field.accepted_extensions || :any,
           # 8 megabyte (SI) default
-          max_file_size: field[:max_file_size] || 8_000_000
+          max_file_size: field.max_file_size || 8_000_000
         )
       end
     end)
