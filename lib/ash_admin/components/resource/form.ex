@@ -1877,6 +1877,7 @@ defmodule AshAdmin.Components.Resource.Form do
     {:noreply, assign(socket, form: form)}
   end
 
+  # sobelow_skip ["Traversal.FileModule"]
   defp consume_file_uploads(socket) do
     uploaded_files =
       socket.assigns[:uploads]
