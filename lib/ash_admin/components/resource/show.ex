@@ -8,6 +8,12 @@ defmodule AshAdmin.Components.Resource.Show do
   import AshAdmin.Helpers
   import AshAdmin.CoreComponents
 
+  @log_failed_to_display_value_error Application.compile_env(
+                                       :ash_admin,
+                                       :log_failed_to_display_value_error,
+                                       true
+                                     )
+
   attr :resource, :any
   attr :record, :any, default: nil
   attr :domain, :any, default: nil
@@ -126,7 +132,7 @@ defmodule AshAdmin.Components.Resource.Show do
             }>
               {inspect(@calculation_errors[calculation.name])}
             </.error>
-            <div class="px-4 py-3 text-right sm:px-6 text-right">
+            <div class="px-4 py-3 text-right sm:px-6">
               <button
                 type="submit"
                 class="py-2 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
@@ -910,17 +916,18 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   end
 
-  defp value!(%Postgrex.Range{
+  # Handle Postgrex.Range
+  defp value!(%{
+         __struct__: struct,
          lower: lower,
          upper: upper,
          lower_inclusive: lower_inclusive,
          upper_inclusive: upper_inclusive
-       }) do
+       })
+       when not is_nil(struct) do
     lower_str =
       case lower do
         :unbound -> "-∞"
-        # Assuming lower/upper are DateTime based on the error, otherwise inspect might be safer
-        # or add more specific type handling if other range types are common.
         %DateTime{} = dt -> DateTime.to_string(dt)
         other -> inspect(other)
       end
@@ -938,6 +945,7 @@ defmodule AshAdmin.Components.Resource.Show do
     "#{lower_bracket}#{lower_str}, #{upper_str}#{upper_bracket}"
   end
 
+  @dialyzer {:nowarn_function, value!: 1}
   defp value!(value) do
     data = Phoenix.HTML.Safe.to_iodata(value)
 
@@ -948,8 +956,10 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   rescue
     e ->
-      Logger.error("Failed to display value:\n#{Exception.format(:error, e, __STACKTRACE__)}")
-      "<display error>"
+      if @log_failed_to_display_value_error do
+        Logger.error("Failed to display value:\n#{Exception.format(:error, e, __STACKTRACE__)}")
+        "<display error>"
+      end
   end
 
   defp short_text?(resource, attribute) do
