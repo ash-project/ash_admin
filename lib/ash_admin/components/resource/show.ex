@@ -910,6 +910,34 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   end
 
+  defp value!(%Postgrex.Range{
+         lower: lower,
+         upper: upper,
+         lower_inclusive: lower_inclusive,
+         upper_inclusive: upper_inclusive
+       }) do
+    lower_str =
+      case lower do
+        :unbound -> "-∞"
+        # Assuming lower/upper are DateTime based on the error, otherwise inspect might be safer
+        # or add more specific type handling if other range types are common.
+        %DateTime{} = dt -> DateTime.to_string(dt)
+        other -> inspect(other)
+      end
+
+    upper_str =
+      case upper do
+        :unbound -> "+∞"
+        %DateTime{} = dt -> DateTime.to_string(dt)
+        other -> inspect(other)
+      end
+
+    lower_bracket = if lower_inclusive, do: "[", else: "("
+    upper_bracket = if upper_inclusive, do: "]", else: ")"
+
+    "#{lower_bracket}#{lower_str}, #{upper_str}#{upper_bracket}"
+  end
+
   defp value!(value) do
     data = Phoenix.HTML.Safe.to_iodata(value)
 
