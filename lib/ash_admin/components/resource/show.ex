@@ -910,15 +910,13 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   end
 
-  # Handle Postgrex.Range
   defp value!(%{
-         __struct__: struct,
+         __struct__: Postgrex.Range,
          lower: lower,
          upper: upper,
          lower_inclusive: lower_inclusive,
          upper_inclusive: upper_inclusive
-       })
-       when not is_nil(struct) do
+       }) do
     lower_str =
       case lower do
         :unbound -> "-∞"
