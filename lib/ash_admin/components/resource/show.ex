@@ -126,7 +126,7 @@ defmodule AshAdmin.Components.Resource.Show do
             }>
               {inspect(@calculation_errors[calculation.name])}
             </.error>
-            <div class="px-4 py-3 text-right sm:px-6 text-right">
+            <div class="px-4 py-3 text-right sm:px-6">
               <button
                 type="submit"
                 class="py-2 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
@@ -912,6 +912,33 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   end
 
+  defp value!(%{
+         __struct__: Postgrex.Range,
+         lower: lower,
+         upper: upper,
+         lower_inclusive: lower_inclusive,
+         upper_inclusive: upper_inclusive
+       }) do
+    lower_str =
+      case lower do
+        :unbound -> "-∞"
+        %DateTime{} = dt -> DateTime.to_string(dt)
+        other -> inspect(other)
+      end
+
+    upper_str =
+      case upper do
+        :unbound -> "+∞"
+        %DateTime{} = dt -> DateTime.to_string(dt)
+        other -> inspect(other)
+      end
+
+    lower_bracket = if lower_inclusive, do: "[", else: "("
+    upper_bracket = if upper_inclusive, do: "]", else: ")"
+
+    "#{lower_bracket}#{lower_str}, #{upper_str}#{upper_bracket}"
+  end
+
   defp value!(value) do
     data = Phoenix.HTML.Safe.to_iodata(value)
 
@@ -922,7 +949,7 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   rescue
     e ->
-      Logger.error("Failed to display value:\n#{Exception.format(:error, e, __STACKTRACE__)}")
+      Logger.debug("Failed to display value:\n#{Exception.format(:error, e, __STACKTRACE__)}")
       "<display error>"
   end
 
