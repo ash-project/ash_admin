@@ -8,12 +8,6 @@ defmodule AshAdmin.Components.Resource.Show do
   import AshAdmin.Helpers
   import AshAdmin.CoreComponents
 
-  @log_failed_to_display_value_error Application.compile_env(
-                                       :ash_admin,
-                                       :log_failed_to_display_value_error,
-                                       true
-                                     )
-
   attr :resource, :any
   attr :record, :any, default: nil
   attr :domain, :any, default: nil
@@ -945,7 +939,6 @@ defmodule AshAdmin.Components.Resource.Show do
     "#{lower_bracket}#{lower_str}, #{upper_str}#{upper_bracket}"
   end
 
-  @dialyzer {:nowarn_function, value!: 1}
   defp value!(value) do
     data = Phoenix.HTML.Safe.to_iodata(value)
 
@@ -956,10 +949,8 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   rescue
     e ->
-      if @log_failed_to_display_value_error do
-        Logger.error("Failed to display value:\n#{Exception.format(:error, e, __STACKTRACE__)}")
-        "<display error>"
-      end
+      Logger.debug("Failed to display value:\n#{Exception.format(:error, e, __STACKTRACE__)}")
+      "<display error>"
   end
 
   defp short_text?(resource, attribute) do
