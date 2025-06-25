@@ -21,7 +21,7 @@ defmodule AshAdmin.SessionPlug do
           Plug.Conn.put_session(conn, cookie, nil)
 
         value ->
-          Plug.Conn.put_session(conn, cookie, value |> URI.encode())
+          Plug.Conn.put_session(conn, cookie, value)
       end
     end)
   end
