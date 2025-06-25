@@ -47,8 +47,8 @@ defmodule AshAdmin.ActorPlug.Plug do
         actor_paused = session_bool(session["actor_paused"], true)
 
         conn
-        |> Plug.Conn.put_session(:actor_resource, resource)
-        |> Plug.Conn.put_session(:actor_domain, domain)
+        |> Plug.Conn.put_session(:actor_resource, resource |> URI.encode())
+        |> Plug.Conn.put_session(:actor_domain, domain |> URI.encode())
         |> Plug.Conn.put_session(:actor_action, action)
         |> Plug.Conn.put_session(:actor_tenant, session["actor_tenant"])
         |> Plug.Conn.put_session(:actor_primary_key, primary_key)
