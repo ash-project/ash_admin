@@ -111,12 +111,12 @@ Hooks.MarkdownEditor = {
 Hooks.Actor = {
   mounted() {
     this.handleEvent("set_actor", (payload) => {
-      document.cookie = "actor_resource" + "=" + payload.resource + ";path=/";
+      document.cookie = "actor_resource" + "=" + encodeURIComponent(payload.resource) + ";path=/";
       document.cookie =
-        "actor_primary_key" + "=" + payload.primary_key + ";path=/";
-      document.cookie = "actor_action" + "=" + payload.action + ";path=/";
-      document.cookie = "actor_domain" + "=" + payload.domain + ";path=/";
-      document.cookie = "actor_tenant" + "=" + payload.tenant + ";path=/";
+        "actor_primary_key" + "=" + encodeURIComponent(payload.primary_key) + ";path=/";
+      document.cookie = "actor_action" + "=" + encodeURIComponent(payload.action) + ";path=/";
+      document.cookie = "actor_domain" + "=" + encodeURIComponent(payload.domain) + ";path=/";
+      document.cookie = "actor_tenant" + "=" + encodeURIComponent(payload.tenant) + ";path=/";
     });
     this.handleEvent("clear_actor", () => {
       document.cookie = "actor_resource" + "=" + ";path=/";
@@ -211,7 +211,7 @@ Hooks.Typeahead = {
 function getCookie(name) {
   var re = new RegExp(name + "=([^;]+)");
   var value = re.exec(document.cookie);
-  return value != null ? unescape(value[1]) : null;
+  return value != null ? decodeURIComponent(value[1]) : null;
 }
 
 let params = () => {
