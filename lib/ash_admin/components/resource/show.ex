@@ -940,17 +940,18 @@ defmodule AshAdmin.Components.Resource.Show do
   end
 
   defp value!(value) do
-    data = Phoenix.HTML.Safe.to_iodata(value)
-
-    if is_binary(data) and !String.valid?(data) do
+    if is_binary(value) and !String.valid?(value) do
       "<binary data>"
     else
-      data
+      case Phoenix.HTML.Safe.impl_for(value) do
+        nil ->
+          Logger.debug("Failed to display value:\n#{inspect(value)}")
+          "<display error>"
+
+        _module ->
+          value
+      end
     end
-  rescue
-    e ->
-      Logger.debug("Failed to display value:\n#{Exception.format(:error, e, __STACKTRACE__)}")
-      "<display error>"
   end
 
   defp short_text?(resource, attribute) do
