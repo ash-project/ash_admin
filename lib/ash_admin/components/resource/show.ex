@@ -940,12 +940,11 @@ defmodule AshAdmin.Components.Resource.Show do
   end
 
   defp value!(value) do
-    data = Phoenix.HTML.Safe.to_iodata(value)
-
-    if is_binary(data) and !String.valid?(data) do
+    if is_binary(value) and !String.valid?(value) do
       "<binary data>"
     else
-      data
+      data = Phoenix.HTML.Safe.to_iodata(value)
+      {:safe, data}
     end
   rescue
     e ->
