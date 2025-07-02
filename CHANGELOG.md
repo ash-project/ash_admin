@@ -5,6 +5,17 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.11](https://github.com/ash-project/ash_admin/compare/v0.13.10...v0.13.11) (2025-07-02)
+
+
+
+
+### Bug Fixes:
+
+* Prevent double HTML escaping (#332) by Jechol Lee
+
+* Encode/decode cookie values in JS (#328) by Jechol Lee
+
 ## [v0.13.10](https://github.com/ash-project/ash_admin/compare/v0.13.9...v0.13.10) (2025-06-18)
 
 
