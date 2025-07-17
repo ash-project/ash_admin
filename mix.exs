@@ -126,7 +126,7 @@ defmodule AshAdmin.MixProject do
       {:ash_phoenix, "~> 2.1 and >= 2.1.8"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix, "~> 1.7"},
-      {:phoenix_live_view, "~> 1.0"},
+      {:phoenix_live_view, "~> 1.1-rc"},
       {:phoenix_html, "~> 4.1"},
       {:jason, "~> 1.0"},
       {:gettext, "~> 0.26"},
