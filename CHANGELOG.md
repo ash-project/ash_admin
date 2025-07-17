@@ -5,6 +5,19 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.12](https://github.com/ash-project/ash_admin/compare/v0.13.11...v0.13.12) (2025-07-17)
+
+
+
+
+### Bug Fixes:
+
+* properly only show dropdowns on related resources by Zach Daniel
+
+### Improvements:
+
+* support liveview 1.1-rc by Zach Daniel
+
 ## [v0.13.11](https://github.com/ash-project/ash_admin/compare/v0.13.10...v0.13.11) (2025-07-02)
 
 
