@@ -29,7 +29,8 @@ spark_locals_without_parens = [
 ]
 
 macro_locals_without_parens = [
-  ash_admin: 1
+  ash_admin: 1,
+  ash_admin: 2
 ]
 
 [
