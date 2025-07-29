@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.13](https://github.com/ash-project/ash_admin/compare/v0.13.12...v0.13.13) (2025-07-29)
+
+
+
+
+### Bug Fixes:
+
+* Add `ash_admin: 2` in locals_without_parens (#348) by kik4444
+
 ## [v0.13.12](https://github.com/ash-project/ash_admin/compare/v0.13.11...v0.13.12) (2025-07-17)
 
 
