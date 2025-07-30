@@ -18,14 +18,23 @@ defmodule AshAdmin.Components.TopNav.ActorSelect do
 
   def actor_select(assigns) do
     ~H"""
-    <div id="actor-hook" class="flex items-center mr-5 text-white" phx-hook="Actor">
+    <div id="actor-hook" class="flex items-center gap-4 mr-5 text-white" phx-hook="Actor">
       <div>
         <span>
-          <button phx-click={@toggle_authorizing} type="button">
+          <button
+            class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 mx-1 my-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
+            phx-click={@toggle_authorizing}
+            type="button"
+          >
             <span :if={@authorizing}>Authorizing</span>
             <span :if={!@authorizing}>Not Authorizing</span>
           </button>
-          <button :if={@actor} phx-click={@toggle_actor_paused} type="button">
+          <button
+            :if={@actor}
+            class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 mx-1 my-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
+            phx-click={@toggle_actor_paused}
+            type="button"
+          >
             <span :if={@actor_paused}>Actor Paused</span>
             <span :if={!@actor_paused}>Actor Active</span>
           </button>
