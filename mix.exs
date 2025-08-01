@@ -122,6 +122,7 @@ defmodule AshAdmin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:cinder, github: "sevenseacat/cinder"},
       {:ash, "~> 3.0 and >= 3.4.63"},
       {:ash_phoenix, "~> 2.1 and >= 2.1.8"},
       {:phoenix_view, "~> 2.0"},

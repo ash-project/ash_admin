@@ -45,6 +45,8 @@ config :tailwind,
 config :logger, level: :debug
 config :phoenix, :serve_endpoints, true
 
+config :cinder, default_theme: "modern"
+
 if config_env() == :dev do
   config :ash_admin,
     ash_domains: [
