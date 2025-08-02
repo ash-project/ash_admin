@@ -1,7 +1,4 @@
-import "phoenix_html";
-import { Socket } from "phoenix";
 import topbar from "../vendor/topbar";
-import { LiveSocket } from "phoenix_live_view";
 
 let socketPath =
   document.querySelector("html").getAttribute("phx-socket") || "/live";
@@ -228,7 +225,7 @@ let params = () => {
   };
 };
 
-let liveSocket = new LiveSocket(socketPath, Socket, {
+let liveSocket = new LiveView.LiveSocket(socketPath, Phoenix.Socket, {
   params: params,
   hooks: Hooks,
   dom: {
