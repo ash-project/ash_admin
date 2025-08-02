@@ -137,6 +137,7 @@ defmodule AshAdmin.MixProject do
       {:tailwind, "~> 0.3.0", only: [:dev, :test]},
       {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
+      {:lazy_html, ">= 0.1.0", only: [:dev, :test]},
       {:ash_postgres, "~> 2.0", only: [:dev, :test]},
       {:ash_sql, "~> 0.2 and >= 0.2.56", only: [:dev, :test]},
       {:git_ops, "~> 2.4", only: [:dev, :test]},
