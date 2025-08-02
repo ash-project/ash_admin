@@ -1,10 +1,10 @@
 defmodule AshAdmin.Components.Resource.DataTable do
   @moduledoc false
   use Phoenix.LiveComponent
-  use Cinder.Table.UrlSync
 
   import AshAdmin.Helpers
   alias AshAdmin.Components.Resource.Table
+  alias AshAdmin.Themes.AshAdminTheme
 
   attr :resource, :atom
   attr :domain, :atom
@@ -109,14 +109,13 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 :if={@ash_query && match?({:ok, _data}, @data)}
                 query={@ash_query}
                 actor={@actor}
-                url_state={@url_state}
-                theme="default"
+                theme={AshAdminTheme}
                 id={"cinder-table-#{@resource}"}
               >
                 <!-- Generate columns for each table column -->
                 <:col
-                  :for={field_name <- AshAdmin.Resource.table_columns(@resource)}
                   :let={record}
+                  :for={field_name <- AshAdmin.Resource.table_columns(@resource)}
                   field={to_string(field_name)}
                   label={to_name(field_name)}
                 >
@@ -128,19 +127,28 @@ defmodule AshAdmin.Components.Resource.DataTable do
                   <div class="flex h-max justify-items-center">
                     <div :if={AshAdmin.Resource.show_action(@resource)}>
                       <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&table=#{@table}&primary_key=#{encode_primary_key(record)}&action_type=read"}>
-                        <AshAdmin.CoreComponents.icon name="hero-information-circle-solid" class="h-5 w-5 text-gray-500" />
+                        <AshAdmin.CoreComponents.icon
+                          name="hero-information-circle-solid"
+                          class="h-5 w-5 text-gray-500"
+                        />
                       </.link>
                     </div>
 
                     <div :if={AshAdmin.Helpers.primary_action(@resource, :update)}>
                       <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
-                        <AshAdmin.CoreComponents.icon name="hero-pencil-solid" class="h-5 w-5 text-gray-500" />
+                        <AshAdmin.CoreComponents.icon
+                          name="hero-pencil-solid"
+                          class="h-5 w-5 text-gray-500"
+                        />
                       </.link>
                     </div>
 
                     <div :if={AshAdmin.Helpers.primary_action(@resource, :destroy)}>
                       <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
-                        <AshAdmin.CoreComponents.icon name="hero-x-circle-solid" class="h-5 w-5 text-gray-500" />
+                        <AshAdmin.CoreComponents.icon
+                          name="hero-x-circle-solid"
+                          class="h-5 w-5 text-gray-500"
+                        />
                       </.link>
                     </div>
 
@@ -151,7 +159,10 @@ defmodule AshAdmin.Components.Resource.DataTable do
                       phx-value-domain={@domain}
                       phx-value-pkey={encode_primary_key(record)}
                     >
-                      <AshAdmin.CoreComponents.icon name="hero-key-solid" class="h-5 w-5 text-gray-500" />
+                      <AshAdmin.CoreComponents.icon
+                        name="hero-key-solid"
+                        class="h-5 w-5 text-gray-500"
+                      />
                     </button>
                   </div>
                 </:col>
@@ -260,12 +271,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
        socket
        |> assign(:initialized, true)}
     end
-  end
-
-  # Handle URL state changes from Cinder
-  def handle_params(params, uri, socket) do
-    socket = Cinder.Table.UrlSync.handle_params(params, uri, socket)
-    {:noreply, socket}
   end
 
   defp load_fields(query) do
