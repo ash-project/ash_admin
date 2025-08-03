@@ -18,10 +18,12 @@ defmodule AshAdmin.Themes.AshAdminTheme do
     # Main table with exact same classes as original Resource.Table
     set :table_class, "rounded-t-lg m-5 w-5/6 mx-auto text-left"
 
-    # Header styling - minimal to match original
+    # Header styling - minimal to match original with better sort interaction
     set :thead_class, "text-left border-b-2"
     set :header_row_class, ""
-    set :th_class, ""
+
+    set :th_class,
+        "cursor-pointer select-none py-2 pr-2 text-sm font-semibold text-gray-900 transition-colors"
 
     # Body styling - no extra classes
     set :tbody_class, ""
@@ -60,83 +62,67 @@ defmodule AshAdmin.Themes.AshAdminTheme do
         "bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium"
   end
 
-  # Sorting styling - simple indicators
+  # Sorting styling - clean indicators that match AshAdmin's minimal style
   component Cinder.Components.Sorting do
-    set :sort_indicator_class, "ml-1"
-    set :sort_arrow_wrapper_class, "text-gray-400"
-    set :sort_asc_icon_class, "h-4 w-4"
+    set :sort_indicator_class, "inline-block ml-1"
+    set :sort_arrow_wrapper_class, "text-gray-400 hover:text-gray-600"
+    set :sort_asc_icon_class, "h-4 w-4 bg-gray-600 inline-block"
     set :sort_asc_icon_name, "hero-chevron-up"
-    set :sort_desc_icon_class, "h-4 w-4"
+    set :sort_desc_icon_class, "h-4 w-4 bg-gray-600 inline-block"
     set :sort_desc_icon_name, "hero-chevron-down"
-    set :sort_none_icon_class, "h-4 w-4"
+    set :sort_none_icon_class, "h-4 w-4 bg-gray-400 inline-block opacity-50"
     set :sort_none_icon_name, "hero-chevron-up-down"
   end
 
-  # Filter styling - matches AshAdmin's form aesthetic
+  # Filter styling - matches AshAdmin's clean, minimal form aesthetic
   component Cinder.Components.Filters do
-    # Container styling - clean and simple
-    set :filter_container_class, "bg-white border border-gray-200 rounded-md p-4 mb-4"
-    set :filter_header_class, "mb-4"
-    set :filter_title_class, "text-lg font-medium text-gray-900 mb-2"
-    set :filter_count_class, "text-sm text-gray-500"
-    set :filter_clear_all_class, "text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+    # Container styling - minimal border, matches table width
+    set :filter_container_class, "border-b-2 border-gray-200 py-4 w-5/6 mx-auto mb-2"
+    set :filter_header_class, "flex items-center justify-between mb-4"
+    set :filter_title_class, "font-medium text-gray-800"
+    set :filter_count_class, "text-sm text-gray-600 bg-gray-200 px-2 py-1 rounded"
+    set :filter_clear_all_class, "text-sm text-blue-600 hover:text-blue-800 font-medium underline"
 
-    # Input wrapper and labels
-    set :filter_inputs_class, "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
-    set :filter_input_wrapper_class, ""
-    set :filter_label_class, "block text-sm font-medium text-gray-700 mb-1"
-    set :filter_clear_button_class, "ml-2 text-gray-400 hover:text-gray-600"
+    # Input wrapper and labels - compact layout
+    set :filter_inputs_class, "flow-root"
+    set :filter_input_wrapper_class, "float-left mr-6 mb-4 space-y-2"
+    set :filter_label_class, "block text-sm font-medium text-gray-700"
 
-    # Input styling - matches AshAdmin form inputs
+    set :filter_placeholder_class,
+        "text-sm text-gray-500 italic p-3 border border-gray-200 rounded bg-gray-50"
+
+    set :filter_clear_button_class, "ml-2 text-gray-400 hover:text-gray-600 text-sm"
+
+    # Input styling - clean, minimal inputs that match AshAdmin
     set :filter_text_input_class,
-        "block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        "w-48 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
 
     set :filter_select_input_class,
-        "block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        "w-48 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white"
 
     set :filter_date_input_class,
-        "block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        "w-40 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
 
     set :filter_number_input_class,
-        "block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        "w-28 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
 
-    # Boolean filter styling
-    set :filter_boolean_container_class, "flex space-x-4"
-    set :filter_boolean_option_class, "flex items-center"
+    # Select filter (dropdown interface)
+    set :filter_select_container_class, "relative"
 
-    set :filter_boolean_radio_class,
-        "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+    set :filter_select_dropdown_class,
+        "absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg max-h-48 overflow-auto"
 
-    set :filter_boolean_label_class, "ml-2 block text-sm text-gray-900"
+    set :filter_select_option_class,
+        "px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center text-sm"
 
-    # Multi-select dropdown styling
-    set :filter_multiselect_container_class, "relative"
+    set :filter_select_label_class, "text-sm text-gray-800 cursor-pointer select-none flex-1"
+    set :filter_select_empty_class, "px-3 py-2 text-sm text-gray-500 italic"
 
-    set :filter_multiselect_dropdown_class,
-        "absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
-
-    set :filter_multiselect_option_class,
-        "px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
-
-    set :filter_multiselect_checkbox_class,
-        "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded mr-2"
-
-    set :filter_multiselect_label_class, "text-sm text-gray-900"
-    set :filter_multiselect_empty_class, "px-3 py-2 text-sm text-gray-500 italic"
-
-    # Multi-checkboxes styling
-    set :filter_multicheckboxes_container_class, "space-y-2 max-h-40 overflow-y-auto"
-    set :filter_multicheckboxes_option_class, "flex items-center"
-
-    set :filter_multicheckboxes_checkbox_class,
-        "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-
-    set :filter_multicheckboxes_label_class, "ml-2 text-sm text-gray-900"
-
-    # Range filter styling
-    set :filter_range_container_class, "flex items-center space-x-2"
-    set :filter_range_input_group_class, "flex items-center space-x-2"
-    set :filter_range_separator_class, "text-gray-500"
+    # Boolean filter styling - compact radio buttons
+    set :filter_boolean_container_class, "flex space-x-4 h-10 items-center"
+    set :filter_boolean_option_class, "flex items-center space-x-2"
+    set :filter_boolean_radio_class, "h-4 w-4 text-blue-600 focus:ring-blue-500 focus:ring-1"
+    set :filter_boolean_label_class, "text-sm text-gray-700 cursor-pointer"
   end
 
   # Loading component styling

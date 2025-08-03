@@ -112,12 +112,14 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 theme={AshAdminTheme}
                 id={"cinder-table-#{@resource}"}
               >
-                <!-- Generate columns for each table column -->
+                <!-- Generate columns with simple sortable/filterable configuration -->
                 <:col
                   :let={record}
                   :for={field_name <- AshAdmin.Resource.table_columns(@resource)}
                   field={to_string(field_name)}
                   label={to_name(field_name)}
+                  filter={is_filterable?(@resource, field_name)}
+                  sort={is_sortable?(@resource, field_name)}
                 >
                   {render_field_value(record, field_name, assigns)}
                 </:col>
@@ -181,8 +183,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
      |> assign_new(:initialized, fn -> false end)
      |> assign_new(:default, fn -> nil end)
      |> assign_new(:page_params, fn -> nil end)
-     |> assign_new(:thousand_records_warning, fn -> false end)
-     |> assign_new(:url_state, fn -> %{} end)}
+     |> assign_new(:thousand_records_warning, fn -> false end)}
   end
 
   def update(assigns, socket) do
@@ -470,6 +471,33 @@ defmodule AshAdmin.Components.Resource.DataTable do
   rescue
     _ ->
       "..."
+  end
+
+  # Check if a field should be sortable
+  defp is_sortable?(resource, field_name) do
+    sortable_columns = AshAdmin.Resource.table_sortable_columns(resource)
+
+    case sortable_columns do
+      # If not specified, no columns are sortable
+      nil -> false
+      list -> field_name in list
+    end
+  end
+
+  # Check if a field should be filterable
+  defp is_filterable?(resource, field_name) do
+    filterable_columns = AshAdmin.Resource.table_filterable_columns(resource)
+
+    case filterable_columns do
+      # If not specified, no columns are filterable
+      nil -> false
+      list -> field_name in list && has_attribute?(resource, field_name)
+    end
+  end
+
+  # Check if field is an actual resource attribute (not a relationship or calculated field)
+  defp has_attribute?(resource, field_name) do
+    Ash.Resource.Info.field(resource, field_name) != nil
   end
 
   defp actions?(resource) do
