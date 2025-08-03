@@ -116,13 +116,13 @@ defmodule AshAdmin.Components.Resource.DataTable do
                   :for={field_name <- AshAdmin.Resource.table_columns(@resource)}
                   field={to_string(field_name)}
                   label={to_name(field_name)}
-                  filter={is_filterable?(@resource, field_name)}
-                  sort={is_sortable?(@resource, field_name)}
+                  filter={filterable?(@resource, field_name)}
+                  sort={sortable?(@resource, field_name)}
                 >
                   {render_field_value(record, field_name, assigns)}
                 </:col>
-
-                <!-- Action buttons column -->
+                
+    <!-- Action buttons column -->
                 <:col :let={record} :if={actions?(@resource)} label="Actions">
                   <div class="flex h-max justify-items-center">
                     <div :if={AshAdmin.Resource.show_action(@resource)}>
@@ -472,7 +472,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   end
 
   # Check if a field should be sortable
-  defp is_sortable?(resource, field_name) do
+  defp sortable?(resource, field_name) do
     sortable_columns = AshAdmin.Resource.table_sortable_columns(resource)
 
     case sortable_columns do
@@ -483,7 +483,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   end
 
   # Check if a field should be filterable
-  defp is_filterable?(resource, field_name) do
+  defp filterable?(resource, field_name) do
     filterable_columns = AshAdmin.Resource.table_filterable_columns(resource)
 
     case filterable_columns do

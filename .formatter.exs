@@ -24,6 +24,8 @@ spark_locals_without_parens = [
   show_resources: 1,
   show_sensitive_fields: 1,
   table_columns: 1,
+  table_filterable_columns: 1,
+  table_sortable_columns: 1,
   type: 1,
   update_actions: 1
 ]
