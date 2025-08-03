@@ -4,7 +4,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
   import AshAdmin.Helpers
   alias AshAdmin.Components.Resource.Table
-  alias AshAdmin.Themes.AshAdminTheme
 
   attr :resource, :atom
   attr :domain, :atom
@@ -109,7 +108,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 :if={@ash_query && match?({:ok, _data}, @data)}
                 query={@ash_query}
                 actor={@actor}
-                theme={AshAdminTheme}
                 id={"cinder-table-#{@resource}"}
               >
                 <!-- Generate columns with simple sortable/filterable configuration -->
