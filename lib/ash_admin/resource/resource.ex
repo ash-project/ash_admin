@@ -161,7 +161,13 @@ defmodule AshAdmin.Resource do
     Spark.Dsl.Extension.get_opt(resource, [:admin], :name, nil, true) ||
       resource
       |> Module.split()
-      |> List.last()
+      |> case do
+        [_, _, last, "Version"] ->
+          "#{last}.Version"
+
+        other ->
+          List.last(other)
+      end
   end
 
   def resource_group(resource) do
