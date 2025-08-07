@@ -5,6 +5,23 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.14](https://github.com/ash-project/ash_admin/compare/v0.13.13...v0.13.14) (2025-08-07)
+
+
+
+
+### Bug Fixes:
+
+* better names for version resources by Zach Daniel
+
+* Read phoenix js assests at compile time (#355) by Kenneth Kostrešević
+
+### Improvements:
+
+* add a little razzle dazzle to the authorizing/actor buttons (#352) by Andy LeClair
+
+* change svg icons to words (#351) by Andy LeClair
+
 ## [v0.13.13](https://github.com/ash-project/ash_admin/compare/v0.13.12...v0.13.13) (2025-07-29)
 
 
