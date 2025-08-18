@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.16](https://github.com/ash-project/ash_admin/compare/v0.13.15...v0.13.16) (2025-08-18)
+
+
+
+
+### Bug Fixes:
+
+* handle overflow & tenant form for long domains list by Zach Daniel
+
 ## [v0.13.15](https://github.com/ash-project/ash_admin/compare/v0.13.14...v0.13.15) (2025-08-18)
 
 
