@@ -25,9 +25,9 @@ defmodule AshAdmin.Components.Resource do
 
   def render(assigns) do
     ~H"""
-    <div class="h-screen">
+    <div class="flex flex-col">
       <Nav.nav resource={@resource} domain={@domain} action={@action} table={@table} prefix={@prefix} />
-      <div class="mx-24 relative grid grid-cols-1 justify-items-center"></div>
+      <div class="flex-1 p-6">
       <div :if={@record && match?({:error, error} when not is_nil(error), @record)}>
         <p>Error loading record</p>
       </div>
@@ -142,6 +142,7 @@ defmodule AshAdmin.Components.Resource do
         prefix={@prefix}
         tenant={@tenant}
       />
+      </div>
     </div>
     """
   end

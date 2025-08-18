@@ -30,9 +30,9 @@ defmodule AshAdmin.Components.TopNav do
 
   def render(assigns) do
     ~H"""
-    <nav phx-keydown="close" phx-key="escape" class="bg-gray-800" phx-target={@myself}>
+    <nav phx-keydown="close" phx-key="escape" class="bg-gray-800 relative" phx-target={@myself}>
       <div class="px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
+        <div class="flex items-center justify-between min-h-16 py-2">
           <div class="flex items-center w-full">
             <div class="flex-shrink-0">
               <h3 class="text-white text-lg">
@@ -42,8 +42,8 @@ defmodule AshAdmin.Components.TopNav do
               </h3>
             </div>
             <div class="hidden md:block w-full">
-              <div class="flex justify-between">
-                <div class="ml-10 flex items-center">
+              <div class="flex justify-between items-center flex-wrap gap-2">
+                <div class="ml-10 flex items-center flex-wrap gap-1">
                   <.live_component
                     :for={domain <- @domains}
                     module={Dropdown}
@@ -55,7 +55,7 @@ defmodule AshAdmin.Components.TopNav do
                     group_labels={DropdownHelper.dropdown_group_labels(domain)}
                   />
                 </div>
-                <div class="ml-10 flex items-center">
+                <div class="flex items-center flex-wrap gap-2">
                   <ActorSelect.actor_select
                     :if={@actor_resources != []}
                     actor_resources={@actor_resources}

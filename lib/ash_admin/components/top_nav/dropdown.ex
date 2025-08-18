@@ -50,7 +50,7 @@ defmodule AshAdmin.Components.TopNav.Dropdown do
             phx-click-away="close"
             class={
               classes([
-                "origin-top-right absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 z-10",
+                "origin-top-right absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 z-50",
                 "bg-gray-600 hover:bg-gray-700": single_active_group?(@groups)
               ])
             }

@@ -158,16 +158,30 @@ defmodule AshAdmin.Resource do
   end
 
   def name(resource) do
-    Spark.Dsl.Extension.get_opt(resource, [:admin], :name, nil, true) ||
-      resource
-      |> Module.split()
-      |> case do
-        [_, _, last, "Version"] ->
-          "#{last}.Version"
+    case Spark.Dsl.Extension.get_opt(resource, [:admin], :name, nil, true) do
+      nil ->
+        split = Module.split(resource)
 
-        other ->
-          List.last(other)
-      end
+        if List.last(split) == "Version" and version?(resource) do
+          split
+          |> Enum.reverse()
+          |> Enum.take(2)
+          |> Enum.reverse()
+          |> Enum.join(".")
+        else
+          List.last(split)
+        end
+
+      v ->
+        v
+    end
+  end
+
+  defp version?(resource) do
+    resource.resource_version?()
+  rescue
+    _ ->
+      false
   end
 
   def resource_group(resource) do
