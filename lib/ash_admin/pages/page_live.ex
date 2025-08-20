@@ -272,16 +272,15 @@ defmodule AshAdmin.PageLive do
                 socket.assigns.actor
               end
 
-            primary_read_action =
-              Ash.Resource.Info.primary_action(socket.assigns.resource, :read) ||
-                AshAdmin.Helpers.primary_action(socket.assigns.resource, :read)
+            show_action =
+              AshAdmin.Resource.show_action(socket.assigns.resource)
 
             record =
               socket.assigns.resource
               |> Ash.Query.filter(^primary_key)
               |> Ash.Query.set_tenant(socket.assigns[:tenant])
               |> Ash.Query.for_read(
-                primary_read_action.name,
+                show_action,
                 %{},
                 actor: actor,
                 authorize?: socket.assigns.authorizing
