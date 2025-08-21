@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.17](https://github.com/ash-project/ash_admin/compare/v0.13.16...v0.13.17) (2025-08-21)
+
+
+
+
+### Bug Fixes:
+
+* use `Resource.admin.show_action` (#359) by quartz
+
 ## [v0.13.16](https://github.com/ash-project/ash_admin/compare/v0.13.15...v0.13.16) (2025-08-18)
 
 
