@@ -1862,18 +1862,11 @@ defmodule AshAdmin.Components.Resource.Form do
       |> replace_new_union_stubs()
       |> replace_unused()
 
-    IO.inspect(params)
-
     form =
       AshPhoenix.Form.validate(socket.assigns.form, params,
         only_touched?: true,
-        target: IO.inspect(event["_target"] || [])
+        target: event["_target"] || []
       )
-
-    IO.inspect(AshPhoenix.Form.errors(form, for_path: :all))
-    IO.inspect(AshPhoenix.Form.value(form, :size))
-    IO.inspect(AshPhoenix.Form.value(form, :name))
-    IO.inspect(AshPhoenix.Form.value(form, :balance))
 
     {:noreply, assign(socket, form: form)}
   end
