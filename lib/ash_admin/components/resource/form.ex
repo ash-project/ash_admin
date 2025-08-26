@@ -1403,7 +1403,7 @@ defmodule AshAdmin.Components.Resource.Form do
     <.input
       type={text_input_type(@form.source.resource, @attribute)}
       placeholder={placeholder(@attribute.default)}
-      value={@value}
+      value={value(@value, @form, @attribute, @attribute.default)}
       name={@name || @form.name <> "[#{@attribute.name}]"}
       id={@id || @form.id <> "_#{@attribute.name}"}
       class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
@@ -1419,7 +1419,7 @@ defmodule AshAdmin.Components.Resource.Form do
           <.input
             type={text_input_type(@form.source.resource, @attribute)}
             placeholder={placeholder(@attribute.default)}
-            value={@value}
+            value={value(@value, @form, @attribute, @attribute.default)}
             name={@name || @form.name <> "[#{@attribute.name}]"}
             id={@id || @form.id <> "_#{@attribute.name}"}
             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
@@ -1862,11 +1862,18 @@ defmodule AshAdmin.Components.Resource.Form do
       |> replace_new_union_stubs()
       |> replace_unused()
 
+    IO.inspect(params)
+
     form =
       AshPhoenix.Form.validate(socket.assigns.form, params,
         only_touched?: true,
-        target: event["_target"] || []
+        target: IO.inspect(event["_target"] || [])
       )
+
+    IO.inspect(AshPhoenix.Form.errors(form, for_path: :all))
+    IO.inspect(AshPhoenix.Form.value(form, :size))
+    IO.inspect(AshPhoenix.Form.value(form, :name))
+    IO.inspect(AshPhoenix.Form.value(form, :balance))
 
     {:noreply, assign(socket, form: form)}
   end
