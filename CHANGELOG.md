@@ -5,6 +5,19 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.18](https://github.com/ash-project/ash_admin/compare/v0.13.17...v0.13.18) (2025-08-31)
+
+
+
+
+### Bug Fixes:
+
+* properly retain values for fallback rendered attribute inputs by Zach Daniel
+
+### Improvements:
+
+* inline jsoneditor and easymde for security by Zach Daniel
+
 ## [v0.13.17](https://github.com/ash-project/ash_admin/compare/v0.13.16...v0.13.17) (2025-08-21)
 
 
