@@ -11,9 +11,16 @@ defmodule AshAdmin.Layouts do
     end
 
   @static_path Application.app_dir(:ash_admin, ["priv", "static"])
+  @vendor_path Application.app_dir(:ash_admin, ["priv", "vendor"])
 
   @external_resource js_path = Path.join(@static_path, "assets/app.js")
   @external_resource css_path = Path.join(@static_path, "assets/app.css")
+
+  # Vendor files
+  @external_resource easymde_js_path = Path.join(@vendor_path, "easymde.min.js")
+  @external_resource easymde_css_path = Path.join(@vendor_path, "easymde.min.css")
+  @external_resource jsoneditor_js_path = Path.join(@vendor_path, "jsoneditor.min.js")
+  @external_resource jsoneditor_css_path = Path.join(@vendor_path, "jsoneditor.min.css")
 
   @app_js """
   #{for path <- phoenix_js_paths, do: path |> File.read!() |> String.replace("//# sourceMappingURL=", "// ")}
@@ -21,8 +28,20 @@ defmodule AshAdmin.Layouts do
   """
   @app_css File.read!(css_path)
 
+  # Read vendor files at compile time
+  @easymde_js if File.exists?(easymde_js_path), do: File.read!(easymde_js_path), else: ""
+  @easymde_css if File.exists?(easymde_css_path), do: File.read!(easymde_css_path), else: ""
+  @jsoneditor_js if File.exists?(jsoneditor_js_path), do: File.read!(jsoneditor_js_path), else: ""
+  @jsoneditor_css if File.exists?(jsoneditor_css_path),
+                    do: File.read!(jsoneditor_css_path),
+                    else: ""
+
   def render("app.js", _), do: @app_js
   def render("app.css", _), do: @app_css
+  def render("easymde.js", _), do: @easymde_js
+  def render("easymde.css", _), do: @easymde_css
+  def render("jsoneditor.js", _), do: @jsoneditor_js
+  def render("jsoneditor.css", _), do: @jsoneditor_css
 
   def render("root.html", assigns) do
     ~H"""
@@ -37,23 +56,17 @@ defmodule AshAdmin.Layouts do
         <style nonce={csp_nonce(@conn, :style)}>
           <%= raw(render("app.css", %{})) %>
         </style>
-        <link
-          nonce={csp_nonce(@conn, :style)}
-          href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.5.1/jsoneditor.min.css"
-          rel="stylesheet"
-          type="text/css"
-        />
-        <script
-          nonce={csp_nonce(@conn, :script)}
-          src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.5.1/jsoneditor.min.js"
-        >
+        <style nonce={csp_nonce(@conn, :style)}>
+          <%= raw(render("jsoneditor.css", %{})) %>
+        </style>
+        <style nonce={csp_nonce(@conn, :style)}>
+          <%= raw(render("easymde.css", %{})) %>
+        </style>
+        <script nonce={csp_nonce(@conn, :script)}>
+          <%= raw(render("jsoneditor.js", %{})) %>
         </script>
-        <link
-          nonce={csp_nonce(@conn, :style)}
-          rel="stylesheet"
-          href="https://unpkg.com/easymde/dist/easymde.min.css"
-        />
-        <script nonce={csp_nonce(@conn, :script)} src="https://unpkg.com/easymde/dist/easymde.min.js">
+        <script nonce={csp_nonce(@conn, :script)}>
+          <%= raw(render("easymde.js", %{})) %>
         </script>
       </head>
       <body>
