@@ -295,6 +295,7 @@ defmodule AshAdmin.PageLive do
                   case Ash.load(record, rel,
                          actor: actor,
                          domain: socket.assigns.domain,
+                         tenant: socket.assigns[:tenant],
                          authorize?: socket.assigns.authorizing
                        ) do
                     {:ok, record} ->
