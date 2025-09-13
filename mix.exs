@@ -14,6 +14,7 @@ defmodule AshAdmin.MixProject do
       description: @description,
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
+      listeners: [Phoenix.CodeReloader],
       docs: &docs/0,
       dialyzer: [
         plt_add_apps: [:ex_unit, :mix]
