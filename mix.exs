@@ -131,7 +131,7 @@ defmodule AshAdmin.MixProject do
       {:phoenix_live_view, "~> 1.1-rc"},
       {:phoenix_html, "~> 4.1"},
       {:jason, "~> 1.0"},
-      {:gettext, "~> 0.26"},
+      {:gettext, "~> 0.26 or ~> 1.0"},
       # Dev dependencies
       {:igniter, "~> 0.5", only: [:dev, :test]},
       {:simple_sat, "~> 0.1", only: [:dev, :test]},
