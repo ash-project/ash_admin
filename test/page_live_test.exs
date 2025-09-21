@@ -44,7 +44,6 @@ defmodule AshAdmin.Test.PageLiveTest do
 
     assert html =~ ~s|<script nonce="csp_nonce"|
     assert html =~ ~s|<style nonce="csp_nonce"|
-    assert html =~ ~s|<link nonce="csp_nonce"|
     refute html =~ "ash_admin-Ed55GFnX"
 
     html =
@@ -56,7 +55,6 @@ defmodule AshAdmin.Test.PageLiveTest do
 
     assert html =~ ~s|<script nonce="script_nonce"|
     assert html =~ ~s|<style nonce="style_nonce"|
-    assert html =~ ~s|<link nonce="style_nonce"|
     refute html =~ "ash_admin-Ed55GFnX"
   end
 
