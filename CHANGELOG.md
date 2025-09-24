@@ -5,6 +5,21 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.19](https://github.com/ash-project/ash_admin/compare/v0.13.18...v0.13.19) (2025-09-24)
+
+
+
+
+### Bug Fixes:
+
+* set brand on loading to_one relationships by Zach Daniel
+
+* use tenant when loading to_one relationships by Zach Daniel
+
+### Improvements:
+
+* support `actor_load` option by Zach Daniel
+
 ## [v0.13.18](https://github.com/ash-project/ash_admin/compare/v0.13.17...v0.13.18) (2025-08-31)
 
 
