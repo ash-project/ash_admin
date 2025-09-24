@@ -22,6 +22,7 @@ Configure the admin dashboard for a given resource.
 | Name | Type | Default | Docs |
 |------|------|---------|------|
 | [`name`](#admin-name){: #admin-name } | `String.t` |  | The proper name to use when this resource appears in the admin interface. |
+| [`actor_load`](#admin-actor_load){: #admin-actor_load } | `any` |  | A load statement to apply on the actor when fetching it |
 | [`actor?`](#admin-actor?){: #admin-actor? } | `boolean` |  | Whether or not this resource can be used as the actor for requests. |
 | [`show_action`](#admin-show_action){: #admin-show_action } | `atom` |  | The action to use when linking to the resource/viewing a single record. Defaults to the primary read action. |
 | [`read_actions`](#admin-read_actions){: #admin-read_actions } | `list(atom)` |  | A list of read actions that can be used to show resource details. By default, all actions are included. |

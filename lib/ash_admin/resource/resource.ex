@@ -26,6 +26,10 @@ defmodule AshAdmin.Resource do
         type: :string,
         doc: "The proper name to use when this resource appears in the admin interface."
       ],
+      actor_load: [
+        type: :any,
+        doc: "A load statement to apply on the actor when fetching it"
+      ],
       actor?: [
         type: :boolean,
         doc: "Whether or not this resource can be used as the actor for requests."
@@ -202,6 +206,10 @@ defmodule AshAdmin.Resource do
 
   def actor?(resource) do
     Spark.Dsl.Extension.get_opt(resource, [:admin], :actor?, false, true)
+  end
+
+  def actor_load(resource) do
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :actor_load, [], true)
   end
 
   def read_actions(resource) do

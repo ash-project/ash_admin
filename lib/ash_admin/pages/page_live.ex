@@ -399,10 +399,12 @@ defmodule AshAdmin.PageLive do
       {:ok, pkey_filter} ->
         domain = Module.concat([domain])
         action = AshAdmin.Helpers.primary_action(resource, :read)
+        actor_load = AshAdmin.Resource.actor_load(resource)
 
         actor =
           resource
           |> Ash.Query.filter(^pkey_filter)
+          |> Ash.Query.load(actor_load)
           |> Ash.Query.set_tenant(socket.assigns[:tenant])
           |> Ash.read_one!(action: action, authorize?: false, domain: domain)
 

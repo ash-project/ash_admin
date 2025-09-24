@@ -131,9 +131,12 @@ defmodule AshAdmin.ActorPlug.Plug do
             Ash.Resource.Info.action(resource, String.to_existing_atom(action), :read)
           end
 
+        actor_load = AshAdmin.Resource.actor_load(resource)
+
         resource
         |> Ash.Query.filter(^filter)
         |> Ash.Query.set_tenant(tenant)
+        |> Ash.Query.load(actor_load)
         |> Ash.read_one!(action: action, authorize?: false, domain: domain)
 
       _ ->
