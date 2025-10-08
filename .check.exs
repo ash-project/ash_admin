@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 [
   ## all available options with default values (see `mix check` docs for description)
   # parallel: true,
@@ -9,7 +13,8 @@
     # {:compiler, false},
     {:npm_test, false},
     {:gettext, false},
-    {:check_formatter, command: "mix spark.formatter --check"}
+    {:check_formatter, command: "mix spark.formatter --check"},
+    {:reuse, command: ["pipx", "run", "reuse", "lint", "-q"]}
 
     ## ...or adjusted (e.g. use one-line formatter for more compact credo output)
     # {:credo, "mix credo --format oneline"},

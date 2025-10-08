@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Resource.Field do
   @moduledoc """
   The representation of a configured field in the admin UI.

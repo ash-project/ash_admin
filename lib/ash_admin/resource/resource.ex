@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Resource do
   @field %Spark.Dsl.Entity{
     describe: "Declare non-default behavior for a specific attribute.",

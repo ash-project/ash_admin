@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Test.Components.TopNav.Helpers.DropdownHelperTest do
   use ExUnit.Case, async: true
 

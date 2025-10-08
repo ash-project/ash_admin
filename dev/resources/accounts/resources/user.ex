@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule Demo.Accounts.User do
   use Ash.Resource,
     domain: Demo.Accounts.Domain,

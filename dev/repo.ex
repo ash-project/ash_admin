@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule Demo.Repo do
   use AshPostgres.Repo, otp_app: :ash_admin
 

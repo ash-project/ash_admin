@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule Demo.Tickets.Ticket.AdminFieldFormats do
   @moduledoc false
   def format_field(status, :description) do

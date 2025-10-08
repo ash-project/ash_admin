@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Components.Resource.RelationshipField do
   @moduledoc """
   This module defines a LiveComponent for rendering a relationship field in an AshAdmin resource form.

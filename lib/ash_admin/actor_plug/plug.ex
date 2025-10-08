@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.ActorPlug.Plug do
   @moduledoc false
   @behaviour AshAdmin.ActorPlug

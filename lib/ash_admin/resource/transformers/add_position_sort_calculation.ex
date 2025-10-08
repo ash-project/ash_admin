@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Resource.Transformers.AddPositionSortCalculation do
   @moduledoc """
   Adds a `ash_admin_position_sort` calculation to resources that have defined admin.label_field.

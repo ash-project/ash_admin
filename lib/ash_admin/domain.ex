@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Domain do
   @admin %Spark.Dsl.Section{
     describe: "Configure the admin dashboard for a given domain.",

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 import Config
 
 config :ash, :validate_domain_resource_inclusion?, false

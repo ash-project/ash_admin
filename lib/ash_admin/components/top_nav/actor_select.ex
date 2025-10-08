@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Components.TopNav.ActorSelect do
   @moduledoc false
   use Phoenix.Component

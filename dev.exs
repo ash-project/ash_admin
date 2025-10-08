@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 # Copied/edited from phoenix_live_dashboard
 # Configures the endpoint
 Application.put_env(:ash_admin, DemoWeb.Endpoint,

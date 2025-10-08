@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Resource.Verifiers.VerifyFileArgumentsExist do
   @moduledoc """
   Ensures that an argument with file options exists in an action of the
