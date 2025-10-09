@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule Demo.Tickets.Customer do
   use Ash.Resource,
     domain: Demo.Tickets.Domain,

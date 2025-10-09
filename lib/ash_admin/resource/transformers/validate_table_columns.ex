@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Resource.Transformers.ValidateTableColumns do
   @moduledoc "Validates that table columns are all either attributes, or `:one` cardinality relationships."
   use Spark.Dsl.Transformer

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Test.Components.Resource.Helpers.FormatHelperTest do
   use ExUnit.Case, async: true
 

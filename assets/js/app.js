@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Zach Daniel
+//
+// SPDX-License-Identifier: MIT
+
 import topbar from "../vendor/topbar";
 
 let socketPath =

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Test.Endpoint do
   use Phoenix.Endpoint, otp_app: :ash_admin
 

@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2020 Zach Daniel
+
+SPDX-License-Identifier: MIT
+-->
+
 # Contributing to AshAdmin
 
 AshAdmin includes a development app, located in the `dev` folder, so you don't need to have an external Phoenix app to plug AshAdmin into.

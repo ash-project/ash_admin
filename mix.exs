@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.MixProject do
   use Mix.Project
 
@@ -43,11 +47,19 @@ defmodule AshAdmin.MixProject do
 
   def package do
     [
-      name: :ash_admin,
+      maintainers: [
+        "Zach Daniel <zach@zachdaniel.dev>"
+      ],
       licenses: ["MIT"],
       links: %{
-        GitHub: "https://github.com/ash-project/ash_admin"
-      }
+        "GitHub" => "https://github.com/ash-project/ash_admin",
+        "Changelog" => "https://github.com/ash-project/ash_admin/blob/main/CHANGELOG.md",
+        "Discord" => "https://discord.gg/HTHRaaVPUc",
+        "Website" => "https://ash-hq.org",
+        "Forum" => "https://elixirforum.com/c/elixir-framework-forums/ash-framework-forum",
+        "REUSE Compliance" => "https://api.reuse.software/info/github.com/ash-project/ash_admin"
+      },
+      source_url: "https://github.com/ash-project/ash_admin"
     ]
   end
 

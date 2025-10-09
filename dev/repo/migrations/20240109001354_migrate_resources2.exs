@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule Demo.Repo.Migrations.MigrateResources2 do
   @moduledoc """
   Updates resources based on their most recent snapshots.

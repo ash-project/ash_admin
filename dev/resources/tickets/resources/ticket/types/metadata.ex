@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule Demo.Tickets.Ticket.Types.Metadata do
   use Ash.Type.NewType, subtype_of: :union, constraints: [
     types: [

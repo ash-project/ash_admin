@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Zach Daniel
+//
+// SPDX-License-Identifier: MIT
+
 // See the Tailwind configuration guide for advanced usage
 // https://tailwindcss.com/docs/configuration
 

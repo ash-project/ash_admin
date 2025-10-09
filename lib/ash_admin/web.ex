@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Web do
   @moduledoc false
   def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
