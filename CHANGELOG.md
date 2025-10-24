@@ -11,6 +11,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.20](https://github.com/ash-project/ash_admin/compare/v0.13.19...v0.13.20) (2025-10-24)
+
+
+
+
+### Bug Fixes:
+
+* Add __spark_metadata__ field to Field struct (#366) by Jechol Lee
+
 ## [v0.13.19](https://github.com/ash-project/ash_admin/compare/v0.13.18...v0.13.19) (2025-09-24)
 
 
