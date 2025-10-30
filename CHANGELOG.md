@@ -11,6 +11,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.23](https://github.com/ash-project/ash_admin/compare/v0.13.22...v0.13.23) (2025-10-30)
+
+
+
+
+### Bug Fixes:
+
+* don't include nil tables when considering if polymorphic tables is empty by Zach Daniel
+
 ## [v0.13.22](https://github.com/ash-project/ash_admin/compare/v0.13.21...v0.13.22) (2025-10-30)
 
 
