@@ -11,6 +11,19 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.21](https://github.com/ash-project/ash_admin/compare/v0.13.20...v0.13.21) (2025-10-30)
+
+
+
+
+### Bug Fixes:
+
+* include resource's table in polymorphic tables dropdown by Zach Daniel
+
+### Improvements:
+
+* allow gettext ~> 1.0 (#368) by Aleksandr Lossenko
+
 ## [v0.13.20](https://github.com/ash-project/ash_admin/compare/v0.13.19...v0.13.20) (2025-10-24)
 
 
