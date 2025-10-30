@@ -11,6 +11,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.22](https://github.com/ash-project/ash_admin/compare/v0.13.21...v0.13.22) (2025-10-30)
+
+
+
+
+### Bug Fixes:
+
+* don't add the resource's primary table if there are no polymorphic tables by Zach Daniel
+
 ## [v0.13.21](https://github.com/ash-project/ash_admin/compare/v0.13.20...v0.13.21) (2025-10-30)
 
 
