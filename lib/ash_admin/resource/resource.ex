@@ -275,6 +275,7 @@ defmodule AshAdmin.Resource do
     |> Enum.flat_map(&Ash.Resource.Info.relationships/1)
     |> Enum.filter(&(&1.destination == resource))
     |> Enum.map(& &1.context[:data_layer][:table])
+    |> Enum.reject(&is_nil/1)
     |> Enum.uniq()
     |> case do
       [] ->
