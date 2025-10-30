@@ -275,8 +275,17 @@ defmodule AshAdmin.Resource do
     |> Enum.flat_map(&Ash.Resource.Info.relationships/1)
     |> Enum.filter(&(&1.destination == resource))
     |> Enum.map(& &1.context[:data_layer][:table])
-    |> Enum.reject(&is_nil/1)
     |> Enum.uniq()
+    |> then(
+      &Enum.concat(
+        [
+          Spark.Dsl.Extension.get_opt(resource, [:postgres], :table),
+          Spark.Dsl.Extension.get_opt(resource, [:sqlite], :table)
+        ],
+        &1
+      )
+    )
+    |> Enum.reject(&is_nil/1)
   end
 
   defp actions_with_primary_first(resource, type) do
