@@ -108,7 +108,7 @@ defmodule AshAdmin.Resource do
       show_calculations: [
         type: {:list, :atom},
         doc:
-          "A list of calculation that can be calculate when this resource is shown. By default, all calculations are included."
+          "A list of calculations that can be loaded when this resource is shown. By default, no calculations are included."
       ],
       label_field: [
         type: :atom,
