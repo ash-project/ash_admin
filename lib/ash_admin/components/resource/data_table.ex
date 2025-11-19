@@ -8,8 +8,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   use Phoenix.LiveComponent
 
   import AshAdmin.Helpers
-  import AshPhoenix.LiveView
-  alias AshAdmin.Components.Resource.Table
+  alias AshAdmin.Components.Resource.CinderTable
 
   attr :resource, :atom
   attr :domain, :atom
@@ -104,17 +103,15 @@ defmodule AshAdmin.Components.Resource.DataTable do
               </ul>
             </div>
             <div class="px-2">
-              {render_pagination_links(assigns, :top)}
-
-              <div :if={@thousand_records_warning && !@action.get? && match?({:ok, _}, @data)}>
+              <div :if={@thousand_records_warning && !@action.get? && !@action.pagination}>
                 Only showing up to 1000 rows. To show more, enable
                 <a href="https://hexdocs.pm/ash/pagination.html">pagination</a>
                 for the action in question.
               </div>
-              <Table.table
-                :if={match?({:ok, _data}, @data)}
+              <CinderTable.table
+                :if={can_render_table?(assigns)}
                 table={@table}
-                data={data(@data)}
+                query={build_cinder_query(assigns)}
                 resource={@resource}
                 domain={@domain}
                 attributes={AshAdmin.Resource.table_columns(@resource)}
@@ -122,8 +119,10 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 show_sensitive_fields={AshAdmin.Resource.show_sensitive_fields(@resource)}
                 prefix={@prefix}
                 actor={@actor}
+                tenant={@tenant}
+                page_size={get_page_size(assigns)}
+                theme="modern"
               />
-              {render_pagination_links(assigns, :bottom)}
             </div>
           </div>
         </div>
@@ -137,8 +136,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
      socket
      |> assign_new(:initialized, fn -> false end)
      |> assign_new(:default, fn -> nil end)
-     |> assign_new(:page_params, fn -> nil end)
-     |> assign_new(:page_num, fn -> nil end)
      |> assign_new(:thousand_records_warning, fn -> false end)}
   end
 
@@ -170,51 +167,16 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
       socket = assign(socket, :query, query)
 
+      # With Cinder, we don't manually fetch data - it handles querying and pagination
+      # We just validate the form if there are arguments
       socket =
-        if socket.assigns.action.pagination do
-          default_limit =
-            socket.assigns.action.pagination.default_limit ||
-              socket.assigns.action.pagination.max_page_size || 25
-
-          count? = !!socket.assigns.action.pagination.countable
-
-          page_params =
-            AshPhoenix.LiveView.page_from_params(params["page"], default_limit, count?)
-
-          socket
-          |> assign(
-            :page_params,
-            page_params
-          )
-          |> assign(
-            :page_num,
-            page_num_from_page_params(page_params)
-          )
-        else
-          socket
-          |> assign(:page_params, nil)
-          |> assign(:page_num, 1)
-        end
-
-      socket =
-        if run_now? do
+        if run_now? && socket.assigns.action.arguments != [] do
           if socket.assigns[:tables] not in [[], nil] && !socket.assigns[:table] do
             assign(socket, :data, {:ok, []})
           else
-            action_opts =
-              if page_params = socket.assigns[:page_params] do
-                [page: page_params]
-              else
-                []
-              end
-
-            case AshPhoenix.Form.submit(socket.assigns.query,
-                   action_opts: action_opts,
-                   params: nil
-                 ) do
-              {:ok, data} -> assign(socket, :data, {:ok, data})
-              {:error, query} -> assign(socket, data: {:error, all_errors(query)}, query: query)
-            end
+            # Validate that the arguments are correct, but don't execute the query
+            # Cinder will handle execution
+            assign(socket, :data, {:ok, :cinder_will_query})
           end
         else
           assign(socket, :data, :loading)
@@ -250,28 +212,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
     end)
   end
 
-  def handle_event("next_page", _, socket) do
-    params = %{"page" => AshPhoenix.LiveView.page_link_params(socket.assigns.data, "next")}
-
-    {:noreply,
-     push_patch(socket, to: self_path(socket.assigns.url_path, socket.assigns.params, params))}
-  end
-
-  def handle_event("prev_page", _, socket) do
-    params = %{"page" => AshPhoenix.LiveView.page_link_params(socket.assigns.data, "prev")}
-
-    {:noreply,
-     push_patch(socket, to: self_path(socket.assigns.url_path, socket.assigns.params, params))}
-  end
-
-  def handle_event("specific_page", %{"page" => page}, socket) do
-    params = %{
-      "page" => AshPhoenix.LiveView.page_link_params(socket.assigns.data, String.to_integer(page))
-    }
-
-    {:noreply,
-     push_patch(socket, to: self_path(socket.assigns.url_path, socket.assigns.params, params))}
-  end
+  # Pagination is handled by Cinder, no need for these event handlers
 
   def handle_event("validate", %{"query" => query}, socket) do
     query = AshPhoenix.Form.validate(socket.assigns.query, query)
@@ -422,255 +363,62 @@ defmodule AshAdmin.Components.Resource.DataTable do
     AshPhoenix.Form.validate(form, new_params)
   end
 
-  defp render_pagination_links(assigns, placement) do
-    assigns = assign(assigns, :placement, placement)
+  # Helper functions for Cinder integration
 
-    ~H"""
-    <div
-      :if={(offset?(@data) || keyset?(@data)) && show_pagination_links?(@data, @placement)}
-      class="w-5/6 mx-auto"
-    >
-      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-        <div class="flex-1 flex justify-between sm:hidden">
-          <button
-            :if={!(keyset?(@data) && is_nil(@params["page"])) && prev_page?(@data)}
-            phx-target={@myself}
-            phx-click="prev_page"
-            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
-          >
-            Previous
-          </button>
-          {render_pagination_information(assigns, true)}
-          <button
-            :if={next_page?(@data)}
-            phx-click="next_page"
-            phx-target={@myself}
-            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
-          >
-            Next
-          </button>
-        </div>
-        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-          <div>
-            {render_pagination_information(assigns)}
-          </div>
-          <div>
-            <nav
-              class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-              aria-label="Pagination"
-            >
-              <button
-                :if={!(keyset?(@data) && is_nil(@params["page"])) && prev_page?(@data)}
-                phx-click="prev_page"
-                phx-target={@myself}
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                <span class="sr-only">Previous</span>
-
-                <svg
-                  class="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </button>
-              <span :if={offset?(@data)}>
-                {render_page_links(assigns, leading_page_nums(@data))}
-                {render_middle_page_num(assigns, @page_num, trailing_page_nums(@data))}
-                {render_page_links(assigns, trailing_page_nums(@data))}
-              </span>
-              <button
-                :if={next_page?(@data)}
-                phx-click="next_page"
-                phx-target={@myself}
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                <span class="sr-only">Next</span>
-
-                <svg
-                  class="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </button>
-            </nav>
-          </div>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
-  defp render_page_links(assigns, page_nums) do
-    assigns = assign(assigns, page_nums: page_nums)
-
-    ~H"""
-    <button
-      :for={i <- @page_nums}
-      phx-click="specific_page"
-      phx-target={@myself}
-      phx-value-page={i}
-      class={
-        classes([
-          "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50",
-          "bg-gray-300": @page_num == i
-        ])
-      }
-    >
-      {i}
-    </button>
-    """
-  end
-
-  defp render_pagination_information(assigns, small? \\ false) do
-    assigns = assign(assigns, :small, small?)
-
-    ~H"""
-    <p class={classes(["text-sm text-gray-700", "sm:hidden": @small])}>
-      <span :if={offset?(@data)}>
-        Showing <span class="font-medium">{first(@data)}</span>
-        to <span class="font-medium">{last(@data)}</span>
-        <%= if count(@data) do %>
-          of
-        <% end %>
-      </span>
-      <span :if={count(@data)}>
-        <span class="font-medium">{count(@data)}</span> results
-      </span>
-    </p>
-    """
-  end
-
-  defp page_num_from_page_params(params) do
-    cond do
-      !params[:offset] || params[:after] || params[:before] ->
-        1
-
-      params[:offset] && params[:limit] ->
-        trunc(Float.ceil(params[:offset] / params[:limit])) + 1
-
-      true ->
-        nil
-    end
-  end
-
-  defp show_pagination_links?({:ok, _page}, :bottom), do: true
-  defp show_pagination_links?({:ok, page}, :top), do: page.limit >= 20
-  defp show_pagination_links?(_, _), do: false
-
-  defp first({:ok, %Ash.Page.Offset{offset: offset}}) do
-    (offset || 0) + 1
-  end
-
-  defp first(_), do: nil
-
-  defp last({:ok, %Ash.Page.Offset{offset: offset, results: results}}) do
-    Enum.count(results) + offset
-  end
-
-  defp last(_), do: nil
-
-  defp render_middle_page_num(assigns, num, trailing_page_nums) do
-    ellipsis? = num in trailing_page_nums || num <= 3
-
-    assigns =
-      assign(assigns, num: num, trailing_page_nums: trailing_page_nums, ellipsis: ellipsis?)
-
-    ~H"""
-    <span
-      :if={show_ellipses?(@data)}
-      class={
-        classes([
-          "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700",
-          "bg-gray-300": !@ellipsis
-        ])
-      }
-    >
-      <span :if={@ellipsis}>
-        ...
-      </span>
-      <span :if={!@ellipsis}>
-        {@num}
-      </span>
-    </span>
-    """
-  end
-
-  defp show_ellipses?(%Ash.Page.Offset{count: count, limit: limit}) when not is_nil(count) do
-    page_nums =
-      count
-      |> Kernel./(limit)
-      |> Float.ceil()
-      |> trunc()
-
-    page_nums > 6
-  end
-
-  defp show_ellipses?({:ok, data}), do: show_ellipses?(data)
-  defp show_ellipses?(_), do: false
-
-  def leading_page_nums({:ok, data}), do: leading_page_nums(data)
-  def leading_page_nums(%Ash.Page.Offset{count: nil}), do: []
-
-  def leading_page_nums(%Ash.Page.Offset{limit: limit, count: count}) do
-    page_nums =
-      count
-      |> Kernel./(limit)
-      |> Float.ceil()
-      |> trunc()
-
-    1..min(3, page_nums)
-  end
-
-  def leading_page_nums(_), do: []
-
-  def trailing_page_nums({:ok, data}), do: trailing_page_nums(data)
-  def trailing_page_nums(%Ash.Page.Offset{count: nil}), do: []
-
-  def trailing_page_nums(%Ash.Page.Offset{limit: limit, count: count}) do
-    page_nums =
-      count
-      |> Kernel./(limit)
-      |> Float.ceil()
-      |> trunc()
-
-    if page_nums > 3 do
-      max(page_nums - 2, 4)..page_nums
+  defp can_render_table?(assigns) do
+    # Don't render if we have tables but none selected
+    if assigns[:tables] not in [[], nil] && !assigns[:table] do
+      false
     else
-      []
+      # Render if we have no arguments, or if arguments have been submitted
+      assigns.action.arguments == [] || assigns.params["args"]
     end
   end
 
-  defp data({:ok, data}), do: data(data)
-  defp data({:error, _}), do: []
-  defp data(%Ash.Page.Offset{results: results}), do: results
-  defp data(%Ash.Page.Keyset{results: results}), do: results
-  defp data(data), do: data
+  defp build_cinder_query(assigns) do
+    # Start with the base resource query
+    query = Ash.Query.for_read(assigns.resource, assigns.action.name)
 
-  defp offset?({:ok, data}), do: offset?(data)
-  defp offset?(%Ash.Page.Offset{}), do: true
-  defp offset?(_), do: false
+    # Apply any form arguments if they exist
+    query =
+      if assigns.params["args"] && assigns.query do
+        # Extract validated arguments from the form
+        case AshPhoenix.Form.submit(assigns.query, params: nil) do
+          {:ok, _} ->
+            # Form is valid, apply its params to the query
+            args = assigns.query.params || %{}
+            apply_query_arguments(query, args)
 
-  defp keyset?({:ok, data}), do: keyset?(data)
-  defp keyset?(%Ash.Page.Keyset{}), do: true
-  defp keyset?(_), do: false
+          {:error, _} ->
+            # Form has errors, use query as-is
+            query
+        end
+      else
+        query
+      end
 
-  defp count({:ok, %{count: count}}), do: count
-  defp count(%{count: count}), do: count
-  defp count(_), do: nil
+    # Ensure table columns are loaded
+    query
+    |> Ash.Query.select([])
+    |> Ash.Query.load(AshAdmin.Resource.table_columns(assigns.resource))
+  end
+
+  defp apply_query_arguments(query, args) when args == %{}, do: query
+
+  defp apply_query_arguments(query, args) do
+    # Apply arguments to the query
+    # This assumes the action accepts these as input
+    Enum.reduce(args, query, fn {key, value}, acc ->
+      Ash.Query.set_argument(acc, String.to_existing_atom(key), value)
+    end)
+  end
+
+  defp get_page_size(assigns) do
+    if assigns.action.pagination do
+      assigns.action.pagination.default_limit ||
+        assigns.action.pagination.max_page_size || 25
+    else
+      25
+    end
+  end
 end
