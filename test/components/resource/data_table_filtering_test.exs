@@ -418,4 +418,73 @@ defmodule AshAdmin.Test.Components.Resource.DataTableFilteringTest do
       refute html =~ "Third post about Testing"
     end
   end
+
+  describe "clear filters" do
+    test "clearing filters restores all results", %{conn: conn} do
+      {view, _html} =
+        live_and_wait(conn, "/api/admin?domain=Domain&resource=Post&action_type=read&action=read")
+
+      # Apply a filter first
+      view
+      |> element("form")
+      |> render_change(%{"filters" => %{"body" => "Phoenix"}})
+
+      # Wait for Cinder to re-query
+      html = render_async(view)
+
+      # Should show only filtered result
+      assert html =~ "Second post about Phoenix"
+      refute html =~ "First post about Elixir"
+      refute html =~ "Third post about Testing"
+
+      # Clear the filter by setting it to empty string
+      view
+      |> element("form")
+      |> render_change(%{"filters" => %{"body" => ""}})
+
+      # Wait for Cinder to re-query
+      html = render_async(view)
+
+      # Should show all posts again
+      assert html =~ "First post about Elixir"
+      assert html =~ "Second post about Phoenix"
+      assert html =~ "Third post about Testing"
+    end
+
+    test "clicking clear all button clears all filters", %{conn: conn} do
+      {view, _html} =
+        live_and_wait(conn, "/api/admin?domain=Domain&resource=Post&action_type=read&action=read")
+
+      # Apply multiple filters
+      view
+      |> element("form")
+      |> render_change(%{
+        "filters" => %{
+          "body" => "Phoenix",
+          "expires_at_from" => "2025-01-01"
+        }
+      })
+
+      # Wait for Cinder to re-query
+      html = render_async(view)
+
+      # Should show only filtered result
+      assert html =~ "Second post about Phoenix"
+      refute html =~ "First post about Elixir"
+      refute html =~ "Third post about Testing"
+
+      # Click the clear all button
+      view
+      |> element("button[phx-click='clear_all_filters']")
+      |> render_click()
+
+      # Wait for Cinder to re-query
+      html = render_async(view)
+
+      # Should show all posts again
+      assert html =~ "First post about Elixir"
+      assert html =~ "Second post about Phoenix"
+      assert html =~ "Third post about Testing"
+    end
+  end
 end
