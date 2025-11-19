@@ -455,7 +455,7 @@ defmodule AshAdmin.PageLive do
   def handle_event("clear_all_filters", _params, socket), do: {:noreply, socket}
   def handle_event("toggle_sort", _params, socket), do: {:noreply, socket}
   def handle_event("goto_page", _params, socket), do: {:noreply, socket}
-  def handle_event("filter_change", params, socket), do: {:noreply, socket}
+  def handle_event("filter_change", _params, socket), do: {:noreply, socket}
 
   @impl true
   def handle_info({:filter_builder_value, _filter, filter_query}, socket) do

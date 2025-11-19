@@ -19,9 +19,10 @@ defmodule AshAdmin.Test.Comment do
 
   actions do
     default_accept(:*)
-    defaults([:create, :read, :update, :destroy])
+    defaults([:read, :update, :destroy])
 
-    create :create_with_photo do
+    create :create do
+      primary?(true)
       argument(:photo, :file)
     end
   end

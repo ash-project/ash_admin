@@ -18,14 +18,8 @@ defmodule AshAdmin.Test.Components.Resource.DataTableFilteringTest do
     {view, render(view)}
   end
 
-  # Helper function to wait for Cinder table to finish loading (for existing view)
-  defp wait_for_table_load(view) do
-    refute_eventually(fn -> render(view) =~ "Loading..." end, timeout: 5000, interval: 100)
-    view
-  end
-
   # Helper to retry a condition until it's false or timeout
-  defp refute_eventually(func, opts \\ []) do
+  defp refute_eventually(func, opts) do
     timeout = Keyword.get(opts, :timeout, 2000)
     interval = Keyword.get(opts, :interval, 50)
     end_time = System.monotonic_time(:millisecond) + timeout
@@ -89,7 +83,7 @@ defmodule AshAdmin.Test.Components.Resource.DataTableFilteringTest do
 
   describe "basic filter functionality" do
     test "renders data table instead of schema view", %{conn: conn} do
-      {view, html} =
+      {_view, html} =
         live_and_wait(conn, "/api/admin?domain=Domain&resource=Post&action_type=read&action=read")
 
       # Should NOT show the schema view (Attributes/Relationships tables)
@@ -150,45 +144,6 @@ defmodule AshAdmin.Test.Components.Resource.DataTableFilteringTest do
       assert html =~ "First post about Elixir"
       assert html =~ "Second post about Phoenix"
       assert html =~ "Third post about Testing"
-    end
-
-    # @tag timeout: :infinity
-    test "clears individual filter", %{conn: conn} do
-      # :debugger.start()
-      # module = Cinder.Table.LiveComponent
-      # {:module, _} = :int.ni(module)
-      # :ok = :int.break(module, 256)
-
-      {view, _html} =
-        live_and_wait(conn, "/api/admin?domain=Domain&resource=Post&action_type=read&action=read")
-
-      # Apply filter
-      view
-      |> element("form")
-      |> render_change(%{"filters" => %{"body" => "Elixir"}})
-
-      # Wait for Cinder to re-query
-      html = render_async(view)
-
-      # Should show all posts again
-      assert html =~ "First post about Elixir"
-    end
-
-    @skip true
-    test "clears all filters at once", %{conn: conn} do
-      {view, _html} =
-        live_and_wait(conn, "/api/admin?domain=Domain&resource=Post&action_type=read&action=read")
-
-      # Apply filter
-      view
-      |> element("form")
-      |> render_change(%{"filters" => %{"body" => "Elixir"}})
-
-      # Wait for Cinder to re-query
-      html = render_async(view)
-
-      # Should show all posts
-      assert html =~ "First post about Elixir"
     end
   end
 

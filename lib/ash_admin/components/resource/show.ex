@@ -9,7 +9,7 @@ defmodule AshAdmin.Components.Resource.Show do
 
   require Logger
 
-  alias AshAdmin.Components.Resource.{Helpers.FormatHelper, SensitiveAttribute, CinderTable}
+  alias AshAdmin.Components.Resource.{CinderTable, Helpers.FormatHelper, SensitiveAttribute}
   import AshAdmin.Helpers
   import AshAdmin.CoreComponents
 
