@@ -545,7 +545,7 @@ defmodule AshAdmin.Components.Resource.Show do
         <.icon name="hero-x-mark" class="h-4 w-4 text-gray-600" />
         """
 
-      nil ->
+      _ ->
         ~H"""
         <.icon name="hero-minus" class="h-4 w-4 text-gray-600" />
         """
