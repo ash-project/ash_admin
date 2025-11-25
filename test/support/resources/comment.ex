@@ -15,14 +15,15 @@ defmodule AshAdmin.Test.Comment do
       allow_nil?(false)
       public?(true)
     end
+  end
 
-    actions do
-      default_accept(:*)
+  actions do
+    default_accept(:*)
+    defaults([:read, :update, :destroy])
 
-      create :create do
-        primary?(true)
-        argument(:photo, :file)
-      end
+    create :create do
+      primary?(true)
+      argument(:photo, :file)
     end
   end
 
