@@ -30,8 +30,7 @@ defmodule AshAdmin.Resource.Transformers.AddPositionSortCalculation do
           arguments: [
             %{name: :search_term, type: :string, constraints: [], default: ""}
           ],
-          sortable?: true,
-          load: [field: label_field]
+          sortable?: true
         ]
 
         case Transformer.build_entity(
