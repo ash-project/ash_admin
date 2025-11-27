@@ -37,7 +37,7 @@ Configure the admin dashboard for a given resource.
 | [`relationship_display_fields`](#admin-relationship_display_fields){: #admin-relationship_display_fields } | `list(atom)` |  | The list of attributes to render when this resource is shown as a relationship on another resource's datatable. |
 | [`resource_group`](#admin-resource_group){: #admin-resource_group } | `atom` |  | The group in the top resource dropdown that the resource appears in. |
 | [`show_sensitive_fields`](#admin-show_sensitive_fields){: #admin-show_sensitive_fields } | `list(atom)` |  | The list of fields that should not be redacted in the admin UI even if they are marked as sensitive. |
-| [`show_calculations`](#admin-show_calculations){: #admin-show_calculations } | `list(atom)` |  | A list of calculation that can be calculate when this resource is shown. By default, all calculations are included. |
+| [`show_calculations`](#admin-show_calculations){: #admin-show_calculations } | `list(atom)` |  | A list of calculations that can be loaded when this resource is shown. By default, no calculations are included. |
 | [`label_field`](#admin-label_field){: #admin-label_field } | `atom` |  | The field to use as the label when the resource appears in a relationship select or typeahead field on another resource's form. |
 | [`relationship_select_max_items`](#admin-relationship_select_max_items){: #admin-relationship_select_max_items } | `integer` | `50` | The maximum number of items to show in a select field when this resource is shown as a relationship on another resource's form. If the number of related resources is higher, a typeahead selector will be used. |
 
