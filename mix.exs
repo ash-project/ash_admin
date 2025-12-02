@@ -138,6 +138,7 @@ defmodule AshAdmin.MixProject do
     [
       {:ash, "~> 3.0 and >= 3.4.63"},
       {:ash_phoenix, "~> 2.1 and >= 2.1.8"},
+      {:cinder, "~> 0.6"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix, "~> 1.7"},
       {:phoenix_live_view, "~> 1.1-rc"},
