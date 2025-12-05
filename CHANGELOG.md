@@ -11,6 +11,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.24](https://github.com/ash-project/ash_admin/compare/v0.13.23...v0.13.24) (2025-12-05)
+
+
+
+
+### Bug Fixes:
+
+* remove load from expr calc because it now shows a warning in ash by Barnabas Jovanovics
+
 ## [v0.13.23](https://github.com/ash-project/ash_admin/compare/v0.13.22...v0.13.23) (2025-10-30)
 
 
