@@ -776,10 +776,15 @@ defmodule AshAdmin.Components.Resource.Form do
         />
         <%= if length(@upload.entries) > 0 do %>
           <div class="w-full bg-gray-200 rounded-full h-1.5 mb-1 mt-1">
+            <style nonce={Process.get(:ash_admin_csp_nonce_style)}>
+              #progress {
+                width: <%= hd(@upload.entries).progress %>%;
+              }
+            </style>
             <div
+              id="progress"
               class="bg-indigo-600 h-1.5 rounded-full"
               data-progress={hd(@upload.entries).progress}
-              style={"width: #{hd(@upload.entries).progress}%"}
             >
             </div>
           </div>

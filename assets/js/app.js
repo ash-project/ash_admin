@@ -16,98 +16,123 @@ const editors = {};
 Hooks.JsonEditor = {
   mounted() {
     const inputId = this.el.getAttribute("data-input-id");
-    const hook = this;
-    this.editor = new JSONEditor(
-      this.el,
-      {
-        onChangeText: (json) => {
-          const target = document.getElementById(inputId);
-          try {
-            JSON.parse(json);
-            target.value = json;
-            target.dispatchEvent(
-              new Event("change", { bubbles: true, target: this.el.name }),
-            );
-          } catch (_e) { }
-        },
-        onChange: () => {
-          try {
-            const target = document.getElementById(inputId);
-            json = hook.editor.get();
-
-            target.value = JSON.stringify(json);
-            target.dispatchEvent(
-              new Event("change", { bubbles: true, target: this.el.name }),
-            );
-          } catch (_e) { }
-        },
-        onModeChange: (newMode) => {
-          hook.mode = newMode;
-        },
-        modes: ["text", "tree"],
-      },
-      JSON.parse(document.getElementById(inputId).value),
-    );
+    const target = document.getElementById(inputId);
+    
+    const textarea = document.createElement("textarea");
+    textarea.value = target.value || "{}";
+    this.el.appendChild(textarea);
+    
+    this.editor = CodeMirror.fromTextArea(textarea, {
+      mode: "javascript",
+      lineNumbers: true,
+      theme: "default",
+      lineWrapping: true,
+      height: "400px"
+    });
+    
+    try {
+      const parsed = JSON.parse(target.value || "{}");
+      this.editor.setValue(JSON.stringify(parsed, null, 2));
+    } catch (e) {
+      this.editor.setValue(target.value || "{}");
+    }
+    
+    this.editor.on("change", () => {
+      target.value = this.editor.getValue();
+      target.dispatchEvent(new Event("change", { bubbles: true }));
+    });
 
     editors[this.el.id] = this.editor;
   },
+  destroyed() {
+    if (this.editor) {
+      this.editor.toTextArea();
+    }
+  }
 };
 
 Hooks.JsonEditorSource = {
   updated() {
     try {
-      let editor = editors[this.el.getAttribute("data-editor-id")];
-      if (editor.getMode() === "tree") {
-        editor.update(JSON.parse(this.el.value));
-      } else {
-        if (editor.get() !== JSON.parse(this.el.value)) {
-          editor.setText(this.el.value);
-        } else {
+      const editor = editors[this.el.getAttribute("data-editor-id")];
+      if (editor && this.el.value) {
+        const currentValue = editor.getValue();
+        if (currentValue !== this.el.value) {
+          try {
+            const parsed = JSON.parse(this.el.value);
+            editor.setValue(JSON.stringify(parsed, null, 2));
+          } catch (_e) {
+            editor.setValue(this.el.value);
+          }
         }
       }
     } catch (_e) { }
-  },
+  }
 };
 
 Hooks.JsonView = {
-  updated() {
-    const json = JSON.parse(this.el.getAttribute("data-json"));
-    this.editor = new JSONEditor(
-      this.el,
-      {
-        mode: "preview",
-      },
-      json,
-    );
-  },
   mounted() {
-    const json = JSON.parse(this.el.getAttribute("data-json"));
-    this.editor = new JSONEditor(
-      this.el,
-      {
-        mode: "preview",
-      },
-      json,
-    );
+    const jsonStr = this.el.getAttribute("data-json");
+    const textarea = document.createElement("textarea");
+    
+    try {
+      const json = JSON.parse(jsonStr);
+      textarea.value = JSON.stringify(json, null, 2);
+    } catch (e) {
+      textarea.value = jsonStr;
+    }
+    
+    this.el.appendChild(textarea);
+    
+    this.editor = CodeMirror.fromTextArea(textarea, {
+      mode: "javascript",
+      lineNumbers: true,
+      readOnly: true,
+      theme: "default",
+      lineWrapping: true
+    });
   },
+  updated() {
+    if (this.editor) {
+      const jsonStr = this.el.getAttribute("data-json");
+      try {
+        const json = JSON.parse(jsonStr);
+        this.editor.setValue(JSON.stringify(json, null, 2));
+      } catch (e) {
+        this.editor.setValue(jsonStr);
+      }
+    }
+  },
+  destroyed() {
+    if (this.editor) {
+      this.editor.toTextArea();
+    }
+  }
 };
-
-const init = (element) =>
-  new EasyMDE({
-    element: element,
-    initialValue: element.getAttribute("value"),
-  });
 
 Hooks.MarkdownEditor = {
   mounted() {
     const id = this.el.getAttribute("data-target-id");
     const el = document.getElementById(id);
-    const easyMDE = init(el);
-    easyMDE.codemirror.on("change", () => {
-      el.value = easyMDE.value();
+    
+    this.editor = CodeMirror.fromTextArea(el, {
+      mode: "markdown",
+      lineNumbers: true,
+      theme: "default",
+      lineWrapping: true,
+      height: "300px"
+    });
+    
+    this.editor.on("change", () => {
+      el.value = this.editor.getValue();
       el.dispatchEvent(new Event("change", { bubbles: true }));
     });
   },
+  destroyed() {
+    if (this.editor) {
+      this.editor.toTextArea();
+    }
+  }
 };
 
 Hooks.Actor = {
