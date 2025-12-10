@@ -20,11 +20,11 @@ SPDX-FileCopyrightText = "2020 Refactoring UI Inc"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = "priv/vendor/jsoneditor*"
-SPDX-FileCopyrightText = "2011-2021 Jos de Jong"
-SPDX-License-Identifier = "Apache-2.0"
+path = "priv/vendor/codemirror*"
+SPDX-FileCopyrightText = "2017-2024 Marijn Haverbeke and others"
+SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = "priv/vendor/easymde*"
-SPDX-FileCopyrightText = ["2015 Sparksuite, Inc", "2017 Jeroen Akkerman"]
+path = ["priv/vendor/javascript.min.js", "priv/vendor/markdown.min.js"]
+SPDX-FileCopyrightText = "2017-2024 Marijn Haverbeke and others"
 SPDX-License-Identifier = "MIT"

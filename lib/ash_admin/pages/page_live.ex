@@ -29,6 +29,14 @@ defmodule AshAdmin.PageLive do
         } = session,
         socket
       ) do
+    csp_nonce_assign_key = get_in(socket.private, [:ash_admin_csp_nonce, :style])
+    if csp_nonce_assign_key do
+      csp_nonce_value = Map.get(socket.assigns, csp_nonce_assign_key)
+      if csp_nonce_value do
+        Process.put(:ash_admin_csp_nonce_style, csp_nonce_value)
+      end
+    end
+
     otp_app = socket.endpoint.config(:otp_app)
 
     prefix =
