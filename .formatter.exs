@@ -8,6 +8,7 @@ spark_locals_without_parens = [
   actor?: 1,
   actor_load: 1,
   create_actions: 1,
+  datetime_step: 1,
   default_resource_page: 1,
   destroy_actions: 1,
   field: 1,
