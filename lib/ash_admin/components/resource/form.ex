@@ -631,6 +631,16 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
+  defp datetime_step(resource, attribute) do
+    case AshAdmin.Resource.field(resource, attribute.name) do
+      %{datetime_step: datetime_step} ->
+        datetime_step
+
+      _ ->
+        "60"
+    end
+  end
+
   defp unwrap_type({:array, type}), do: unwrap_type(type)
   defp unwrap_type(type), do: type
 
@@ -667,7 +677,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
   def render_attribute_input(assigns, %{type: type} = attribute, form, value, name, id, _)
       when type in [Ash.Type.UtcDatetime, Ash.Type.UtcDatetimeUsec, Ash.Type.DateTime] do
-    assigns = assign(assigns, form: form, value: value, name: name, attribute: attribute, id: id)
+    assigns = assign(assigns, form: form, value: value, name: name, attribute: attribute, step: datetime_step(assigns.resource, attribute), id: id)
 
     ~H"""
     <.input
@@ -675,6 +685,7 @@ defmodule AshAdmin.Components.Resource.Form do
       value={value(@value, @form, @attribute)}
       name={@name || @form.name <> "[#{@attribute.name}]"}
       id={@id || @form.id <> "_#{@attribute.name}"}
+      step={@step}
     />
     """
   end
