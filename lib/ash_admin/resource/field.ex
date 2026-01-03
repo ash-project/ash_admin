@@ -7,7 +7,15 @@ defmodule AshAdmin.Resource.Field do
   @moduledoc """
   The representation of a configured field in the admin UI.
   """
-  defstruct [:name, :type, :default, :max_file_size, :accepted_extensions, :datetime_step, :__spark_metadata__]
+  defstruct [
+    :name,
+    :type,
+    :default,
+    :max_file_size,
+    :accepted_extensions,
+    :datetime_step,
+    :__spark_metadata__
+  ]
 
   @schema [
     name: [
