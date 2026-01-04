@@ -22,10 +22,10 @@ defmodule AshAdmin.Layouts do
   @external_resource css_path = Path.join(@static_path, "assets/app.css")
 
   # Vendor files
-  @external_resource easymde_js_path = Path.join(@vendor_path, "easymde.min.js")
-  @external_resource easymde_css_path = Path.join(@vendor_path, "easymde.min.css")
-  @external_resource jsoneditor_js_path = Path.join(@vendor_path, "jsoneditor.min.js")
-  @external_resource jsoneditor_css_path = Path.join(@vendor_path, "jsoneditor.min.css")
+  @external_resource codemirror_js_path = Path.join(@vendor_path, "codemirror.min.js")
+  @external_resource codemirror_css_path = Path.join(@vendor_path, "codemirror.min.css")
+  @external_resource codemirror_js_mode_path = Path.join(@vendor_path, "javascript.min.js")
+  @external_resource codemirror_md_mode_path = Path.join(@vendor_path, "markdown.min.js")
 
   @app_js """
   #{for path <- phoenix_js_paths, do: path |> File.read!() |> String.replace("//# sourceMappingURL=", "// ")}
@@ -34,19 +34,17 @@ defmodule AshAdmin.Layouts do
   @app_css File.read!(css_path)
 
   # Read vendor files at compile time
-  @easymde_js if File.exists?(easymde_js_path), do: File.read!(easymde_js_path), else: ""
-  @easymde_css if File.exists?(easymde_css_path), do: File.read!(easymde_css_path), else: ""
-  @jsoneditor_js if File.exists?(jsoneditor_js_path), do: File.read!(jsoneditor_js_path), else: ""
-  @jsoneditor_css if File.exists?(jsoneditor_css_path),
-                    do: File.read!(jsoneditor_css_path),
-                    else: ""
+  @codemirror_js if File.exists?(codemirror_js_path), do: File.read!(codemirror_js_path), else: ""
+  @codemirror_css if File.exists?(codemirror_css_path), do: File.read!(codemirror_css_path), else: ""
+  @codemirror_js_mode if File.exists?(codemirror_js_mode_path), do: File.read!(codemirror_js_mode_path), else: ""
+  @codemirror_md_mode if File.exists?(codemirror_md_mode_path), do: File.read!(codemirror_md_mode_path), else: ""
 
   def render("app.js", _), do: @app_js
   def render("app.css", _), do: @app_css
-  def render("easymde.js", _), do: @easymde_js
-  def render("easymde.css", _), do: @easymde_css
-  def render("jsoneditor.js", _), do: @jsoneditor_js
-  def render("jsoneditor.css", _), do: @jsoneditor_css
+  def render("codemirror.js", _), do: @codemirror_js
+  def render("codemirror.css", _), do: @codemirror_css
+  def render("codemirror-js-mode.js", _), do: @codemirror_js_mode
+  def render("codemirror-md-mode.js", _), do: @codemirror_md_mode
 
   def render("root.html", assigns) do
     ~H"""
@@ -62,16 +60,16 @@ defmodule AshAdmin.Layouts do
           <%= raw(render("app.css", %{})) %>
         </style>
         <style nonce={csp_nonce(@conn, :style)}>
-          <%= raw(render("jsoneditor.css", %{})) %>
-        </style>
-        <style nonce={csp_nonce(@conn, :style)}>
-          <%= raw(render("easymde.css", %{})) %>
+          <%= raw(render("codemirror.css", %{})) %>
         </style>
         <script nonce={csp_nonce(@conn, :script)}>
-          <%= raw(render("jsoneditor.js", %{})) %>
+          <%= raw(render("codemirror.js", %{})) %>
         </script>
         <script nonce={csp_nonce(@conn, :script)}>
-          <%= raw(render("easymde.js", %{})) %>
+          <%= raw(render("codemirror-js-mode.js", %{})) %>
+        </script>
+        <script nonce={csp_nonce(@conn, :script)}>
+          <%= raw(render("codemirror-md-mode.js", %{})) %>
         </script>
       </head>
       <body>
