@@ -9,7 +9,7 @@ defmodule AshAdmin.Components.Resource.Show do
 
   require Logger
 
-  alias AshAdmin.Components.Resource.{Helpers.FormatHelper, SensitiveAttribute, Table}
+  alias AshAdmin.Components.Resource.{CinderTable, Helpers.FormatHelper, SensitiveAttribute}
   import AshAdmin.Helpers
   import AshAdmin.CoreComponents
 
@@ -282,7 +282,7 @@ defmodule AshAdmin.Components.Resource.Show do
 
     ~H"""
     <div class="mb-10 overflow-scroll">
-      <Table.table
+      <CinderTable.table
         data={@data}
         resource={@destination}
         domain={@destination_domain || Ash.Resource.Info.domain(@destination) || @domain}
