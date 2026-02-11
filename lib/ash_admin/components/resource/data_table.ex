@@ -206,10 +206,16 @@ defmodule AshAdmin.Components.Resource.DataTable do
       socket = assign(socket, :query, query)
 
       # Build the Ash query for Cinder by extracting from the AshPhoenix.Form
+      # Only pass the query to Cinder if the form has no validation errors
       socket =
         if run_now? && (socket.assigns[:tables] in [[], nil] || socket.assigns[:table]) do
           ash_query = socket.assigns.query.source
-          assign(socket, :ash_query, ash_query)
+
+          if ash_query.errors == [] do
+            assign(socket, :ash_query, ash_query)
+          else
+            assign(socket, :ash_query, nil)
+          end
         else
           assign(socket, :ash_query, nil)
         end
@@ -231,7 +237,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
   defp pagination_config(action) do
     case action.pagination do
-      nil ->
+      falsy when falsy in [nil, false] ->
         {nil, nil}
 
       pagination ->
