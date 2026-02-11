@@ -11,6 +11,19 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.25](https://github.com/ash-project/ash_admin/compare/v0.13.24...v0.13.25) (2026-02-11)
+
+
+
+
+### Bug Fixes:
+
+* pass authorizing and show_filters to CinderTable by Zach Daniel
+
+### Improvements:
+
+* Add :datetime_step form field configuration (#376) by capoccias
+
 ## [v0.13.24](https://github.com/ash-project/ash_admin/compare/v0.13.23...v0.13.24) (2025-12-05)
 
 
