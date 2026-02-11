@@ -76,7 +76,10 @@ defmodule AshAdmin.Components.Resource.DataTable do
           </div>
         </div>
 
-        <div :if={@action.arguments == [] || @params["args"]} class="h-full overflow-auto mx-4 md:mx-16 mt-4 md:mt-10">
+        <div
+          :if={@action.arguments == [] || @params["args"]}
+          class="h-full overflow-auto mx-4 md:mx-16 mt-4 md:mt-10"
+        >
           <div class="shadow-lg overflow-auto sm:rounded-md bg-white">
             <div class="px-2">
               <div :if={@ash_query} class="px-6 pt-6">
@@ -115,7 +118,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 >
                   {render_field_value(record, field_name, assigns)}
                 </:col>
-
+                
     <!-- Action buttons column -->
                 <:col :let={record} :if={actions?(@resource)} label="Actions">
                   <div class="flex h-max justify-items-center">

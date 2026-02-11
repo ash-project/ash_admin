@@ -118,7 +118,10 @@ defmodule AshAdmin.Themes.AshAdminTheme do
   # Boolean filter styling - compact radio buttons
   set :filter_boolean_container_class, "flex space-x-3 h-8 items-center"
   set :filter_boolean_option_class, "flex items-center space-x-1.5"
-  set :filter_boolean_radio_class, "h-3.5 w-3.5 text-indigo-600 focus:ring-indigo-500 focus:ring-1"
+
+  set :filter_boolean_radio_class,
+      "h-3.5 w-3.5 text-indigo-600 focus:ring-indigo-500 focus:ring-1"
+
   set :filter_boolean_label_class, "text-sm text-gray-600 cursor-pointer"
 
   # Loading component styling
