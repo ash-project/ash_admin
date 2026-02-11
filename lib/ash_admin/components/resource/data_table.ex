@@ -254,7 +254,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
     end
   end
 
-
   def handle_event("toggle_filters", _params, socket) do
     {:noreply, assign(socket, :show_filters, !socket.assigns.show_filters)}
   end
