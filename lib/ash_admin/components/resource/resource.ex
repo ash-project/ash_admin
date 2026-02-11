@@ -9,7 +9,14 @@ defmodule AshAdmin.Components.Resource do
 
   require Ash.Query
 
-  alias AshAdmin.Components.Resource.{DataTable, Form, GenericAction, Info, Nav, Show}
+  alias AshAdmin.Components.Resource.{
+    DataTable,
+    Form,
+    GenericAction,
+    Info,
+    Nav,
+    Show
+  }
 
   # prop hide_filter, :boolean, default: true
   attr :resource, :any, required: true

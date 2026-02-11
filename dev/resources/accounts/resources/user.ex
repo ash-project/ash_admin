@@ -25,6 +25,8 @@ defmodule Demo.Accounts.User do
     read_actions [:me, :read, :by_id, :by_name]
 
     table_columns [:id, :first_name, :last_name, :representative, :admin, :full_name, :api_key, :date_of_birth]
+    table_filterable_columns [:first_name]
+    table_sortable_columns [:first_name, :last_name]
 
     show_calculations [:multi_arguments, :is_super_admin?, :full_name, :nested_embed]
   end

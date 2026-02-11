@@ -8,7 +8,8 @@ defmodule AshAdmin.Components.Resource.DataTable do
   use Phoenix.LiveComponent
 
   import AshAdmin.Helpers
-  alias AshAdmin.Components.Resource.CinderTable
+  alias AshAdmin.Components.Resource.Table
+  alias AshAdmin.Themes.AshAdminTheme
 
   attr :resource, :atom
   attr :domain, :atom
@@ -26,129 +27,143 @@ defmodule AshAdmin.Components.Resource.DataTable do
   def render(assigns) do
     ~H"""
     <div>
-      <div class="sm:mt-0 bg-gray-300 min-h-screen">
+      <div class="md:pt-10 sm:mt-0 bg-gray-300 min-h-screen">
         <div
           :if={@action.arguments != []}
-          class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10"
+          class="mx-4 md:mx-16 mt-4 md:mt-10"
         >
-          <div class="md:mt-0 md:col-span-2">
-            <div class="shadow-lg overflow-hidden pt-2 sm:rounded-md bg-white">
-              <div class="px-4 sm:p-6">
-                <.form
-                  :let={form}
-                  :if={@query}
-                  as={:query}
-                  for={@query}
-                  phx-change="validate"
-                  phx-submit="save"
-                  phx-target={@myself}
-                >
-                  <div :if={form.source.submitted_once?} class="ml-4 mt-4 text-red-500">
-                    <ul>
-                      <li :for={{field, message} <- all_errors(form)}>
-                        <span :if={field}>
-                          {field}:
-                        </span>
-                        <span>
-                          {message}
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-                  {AshAdmin.Components.Resource.Form.render_attributes(
-                    assigns,
-                    @resource,
-                    @action,
-                    form
-                  )}
-                  <div class="px-4 py-3 text-right sm:px-6">
-                    <button
-                      type="submit"
-                      class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Run Query
-                    </button>
-                  </div>
-                </.form>
-              </div>
+          <div class="shadow-lg overflow-hidden sm:rounded-md bg-white" style="max-width: 42rem;">
+            <div class="px-6 py-6">
+              <.form
+                :let={form}
+                :if={@query}
+                as={:query}
+                for={@query}
+                phx-change="validate"
+                phx-submit="save"
+                phx-target={@myself}
+              >
+                {AshAdmin.Components.Resource.Form.render_attributes(
+                  assigns,
+                  @resource,
+                  @action,
+                  form
+                )}
+                <div class="py-3 text-right">
+                  <button
+                    type="submit"
+                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Run Query
+                  </button>
+                </div>
+              </.form>
             </div>
           </div>
         </div>
 
-        <div :if={@tables != []} class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10">
-          <div class="md:mt-0 md:col-span-2">
-            <div class="px-4 sm:p-6">
-              <AshAdmin.Components.Resource.SelectTable.table
-                resource={@resource}
-                action={@action}
-                on_change="change_table"
-                target={@myself}
-                table={@table}
-                tables={@tables}
-                polymorphic_actions={@polymorphic_actions}
-              />
-            </div>
+        <div :if={@tables != []} class="mx-4 md:mx-16 mt-4 md:mt-10">
+          <div class="px-6 py-4">
+            <AshAdmin.Components.Resource.SelectTable.table
+              resource={@resource}
+              action={@action}
+              on_change="change_table"
+              target={@myself}
+              table={@table}
+              tables={@tables}
+              polymorphic_actions={@polymorphic_actions}
+            />
           </div>
         </div>
 
-        <div :if={@action.arguments == [] || @params["args"]} class="h-full overflow-auto md:mx-4">
+        <div
+          :if={@action.arguments == [] || @params["args"]}
+          class="h-full overflow-auto mx-4 md:mx-16 mt-4 md:mt-10"
+        >
           <div class="shadow-lg overflow-auto sm:rounded-md bg-white">
-            <div :if={match?({:error, _}, @data) && @action.arguments == []}>
-              <ul>
-                <%= for {path, error} <- AshPhoenix.Form.errors(@query, for_path: :all) do %>
-                  <%= for {field, message} <- error do %>
-                    <li>{Enum.join(path ++ [field], ".")}: {message}</li>
-                  <% end %>
-                <% end %>
-              </ul>
-            </div>
             <div class="px-2">
-              <div :if={@thousand_records_warning && !@action.get? && !@action.pagination}>
-                Only showing up to 1000 rows. To show more, enable
-                <a href="https://hexdocs.pm/ash/pagination.html">pagination</a>
-                for the action in question.
-              </div>
-              <div :if={can_render_table?(assigns)} class="mx-5 mt-5 mb-2">
+              <div :if={@ash_query && @has_filters} class="px-6 pt-6">
                 <button
-                  type="button"
                   phx-click="toggle_filters"
                   phx-target={@myself}
-                  class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+                  class="inline-flex items-center gap-2 py-2 px-4 border border-indigo-600 text-sm font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
+                  <AshAdmin.CoreComponents.icon
+                    name={if @show_filters, do: "hero-funnel-solid", else: "hero-funnel"}
                     class="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                    />
-                  </svg>
-                  {if @show_filters, do: "Hide Filters", else: "Show Filters"}
+                  />
+                  {if @show_filters, do: "Hide Filters", else: "Filters"}
                 </button>
               </div>
-              <CinderTable.table
-                :if={can_render_table?(assigns)}
-                table={@table}
-                query={build_cinder_query(assigns)}
-                resource={@resource}
-                domain={@domain}
-                attributes={AshAdmin.Resource.table_columns(@resource)}
-                format_fields={AshAdmin.Resource.format_fields(@resource)}
-                show_sensitive_fields={AshAdmin.Resource.show_sensitive_fields(@resource)}
-                prefix={@prefix}
+              <Cinder.collection
+                :if={@ash_query}
+                query={@ash_query}
                 actor={@actor}
                 tenant={@tenant}
-                page_size={get_page_size(assigns)}
-                authorizing={@authorizing}
+                page_size={@page_size}
+                pagination={@pagination_mode}
                 show_filters={@show_filters}
-                theme={AshAdmin.Themes.AshAdminTheme}
-              />
+                query_opts={[authorize?: @authorizing]}
+                theme={AshAdminTheme}
+                id={"cinder-table-#{@resource}"}
+              >
+                <!-- Generate columns with simple sortable/filterable configuration -->
+                <:col
+                  :let={record}
+                  :for={field_name <- AshAdmin.Resource.table_columns(@resource)}
+                  field={to_string(field_name)}
+                  label={to_name(field_name)}
+                  filter={filterable?(@resource, field_name)}
+                  sort={sortable?(@resource, field_name)}
+                >
+                  {render_field_value(record, field_name, assigns)}
+                </:col>
+                
+    <!-- Action buttons column -->
+                <:col :let={record} :if={actions?(@resource)} label="Actions">
+                  <div class="flex h-max justify-items-center">
+                    <div :if={AshAdmin.Resource.show_action(@resource)}>
+                      <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&table=#{@table}&primary_key=#{encode_primary_key(record)}&action_type=read"}>
+                        <AshAdmin.CoreComponents.icon
+                          name="hero-information-circle-solid"
+                          class="h-5 w-5 text-gray-500"
+                        />
+                      </.link>
+                    </div>
+
+                    <div :if={AshAdmin.Helpers.primary_action(@resource, :update)}>
+                      <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
+                        <AshAdmin.CoreComponents.icon
+                          name="hero-pencil-solid"
+                          class="h-5 w-5 text-gray-500"
+                        />
+                      </.link>
+                    </div>
+
+                    <div :if={AshAdmin.Helpers.primary_action(@resource, :destroy)}>
+                      <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
+                        <AshAdmin.CoreComponents.icon
+                          name="hero-x-circle-solid"
+                          class="h-5 w-5 text-gray-500"
+                        />
+                      </.link>
+                    </div>
+
+                    <button
+                      :if={AshAdmin.Resource.actor?(@resource)}
+                      phx-click="set_actor"
+                      phx-value-resource={@resource}
+                      phx-value-domain={@domain}
+                      phx-value-pkey={encode_primary_key(record)}
+                    >
+                      <AshAdmin.CoreComponents.icon
+                        name="hero-key-solid"
+                        class="h-5 w-5 text-gray-500"
+                      />
+                    </button>
+                  </div>
+                </:col>
+              </Cinder.collection>
             </div>
           </div>
         </div>
@@ -162,8 +177,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
      socket
      |> assign_new(:initialized, fn -> false end)
      |> assign_new(:default, fn -> nil end)
-     |> assign_new(:show_filters, fn -> false end)
-     |> assign_new(:thousand_records_warning, fn -> false end)}
+     |> assign_new(:show_filters, fn -> false end)}
   end
 
   def update(assigns, socket) do
@@ -194,20 +208,31 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
       socket = assign(socket, :query, query)
 
-      # With Cinder, we don't manually fetch data - it handles querying and pagination
-      # We just validate the form if there are arguments
+      # Build the Ash query for Cinder by extracting from the AshPhoenix.Form
+      # Only pass the query to Cinder if the form has no validation errors
       socket =
-        if run_now? && socket.assigns.action.arguments != [] do
-          if socket.assigns[:tables] not in [[], nil] && !socket.assigns[:table] do
-            assign(socket, :data, {:ok, []})
+        if run_now? && (socket.assigns[:tables] in [[], nil] || socket.assigns[:table]) do
+          ash_query = socket.assigns.query.source
+
+          if ash_query.errors == [] do
+            assign(socket, :ash_query, ash_query)
           else
-            # Validate that the arguments are correct, but don't execute the query
-            # Cinder will handle execution
-            assign(socket, :data, {:ok, :cinder_will_query})
+            assign(socket, :ash_query, nil)
           end
         else
-          assign(socket, :data, :loading)
+          assign(socket, :ash_query, nil)
         end
+
+      {page_size, pagination_mode} = pagination_config(socket.assigns.action)
+
+      has_filters = AshAdmin.Resource.table_filterable_columns(socket.assigns.resource) != []
+
+      socket =
+        assign(socket,
+          page_size: page_size,
+          pagination_mode: pagination_mode,
+          has_filters: has_filters
+        )
 
       {:ok,
        socket
@@ -221,25 +246,28 @@ defmodule AshAdmin.Components.Resource.DataTable do
     |> Ash.Query.load(AshAdmin.Resource.table_columns(query.resource))
   end
 
-  defp all_errors(form) do
-    form
-    |> AshPhoenix.Form.errors(for_path: :all)
-    |> Enum.flat_map(fn {path, errors} ->
-      Enum.map(errors, fn {field, message} ->
-        path = List.wrap(path)
+  defp pagination_config(action) do
+    case action.pagination do
+      falsy when falsy in [nil, false] ->
+        {nil, nil}
 
-        case Enum.reject(path ++ List.wrap(field), &is_nil/1) do
-          [] ->
-            {nil, message}
+      pagination ->
+        page_size = pagination.default_limit || pagination.max_page_size || 100
 
-          items ->
-            {Enum.join(items, "."), message}
-        end
-      end)
-    end)
+        pagination_mode =
+          if pagination.keyset? && !pagination.offset? do
+            :keyset
+          else
+            :offset
+          end
+
+        {page_size, pagination_mode}
+    end
   end
 
-  # Pagination is handled by Cinder, no need for these event handlers
+  def handle_event("toggle_filters", _params, socket) do
+    {:noreply, assign(socket, :show_filters, !socket.assigns.show_filters)}
+  end
 
   def handle_event("validate", %{"query" => query}, socket) do
     query = AshPhoenix.Form.validate(socket.assigns.query, query)
@@ -253,10 +281,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
        socket,
        to: self_path(socket.assigns.url_path, socket.assigns.params, %{"args" => query_params})
      )}
-  end
-
-  def handle_event("toggle_filters", _params, socket) do
-    {:noreply, assign(socket, :show_filters, !socket.assigns.show_filters)}
   end
 
   def handle_event("change_table", %{"table" => %{"table" => table}}, socket) do
@@ -394,40 +418,61 @@ defmodule AshAdmin.Components.Resource.DataTable do
     AshPhoenix.Form.validate(form, new_params)
   end
 
-  # Helper functions for Cinder integration
+  # Field rendering - delegate to existing Table component logic
+  defp render_field_value(record, field_name, assigns) do
+    attribute = Ash.Resource.Info.field(assigns.resource, field_name)
+    format_fields = AshAdmin.Resource.format_fields(assigns.resource)
+    show_sensitive_fields = AshAdmin.Resource.show_sensitive_fields(assigns.resource)
 
-  defp can_render_table?(assigns) do
-    # Don't render if we have tables but none selected
-    if assigns[:tables] not in [[], nil] && !assigns[:table] do
-      false
+    if attribute do
+      Table.render_attribute(
+        assigns.domain,
+        record,
+        attribute,
+        format_fields,
+        show_sensitive_fields,
+        assigns.actor,
+        nil
+      )
     else
-      # Render if we have no arguments, or if arguments have been submitted
-      assigns.action.arguments == [] || assigns.params["args"]
+      "..."
+    end
+  rescue
+    _ ->
+      "..."
+  end
+
+  # Check if a field should be sortable
+  defp sortable?(resource, field_name) do
+    sortable_columns = AshAdmin.Resource.table_sortable_columns(resource)
+
+    case sortable_columns do
+      # If not specified, everything is sortable
+      nil -> true
+      list -> field_name in list
     end
   end
 
-  defp build_cinder_query(assigns) do
-    # When there are validated form arguments, extract the source query from the form
-    # which already has arguments properly applied. Otherwise build a fresh query.
-    query =
-      if assigns.params["args"] && assigns.query do
-        assigns.query.source
-      else
-        Ash.Query.for_read(assigns.resource, assigns.action.name)
-      end
+  # Check if a field should be filterable
+  defp filterable?(resource, field_name) do
+    filterable_columns = AshAdmin.Resource.table_filterable_columns(resource)
 
-    # Ensure table columns are loaded
-    query
-    |> Ash.Query.select([])
-    |> Ash.Query.load(AshAdmin.Resource.table_columns(assigns.resource))
+    case filterable_columns do
+      # If not specified, everything is filterable
+      nil -> true
+      list -> field_name in list && has_attribute?(resource, field_name)
+    end
   end
 
-  defp get_page_size(assigns) do
-    if assigns.action.pagination do
-      assigns.action.pagination.default_limit ||
-        assigns.action.pagination.max_page_size || 25
-    else
-      25
-    end
+  # Check if field is an actual resource attribute (not a relationship or calculated field)
+  defp has_attribute?(resource, field_name) do
+    Ash.Resource.Info.field(resource, field_name) != nil
+  end
+
+  defp actions?(resource) do
+    AshAdmin.Helpers.primary_action(resource, :update) ||
+      AshAdmin.Resource.show_action(resource) ||
+      AshAdmin.Resource.actor?(resource) ||
+      AshAdmin.Helpers.primary_action(resource, :destroy)
   end
 end
