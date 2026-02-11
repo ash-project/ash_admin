@@ -108,6 +108,30 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 <a href="https://hexdocs.pm/ash/pagination.html">pagination</a>
                 for the action in question.
               </div>
+              <div :if={can_render_table?(assigns)} class="mx-5 mt-5 mb-2">
+                <button
+                  type="button"
+                  phx-click="toggle_filters"
+                  phx-target={@myself}
+                  class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                    />
+                  </svg>
+                  {if @show_filters, do: "Hide Filters", else: "Show Filters"}
+                </button>
+              </div>
               <CinderTable.table
                 :if={can_render_table?(assigns)}
                 table={@table}
@@ -121,6 +145,8 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 actor={@actor}
                 tenant={@tenant}
                 page_size={get_page_size(assigns)}
+                authorizing={@authorizing}
+                show_filters={@show_filters}
                 theme="modern"
               />
             </div>
@@ -136,6 +162,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
      socket
      |> assign_new(:initialized, fn -> false end)
      |> assign_new(:default, fn -> nil end)
+     |> assign_new(:show_filters, fn -> false end)
      |> assign_new(:thousand_records_warning, fn -> false end)}
   end
 
@@ -226,6 +253,10 @@ defmodule AshAdmin.Components.Resource.DataTable do
        socket,
        to: self_path(socket.assigns.url_path, socket.assigns.params, %{"args" => query_params})
      )}
+  end
+
+  def handle_event("toggle_filters", _params, socket) do
+    {:noreply, assign(socket, :show_filters, !socket.assigns.show_filters)}
   end
 
   def handle_event("change_table", %{"table" => %{"table" => table}}, socket) do
