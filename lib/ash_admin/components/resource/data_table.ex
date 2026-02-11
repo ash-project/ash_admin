@@ -227,7 +227,12 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
       has_filters = AshAdmin.Resource.table_filterable_columns(socket.assigns.resource) != []
 
-      socket = assign(socket, page_size: page_size, pagination_mode: pagination_mode, has_filters: has_filters)
+      socket =
+        assign(socket,
+          page_size: page_size,
+          pagination_mode: pagination_mode,
+          has_filters: has_filters
+        )
 
       {:ok,
        socket
