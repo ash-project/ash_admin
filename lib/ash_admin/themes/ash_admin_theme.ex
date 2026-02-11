@@ -12,9 +12,9 @@ defmodule AshAdmin.Themes.AshAdminTheme do
   # Minimal container - no extra styling
   set :container_class, ""
   # Table wrapper - no styling to match original
-  set :table_wrapper_class, ""
+  set :table_wrapper_class, "p-6 pb-0"
   # Main table with exact same classes as original Resource.Table
-  set :table_class, "rounded-t-lg m-5 w-5/6 mx-auto text-left"
+  set :table_class, "rounded-t-lg my-5 px-6 w-full text-left"
   # Header styling - minimal to match original with better sort interaction
   set :thead_class, "text-left border-b-2"
   set :header_row_class, ""
@@ -36,7 +36,7 @@ defmodule AshAdmin.Themes.AshAdminTheme do
 
   # Pagination styling
   # Pagination
-  set :pagination_wrapper_class, "w-5/6 mx-auto pb-4"
+  set :pagination_wrapper_class, "px-6 pb-6"
 
   set :pagination_container_class,
       "py-3 flex items-center justify-between"
@@ -66,7 +66,7 @@ defmodule AshAdmin.Themes.AshAdminTheme do
 
   # Filter styling
   # Filters
-  set :filter_container_class, "w-5/6 mx-auto py-2"
+  set :filter_container_class, "px-6 py-2"
   set :filter_header_class, "hidden"
   set :filter_title_class, "hidden"
   set :filter_count_class, "hidden"

@@ -27,79 +27,63 @@ defmodule AshAdmin.Components.Resource.DataTable do
   def render(assigns) do
     ~H"""
     <div>
-      <div class="sm:mt-0 bg-gray-300 min-h-screen">
+      <div class="md:pt-10 sm:mt-0 bg-gray-300 min-h-screen">
         <div
           :if={@action.arguments != []}
-          class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10"
+          class="mx-4 md:mx-16 mt-4 md:mt-10"
         >
-          <div class="md:mt-0 md:col-span-2">
-            <div class="shadow-lg overflow-hidden pt-2 sm:rounded-md bg-white">
-              <div class="px-4 sm:p-6">
-                <.form
-                  :let={form}
-                  :if={@query}
-                  as={:query}
-                  for={@query}
-                  phx-change="validate"
-                  phx-submit="save"
-                  phx-target={@myself}
-                >
-                  <div :if={form.source.submitted_once?} class="ml-4 mt-4 text-red-500">
-                    <ul>
-                      <li :for={{field, message} <- all_errors(form)}>
-                        <span :if={field}>
-                          {field}:
-                        </span>
-                        <span>
-                          {message}
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-                  {AshAdmin.Components.Resource.Form.render_attributes(
-                    assigns,
-                    @resource,
-                    @action,
-                    form
-                  )}
-                  <div class="px-4 py-3 text-right sm:px-6">
-                    <button
-                      type="submit"
-                      class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Run Query
-                    </button>
-                  </div>
-                </.form>
-              </div>
+          <div class="shadow-lg overflow-hidden sm:rounded-md bg-white" style="max-width: 42rem;">
+            <div class="px-6 py-6">
+              <.form
+                :let={form}
+                :if={@query}
+                as={:query}
+                for={@query}
+                phx-change="validate"
+                phx-submit="save"
+                phx-target={@myself}
+              >
+                {AshAdmin.Components.Resource.Form.render_attributes(
+                  assigns,
+                  @resource,
+                  @action,
+                  form
+                )}
+                <div class="py-3 text-right">
+                  <button
+                    type="submit"
+                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Run Query
+                  </button>
+                </div>
+              </.form>
             </div>
           </div>
         </div>
 
-        <div :if={@tables != []} class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10">
-          <div class="md:mt-0 md:col-span-2">
-            <div class="px-4 sm:p-6">
-              <AshAdmin.Components.Resource.SelectTable.table
-                resource={@resource}
-                action={@action}
-                on_change="change_table"
-                target={@myself}
-                table={@table}
-                tables={@tables}
-                polymorphic_actions={@polymorphic_actions}
-              />
-            </div>
+        <div :if={@tables != []} class="mx-4 md:mx-16 mt-4 md:mt-10">
+          <div class="px-6 py-4">
+            <AshAdmin.Components.Resource.SelectTable.table
+              resource={@resource}
+              action={@action}
+              on_change="change_table"
+              target={@myself}
+              table={@table}
+              tables={@tables}
+              polymorphic_actions={@polymorphic_actions}
+            />
           </div>
         </div>
 
-        <div :if={@action.arguments == [] || @params["args"]} class="h-full overflow-auto md:mx-4">
+        <div :if={@action.arguments == [] || @params["args"]} class="h-full overflow-auto mx-4 md:mx-16 mt-4 md:mt-10">
           <div class="shadow-lg overflow-auto sm:rounded-md bg-white">
             <div class="px-2">
-              <div :if={@ash_query} class="w-5/6 mx-auto pt-4">
+              <div :if={@ash_query} class="px-6 pt-6">
                 <button
                   phx-click="toggle_filters"
                   phx-target={@myself}
-                  class="inline-flex items-center gap-2 py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  class="inline-flex items-center gap-2 py-2 px-4 border border-indigo-600 text-sm font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   <AshAdmin.CoreComponents.icon
                     name={if @show_filters, do: "hero-funnel-solid", else: "hero-funnel"}
@@ -264,23 +248,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
     end
   end
 
-  defp all_errors(form) do
-    form
-    |> AshPhoenix.Form.errors(for_path: :all)
-    |> Enum.flat_map(fn {path, errors} ->
-      Enum.map(errors, fn {field, message} ->
-        path = List.wrap(path)
-
-        case Enum.reject(path ++ List.wrap(field), &is_nil/1) do
-          [] ->
-            {nil, message}
-
-          items ->
-            {Enum.join(items, "."), message}
-        end
-      end)
-    end)
-  end
 
   def handle_event("toggle_filters", _params, socket) do
     {:noreply, assign(socket, :show_filters, !socket.assigns.show_filters)}
