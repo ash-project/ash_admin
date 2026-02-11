@@ -33,11 +33,9 @@ defmodule AshAdmin.Components.Resource.CinderTable do
   attr :skip, :list, default: []
   attr :format_fields, :any, default: []
   attr :show_sensitive_fields, :list, default: []
-  attr :authorizing, :boolean, default: false
   attr :actions, :boolean, default: true
   attr :page_size, :integer, default: 25
   attr :theme, :string, default: "modern"
-  attr :show_filters, :boolean, default: false
   attr :relationship_name, :atom, default: nil
 
   def table(assigns) do
@@ -56,7 +54,7 @@ defmodule AshAdmin.Components.Resource.CinderTable do
         page_size={@page_size}
         theme={@theme}
         show_pagination={true}
-        show_filters={@show_filters}
+        show_filters={true}
         class="rounded-t-lg m-5 w-5/6 mx-auto"
         loading_message="Loading..."
       >
@@ -141,7 +139,7 @@ defmodule AshAdmin.Components.Resource.CinderTable do
   # Only include options that Cinder supports:
   # [:load, :select, :tenant, :timeout, :authorize?, :max_concurrency]
   defp build_query_opts(assigns) do
-    opts = [authorize?: assigns.authorizing]
+    opts = []
 
     # Determine what to load based on attributes and relationships
     display_attrs = get_displayed_attributes(assigns.resource, assigns.attributes, [])
