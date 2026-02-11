@@ -34,24 +34,24 @@ defmodule AshAdmin.Themes.AshAdminTheme do
   set :error_container_class, "text-center py-4"
   set :error_message_class, "text-red-600"
 
-  # Pagination styling - minimal to integrate well with table
+  # Pagination styling
   # Pagination
-  set :pagination_wrapper_class, "w-5/6 mx-auto"
+  set :pagination_wrapper_class, "w-5/6 mx-auto pb-4"
 
   set :pagination_container_class,
-      "bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200"
+      "py-3 flex items-center justify-between"
 
   # Simple info styling
-  set :pagination_info_class, "text-sm text-gray-700"
-  set :pagination_count_class, "font-medium text-gray-900"
+  set :pagination_info_class, "text-sm text-gray-500"
+  set :pagination_count_class, "font-medium text-gray-700"
   # Clean navigation styling
-  set :pagination_nav_class, "inline-flex rounded-md shadow-sm -space-x-px"
+  set :pagination_nav_class, "inline-flex -space-x-px rounded-md overflow-hidden"
 
   set :pagination_button_class,
-      "relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+      "relative inline-flex items-center px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 border border-gray-200"
 
   set :pagination_current_class,
-      "bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium"
+      "relative inline-flex items-center px-3 py-1.5 text-sm font-medium bg-indigo-600 text-white border border-indigo-600"
 
   # Sorting styling - clean indicators that match AshAdmin's minimal style
   # Sorting
@@ -64,34 +64,34 @@ defmodule AshAdmin.Themes.AshAdminTheme do
   set :sort_none_icon_class, "h-4 w-4 bg-gray-400 inline-block opacity-50"
   set :sort_none_icon_name, "hero-chevron-up-down"
 
-  # Filter styling - compact, minimal to match table aesthetic
+  # Filter styling
   # Filters
-  set :filter_container_class, "border-b border-gray-200 py-3 w-5/6 mx-auto"
-  set :filter_header_class, "flex items-center justify-between mb-3"
-  set :filter_title_class, "text-sm font-semibold text-gray-900"
-  set :filter_count_class, "text-xs text-gray-500 ml-1"
-  set :filter_clear_all_class, "text-xs text-gray-500 hover:text-gray-700 underline"
-  # Input wrapper and labels - horizontal layout with wrapping
-  set :filter_inputs_class, "flex flex-wrap gap-x-6 gap-y-3"
-  set :filter_input_wrapper_class, "space-y-1"
-  set :filter_label_class, "block text-xs font-medium text-gray-500"
+  set :filter_container_class, "w-5/6 mx-auto py-2"
+  set :filter_header_class, "hidden"
+  set :filter_title_class, "hidden"
+  set :filter_count_class, "hidden"
+  set :filter_clear_all_class, "text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+  # Input wrapper and labels
+  set :filter_inputs_class, "flex flex-wrap gap-x-6 gap-y-4 items-end"
+  set :filter_input_wrapper_class, "flex-none space-y-1"
+  set :filter_label_class, "block text-sm font-medium text-gray-700"
 
   set :filter_placeholder_class,
-      "text-xs text-gray-400 italic px-2 py-1.5 border border-gray-200 rounded bg-gray-50"
+      "text-sm text-gray-400 italic px-3 py-2 border border-gray-200 rounded"
 
-  set :filter_clear_button_class, "ml-1.5 text-gray-300 hover:text-gray-500 text-xs"
-  # Input styling - compact inputs matching table's minimal style
+  set :filter_clear_button_class, "ml-2 text-gray-400 hover:text-gray-600 text-sm"
+  # Input styling - larger inputs with thicker borders to match table
   set :filter_text_input_class,
-      "w-44 px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+      "w-48 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
 
   set :filter_select_input_class,
-      "w-44 px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+      "w-48 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
 
   set :filter_date_input_class,
-      "px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+      "px-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
 
   set :filter_number_input_class,
-      "w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+      "w-28 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
 
   # Range filter styling - inline layout for date/number ranges
   set :filter_range_container_class, "flex items-center gap-2"

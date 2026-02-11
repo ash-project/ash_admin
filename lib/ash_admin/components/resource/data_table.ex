@@ -94,26 +94,29 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
         <div :if={@action.arguments == [] || @params["args"]} class="h-full overflow-auto md:mx-4">
           <div class="shadow-lg overflow-auto sm:rounded-md bg-white">
-            <div :if={match?({:error, _}, @data) && @action.arguments == []}>
-              <ul>
-                <%= for {path, error} <- AshPhoenix.Form.errors(@query, for_path: :all) do %>
-                  <%= for {field, message} <- error do %>
-                    <li>{Enum.join(path ++ [field], ".")}: {message}</li>
-                  <% end %>
-                <% end %>
-              </ul>
-            </div>
             <div class="px-2">
-              <div :if={@thousand_records_warning && !@action.get? && match?({:ok, _}, @data)}>
-                Only showing up to 1000 rows. To show more, enable
-                <a href="https://hexdocs.pm/ash/pagination.html">pagination</a>
-                for the action in question.
+              <div :if={@ash_query} class="w-5/6 mx-auto pt-4">
+                <button
+                  phx-click="toggle_filters"
+                  phx-target={@myself}
+                  class="inline-flex items-center gap-2 py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  <AshAdmin.CoreComponents.icon
+                    name={if @show_filters, do: "hero-funnel-solid", else: "hero-funnel"}
+                    class="h-4 w-4"
+                  />
+                  {if @show_filters, do: "Hide Filters", else: "Filters"}
+                </button>
               </div>
-
               <Cinder.collection
-                :if={@ash_query && match?({:ok, _data}, @data)}
+                :if={@ash_query}
                 query={@ash_query}
                 actor={@actor}
+                tenant={@tenant}
+                page_size={@page_size}
+                pagination={@pagination_mode}
+                show_filters={@show_filters}
+                query_opts={[authorize?: @authorizing]}
                 theme={AshAdminTheme}
                 id={"cinder-table-#{@resource}"}
               >
@@ -187,8 +190,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
      socket
      |> assign_new(:initialized, fn -> false end)
      |> assign_new(:default, fn -> nil end)
-     |> assign_new(:page_params, fn -> nil end)
-     |> assign_new(:thousand_records_warning, fn -> false end)}
+     |> assign_new(:show_filters, fn -> false end)}
   end
 
   def update(assigns, socket) do
@@ -228,50 +230,8 @@ defmodule AshAdmin.Components.Resource.DataTable do
           assign(socket, :ash_query, nil)
         end
 
-      socket =
-        if socket.assigns.action.pagination do
-          default_limit =
-            socket.assigns.action.pagination.default_limit ||
-              socket.assigns.action.pagination.max_page_size || 25
-
-          count? = !!socket.assigns.action.pagination.countable
-
-          page_params =
-            AshPhoenix.LiveView.page_from_params(params["page"], default_limit, count?)
-
-          socket
-          |> assign(
-            :page_params,
-            page_params
-          )
-        else
-          socket
-          |> assign(:page_params, nil)
-        end
-
-      socket =
-        if run_now? do
-          if socket.assigns[:tables] not in [[], nil] && !socket.assigns[:table] do
-            assign(socket, :data, {:ok, []})
-          else
-            action_opts =
-              if page_params = socket.assigns[:page_params] do
-                [page: page_params]
-              else
-                []
-              end
-
-            case AshPhoenix.Form.submit(socket.assigns.query,
-                   action_opts: action_opts,
-                   params: nil
-                 ) do
-              {:ok, data} -> assign(socket, :data, {:ok, data})
-              {:error, query} -> assign(socket, data: {:error, all_errors(query)}, query: query)
-            end
-          end
-        else
-          assign(socket, :data, :loading)
-        end
+      {page_size, pagination_mode} = pagination_config(socket.assigns.action)
+      socket = assign(socket, page_size: page_size, pagination_mode: pagination_mode)
 
       {:ok,
        socket
@@ -283,6 +243,25 @@ defmodule AshAdmin.Components.Resource.DataTable do
     query
     |> Ash.Query.select([])
     |> Ash.Query.load(AshAdmin.Resource.table_columns(query.resource))
+  end
+
+  defp pagination_config(action) do
+    case action.pagination do
+      nil ->
+        {nil, nil}
+
+      pagination ->
+        page_size = pagination.default_limit || pagination.max_page_size || 100
+
+        pagination_mode =
+          if pagination.keyset? && !pagination.offset? do
+            :keyset
+          else
+            :offset
+          end
+
+        {page_size, pagination_mode}
+    end
   end
 
   defp all_errors(form) do
@@ -303,7 +282,9 @@ defmodule AshAdmin.Components.Resource.DataTable do
     end)
   end
 
-  # Remove all pagination event handlers since Cinder handles pagination now
+  def handle_event("toggle_filters", _params, socket) do
+    {:noreply, assign(socket, :show_filters, !socket.assigns.show_filters)}
+  end
 
   def handle_event("validate", %{"query" => query}, socket) do
     query = AshPhoenix.Form.validate(socket.assigns.query, query)
