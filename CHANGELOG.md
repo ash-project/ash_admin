@@ -11,6 +11,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.13.26](https://github.com/ash-project/ash_admin/compare/v0.13.25...v0.13.26) (2026-02-11)
+
+
+
+
+### Improvements:
+
+* incoporate sevenseacat theme into cinder table for consistent styling and enhanced features by Zach Daniel
+
 ## [v0.13.25](https://github.com/ash-project/ash_admin/compare/v0.13.24...v0.13.25) (2026-02-11)
 
 
