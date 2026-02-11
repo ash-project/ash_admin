@@ -31,6 +31,8 @@ spark_locals_without_parens = [
   show_resources: 1,
   show_sensitive_fields: 1,
   table_columns: 1,
+  table_filterable_columns: 1,
+  table_sortable_columns: 1,
   type: 1,
   update_actions: 1
 ]
@@ -42,7 +44,7 @@ macro_locals_without_parens = [
 
 [
   inputs: ["{mix,.formatter}.exs", "{config,lib,test}/**/*.{ex,exs}"],
-  import_deps: [:phoenix],
+  import_deps: [:phoenix, :cinder],
   locals_without_parens: spark_locals_without_parens ++ macro_locals_without_parens,
   plugins: [Phoenix.LiveView.HTMLFormatter],
   export: [

@@ -101,15 +101,15 @@ defmodule AshAdmin.Components.Resource.Table do
     |> Enum.reject(&(&1.name in skip))
   end
 
-  defp render_attribute(
-         domain,
-         record,
-         attribute,
-         formats,
-         show_sensitive_fields,
-         actor,
-         relationship_name
-       ) do
+  def render_attribute(
+        domain,
+        record,
+        attribute,
+        formats,
+        show_sensitive_fields,
+        actor,
+        relationship_name
+      ) do
     process_attribute(
       domain,
       record,

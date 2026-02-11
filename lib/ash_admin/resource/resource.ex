@@ -85,6 +85,15 @@ defmodule AshAdmin.Resource do
         type: {:list, :atom},
         doc: "The list of attributes to render on the table view."
       ],
+      table_sortable_columns: [
+        type: {:list, :atom},
+        doc: "The list of columns that can be sorted. If not specified, no columns are sortable."
+      ],
+      table_filterable_columns: [
+        type: {:list, :atom},
+        doc:
+          "The list of columns that can be filtered. If not specified, no columns are filterable."
+      ],
       format_fields: [
         type: {:list, :any},
         doc: """
@@ -267,6 +276,14 @@ defmodule AshAdmin.Resource do
     |> Enum.find(fn field ->
       field.name == name
     end)
+  end
+
+  def table_sortable_columns(resource) do
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :table_sortable_columns, nil, true)
+  end
+
+  def table_filterable_columns(resource) do
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :table_filterable_columns, nil, true)
   end
 
   defp find_polymorphic_tables(resource, domains) do
