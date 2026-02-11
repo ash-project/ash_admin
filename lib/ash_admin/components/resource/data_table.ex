@@ -82,7 +82,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
         >
           <div class="shadow-lg overflow-auto sm:rounded-md bg-white">
             <div class="px-2">
-              <div :if={@ash_query} class="px-6 pt-6">
+              <div :if={@ash_query && @has_filters} class="px-6 pt-6">
                 <button
                   phx-click="toggle_filters"
                   phx-target={@myself}
@@ -224,7 +224,10 @@ defmodule AshAdmin.Components.Resource.DataTable do
         end
 
       {page_size, pagination_mode} = pagination_config(socket.assigns.action)
-      socket = assign(socket, page_size: page_size, pagination_mode: pagination_mode)
+
+      has_filters = AshAdmin.Resource.table_filterable_columns(socket.assigns.resource) != []
+
+      socket = assign(socket, page_size: page_size, pagination_mode: pagination_mode, has_filters: has_filters)
 
       {:ok,
        socket
