@@ -11,6 +11,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v0.14.0](https://github.com/ash-project/ash_admin/compare/v0.13.26...v0.14.0) (2026-02-11)
+
+
+
+
+### Features:
+
+* Redo of Cinder integration (#380) by sevenseacat
+
 ## [v0.13.26](https://github.com/ash-project/ash_admin/compare/v0.13.25...v0.13.26) (2026-02-11)
 
 
