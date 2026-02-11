@@ -11,7 +11,11 @@ const fs = require("fs");
 const path = require("path");
 
 module.exports = {
-  content: ["./js/**/*.js", "./../lib/ash_admin/components/**/*.*ex"],
+  content: [
+    "./js/**/*.js",
+    "./../lib/ash_admin/components/**/*.*ex",
+    "../deps/cinder/**/*.*ex",
+  ],
   theme: {
     extend: {
       colors: {
