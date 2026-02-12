@@ -105,7 +105,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 show_filters={@show_filters}
                 query_opts={[authorize?: @authorizing]}
                 theme={AshAdminTheme}
-                id={"cinder-table-#{@resource}"}
               >
                 <!-- Generate columns with simple sortable/filterable configuration -->
                 <:col
