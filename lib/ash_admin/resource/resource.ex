@@ -87,12 +87,12 @@ defmodule AshAdmin.Resource do
       ],
       table_sortable_columns: [
         type: {:list, :atom},
-        doc: "The list of columns that can be sorted. If not specified, no columns are sortable."
+        doc: "The list of columns that can be sorted. If not specified, all columns are sortable."
       ],
       table_filterable_columns: [
         type: {:list, :atom},
         doc:
-          "The list of columns that can be filtered. If not specified, no columns are filterable."
+          "The list of columns that can be filtered. If not specified, all columns are filterable."
       ],
       format_fields: [
         type: {:list, :any},
