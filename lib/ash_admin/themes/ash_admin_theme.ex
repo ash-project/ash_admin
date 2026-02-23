@@ -116,13 +116,13 @@ defmodule AshAdmin.Themes.AshAdminTheme do
   set :filter_select_placeholder_class, "text-gray-400"
   set :filter_select_arrow_class, "h-4 w-4 text-gray-400"
   # Boolean filter styling - compact radio buttons
-  set :filter_boolean_container_class, "flex space-x-3 h-8 items-center"
-  set :filter_boolean_option_class, "flex items-center space-x-1.5"
+  set :filter_radio_group_container_class, "flex space-x-3 h-8 items-center"
+  set :filter_radio_group_option_class, "flex items-center space-x-1.5"
 
-  set :filter_boolean_radio_class,
+  set :filter_radio_group_radio_class,
       "h-3.5 w-3.5 text-indigo-600 focus:ring-indigo-500 focus:ring-1"
 
-  set :filter_boolean_label_class, "text-sm text-gray-600 cursor-pointer"
+  set :filter_radio_group_label_class, "text-sm text-gray-600 cursor-pointer"
 
   # Loading component styling
   # Loading
