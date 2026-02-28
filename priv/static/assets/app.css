@@ -781,6 +781,19 @@ select {
   height: 1.25rem;
 }
 
+.hero-chevron-right {
+  --hero-chevron-right: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>');
+  -webkit-mask: var(--hero-chevron-right);
+  mask: var(--hero-chevron-right);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  background-color: currentColor;
+  vertical-align: middle;
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
 .hero-chevron-up {
   --hero-chevron-up: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>');
   -webkit-mask: var(--hero-chevron-up);
@@ -1102,6 +1115,10 @@ select {
   right: 0.25rem;
 }
 
+.right-10 {
+  right: 2.5rem;
+}
+
 .right-2 {
   right: 0.5rem;
 }
@@ -1114,8 +1131,20 @@ select {
   right: 1.25rem;
 }
 
+.right-6 {
+  right: 1.5rem;
+}
+
+.right-8 {
+  right: 2rem;
+}
+
 .top-1 {
   top: 0.25rem;
+}
+
+.top-10 {
+  top: 2.5rem;
 }
 
 .top-2 {
@@ -1128,6 +1157,10 @@ select {
 
 .top-6 {
   top: 1.5rem;
+}
+
+.top-8 {
+  top: 2rem;
 }
 
 .top-full {
@@ -2099,11 +2132,6 @@ select {
 .border-purple-500 {
   --tw-border-opacity: 1;
   border-color: rgb(168 85 247 / var(--tw-border-opacity));
-}
-
-.border-purple-600 {
-  --tw-border-opacity: 1;
-  border-color: rgb(147 51 234 / var(--tw-border-opacity));
 }
 
 .border-red-200 {

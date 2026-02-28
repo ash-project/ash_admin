@@ -184,9 +184,9 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
         socket
       ) do
     cond do
-      key == "ArrowDown" and length(socket.assigns.suggestions) > 0 ->
+      key == "ArrowDown" and Enum.any?(socket.assigns.suggestions) ->
         new_index =
-          min(socket.assigns.highlighted_index + 1, length(socket.assigns.suggestions) - 1)
+          min(socket.assigns.highlighted_index + 1, Enum.count(socket.assigns.suggestions) - 1)
 
         {_new_suggestion_name, new_suggestion_id} = Enum.at(socket.assigns.suggestions, new_index)
 
@@ -196,7 +196,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
            current_suggestion_id: new_suggestion_id
          )}
 
-      key == "ArrowUp" and length(socket.assigns.suggestions) > 0 ->
+      key == "ArrowUp" and Enum.any?(socket.assigns.suggestions) ->
         new_index =
           max(socket.assigns.highlighted_index - 1, 0)
 
