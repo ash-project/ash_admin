@@ -21,6 +21,9 @@ defmodule AshAdmin.Components.TopNav do
   attr :actor_resources, :any, required: true
   attr :domains, :any, required: true
   attr :tenant, :any, required: true
+  attr :tenant_mode, :atom, required: true
+  attr :tenant_options, :list, required: true
+  attr :tenant_suggestions, :list, required: true
   attr :clear_tenant, :string
   attr :set_tenant, :string
   attr :toggle_authorizing, :string, required: true
@@ -76,8 +79,11 @@ defmodule AshAdmin.Components.TopNav do
                     prefix={@prefix}
                   />
                   <TenantForm.tenant_form
-                    :if={show_tenant_form?(@domains)}
+                    :if={show_tenant_form?(@domains, @tenant_mode)}
                     tenant={@tenant}
+                    tenant_mode={@tenant_mode}
+                    tenant_options={@tenant_options}
+                    tenant_suggestions={@tenant_suggestions}
                     editing_tenant={@editing_tenant}
                     set_tenant={@set_tenant}
                     clear_tenant={@clear_tenant}
@@ -132,8 +138,11 @@ defmodule AshAdmin.Components.TopNav do
           </div>
           <div class="block px-4 py-2 text-sm">
             <TenantForm.tenant_form
-              :if={show_tenant_form?(@domains)}
+              :if={show_tenant_form?(@domains, @tenant_mode)}
               tenant={@tenant}
+              tenant_mode={@tenant_mode}
+              tenant_options={@tenant_options}
+              tenant_suggestions={@tenant_suggestions}
               editing_tenant={@editing_tenant}
               set_tenant={@set_tenant}
               clear_tenant={@clear_tenant}
@@ -169,7 +178,10 @@ defmodule AshAdmin.Components.TopNav do
     {:noreply, assign(socket, :open, !socket.assigns.open)}
   end
 
-  defp show_tenant_form?(domains) do
+  defp show_tenant_form?(_domains, tenant_mode) when tenant_mode in [:dropdown, :typeahead],
+    do: true
+
+  defp show_tenant_form?(domains, _tenant_mode) do
     Enum.any?(domains, fn domain ->
       domain
       |> AshAdmin.Domain.show_resources()

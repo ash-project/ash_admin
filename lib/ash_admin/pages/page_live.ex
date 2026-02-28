@@ -46,6 +46,15 @@ defmodule AshAdmin.PageLive do
 
     domains = domains(otp_app)
 
+    tenant_mode = AshAdmin.tenant_mode()
+
+    tenant_options =
+      if tenant_mode == :dropdown do
+        AshAdmin.list_tenants()
+      else
+        []
+      end
+
     {:ok,
      socket
      |> assign(:prefix, prefix)
@@ -54,6 +63,9 @@ defmodule AshAdmin.PageLive do
      |> assign(:domains, domains)
      |> assign(:tenant, session["tenant"])
      |> assign(:editing_tenant, false)
+     |> assign(:tenant_mode, tenant_mode)
+     |> assign(:tenant_options, tenant_options)
+     |> assign(:tenant_suggestions, [])
      |> then(fn socket ->
        assign(socket, AshAdmin.ActorPlug.actor_assigns(socket, session))
      end)
@@ -78,6 +90,9 @@ defmodule AshAdmin.PageLive do
         actor_tenant={@actor_tenant}
         resource={@resource}
         tenant={@tenant}
+        tenant_mode={@tenant_mode}
+        tenant_options={@tenant_options}
+        tenant_suggestions={@tenant_suggestions}
         actor_resources={@actor_resources}
         authorizing={@authorizing}
         actor_paused={@actor_paused}
@@ -385,11 +400,29 @@ defmodule AshAdmin.PageLive do
   end
 
   def handle_event("start_editing_tenant", _, socket) do
-    {:noreply, assign(socket, :editing_tenant, true)}
+    socket = assign(socket, :editing_tenant, true)
+
+    socket =
+      if socket.assigns.tenant_mode == :typeahead do
+        suggestions = AshAdmin.search_tenants(socket.assigns[:tenant] || "")
+        assign(socket, :tenant_suggestions, suggestions)
+      else
+        socket
+      end
+
+    {:noreply, socket}
   end
 
   def handle_event("stop_editing_tenant", _, socket) do
-    {:noreply, assign(socket, :editing_tenant, false)}
+    {:noreply,
+     socket
+     |> assign(:editing_tenant, false)
+     |> assign(:tenant_suggestions, [])}
+  end
+
+  def handle_event("search_tenants", %{"tenant" => search}, socket) do
+    suggestions = AshAdmin.search_tenants(search)
+    {:noreply, assign(socket, :tenant_suggestions, suggestions)}
   end
 
   def handle_event(
@@ -433,11 +466,20 @@ defmodule AshAdmin.PageLive do
   end
 
   def handle_event("set_tenant", data, socket) do
-    {:noreply,
-     socket
-     |> assign(:editing_tenant, false)
-     |> assign(:tenant, data["tenant"])
-     |> push_event("set_tenant", %{tenant: data["tenant"]})}
+    tenant = data["tenant"]
+    tenant = if tenant in [nil, ""], do: nil, else: tenant
+
+    socket =
+      socket
+      |> assign(:editing_tenant, false)
+      |> assign(:tenant, tenant)
+      |> assign(:tenant_suggestions, [])
+
+    if tenant do
+      {:noreply, push_event(socket, "set_tenant", %{tenant: tenant})}
+    else
+      {:noreply, push_event(socket, "clear_tenant", %{})}
+    end
   end
 
   def handle_event("clear_tenant", _, socket) do

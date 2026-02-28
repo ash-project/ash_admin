@@ -88,6 +88,49 @@ end
 
 Start your project (usually by running `mix phx.server` in a terminal) and visit `/admin` in your browser (or the path you configured `ash_admin` with in your router).
 
+## Tenant Selection
+
+By default, the tenant field in the admin navbar is a free-text input. You can configure a `list_tenants` MFA (module, function, args) to provide a better tenant selection experience.
+
+### Dropdown
+
+If the function referenced by the MFA takes no additional arguments (i.e. the arity equals the length of the args list), AshAdmin renders a dropdown select with the returned list of tenant strings:
+
+```elixir
+config :ash_admin, :list_tenants, {MyApp.Tenants, :list_tenants, []}
+```
+
+```elixir
+defmodule MyApp.Tenants do
+  def list_tenants do
+    # Return a list of tenant identifier strings
+    ["tenant_a", "tenant_b", "tenant_c"]
+  end
+end
+```
+
+### Typeahead
+
+If the function takes one additional argument beyond the args list, AshAdmin renders a typeahead input. The extra argument is the search text the user has typed:
+
+```elixir
+config :ash_admin, :list_tenants, {MyApp.Tenants, :search_tenants, []}
+```
+
+```elixir
+defmodule MyApp.Tenants do
+  def search_tenants(""), do: []
+  def search_tenants(search) do
+    # Return a filtered list of tenant identifier strings
+    MyApp.Repo.all(
+      from t in "tenants",
+        where: ilike(t.name, ^"%#{search}%"),
+        select: t.name
+    )
+  end
+end
+```
+
 ## Security
 
 You can limit access to ash_admin when using `AshAuthentication` like so:
