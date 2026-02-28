@@ -1,9 +1,110 @@
+<!--
+SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs.contributors>
+
+SPDX-License-Identifier: MIT
+-->
+
 # Change Log
 
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](Https://conventionalcommits.org) for commit guidelines.
 
 <!-- changelog -->
+
+## [v0.14.0](https://github.com/ash-project/ash_admin/compare/v0.13.26...v0.14.0) (2026-02-11)
+
+
+
+
+### Features:
+
+* Redo of Cinder integration (#380) by sevenseacat
+
+## [v0.13.26](https://github.com/ash-project/ash_admin/compare/v0.13.25...v0.13.26) (2026-02-11)
+
+
+
+
+### Improvements:
+
+* incoporate sevenseacat theme into cinder table for consistent styling and enhanced features by Zach Daniel
+
+## [v0.13.25](https://github.com/ash-project/ash_admin/compare/v0.13.24...v0.13.25) (2026-02-11)
+
+
+
+
+### Bug Fixes:
+
+* pass authorizing and show_filters to CinderTable by Zach Daniel
+
+### Improvements:
+
+* Add :datetime_step form field configuration (#376) by capoccias
+
+## [v0.13.24](https://github.com/ash-project/ash_admin/compare/v0.13.23...v0.13.24) (2025-12-05)
+
+
+
+
+### Bug Fixes:
+
+* remove load from expr calc because it now shows a warning in ash by Barnabas Jovanovics
+
+## [v0.13.23](https://github.com/ash-project/ash_admin/compare/v0.13.22...v0.13.23) (2025-10-30)
+
+
+
+
+### Bug Fixes:
+
+* don't include nil tables when considering if polymorphic tables is empty by Zach Daniel
+
+## [v0.13.22](https://github.com/ash-project/ash_admin/compare/v0.13.21...v0.13.22) (2025-10-30)
+
+
+
+
+### Bug Fixes:
+
+* don't add the resource's primary table if there are no polymorphic tables by Zach Daniel
+
+## [v0.13.21](https://github.com/ash-project/ash_admin/compare/v0.13.20...v0.13.21) (2025-10-30)
+
+
+
+
+### Bug Fixes:
+
+* include resource's table in polymorphic tables dropdown by Zach Daniel
+
+### Improvements:
+
+* allow gettext ~> 1.0 (#368) by Aleksandr Lossenko
+
+## [v0.13.20](https://github.com/ash-project/ash_admin/compare/v0.13.19...v0.13.20) (2025-10-24)
+
+
+
+
+### Bug Fixes:
+
+* Add __spark_metadata__ field to Field struct (#366) by Jechol Lee
+
+## [v0.13.19](https://github.com/ash-project/ash_admin/compare/v0.13.18...v0.13.19) (2025-09-24)
+
+
+
+
+### Bug Fixes:
+
+* set brand on loading to_one relationships by Zach Daniel
+
+* use tenant when loading to_one relationships by Zach Daniel
+
+### Improvements:
+
+* support `actor_load` option by Zach Daniel
 
 ## [v0.13.18](https://github.com/ash-project/ash_admin/compare/v0.13.17...v0.13.18) (2025-08-31)
 

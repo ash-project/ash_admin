@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs.contributors>
+
+SPDX-License-Identifier: MIT
+-->
+
 ![Logo](https://github.com/ash-project/ash/blob/main/logos/cropped-for-header-black-text.png?raw=true#gh-light-mode-only)
 ![Logo](https://github.com/ash-project/ash/blob/main/logos/cropped-for-header-white-text.png?raw=true#gh-dark-mode-only)
 
@@ -5,6 +11,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Hex version badge](https://img.shields.io/hexpm/v/ash_admin.svg)](https://hex.pm/packages/ash_admin)
 [![Hexdocs badge](https://img.shields.io/badge/docs-hexdocs-purple)](https://hexdocs.pm/ash_admin)
+[![REUSE status](https://api.reuse.software/badge/github.com/ash-project/ash_admin)](https://api.reuse.software/info/github.com/ash-project/ash_admin)
 
 # AshAdmin
 

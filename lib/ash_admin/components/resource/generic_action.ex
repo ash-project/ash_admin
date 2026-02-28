@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Components.Resource.GenericAction do
   @moduledoc false
   use Phoenix.LiveComponent
@@ -250,85 +255,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
 
       {:ok, assign(socket, initialized: true, form: form)}
     end
-
-    # else
-    #   socket = assign(socket, assigns)
-    #   params = socket.assigns[:params] || %{}
-    #   arguments = params["args"]
-
-    #   query =
-    #     socket.assigns[:resource]
-    #     |> AshPhoenix.Form.for_read(socket.assigns.action.name,
-    #       as: "query",
-    #     )
-
-    #   {query, run_now?} =
-    #     if arguments do
-    #       {Map.put(AshPhoenix.Form.validate(query, arguments), :submitted_once?, true), true}
-    #     else
-    #       {query, socket.assigns.action.arguments == []}
-    #     end
-
-    #   socket = assign(socket, :query, query)
-
-    #   socket =
-    #     if params["page"] && socket.assigns.action.pagination do
-    #       default_limit =
-    #         socket.assigns.action.pagination.default_limit ||
-    #           socket.assigns.action.pagination.max_page_size || 25
-
-    #       count? = !!socket.assigns.action.pagination.countable
-
-    #       page_params =
-    #         AshPhoenix.LiveView.page_from_params(params["page"], default_limit, count?)
-
-    #       socket
-    #       |> assign(
-    #         :page_params,
-    #         page_params
-    #       )
-    #       |> assign(
-    #         :page_num,
-    #         page_num_from_page_params(page_params)
-    #       )
-    #     else
-    #       socket
-    #       |> assign(:page_params, nil)
-    #       |> assign(:page_num, 1)
-    #     end
-
-    #   socket =
-    #     if run_now? do
-    #       if socket.assigns[:tables] not in [[], nil] && !socket.assigns[:table] do
-    #         assign(socket, :data, {:ok, []})
-    #       else
-    #         action_opts =
-    #           if page_params = socket.assigns[:page_params] do
-    #             [page: page_params]
-    #           else
-    #             []
-    #           end
-
-    #         case AshPhoenix.Form.submit(socket.assigns.query, action_opts: action_opts, params: nil) do
-    #           {:ok, data} -> assign(socket, :data, {:ok, data})
-    #           {:error, query} -> assign(socket, data: {:error, all_errors(query)}, query: query)
-    #         end
-    #       end
-    #     else
-    #       assign(socket, :data, :loading)
-    #     end
-
-    #   {:ok,
-    #    socket
-    #    |> assign(:initialized, true)}
-    # end
   end
-
-  # defp load_fields(query) do
-  #   query
-  #   |> Ash.Query.select([])
-  #   |> Ash.Query.load(AshAdmin.Resource.table_columns(query.resource))
-  # end
 
   def handle_event("validate", params, socket) do
     params = params["form"] || %{}

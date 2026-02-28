@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
 # This file contains the configuration for Credo and you are probably reading
 # this after creating it with `mix credo.gen.config`.
 #

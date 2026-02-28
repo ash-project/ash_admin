@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Web do
   @moduledoc false
   def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)

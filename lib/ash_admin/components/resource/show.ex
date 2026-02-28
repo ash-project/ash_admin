@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Components.Resource.Show do
   @moduledoc false
   use Phoenix.LiveComponent
@@ -540,7 +545,7 @@ defmodule AshAdmin.Components.Resource.Show do
         <.icon name="hero-x-mark" class="h-4 w-4 text-gray-600" />
         """
 
-      nil ->
+      _ ->
         ~H"""
         <.icon name="hero-minus" class="h-4 w-4 text-gray-600" />
         """

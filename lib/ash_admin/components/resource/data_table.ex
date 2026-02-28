@@ -1,10 +1,15 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Components.Resource.DataTable do
   @moduledoc false
   use Phoenix.LiveComponent
 
   import AshAdmin.Helpers
-  import AshPhoenix.LiveView
   alias AshAdmin.Components.Resource.Table
+  alias AshAdmin.Themes.AshAdminTheme
 
   attr :resource, :atom
   attr :domain, :atom
@@ -22,103 +27,142 @@ defmodule AshAdmin.Components.Resource.DataTable do
   def render(assigns) do
     ~H"""
     <div>
-      <div class="sm:mt-0 bg-gray-300 min-h-screen">
+      <div class="md:pt-10 sm:mt-0 bg-gray-300 min-h-screen">
         <div
           :if={@action.arguments != []}
-          class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10"
+          class="mx-4 md:mx-16 mt-4 md:mt-10"
         >
-          <div class="md:mt-0 md:col-span-2">
-            <div class="shadow-lg overflow-hidden pt-2 sm:rounded-md bg-white">
-              <div class="px-4 sm:p-6">
-                <.form
-                  :let={form}
-                  :if={@query}
-                  as={:query}
-                  for={@query}
-                  phx-change="validate"
-                  phx-submit="save"
+          <div class="shadow-lg overflow-hidden sm:rounded-md bg-white" style="max-width: 42rem;">
+            <div class="px-6 py-6">
+              <.form
+                :let={form}
+                :if={@query}
+                as={:query}
+                for={@query}
+                phx-change="validate"
+                phx-submit="save"
+                phx-target={@myself}
+              >
+                {AshAdmin.Components.Resource.Form.render_attributes(
+                  assigns,
+                  @resource,
+                  @action,
+                  form
+                )}
+                <div class="py-3 text-right">
+                  <button
+                    type="submit"
+                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Run Query
+                  </button>
+                </div>
+              </.form>
+            </div>
+          </div>
+        </div>
+
+        <div :if={@tables != []} class="mx-4 md:mx-16 mt-4 md:mt-10">
+          <div class="px-6 py-4">
+            <AshAdmin.Components.Resource.SelectTable.table
+              resource={@resource}
+              action={@action}
+              on_change="change_table"
+              target={@myself}
+              table={@table}
+              tables={@tables}
+              polymorphic_actions={@polymorphic_actions}
+            />
+          </div>
+        </div>
+
+        <div
+          :if={@action.arguments == [] || @params["args"]}
+          class="h-full overflow-auto mx-4 md:mx-16 mt-4 md:mt-10"
+        >
+          <div class="shadow-lg overflow-auto sm:rounded-md bg-white">
+            <div class="px-2">
+              <div :if={@ash_query && @has_filters} class="px-6 pt-6">
+                <button
+                  phx-click="toggle_filters"
                   phx-target={@myself}
+                  class="inline-flex items-center gap-2 py-2 px-4 border border-indigo-600 text-sm font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
-                  <div :if={form.source.submitted_once?} class="ml-4 mt-4 text-red-500">
-                    <ul>
-                      <li :for={{field, message} <- all_errors(form)}>
-                        <span :if={field}>
-                          {field}:
-                        </span>
-                        <span>
-                          {message}
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-                  {AshAdmin.Components.Resource.Form.render_attributes(
-                    assigns,
-                    @resource,
-                    @action,
-                    form
-                  )}
-                  <div class="px-4 py-3 text-right sm:px-6">
+                  <AshAdmin.CoreComponents.icon
+                    name={if @show_filters, do: "hero-funnel-solid", else: "hero-funnel"}
+                    class="h-4 w-4"
+                  />
+                  {if @show_filters, do: "Hide Filters", else: "Filters"}
+                </button>
+              </div>
+              <Cinder.collection
+                :if={@ash_query}
+                query={@ash_query}
+                actor={@actor}
+                tenant={@tenant}
+                page_size={@page_size}
+                pagination={@pagination_mode}
+                show_filters={@show_filters}
+                query_opts={[authorize?: @authorizing]}
+                theme={AshAdminTheme}
+              >
+                <!-- Generate columns with simple sortable/filterable configuration -->
+                <:col
+                  :let={record}
+                  :for={field_name <- AshAdmin.Resource.table_columns(@resource)}
+                  field={to_string(field_name)}
+                  label={to_name(field_name)}
+                  filter={filterable?(@resource, field_name)}
+                  sort={sortable?(@resource, field_name)}
+                >
+                  {render_field_value(record, field_name, assigns)}
+                </:col>
+                
+    <!-- Action buttons column -->
+                <:col :let={record} :if={actions?(@resource)} label="Actions">
+                  <div class="flex h-max justify-items-center">
+                    <div :if={AshAdmin.Resource.show_action(@resource)}>
+                      <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&table=#{@table}&primary_key=#{encode_primary_key(record)}&action_type=read"}>
+                        <AshAdmin.CoreComponents.icon
+                          name="hero-information-circle-solid"
+                          class="h-5 w-5 text-gray-500"
+                        />
+                      </.link>
+                    </div>
+
+                    <div :if={AshAdmin.Helpers.primary_action(@resource, :update)}>
+                      <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
+                        <AshAdmin.CoreComponents.icon
+                          name="hero-pencil-solid"
+                          class="h-5 w-5 text-gray-500"
+                        />
+                      </.link>
+                    </div>
+
+                    <div :if={AshAdmin.Helpers.primary_action(@resource, :destroy)}>
+                      <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
+                        <AshAdmin.CoreComponents.icon
+                          name="hero-x-circle-solid"
+                          class="h-5 w-5 text-gray-500"
+                        />
+                      </.link>
+                    </div>
+
                     <button
-                      type="submit"
-                      class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      :if={AshAdmin.Resource.actor?(@resource)}
+                      phx-click="set_actor"
+                      phx-value-resource={@resource}
+                      phx-value-domain={@domain}
+                      phx-value-pkey={encode_primary_key(record)}
                     >
-                      Run Query
+                      <AshAdmin.CoreComponents.icon
+                        name="hero-key-solid"
+                        class="h-5 w-5 text-gray-500"
+                      />
                     </button>
                   </div>
-                </.form>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div :if={@tables != []} class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10">
-          <div class="md:mt-0 md:col-span-2">
-            <div class="px-4 sm:p-6">
-              <AshAdmin.Components.Resource.SelectTable.table
-                resource={@resource}
-                action={@action}
-                on_change="change_table"
-                target={@myself}
-                table={@table}
-                tables={@tables}
-                polymorphic_actions={@polymorphic_actions}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div :if={@action.arguments == [] || @params["args"]} class="h-full overflow-auto md:mx-4">
-          <div class="shadow-lg overflow-auto sm:rounded-md bg-white">
-            <div :if={match?({:error, _}, @data) && @action.arguments == []}>
-              <ul>
-                <%= for {path, error} <- AshPhoenix.Form.errors(@query, for_path: :all) do %>
-                  <%= for {field, message} <- error do %>
-                    <li>{Enum.join(path ++ [field], ".")}: {message}</li>
-                  <% end %>
-                <% end %>
-              </ul>
-            </div>
-            <div class="px-2">
-              {render_pagination_links(assigns, :top)}
-
-              <div :if={@thousand_records_warning && !@action.get? && match?({:ok, _}, @data)}>
-                Only showing up to 1000 rows. To show more, enable
-                <a href="https://hexdocs.pm/ash/pagination.html">pagination</a>
-                for the action in question.
-              </div>
-              <Table.table
-                :if={match?({:ok, _data}, @data)}
-                table={@table}
-                data={data(@data)}
-                resource={@resource}
-                domain={@domain}
-                attributes={AshAdmin.Resource.table_columns(@resource)}
-                format_fields={AshAdmin.Resource.format_fields(@resource)}
-                show_sensitive_fields={AshAdmin.Resource.show_sensitive_fields(@resource)}
-                prefix={@prefix}
-                actor={@actor}
-              />
-              {render_pagination_links(assigns, :bottom)}
+                </:col>
+              </Cinder.collection>
             </div>
           </div>
         </div>
@@ -132,9 +176,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
      socket
      |> assign_new(:initialized, fn -> false end)
      |> assign_new(:default, fn -> nil end)
-     |> assign_new(:page_params, fn -> nil end)
-     |> assign_new(:page_num, fn -> nil end)
-     |> assign_new(:thousand_records_warning, fn -> false end)}
+     |> assign_new(:show_filters, fn -> false end)}
   end
 
   def update(assigns, socket) do
@@ -165,55 +207,31 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
       socket = assign(socket, :query, query)
 
+      # Build the Ash query for Cinder by extracting from the AshPhoenix.Form
+      # Only pass the query to Cinder if the form has no validation errors
       socket =
-        if socket.assigns.action.pagination do
-          default_limit =
-            socket.assigns.action.pagination.default_limit ||
-              socket.assigns.action.pagination.max_page_size || 25
+        if run_now? && (socket.assigns[:tables] in [[], nil] || socket.assigns[:table]) do
+          ash_query = socket.assigns.query.source
 
-          count? = !!socket.assigns.action.pagination.countable
-
-          page_params =
-            AshPhoenix.LiveView.page_from_params(params["page"], default_limit, count?)
-
-          socket
-          |> assign(
-            :page_params,
-            page_params
-          )
-          |> assign(
-            :page_num,
-            page_num_from_page_params(page_params)
-          )
-        else
-          socket
-          |> assign(:page_params, nil)
-          |> assign(:page_num, 1)
-        end
-
-      socket =
-        if run_now? do
-          if socket.assigns[:tables] not in [[], nil] && !socket.assigns[:table] do
-            assign(socket, :data, {:ok, []})
+          if ash_query.errors == [] do
+            assign(socket, :ash_query, ash_query)
           else
-            action_opts =
-              if page_params = socket.assigns[:page_params] do
-                [page: page_params]
-              else
-                []
-              end
-
-            case AshPhoenix.Form.submit(socket.assigns.query,
-                   action_opts: action_opts,
-                   params: nil
-                 ) do
-              {:ok, data} -> assign(socket, :data, {:ok, data})
-              {:error, query} -> assign(socket, data: {:error, all_errors(query)}, query: query)
-            end
+            assign(socket, :ash_query, nil)
           end
         else
-          assign(socket, :data, :loading)
+          assign(socket, :ash_query, nil)
         end
+
+      {page_size, pagination_mode} = pagination_config(socket.assigns.action)
+
+      has_filters = AshAdmin.Resource.table_filterable_columns(socket.assigns.resource) != []
+
+      socket =
+        assign(socket,
+          page_size: page_size,
+          pagination_mode: pagination_mode,
+          has_filters: has_filters
+        )
 
       {:ok,
        socket
@@ -227,45 +245,27 @@ defmodule AshAdmin.Components.Resource.DataTable do
     |> Ash.Query.load(AshAdmin.Resource.table_columns(query.resource))
   end
 
-  defp all_errors(form) do
-    form
-    |> AshPhoenix.Form.errors(for_path: :all)
-    |> Enum.flat_map(fn {path, errors} ->
-      Enum.map(errors, fn {field, message} ->
-        path = List.wrap(path)
+  defp pagination_config(action) do
+    case action.pagination do
+      falsy when falsy in [nil, false] ->
+        {nil, nil}
 
-        case Enum.reject(path ++ List.wrap(field), &is_nil/1) do
-          [] ->
-            {nil, message}
+      pagination ->
+        page_size = pagination.default_limit || pagination.max_page_size || 100
 
-          items ->
-            {Enum.join(items, "."), message}
-        end
-      end)
-    end)
+        pagination_mode =
+          if pagination.keyset? && !pagination.offset? do
+            :keyset
+          else
+            :offset
+          end
+
+        {page_size, pagination_mode}
+    end
   end
 
-  def handle_event("next_page", _, socket) do
-    params = %{"page" => AshPhoenix.LiveView.page_link_params(socket.assigns.data, "next")}
-
-    {:noreply,
-     push_patch(socket, to: self_path(socket.assigns.url_path, socket.assigns.params, params))}
-  end
-
-  def handle_event("prev_page", _, socket) do
-    params = %{"page" => AshPhoenix.LiveView.page_link_params(socket.assigns.data, "prev")}
-
-    {:noreply,
-     push_patch(socket, to: self_path(socket.assigns.url_path, socket.assigns.params, params))}
-  end
-
-  def handle_event("specific_page", %{"page" => page}, socket) do
-    params = %{
-      "page" => AshPhoenix.LiveView.page_link_params(socket.assigns.data, String.to_integer(page))
-    }
-
-    {:noreply,
-     push_patch(socket, to: self_path(socket.assigns.url_path, socket.assigns.params, params))}
+  def handle_event("toggle_filters", _params, socket) do
+    {:noreply, assign(socket, :show_filters, !socket.assigns.show_filters)}
   end
 
   def handle_event("validate", %{"query" => query}, socket) do
@@ -417,255 +417,61 @@ defmodule AshAdmin.Components.Resource.DataTable do
     AshPhoenix.Form.validate(form, new_params)
   end
 
-  defp render_pagination_links(assigns, placement) do
-    assigns = assign(assigns, :placement, placement)
+  # Field rendering - delegate to existing Table component logic
+  defp render_field_value(record, field_name, assigns) do
+    attribute = Ash.Resource.Info.field(assigns.resource, field_name)
+    format_fields = AshAdmin.Resource.format_fields(assigns.resource)
+    show_sensitive_fields = AshAdmin.Resource.show_sensitive_fields(assigns.resource)
 
-    ~H"""
-    <div
-      :if={(offset?(@data) || keyset?(@data)) && show_pagination_links?(@data, @placement)}
-      class="w-5/6 mx-auto"
-    >
-      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-        <div class="flex-1 flex justify-between sm:hidden">
-          <button
-            :if={!(keyset?(@data) && is_nil(@params["page"])) && prev_page?(@data)}
-            phx-target={@myself}
-            phx-click="prev_page"
-            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
-          >
-            Previous
-          </button>
-          {render_pagination_information(assigns, true)}
-          <button
-            :if={next_page?(@data)}
-            phx-click="next_page"
-            phx-target={@myself}
-            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:text-gray-500"
-          >
-            Next
-          </button>
-        </div>
-        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-          <div>
-            {render_pagination_information(assigns)}
-          </div>
-          <div>
-            <nav
-              class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-              aria-label="Pagination"
-            >
-              <button
-                :if={!(keyset?(@data) && is_nil(@params["page"])) && prev_page?(@data)}
-                phx-click="prev_page"
-                phx-target={@myself}
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                <span class="sr-only">Previous</span>
-
-                <svg
-                  class="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </button>
-              <span :if={offset?(@data)}>
-                {render_page_links(assigns, leading_page_nums(@data))}
-                {render_middle_page_num(assigns, @page_num, trailing_page_nums(@data))}
-                {render_page_links(assigns, trailing_page_nums(@data))}
-              </span>
-              <button
-                :if={next_page?(@data)}
-                phx-click="next_page"
-                phx-target={@myself}
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                <span class="sr-only">Next</span>
-
-                <svg
-                  class="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </button>
-            </nav>
-          </div>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
-  defp render_page_links(assigns, page_nums) do
-    assigns = assign(assigns, page_nums: page_nums)
-
-    ~H"""
-    <button
-      :for={i <- @page_nums}
-      phx-click="specific_page"
-      phx-target={@myself}
-      phx-value-page={i}
-      class={
-        classes([
-          "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50",
-          "bg-gray-300": @page_num == i
-        ])
-      }
-    >
-      {i}
-    </button>
-    """
-  end
-
-  defp render_pagination_information(assigns, small? \\ false) do
-    assigns = assign(assigns, :small, small?)
-
-    ~H"""
-    <p class={classes(["text-sm text-gray-700", "sm:hidden": @small])}>
-      <span :if={offset?(@data)}>
-        Showing <span class="font-medium">{first(@data)}</span>
-        to <span class="font-medium">{last(@data)}</span>
-        <%= if count(@data) do %>
-          of
-        <% end %>
-      </span>
-      <span :if={count(@data)}>
-        <span class="font-medium">{count(@data)}</span> results
-      </span>
-    </p>
-    """
-  end
-
-  defp page_num_from_page_params(params) do
-    cond do
-      !params[:offset] || params[:after] || params[:before] ->
-        1
-
-      params[:offset] && params[:limit] ->
-        trunc(Float.ceil(params[:offset] / params[:limit])) + 1
-
-      true ->
+    if attribute do
+      Table.render_attribute(
+        assigns.domain,
+        record,
+        attribute,
+        format_fields,
+        show_sensitive_fields,
+        assigns.actor,
         nil
-    end
-  end
-
-  defp show_pagination_links?({:ok, _page}, :bottom), do: true
-  defp show_pagination_links?({:ok, page}, :top), do: page.limit >= 20
-  defp show_pagination_links?(_, _), do: false
-
-  defp first({:ok, %Ash.Page.Offset{offset: offset}}) do
-    (offset || 0) + 1
-  end
-
-  defp first(_), do: nil
-
-  defp last({:ok, %Ash.Page.Offset{offset: offset, results: results}}) do
-    Enum.count(results) + offset
-  end
-
-  defp last(_), do: nil
-
-  defp render_middle_page_num(assigns, num, trailing_page_nums) do
-    ellipsis? = num in trailing_page_nums || num <= 3
-
-    assigns =
-      assign(assigns, num: num, trailing_page_nums: trailing_page_nums, ellipsis: ellipsis?)
-
-    ~H"""
-    <span
-      :if={show_ellipses?(@data)}
-      class={
-        classes([
-          "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700",
-          "bg-gray-300": !@ellipsis
-        ])
-      }
-    >
-      <span :if={@ellipsis}>
-        ...
-      </span>
-      <span :if={!@ellipsis}>
-        {@num}
-      </span>
-    </span>
-    """
-  end
-
-  defp show_ellipses?(%Ash.Page.Offset{count: count, limit: limit}) when not is_nil(count) do
-    page_nums =
-      count
-      |> Kernel./(limit)
-      |> Float.ceil()
-      |> trunc()
-
-    page_nums > 6
-  end
-
-  defp show_ellipses?({:ok, data}), do: show_ellipses?(data)
-  defp show_ellipses?(_), do: false
-
-  def leading_page_nums({:ok, data}), do: leading_page_nums(data)
-  def leading_page_nums(%Ash.Page.Offset{count: nil}), do: []
-
-  def leading_page_nums(%Ash.Page.Offset{limit: limit, count: count}) do
-    page_nums =
-      count
-      |> Kernel./(limit)
-      |> Float.ceil()
-      |> trunc()
-
-    1..min(3, page_nums)
-  end
-
-  def leading_page_nums(_), do: []
-
-  def trailing_page_nums({:ok, data}), do: trailing_page_nums(data)
-  def trailing_page_nums(%Ash.Page.Offset{count: nil}), do: []
-
-  def trailing_page_nums(%Ash.Page.Offset{limit: limit, count: count}) do
-    page_nums =
-      count
-      |> Kernel./(limit)
-      |> Float.ceil()
-      |> trunc()
-
-    if page_nums > 3 do
-      max(page_nums - 2, 4)..page_nums
+      )
     else
-      []
+      "..."
+    end
+  rescue
+    _ ->
+      "..."
+  end
+
+  # Check if a field should be sortable
+  defp sortable?(resource, field_name) do
+    sortable_columns = AshAdmin.Resource.table_sortable_columns(resource)
+
+    case sortable_columns do
+      # If not specified, everything is sortable
+      nil -> true
+      list -> field_name in list
     end
   end
 
-  defp data({:ok, data}), do: data(data)
-  defp data({:error, _}), do: []
-  defp data(%Ash.Page.Offset{results: results}), do: results
-  defp data(%Ash.Page.Keyset{results: results}), do: results
-  defp data(data), do: data
+  # Check if a field should be filterable
+  defp filterable?(resource, field_name) do
+    filterable_columns = AshAdmin.Resource.table_filterable_columns(resource)
 
-  defp offset?({:ok, data}), do: offset?(data)
-  defp offset?(%Ash.Page.Offset{}), do: true
-  defp offset?(_), do: false
+    case filterable_columns do
+      # If not specified, everything is filterable
+      nil -> true
+      list -> field_name in list && has_attribute?(resource, field_name)
+    end
+  end
 
-  defp keyset?({:ok, data}), do: keyset?(data)
-  defp keyset?(%Ash.Page.Keyset{}), do: true
-  defp keyset?(_), do: false
+  # Check if field is an actual resource attribute (not a relationship or calculated field)
+  defp has_attribute?(resource, field_name) do
+    Ash.Resource.Info.field(resource, field_name) != nil
+  end
 
-  defp count({:ok, %{count: count}}), do: count
-  defp count(%{count: count}), do: count
-  defp count(_), do: nil
+  defp actions?(resource) do
+    AshAdmin.Helpers.primary_action(resource, :update) ||
+      AshAdmin.Resource.show_action(resource) ||
+      AshAdmin.Resource.actor?(resource) ||
+      AshAdmin.Helpers.primary_action(resource, :destroy)
+  end
 end

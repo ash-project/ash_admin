@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Resource do
   @field %Spark.Dsl.Entity{
     describe: "Declare non-default behavior for a specific attribute.",
@@ -25,6 +30,10 @@ defmodule AshAdmin.Resource do
       name: [
         type: :string,
         doc: "The proper name to use when this resource appears in the admin interface."
+      ],
+      actor_load: [
+        type: :any,
+        doc: "A load statement to apply on the actor when fetching it"
       ],
       actor?: [
         type: :boolean,
@@ -76,6 +85,15 @@ defmodule AshAdmin.Resource do
         type: {:list, :atom},
         doc: "The list of attributes to render on the table view."
       ],
+      table_sortable_columns: [
+        type: {:list, :atom},
+        doc: "The list of columns that can be sorted. If not specified, all columns are sortable."
+      ],
+      table_filterable_columns: [
+        type: {:list, :atom},
+        doc:
+          "The list of columns that can be filtered. If not specified, all columns are filterable."
+      ],
       format_fields: [
         type: {:list, :any},
         doc: """
@@ -99,7 +117,7 @@ defmodule AshAdmin.Resource do
       show_calculations: [
         type: {:list, :atom},
         doc:
-          "A list of calculation that can be calculate when this resource is shown. By default, all calculations are included."
+          "A list of calculations that can be loaded when this resource is shown. By default, no calculations are included."
       ],
       label_field: [
         type: :atom,
@@ -204,6 +222,10 @@ defmodule AshAdmin.Resource do
     Spark.Dsl.Extension.get_opt(resource, [:admin], :actor?, false, true)
   end
 
+  def actor_load(resource) do
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :actor_load, [], true)
+  end
+
   def read_actions(resource) do
     Spark.Dsl.Extension.get_opt(resource, [:admin], :read_actions, nil, true) ||
       actions_with_primary_first(resource, :read)
@@ -256,6 +278,14 @@ defmodule AshAdmin.Resource do
     end)
   end
 
+  def table_sortable_columns(resource) do
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :table_sortable_columns, nil, true)
+  end
+
+  def table_filterable_columns(resource) do
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :table_filterable_columns, nil, true)
+  end
+
   defp find_polymorphic_tables(resource, domains) do
     domains
     |> Enum.flat_map(&AshAdmin.Domain.show_resources/1)
@@ -264,6 +294,20 @@ defmodule AshAdmin.Resource do
     |> Enum.map(& &1.context[:data_layer][:table])
     |> Enum.reject(&is_nil/1)
     |> Enum.uniq()
+    |> case do
+      [] ->
+        []
+
+      tables ->
+        Enum.concat(
+          [
+            Spark.Dsl.Extension.get_opt(resource, [:postgres], :table),
+            Spark.Dsl.Extension.get_opt(resource, [:sqlite], :table)
+          ],
+          tables
+        )
+    end
+    |> Enum.reject(&is_nil/1)
   end
 
   defp actions_with_primary_first(resource, type) do

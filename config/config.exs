@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
 import Config
 
 config :ash, :validate_domain_resource_inclusion?, false

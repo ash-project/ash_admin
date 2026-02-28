@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
+version = 1
+
+[[annotations]]
+path = ["REUSE.toml", "priv/static/assets/app*"]
+SPDX-FileCopyrightText = "2020 Zach Daniel"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "assets/vendor/topbar.js"
+SPDX-FileCopyrightText = "2021 Buu Nguyen"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["assets/vendor/heroicons/*", "assets/vendor/heroicons/**/*"]
+SPDX-FileCopyrightText = "2020 Refactoring UI Inc"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "priv/vendor/jsoneditor*"
+SPDX-FileCopyrightText = "2011-2021 Jos de Jong"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "priv/vendor/easymde*"
+SPDX-FileCopyrightText = ["2015 Sparksuite, Inc", "2017 Jeroen Akkerman"]
+SPDX-License-Identifier = "MIT"

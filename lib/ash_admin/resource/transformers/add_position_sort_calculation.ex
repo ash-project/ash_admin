@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Resource.Transformers.AddPositionSortCalculation do
   @moduledoc """
   Adds a `ash_admin_position_sort` calculation to resources that have defined admin.label_field.
@@ -25,8 +30,7 @@ defmodule AshAdmin.Resource.Transformers.AddPositionSortCalculation do
           arguments: [
             %{name: :search_term, type: :string, constraints: [], default: ""}
           ],
-          sortable?: true,
-          load: [field: label_field]
+          sortable?: true
         ]
 
         case Transformer.build_entity(

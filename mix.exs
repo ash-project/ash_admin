@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.MixProject do
   use Mix.Project
 
@@ -5,7 +9,7 @@ defmodule AshAdmin.MixProject do
   A super-admin UI for Ash Framework, built with Phoenix LiveView.
   """
 
-  @version "0.13.18"
+  @version "0.14.0"
 
   def project do
     [
@@ -43,11 +47,19 @@ defmodule AshAdmin.MixProject do
 
   def package do
     [
-      name: :ash_admin,
+      maintainers: [
+        "Zach Daniel <zach@zachdaniel.dev>"
+      ],
       licenses: ["MIT"],
       links: %{
-        GitHub: "https://github.com/ash-project/ash_admin"
-      }
+        "GitHub" => "https://github.com/ash-project/ash_admin",
+        "Changelog" => "https://github.com/ash-project/ash_admin/blob/main/CHANGELOG.md",
+        "Discord" => "https://discord.gg/HTHRaaVPUc",
+        "Website" => "https://ash-hq.org",
+        "Forum" => "https://elixirforum.com/c/elixir-framework-forums/ash-framework-forum",
+        "REUSE Compliance" => "https://api.reuse.software/info/github.com/ash-project/ash_admin"
+      },
+      source_url: "https://github.com/ash-project/ash_admin"
     ]
   end
 
@@ -124,6 +136,7 @@ defmodule AshAdmin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:cinder, "~> 0.9"},
       {:ash, "~> 3.0 and >= 3.4.63"},
       {:ash_phoenix, "~> 2.1 and >= 2.1.8"},
       {:phoenix_view, "~> 2.0"},

@@ -1,10 +1,22 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Components.Resource do
   @moduledoc false
   use Phoenix.LiveComponent
 
   require Ash.Query
 
-  alias AshAdmin.Components.Resource.{DataTable, Form, GenericAction, Info, Nav, Show}
+  alias AshAdmin.Components.Resource.{
+    DataTable,
+    Form,
+    GenericAction,
+    Info,
+    Nav,
+    Show
+  }
 
   # prop hide_filter, :boolean, default: true
   attr :resource, :any, required: true

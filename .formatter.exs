@@ -1,7 +1,14 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
 spark_locals_without_parens = [
   accepted_extensions: 1,
   actor?: 1,
+  actor_load: 1,
   create_actions: 1,
+  datetime_step: 1,
   default_resource_page: 1,
   destroy_actions: 1,
   field: 1,
@@ -24,6 +31,8 @@ spark_locals_without_parens = [
   show_resources: 1,
   show_sensitive_fields: 1,
   table_columns: 1,
+  table_filterable_columns: 1,
+  table_sortable_columns: 1,
   type: 1,
   update_actions: 1
 ]
@@ -35,7 +44,7 @@ macro_locals_without_parens = [
 
 [
   inputs: ["{mix,.formatter}.exs", "{config,lib,test}/**/*.{ex,exs}"],
-  import_deps: [:phoenix],
+  import_deps: [:phoenix, :cinder],
   locals_without_parens: spark_locals_without_parens ++ macro_locals_without_parens,
   plugins: [Phoenix.LiveView.HTMLFormatter],
   export: [

@@ -22,6 +22,7 @@ Configure the admin dashboard for a given resource.
 | Name | Type | Default | Docs |
 |------|------|---------|------|
 | [`name`](#admin-name){: #admin-name } | `String.t` |  | The proper name to use when this resource appears in the admin interface. |
+| [`actor_load`](#admin-actor_load){: #admin-actor_load } | `any` |  | A load statement to apply on the actor when fetching it |
 | [`actor?`](#admin-actor?){: #admin-actor? } | `boolean` |  | Whether or not this resource can be used as the actor for requests. |
 | [`show_action`](#admin-show_action){: #admin-show_action } | `atom` |  | The action to use when linking to the resource/viewing a single record. Defaults to the primary read action. |
 | [`read_actions`](#admin-read_actions){: #admin-read_actions } | `list(atom)` |  | A list of read actions that can be used to show resource details. By default, all actions are included. |
@@ -32,11 +33,13 @@ Configure the admin dashboard for a given resource.
 | [`polymorphic_tables`](#admin-polymorphic_tables){: #admin-polymorphic_tables } | `list(String.t)` |  | For resources that use ash_postgres' polymorphism capabilities, you can provide a list of tables that should be available to select. These will be added to the list of derivable tables based on scanning all domains and resources provided to ash_admin. |
 | [`polymorphic_actions`](#admin-polymorphic_actions){: #admin-polymorphic_actions } | `list(atom)` |  | For resources that use ash_postgres' polymorphism capabilities, you can provide a list of actions that should require a table to be set. If this is not set, then *all* actions will require tables. |
 | [`table_columns`](#admin-table_columns){: #admin-table_columns } | `list(atom)` |  | The list of attributes to render on the table view. |
+| [`table_sortable_columns`](#admin-table_sortable_columns){: #admin-table_sortable_columns } | `list(atom)` |  | The list of columns that can be sorted. If not specified, all columns are sortable. |
+| [`table_filterable_columns`](#admin-table_filterable_columns){: #admin-table_filterable_columns } | `list(atom)` |  | The list of columns that can be filtered. If not specified, all columns are filterable. |
 | [`format_fields`](#admin-format_fields){: #admin-format_fields } | `list(any)` |  | The list of fields and their formats represented as a MFA. For example: `updated_at: {Timex, :format!, ["{0D}-{0M}-{YYYY} {h12}:{m} {AM}"]}`. Datatable pages format all given fields. Show and Update pages format given read-only fields of types `Ash.Type.Date`, `Ash.Type.DateTime`, `Ash.Type.Time`, `Ash.Type.NaiveDatetime`, `Ash.Type.UtcDatetime` and `Ash.Type.UtcDatetimeUsec`. |
 | [`relationship_display_fields`](#admin-relationship_display_fields){: #admin-relationship_display_fields } | `list(atom)` |  | The list of attributes to render when this resource is shown as a relationship on another resource's datatable. |
 | [`resource_group`](#admin-resource_group){: #admin-resource_group } | `atom` |  | The group in the top resource dropdown that the resource appears in. |
 | [`show_sensitive_fields`](#admin-show_sensitive_fields){: #admin-show_sensitive_fields } | `list(atom)` |  | The list of fields that should not be redacted in the admin UI even if they are marked as sensitive. |
-| [`show_calculations`](#admin-show_calculations){: #admin-show_calculations } | `list(atom)` |  | A list of calculation that can be calculate when this resource is shown. By default, all calculations are included. |
+| [`show_calculations`](#admin-show_calculations){: #admin-show_calculations } | `list(atom)` |  | A list of calculations that can be loaded when this resource is shown. By default, no calculations are included. |
 | [`label_field`](#admin-label_field){: #admin-label_field } | `atom` |  | The field to use as the label when the resource appears in a relationship select or typeahead field on another resource's form. |
 | [`relationship_select_max_items`](#admin-relationship_select_max_items){: #admin-relationship_select_max_items } | `integer` | `50` | The maximum number of items to show in a select field when this resource is shown as a relationship on another resource's form. If the number of related resources is higher, a typeahead selector will be used. |
 
@@ -75,6 +78,7 @@ Declare non-default behavior for a specific attribute.
 | [`type`](#admin-form-field-type){: #admin-form-field-type } | `:default \| :long_text \| :short_text \| :markdown` |  | The type of the value in the form. Use `default` if you are just specifying field order |
 | [`max_file_size`](#admin-form-field-max_file_size){: #admin-form-field-max_file_size } | `integer` |  | The maximum file size in bytes to allow to be uploaded. Only applicable to action arguments of `Ash.Type.File`. |
 | [`accepted_extensions`](#admin-form-field-accepted_extensions){: #admin-form-field-accepted_extensions } | `any \| list(String.t)` |  | A list of unique file extensions (such as ".jpeg") or mime type (such as "image/jpeg" or "image/*"). Only applicable to action arguments of `Ash.Type.File`. |
+| [`datetime_step`](#admin-form-field-datetime_step){: #admin-form-field-datetime_step } | `String.t` |  | The value for the input's `step` property that determines it's precision. Defaults to "60", i.e. minute. Only applicable to action attributes and arguments that are datetimes, e.g. `Ash.Type.UtcDatetime`. |
 
 
 

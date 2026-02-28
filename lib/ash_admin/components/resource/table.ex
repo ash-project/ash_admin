@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2020 Zach Daniel
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Components.Resource.Table do
   @moduledoc false
   use Phoenix.Component
@@ -96,15 +101,15 @@ defmodule AshAdmin.Components.Resource.Table do
     |> Enum.reject(&(&1.name in skip))
   end
 
-  defp render_attribute(
-         domain,
-         record,
-         attribute,
-         formats,
-         show_sensitive_fields,
-         actor,
-         relationship_name
-       ) do
+  def render_attribute(
+        domain,
+        record,
+        attribute,
+        formats,
+        show_sensitive_fields,
+        actor,
+        relationship_name
+      ) do
     process_attribute(
       domain,
       record,

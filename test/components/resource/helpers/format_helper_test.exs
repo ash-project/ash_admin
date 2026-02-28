@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Test.Components.Resource.Helpers.FormatHelperTest do
   use ExUnit.Case, async: true
 
