@@ -14,5 +14,8 @@ defmodule Demo.Accounts.Domain do
 
   resources do
     resource Demo.Accounts.User
+    resource Demo.Accounts.Office
+    resource Demo.Accounts.Membership
+    resource Demo.Accounts.OfficeLink
   end
 end

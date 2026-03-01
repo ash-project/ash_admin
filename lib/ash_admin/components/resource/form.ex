@@ -36,6 +36,21 @@ defmodule AshAdmin.Components.Resource.Form do
      |> assign(:params, %{})}
   end
 
+  def update(%{add_related: %{path: path, pk_field: pk_field, id: id}} = _assigns, socket) do
+    form =
+      AshPhoenix.Form.add_form(socket.assigns.form, path,
+        type: :read,
+        params: %{pk_field => id}
+      )
+
+    {:ok, assign(socket, form: form) |> allow_uploading_form_arguments()}
+  end
+
+  def update(%{remove_related: path} = _assigns, socket) do
+    form = AshPhoenix.Form.remove_form(socket.assigns.form, path)
+    {:ok, assign(socket, form: form)}
+  end
+
   def update(assigns, socket) do
     {:ok,
      socket
@@ -174,7 +189,8 @@ defmodule AshAdmin.Components.Resource.Form do
         action,
         form,
         exactly \\ nil,
-        skip \\ []
+        skip \\ [],
+        enrichments \\ %{}
       ) do
     assigns =
       assign(assigns,
@@ -182,12 +198,13 @@ defmodule AshAdmin.Components.Resource.Form do
         action: action,
         form: form,
         exactly: exactly,
-        skip: skip
+        skip: skip,
+        enrichments: enrichments
       )
 
     ~H"""
     <% {attributes, flags, bottom_attributes, relationship_args} =
-      attributes(@resource, @action, @exactly) %>
+      attributes(@resource, @action, @exactly) |> apply_enrichments(@enrichments) %>
     <div class="grid grid-cols-6 gap-6">
       <div
         :for={attribute <- Enum.reject(attributes, &(is_nil(@exactly) && &1.name in @skip))}
@@ -282,19 +299,31 @@ defmodule AshAdmin.Components.Resource.Form do
     </div>
     <div :for={{relationship, argument, opts} <- relationship_args}>
       <%= if relationship not in @skip and argument.name not in @skip do %>
+        <% rel = Ash.Resource.Info.relationship(@form.source.resource, relationship) %>
+        <% simple_select? = simple_select_relationship?(rel, argument, opts) %>
         <label
           class="block text-sm font-medium text-gray-700"
           for={@form.name <> "[#{argument.name}]"}
         >
           {to_name(argument.name)}
         </label>
-        {render_relationship_input(
-          assigns,
-          Ash.Resource.Info.relationship(@form.source.resource, relationship),
-          @form,
-          argument,
-          opts
-        )}
+        <%= if simple_select? do %>
+          {render_relationship_select_input(
+            assigns,
+            rel,
+            @form,
+            argument,
+            opts
+          )}
+        <% else %>
+          {render_relationship_input(
+            assigns,
+            rel,
+            @form,
+            argument,
+            opts
+          )}
+        <% end %>
       <% end %>
     </div>
     """
@@ -352,6 +381,18 @@ defmodule AshAdmin.Components.Resource.Form do
         {false, [key]}
       end
 
+    destination_label_field =
+      if key do
+        AshAdmin.Resource.label_field(relationship.destination)
+      end
+
+    pk_enrichments =
+      if destination_label_field && key do
+        %{key => %{related_resource: relationship.destination}}
+      else
+        %{}
+      end
+
     assigns =
       assign(assigns,
         relationship: relationship,
@@ -361,7 +402,8 @@ defmodule AshAdmin.Components.Resource.Form do
         key: key,
         hidden: hidden?,
         exactly_fields: exactly_fields,
-        is_relationship_form: true
+        is_relationship_form: true,
+        pk_enrichments: pk_enrichments
       )
 
     ~H"""
@@ -398,10 +440,38 @@ defmodule AshAdmin.Components.Resource.Form do
             {render_attributes(
               assigns,
               @relationship.through,
-              join_action(@relationship.through, join_form, inner_form.source.form_keys[:_join]),
+              join_form.source.source.action,
               join_form,
-              @exactly_fields || inner_form.source.form_keys[:_join][:create_fields],
+              @exactly_fields || join_form_fields(join_form, inner_form.source.form_keys[:_join]),
               skip_through_related(@exactly_fields, @relationship)
+            )}
+          </.inputs_for>
+        <% end %>
+        <%= if inner_form.source.form_keys[:_update] do %>
+          <% update_config = inner_form.source.form_keys[:_update] %>
+          <% update_resource = update_config[:resource] %>
+          <.inputs_for :let={update_form} field={inner_form[:_update]}>
+            <.input
+              :for={kv <- update_form.hidden}
+              :if={@hidden}
+              name={update_form.name <> "[#{elem(kv, 0)}]"}
+              value={
+                if elem(kv, 0) == :_form_type and update_config[:data],
+                  do: "update",
+                  else: elem(kv, 1)
+              }
+              type="hidden"
+            />
+            {render_attributes(
+              assigns,
+              update_resource,
+              update_form.source.source.action,
+              update_form,
+              @exactly_fields || join_form_fields(update_form, update_config),
+              if(update_resource == @relationship.through,
+                do: skip_through_related(@exactly_fields, @relationship),
+                else: []
+              )
             )}
           </.inputs_for>
         <% end %>
@@ -411,7 +481,8 @@ defmodule AshAdmin.Components.Resource.Form do
           inner_form.source.source.action,
           inner_form,
           @exactly_fields || relationship_fields(inner_form),
-          skip_related(@exactly_fields, @relationship)
+          skip_related(@exactly_fields, @relationship),
+          @pk_enrichments
         )}
 
         <button
@@ -485,24 +556,298 @@ defmodule AshAdmin.Components.Resource.Form do
     """
   end
 
-  defp join_action(through, join_form, opts) do
-    name =
-      case join_form.source.type do
-        :create ->
-          opts[:create_action]
+  defp render_relationship_select_input(
+         assigns,
+         relationship,
+         form,
+         argument,
+         _opts
+       ) do
+    destination = relationship.destination
+    pk_field = Ash.Resource.Info.primary_key(destination) |> List.first()
+    label_field = AshAdmin.Resource.label_field(destination)
 
-        :update ->
-          opts[:update_action]
+    # Load all options for label lookup
+    max_items = AshAdmin.Resource.relationship_select_max_items(destination)
 
-        :destroy ->
-          opts[:destroy_action]
+    all_options =
+      destination
+      |> Ash.Query.new()
+      |> Ash.Query.load([label_field])
+      |> Ash.Query.limit(max_items + 1)
+      |> Ash.read!(
+        actor: assigns[:actor],
+        authorize?: assigns[:authorizing],
+        tenant: assigns[:tenant]
+      )
+      |> then(fn
+        %Ash.Page.Offset{results: results} -> results
+        results -> results
+      end)
+      |> Enum.map(&{to_string(Map.get(&1, label_field)), to_string(Map.get(&1, pk_field))})
 
-        :read ->
-          opts[:read_action]
+    selected_ids = get_selected_ids_for_relationship(form, argument.name, pk_field)
+
+    assigns =
+      assign(assigns,
+        relationship: relationship,
+        form: form,
+        argument: argument,
+        pk_field: pk_field,
+        label_field: label_field,
+        all_options: all_options,
+        selected_ids: selected_ids,
+        is_relationship_form: true,
+        form_component_id: assigns[:id],
+        form_component_module: __MODULE__
+      )
+
+    ~H"""
+    <div>
+      <div :if={@selected_ids != []} class="flex flex-wrap gap-2 mb-2">
+        <.inputs_for :let={inner_form} field={@form[@argument.name]}>
+          <.input
+            :for={kv <- inner_form.hidden}
+            name={inner_form.name <> "[#{elem(kv, 0)}]"}
+            value={elem(kv, 1)}
+            type="hidden"
+          />
+          <% pk_value = get_pk_from_inner_form(inner_form, @pk_field) %>
+          <% pk_string = pk_value && to_string(pk_value) %>
+          <% label =
+            Enum.find_value(@all_options, pk_string, fn {l, id} ->
+              if id == pk_string, do: l
+            end) %>
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+            {label}
+            <button
+              type="button"
+              phx-click="remove_form"
+              phx-target={@myself}
+              phx-value-path={inner_form.name}
+              class="inline-flex items-center justify-center h-4 w-4 rounded-full text-indigo-400 hover:bg-indigo-200 hover:text-indigo-500"
+            >
+              <.icon name="hero-x-mark" class="h-3 w-3" />
+            </button>
+          </span>
+        </.inputs_for>
+      </div>
+
+      <.live_component
+        module={AshAdmin.Components.Resource.ManagedRelationshipSelectField}
+        id={"#{@form.name}-#{@argument.name}-add"}
+        relationship={@relationship}
+        form_path={"#{@form.name}[#{@argument.name}]"}
+        form_component_id={@form_component_id}
+        form_component_module={@form_component_module}
+        argument={@argument}
+        selected_ids={@selected_ids}
+        actor={@actor}
+        tenant={@tenant}
+        authorizing={@authorizing}
+      />
+    </div>
+    """
+  end
+
+  defp get_selected_ids_for_relationship(form, argument_name, pk_field) do
+    form
+    |> Phoenix.HTML.Form.input_value(argument_name)
+    |> List.wrap()
+    |> Enum.map(fn
+      %Phoenix.HTML.Form{} = f ->
+        get_pk_from_inner_form(f, pk_field)
+
+      %AshPhoenix.Form{} = f ->
+        Map.get(f.data || %{}, pk_field) ||
+          Map.get(f.params || %{}, to_string(pk_field)) ||
+          Map.get(f.params || %{}, pk_field)
+
+      %{} = map ->
+        Map.get(map, pk_field) || Map.get(map, to_string(pk_field))
+
+      _ ->
+        nil
+    end)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.map(&to_string/1)
+  end
+
+  defp get_pk_from_inner_form(inner_form, pk_field) do
+    data_value =
+      case inner_form do
+        %Phoenix.HTML.Form{data: data} when is_map(data) -> Map.get(data, pk_field)
+        _ -> nil
       end
 
-    Ash.Resource.Info.action(through, name)
+    params_value =
+      case inner_form do
+        %Phoenix.HTML.Form{params: params} when is_map(params) ->
+          Map.get(params, to_string(pk_field)) || Map.get(params, pk_field)
+
+        _ ->
+          nil
+      end
+
+    data_value || params_value
   end
+
+  defp simple_select_relationship?(relationship, argument, manage_opts) do
+    destination = relationship.destination
+    destination_pk = Ash.Resource.Info.primary_key(destination)
+    has_label = AshAdmin.Resource.label_field(destination) != nil
+
+    if !has_label || !match?([_], destination_pk) || relationship.cardinality == :one do
+      false
+    else
+      # Compute exactly_fields the same way render_relationship_input does
+      key =
+        manage_opts[:value_is_key] ||
+          case destination_pk do
+            [k] -> k
+            _ -> nil
+          end
+
+      exactly_fields =
+        if map_type?(argument.type) || !key do
+          nil
+        else
+          [key]
+        end
+
+      # Check what fields the destination form would render
+      dest_only_pk? = destination_form_only_pk?(relationship, exactly_fields, manage_opts)
+
+      # Check what fields the join form would render (many_to_many only)
+      join_no_extras? = join_form_no_extra_fields?(relationship, exactly_fields, manage_opts)
+
+      dest_only_pk? && join_no_extras?
+    end
+  end
+
+  defp destination_form_only_pk?(_relationship, exactly_fields, _manage_opts)
+       when is_list(exactly_fields) do
+    # exactly_fields = [key] means only the PK is shown on the destination form
+    true
+  end
+
+  defp destination_form_only_pk?(relationship, nil, manage_opts) do
+    destination = relationship.destination
+    destination_pk = Ash.Resource.Info.primary_key(destination)
+
+    skip =
+      case relationship.type do
+        :belongs_to -> []
+        _ -> [relationship.destination_attribute]
+      end
+
+    # Check all action types that could contribute form fields
+    all_action_tuples =
+      [
+        Ash.Changeset.ManagedRelationshipHelpers.on_no_match_destination_actions(
+          manage_opts,
+          relationship
+        ),
+        Ash.Changeset.ManagedRelationshipHelpers.on_match_destination_actions(
+          manage_opts,
+          relationship
+        ),
+        Ash.Changeset.ManagedRelationshipHelpers.on_lookup_update_action(
+          manage_opts,
+          relationship
+        )
+      ]
+      |> Enum.flat_map(&List.wrap/1)
+      |> Enum.reject(&(elem(&1, 0) == :join))
+
+    # For each destination action, check if it would render fields beyond the PK
+    Enum.all?(all_action_tuples, fn action_tuple ->
+      {_source_or_dest, action_name} = extract_action_info(action_tuple)
+      action = Ash.Resource.Info.action(destination, action_name)
+
+      if action do
+        {attrs, flags, defaults, rel_args} = attributes(destination, action, nil)
+        visible = (attrs ++ flags ++ defaults) |> Enum.reject(&(&1.name in skip))
+        Enum.all?(visible, &(&1.name in destination_pk)) && rel_args == []
+      else
+        true
+      end
+    end)
+  end
+
+  defp join_form_no_extra_fields?(%{type: :many_to_many} = rel, exactly_fields, manage_opts) do
+    fk_fields =
+      MapSet.new([
+        rel.source_attribute_on_join_resource,
+        rel.destination_attribute_on_join_resource
+      ])
+
+    skip =
+      if exactly_fields do
+        # skip_through_related(exactly_fields, rel) returns []
+        MapSet.new()
+      else
+        # skip_through_related(nil, rel) returns the FK fields
+        fk_fields
+      end
+
+    # Collect all join action tuples from all manage phases
+    join_actions =
+      [
+        Ash.Changeset.ManagedRelationshipHelpers.on_no_match_destination_actions(
+          manage_opts,
+          rel
+        ),
+        Ash.Changeset.ManagedRelationshipHelpers.on_match_destination_actions(manage_opts, rel),
+        Ash.Changeset.ManagedRelationshipHelpers.on_missing_destination_actions(manage_opts, rel),
+        Ash.Changeset.ManagedRelationshipHelpers.on_lookup_update_action(manage_opts, rel)
+      ]
+      |> Enum.flat_map(&List.wrap/1)
+      |> Enum.filter(&(elem(&1, 0) == :join))
+
+    Enum.all?(join_actions, fn {:join, action_name, fields} ->
+      action = Ash.Resource.Info.action(rel.through, action_name)
+
+      if action do
+        # fields from manage_opts determine create_fields/update_fields
+        # The form renders attributes(through, action, exactly_fields || fields)
+        exactly = exactly_fields || fields
+
+        {attrs, flags, defaults, rel_args} =
+          if exactly do
+            attributes(rel.through, action, exactly)
+          else
+            attributes(rel.through, action, nil)
+          end
+
+        visible =
+          (attrs ++ flags ++ defaults)
+          |> Enum.reject(&(MapSet.member?(skip, &1.name)))
+
+        visible == [] && rel_args == []
+      else
+        true
+      end
+    end)
+  end
+
+  defp join_form_no_extra_fields?(_rel, _exactly_fields, _manage_opts), do: true
+
+  defp extract_action_info({_source_or_dest, action_name, _fields}),
+    do: {:destination, action_name}
+
+  defp extract_action_info({source_or_dest, action_name}),
+    do: {source_or_dest, action_name}
+
+  defp join_form_fields(join_form, join_config) do
+    case join_form.source.type do
+      :create -> join_config[:create_fields]
+      :update -> join_config[:update_fields]
+      :destroy -> join_config[:destroy_fields]
+      :read -> join_config[:create_fields] || join_config[:update_fields]
+    end
+  end
+
 
   defp can_add_related?(form, action, argument) do
     if form.source.form_keys[argument.name][action] do
@@ -2263,6 +2608,21 @@ defmodule AshAdmin.Components.Resource.Form do
       end)
 
     {auto_sorted_with_relationships, flags, sorted_defaults, relationship_args}
+  end
+
+  defp apply_enrichments(result, enrichments) when enrichments == %{}, do: result
+
+  defp apply_enrichments({auto_sorted, flags, sorted_defaults, relationship_args}, enrichments) do
+    enrich = fn attributes ->
+      Enum.map(attributes, fn attribute ->
+        case Map.get(enrichments, attribute.name) do
+          nil -> attribute
+          override -> Map.merge(attribute, override)
+        end
+      end)
+    end
+
+    {enrich.(auto_sorted), enrich.(flags), enrich.(sorted_defaults), relationship_args}
   end
 
   defp map_type?({:array, type}) do

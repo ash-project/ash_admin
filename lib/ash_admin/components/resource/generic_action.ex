@@ -267,7 +267,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
   def handle_event("save", params, socket) do
     params = params["form"] || %{}
 
-    case AshPhoenix.Form.submit(socket.assigns.form, params: params) do
+    case AshPhoenix.Form.submit(socket.assigns.form, params: params, force?: true) do
       :ok -> {:noreply, assign(socket, result: :ok)}
       {:ok, res} -> {:noreply, assign(socket, result: {:ok, res})}
       {:error, form} -> {:noreply, assign(socket, form: form, result: :error)}

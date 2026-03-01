@@ -66,8 +66,16 @@ defmodule Demo.Accounts.User do
       filter expr(first_name == ^arg(:first_name) and last_name == ^arg(:last_name))
     end
 
-    create :create
-    update :update, primary?: true
+    create :create do
+      argument :offices, {:array, :map}
+      change manage_relationship(:offices, type: :append)
+    end
+
+    update :update do
+      primary? true
+      argument :offices, {:array, :map}
+      change manage_relationship(:offices, type: :append_and_remove)
+    end
     update :update2
     destroy :destroy
 
@@ -189,5 +197,14 @@ defmodule Demo.Accounts.User do
     attribute :org, :string
 
     timestamps()
+  end
+
+  relationships do
+    many_to_many :offices, Demo.Accounts.Office do
+      public? true
+      through Demo.Accounts.Membership
+      source_attribute_on_join_resource :user_id
+      destination_attribute_on_join_resource :office_id
+    end
   end
 end
