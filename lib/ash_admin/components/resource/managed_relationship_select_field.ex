@@ -39,7 +39,10 @@ defmodule AshAdmin.Components.Resource.ManagedRelationshipSelectField do
   def render(assigns) do
     all_options = load_all_options(assigns)
     selected_ids = MapSet.new(assigns.selected_ids, &to_string/1)
-    available_options = Enum.reject(all_options, fn {_label, id} -> to_string(id) in selected_ids end)
+
+    available_options =
+      Enum.reject(all_options, fn {_label, id} -> to_string(id) in selected_ids end)
+
     field_type = if length(all_options) <= assigns.max_items, do: :select, else: :typeahead
 
     assigns =
@@ -160,16 +163,16 @@ defmodule AshAdmin.Components.Resource.ManagedRelationshipSelectField do
           }
         )
 
-        {:noreply,
-         assign(socket, suggestions: [], search_term: "", highlighted_index: -1)}
+        {:noreply, assign(socket, suggestions: [], search_term: "", highlighted_index: -1)}
 
       key == "Escape" ->
-        {:noreply,
-         assign(socket, suggestions: [], search_term: "", highlighted_index: -1)}
+        {:noreply, assign(socket, suggestions: [], search_term: "", highlighted_index: -1)}
 
       true ->
         suggestions = fetch_suggestions(socket.assigns, search_term)
-        {:noreply, assign(socket, suggestions: suggestions, search_term: search_term, highlighted_index: -1)}
+
+        {:noreply,
+         assign(socket, suggestions: suggestions, search_term: search_term, highlighted_index: -1)}
     end
   end
 
@@ -236,6 +239,8 @@ defmodule AshAdmin.Components.Resource.ManagedRelationshipSelectField do
       results -> results
     end)
     |> Enum.map(&{to_string(Map.get(&1, assigns.label_field)), to_string(&1.id)})
-    |> Enum.reject(fn {_label, id} -> to_string(id) in Enum.map(assigns.selected_ids, &to_string/1) end)
+    |> Enum.reject(fn {_label, id} ->
+      to_string(id) in Enum.map(assigns.selected_ids, &to_string/1)
+    end)
   end
 end

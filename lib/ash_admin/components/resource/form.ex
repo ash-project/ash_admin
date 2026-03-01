@@ -822,7 +822,7 @@ defmodule AshAdmin.Components.Resource.Form do
 
         visible =
           (attrs ++ flags ++ defaults)
-          |> Enum.reject(&(MapSet.member?(skip, &1.name)))
+          |> Enum.reject(&MapSet.member?(skip, &1.name))
 
         visible == [] && rel_args == []
       else
@@ -847,7 +847,6 @@ defmodule AshAdmin.Components.Resource.Form do
       :read -> join_config[:create_fields] || join_config[:update_fields]
     end
   end
-
 
   defp can_add_related?(form, action, argument) do
     if form.source.form_keys[argument.name][action] do
