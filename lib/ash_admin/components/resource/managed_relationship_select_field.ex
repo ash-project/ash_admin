@@ -86,6 +86,7 @@ defmodule AshAdmin.Components.Resource.ManagedRelationshipSelectField do
             phx-target={@myself}
             placeholder={"Search #{relationship_label(@relationship)}..."}
             autocomplete="off"
+            onkeydown="if(event.key === 'Enter') event.preventDefault()"
           />
         </div>
         <ul

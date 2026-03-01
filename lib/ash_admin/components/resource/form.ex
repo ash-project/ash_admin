@@ -85,6 +85,12 @@ defmodule AshAdmin.Components.Resource.Form do
     """
   end
 
+  defp has_forbidden_error?(form) do
+    form
+    |> AshPhoenix.Form.raw_errors()
+    |> Enum.any?(&match?(%{class: :forbidden}, &1))
+  end
+
   defp all_errors(form) do
     form
     |> AshPhoenix.Form.errors(for_path: :all)
@@ -106,6 +112,14 @@ defmodule AshAdmin.Components.Resource.Form do
   defp render_form(assigns) do
     ~H"""
     <div class="shadow-lg overflow-hidden sm:rounded-md bg-white">
+      <div
+        :if={@form.source.submitted_once? && has_forbidden_error?(@form.source)}
+        class="mx-4 mt-4 p-3 bg-red-50 border border-red-300 rounded-md"
+      >
+        <p class="text-red-800 font-medium">
+          You are not authorized to perform this action.
+        </p>
+      </div>
       <div :if={@form.source.submitted_once?} class="ml-4 mt-4 text-red-500">
         <ul>
           <li :for={{field, message} <- all_errors(@form)}>
