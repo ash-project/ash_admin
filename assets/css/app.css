@@ -9,6 +9,18 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+/* Ensure LiveView wrapper divs pass through full height */
+[data-phx-main], [data-phx-session] {
+  height: 100%;
+}
+
+/* Bottom breathing room in scrollable content area */
+main.admin-main::after {
+  content: "";
+  display: block;
+  height: 4rem;
+}
+
 /* CodeMirror 6 editor styling */
 .cm-editor {
   min-height: 200px;
@@ -106,5 +118,51 @@
 
 .md-fullscreen .md-editor-maximize-btn {
   font-size: 1.125rem;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .cm-editor {
+    border-color: #334155; /* slate-700 */
+  }
+
+  .cm-editor.cm-focused {
+    outline-color: #64748b; /* slate-500 */
+  }
+
+  .md-editor-container {
+    border-color: #334155; /* slate-700 */
+  }
+
+  .md-editor-toolbar {
+    background: #1e293b; /* slate-800 */
+    border-bottom-color: #334155; /* slate-700 */
+  }
+
+  .md-editor-maximize-btn {
+    color: #94a3b8; /* slate-400 */
+  }
+
+  .md-editor-maximize-btn:hover {
+    background: #334155; /* slate-700 */
+    color: #f1f5f9; /* slate-100 */
+  }
+
+  .md-preview-pane {
+    border-left-color: #334155; /* slate-700 */
+    background: #0f172a; /* slate-950 */
+    color: #e2e8f0; /* slate-200 */
+  }
+
+  .md-fullscreen {
+    background: #0f172a; /* slate-950 */
+  }
+
+  /* Input placeholders */
+  input::placeholder,
+  textarea::placeholder {
+    color: #64748b; /* slate-500 */
+    opacity: 1;
+  }
 }
 

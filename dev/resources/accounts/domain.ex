@@ -17,5 +17,6 @@ defmodule Demo.Accounts.Domain do
     resource Demo.Accounts.Office
     resource Demo.Accounts.Membership
     resource Demo.Accounts.OfficeLink
+    resource Demo.Accounts.Calculator
   end
 end
