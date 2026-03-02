@@ -9,7 +9,7 @@ defmodule AshAdmin.MixProject do
   A super-admin UI for Ash Framework, built with Phoenix LiveView.
   """
 
-  @version "0.14.0"
+  @version "1.0.0-rc.0"
 
   def project do
     [
@@ -142,7 +142,7 @@ defmodule AshAdmin.MixProject do
     [
       {:cinder, "~> 0.9"},
       {:ash, "~> 3.0 and >= 3.4.63"},
-      {:ash_phoenix, path: "../ash_phoenix", override: true},
+      {:ash_phoenix, "~> 2.0 and >= 2.3.20"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix, "~> 1.7"},
       {:phoenix_live_view, "~> 1.1-rc"},
