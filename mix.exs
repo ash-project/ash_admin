@@ -114,7 +114,11 @@ defmodule AshAdmin.MixProject do
       ],
       test: ["setup", "test"],
       "spark.formatter": "spark.formatter --extensions AshAdmin.Domain,AshAdmin.Resource",
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "assets.setup": [
+        "tailwind.install --if-missing",
+        "esbuild.install --if-missing",
+        "cmd --cd assets npm install"
+      ],
       "assets.build": ["tailwind default", "esbuild default"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
       "spark.cheat_sheets_in_search":

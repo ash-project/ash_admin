@@ -10,7 +10,7 @@ defmodule Demo.Accounts.Profile do
 
   admin do
     form do
-      field :bio, type: :long_text
+      field :bio, type: :markdown
       field :history, type: :long_text
     end
   end

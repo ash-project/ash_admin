@@ -16,6 +16,7 @@ module.exports = {
     "./../lib/ash_admin/components/**/*.*ex",
     "../deps/cinder/**/*.*ex",
   ],
+  safelist: ["prose", "max-w-none"],
   theme: {
     extend: {
       colors: {
@@ -25,6 +26,7 @@ module.exports = {
   },
   plugins: [
     require("@tailwindcss/forms"),
+    require("@tailwindcss/typography"),
     // Allows prefixing tailwind classes with LiveView classes to add rules
     // only when LiveView classes are applied, for example:
     //

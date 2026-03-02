@@ -9,3 +9,102 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+/* CodeMirror 6 editor styling */
+.cm-editor {
+  min-height: 200px;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+}
+
+.cm-editor.cm-focused {
+  outline: 2px solid #3b82f6;
+  outline-offset: -1px;
+  border-color: transparent;
+}
+
+.cm-editor .cm-scroller {
+  overflow: auto;
+}
+
+/* Markdown editor */
+.md-editor-container {
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.md-editor-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.25rem 0.5rem;
+  background: #f3f4f6;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.md-editor-maximize-btn {
+  padding: 0.125rem 0.5rem;
+  font-size: 1rem;
+  line-height: 1;
+  color: #6b7280;
+  background: none;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.md-editor-maximize-btn:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.md-editor-wrapper {
+  display: flex;
+  min-height: 250px;
+}
+
+.md-editor-pane {
+  flex: 1;
+  min-width: 0;
+}
+
+.md-editor-pane .cm-editor {
+  height: 100%;
+  border: none;
+  border-radius: 0;
+}
+
+.md-editor-pane .cm-editor.cm-focused {
+  outline: none;
+  border-color: transparent;
+}
+
+.md-preview-pane {
+  flex: 1;
+  min-width: 0;
+  padding: 0.75rem;
+  border-left: 1px solid #d1d5db;
+  overflow: auto;
+  background: #f9fafb;
+}
+
+/* Fullscreen mode */
+.md-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #fff;
+  border: none;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.md-fullscreen .md-editor-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+.md-fullscreen .md-editor-maximize-btn {
+  font-size: 1.125rem;
+}
+
