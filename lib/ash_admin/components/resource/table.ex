@@ -30,13 +30,16 @@ defmodule AshAdmin.Components.Resource.Table do
     ~H"""
     <div>
       <table class="rounded-t-lg m-5 w-5/6 mx-auto text-left">
-        <thead class="text-left border-b-2">
-          <th :for={attribute <- attributes(@resource, @attributes, @skip)}>
+        <thead class="text-left border-b-2 border-slate-200 dark:border-slate-700">
+          <th
+            :for={attribute <- attributes(@resource, @attributes, @skip)}
+            class="py-2 pr-2 text-sm font-semibold text-slate-900 dark:text-slate-100"
+          >
             {to_name(attribute.name)}
           </th>
         </thead>
         <tbody>
-          <tr :for={record <- @data} class="border-b-2">
+          <tr :for={record <- @data} class="border-b border-slate-200 dark:border-slate-700">
             <td :for={attribute <- attributes(@resource, @attributes, @skip)} class="py-3">
               {render_attribute(
                 @domain,
@@ -52,19 +55,28 @@ defmodule AshAdmin.Components.Resource.Table do
               <div class="flex h-max justify-items-center">
                 <div :if={AshAdmin.Resource.show_action(@resource)}>
                   <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&table=#{@table}&primary_key=#{encode_primary_key(record)}&action_type=read"}>
-                    <.icon name="hero-information-circle-solid" class="h-5 w-5 text-gray-500" />
+                    <.icon
+                      name="hero-information-circle-solid"
+                      class="h-5 w-5 text-slate-500 dark:text-slate-400"
+                    />
                   </.link>
                 </div>
 
                 <div :if={AshAdmin.Helpers.primary_action(@resource, :update)}>
                   <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
-                    <.icon name="hero-pencil-solid" class="h-5 w-5 text-gray-500" />
+                    <.icon
+                      name="hero-pencil-solid"
+                      class="h-5 w-5 text-slate-500 dark:text-slate-400"
+                    />
                   </.link>
                 </div>
 
                 <div :if={AshAdmin.Helpers.primary_action(@resource, :destroy)}>
                   <.link navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&table=#{@table}&primary_key=#{encode_primary_key(record)}"}>
-                    <.icon name="hero-x-circle-solid" class="h-5 w-5 text-gray-500" />
+                    <.icon
+                      name="hero-x-circle-solid"
+                      class="h-5 w-5 text-slate-500 dark:text-slate-400"
+                    />
                   </.link>
                 </div>
 
@@ -75,7 +87,7 @@ defmodule AshAdmin.Components.Resource.Table do
                   phx-value-domain={@domain}
                   phx-value-pkey={encode_primary_key(record)}
                 >
-                  <.icon name="hero-key-solid" class="h-5 w-5 text-gray-500" />
+                  <.icon name="hero-key-solid" class="h-5 w-5 text-slate-500 dark:text-slate-400" />
                 </button>
               </div>
             </td>

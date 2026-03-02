@@ -22,57 +22,62 @@ defmodule AshAdmin.Components.Resource.GenericAction do
 
   def render(assigns) do
     ~H"""
-    <div class="sm:mt-0 bg-gray-300 min-h-screen">
+    <div class="px-4 md:px-8 pt-8 pb-8">
       <%= if Enum.empty?(@action.arguments) do %>
-        <.form
-          :let={form}
-          as={:form}
-          for={@form}
-          class="flex flex-row justify-items-center pt-4"
-          phx-change="validate"
-          phx-submit="save"
-          phx-target={@myself}
-        >
-          <div :if={form.source.submitted_once?} class="ml-4 mt-4 text-red-500">
-            <ul>
-              <li :for={{field, message} <- all_errors(form)}>
-                <span :if={field}>
-                  {field}:
-                </span>
-                <span>
-                  {message}
-                </span>
-              </li>
-            </ul>
-          </div>
-          {AshAdmin.Components.Resource.Form.render_attributes(
-            assigns,
-            @resource,
-            @action,
-            form
-          )}
-          <button
-            type="submit"
-            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        <div class="flex flex-col items-center">
+          <.form
+            :let={form}
+            as={:form}
+            for={@form}
+            phx-change="validate"
+            phx-submit="save"
+            phx-target={@myself}
           >
-            Run
-          </button>
-        </.form>
+            <div
+              :if={form.source.submitted_once?}
+              class="mb-4 text-rose-600 dark:text-rose-400"
+            >
+              <ul>
+                <li :for={{field, message} <- all_errors(form)}>
+                  <span :if={field}>
+                    {field}:
+                  </span>
+                  <span>
+                    {message}
+                  </span>
+                </li>
+              </ul>
+            </div>
+            {AshAdmin.Components.Resource.Form.render_attributes(
+              assigns,
+              @resource,
+              @action,
+              form
+            )}
+            <button
+              type="submit"
+              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+            >
+              Run
+            </button>
+          </.form>
+        </div>
       <% else %>
-        <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:pt-10 mb-10"></div>
-        <div class="md:mt-0 md:col-span-2">
-          <div class="shadow-lg overflow-hidden pt-2 sm:rounded-md bg-white">
-            <div class="px-4 sm:p-6">
+        <div class="max-w-2xl mx-auto">
+          <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md bg-white dark:bg-slate-900">
+            <div class="px-6 py-6">
               <.form
                 :let={form}
                 as={:form}
                 for={@form}
-                class="flex flex-row"
                 phx-change="validate"
                 phx-submit="save"
                 phx-target={@myself}
               >
-                <div :if={form.source.submitted_once?} class="ml-4 mt-4 text-red-500">
+                <div
+                  :if={form.source.submitted_once?}
+                  class="mb-4 text-rose-600 dark:text-rose-400"
+                >
                   <ul>
                     <li :for={{field, message} <- all_errors(form)}>
                       <span :if={field}>
@@ -90,10 +95,10 @@ defmodule AshAdmin.Components.Resource.GenericAction do
                   @action,
                   form
                 )}
-                <div class="px-4 py-3 text-right sm:px-6 my-auto">
+                <div class="pt-4 flex justify-center">
                   <button
                     type="submit"
-                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
                   >
                     Run
                   </button>
@@ -107,14 +112,19 @@ defmodule AshAdmin.Components.Resource.GenericAction do
       <%= case @result do %>
         <% :pending -> %>
         <% :ok -> %>
-          Success
+          <div class="flex justify-center pt-6">
+            <span class="text-sm text-slate-600 dark:text-slate-400">Success</span>
+          </div>
         <% {:ok, result} -> %>
-          <div class="shadow-lg overflow-auto sm:rounded-md bg-white mx-12 px-8">
-            <h1>Success</h1>
-            {render_value(assigns, result, @action.returns, @action.constraints)}
+          <div class="max-w-2xl mx-auto mt-6">
+            <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-auto sm:rounded-md bg-white dark:bg-slate-900 px-6 py-4">
+              {render_value(assigns, result, @action.returns, @action.constraints)}
+            </div>
           </div>
         <% :error -> %>
-          Action failed
+          <div class="flex justify-center pt-6">
+            <span class="text-sm text-rose-600 dark:text-rose-400">Action failed</span>
+          </div>
       <% end %>
     </div>
     """
@@ -197,7 +207,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
     if (is_map(value) || Keyword.keyword?(value)) && Keyword.keyword?(constraints[:fields]) do
       ~H"""
       <%= for {key, config} <- @constraints[:fields] do %>
-        <div class="block text-sm font-medium text-gray-700">
+        <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
           {to_name(key)}
         </div>
         <div>

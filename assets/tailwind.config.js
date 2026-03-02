@@ -11,12 +11,14 @@ const fs = require("fs");
 const path = require("path");
 
 module.exports = {
+  darkMode: 'media',
   content: [
     "./js/**/*.js",
     "./../lib/ash_admin/components/**/*.*ex",
+    "./../lib/ash_admin/pages/**/*.*ex",
     "../deps/cinder/**/*.*ex",
   ],
-  safelist: ["prose", "max-w-none"],
+  safelist: ["prose", "dark:prose-invert", "max-w-none", "border-l-4"],
   theme: {
     extend: {
       colors: {

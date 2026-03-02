@@ -20,6 +20,7 @@ import { autocompletion, completionKeymap } from "@codemirror/autocomplete";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
 import { markdown } from "@codemirror/lang-markdown";
 import { linter, lintKeymap } from "@codemirror/lint";
+import { oneDark } from "@codemirror/theme-one-dark";
 import { marked } from "marked";
 
 // basicSetup minus closeBrackets (which causes cursor jumps in JSON editing)
@@ -58,6 +59,14 @@ let csrfToken = document
 let Hooks = {};
 const editors = {};
 
+function isDarkMode() {
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function darkThemeExtension() {
+  return isDarkMode() ? oneDark : [];
+}
+
 function getCspNonce() {
   const meta = document.querySelector('meta[name="csp-nonce-style"]');
   return meta ? meta.getAttribute("content") : undefined;
@@ -80,6 +89,7 @@ Hooks.JsonEditor = {
         editorSetup,
         json(),
         linter(jsonParseLinter()),
+        darkThemeExtension(),
         cspNonceExtension(),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
@@ -156,6 +166,7 @@ Hooks.JsonView = {
         json(),
         EditorView.editable.of(false),
         EditorState.readOnly.of(true),
+        darkThemeExtension(),
         cspNonceExtension(),
       ],
       parent: this.el,
@@ -198,7 +209,7 @@ Hooks.MarkdownEditor = {
     editorPane.className = "md-editor-pane";
 
     const preview = document.createElement("div");
-    preview.className = "md-preview-pane prose max-w-none";
+    preview.className = "md-preview-pane prose dark:prose-invert max-w-none";
     preview.innerHTML = marked.parse(initialValue);
 
     wrapper.appendChild(editorPane);
@@ -240,6 +251,7 @@ Hooks.MarkdownEditor = {
       extensions: [
         editorSetup,
         markdown(),
+        darkThemeExtension(),
         cspNonceExtension(),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
@@ -303,6 +315,19 @@ Hooks.Tenant = {
       setCookie("tenant", null);
     });
   },
+};
+
+Hooks.PositionAbove = {
+  mounted() { this.position(); },
+  updated() { this.position(); },
+  position() {
+    const input = this.el.nextElementSibling?.querySelector("input");
+    if (!input) return;
+    const rect = input.getBoundingClientRect();
+    this.el.style.bottom = (window.innerHeight - rect.top + 4) + "px";
+    this.el.style.left = rect.left + "px";
+    this.el.style.width = rect.width + "px";
+  }
 };
 
 Hooks.MaintainAttrs = {

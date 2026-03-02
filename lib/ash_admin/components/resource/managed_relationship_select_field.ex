@@ -93,7 +93,7 @@ defmodule AshAdmin.Components.Resource.ManagedRelationshipSelectField do
           :if={Enum.count(@suggestions) > 0}
           id={"#{@id}-listbox"}
           role="listbox"
-          class="absolute z-10 mt-1 bg-white shadow-lg rounded-md px-2 py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm"
+          class="absolute z-10 mt-1 bg-white dark:bg-slate-800 shadow-lg rounded-md px-2 py-1 text-base ring-1 ring-slate-200 dark:ring-slate-700 overflow-auto focus:outline-none sm:text-sm"
         >
           <%= for {{suggestion_name, suggestion_id}, index} <- Enum.with_index(@suggestions) do %>
             <li
@@ -101,8 +101,9 @@ defmodule AshAdmin.Components.Resource.ManagedRelationshipSelectField do
               class={[
                 "cursor-pointer select-none relative py-2 px-2 w-full truncate",
                 if(index == @highlighted_index,
-                  do: "text-white bg-indigo-500",
-                  else: "text-gray-900 hover:bg-indigo-400 hover:text-gray-100"
+                  do: "text-white bg-slate-700 dark:bg-slate-500",
+                  else:
+                    "text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700"
                 )
               ]}
               role="option"

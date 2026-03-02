@@ -13,8 +13,6 @@ defmodule AshAdmin.Components.Resource do
     DataTable,
     Form,
     GenericAction,
-    Info,
-    Nav,
     Show
   }
 
@@ -37,9 +35,8 @@ defmodule AshAdmin.Components.Resource do
 
   def render(assigns) do
     ~H"""
-    <div class="flex flex-col">
-      <Nav.nav resource={@resource} domain={@domain} action={@action} table={@table} prefix={@prefix} />
-      <div class="flex-1 p-6">
+    <div>
+      <div>
         <div :if={@record && match?({:error, error} when not is_nil(error), @record)}>
           <p>Error loading record</p>
         </div>
@@ -104,7 +101,6 @@ defmodule AshAdmin.Components.Resource do
           table={@table}
           prefix={@prefix}
         />
-        <Info.info :if={is_nil(@action_type)} resource={@resource} domain={@domain} prefix={@prefix} />
         <.live_component
           :if={@action_type == :create}
           module={Form}

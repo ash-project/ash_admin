@@ -25,7 +25,7 @@ defmodule AshAdmin.Components.Resource.Show do
 
   def render(assigns) do
     ~H"""
-    <div class="md:pt-10 sm:mt-0 bg-gray-300 min-h-screen pb-20">
+    <div class="md:pt-10 sm:mt-0">
       <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
         <div class="mt-5 md:mt-0 md:col-span-2">
           {render_show(assigns, @record, @resource)}
@@ -49,7 +49,7 @@ defmodule AshAdmin.Components.Resource.Show do
     assigns = assign(assigns, record: record, resource: resource, title: title, buttons: buttons?)
 
     ~H"""
-    <div class="shadow-lg overflow-hidden sm:rounded-md bg-white">
+    <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md bg-white dark:bg-slate-900">
       <h1 :if={@title} class="pt-2 pl-4 text-lg">{@title}</h1>
       <button
         :if={AshAdmin.Resource.actor?(@resource)}
@@ -59,7 +59,7 @@ defmodule AshAdmin.Components.Resource.Show do
         phx-value-domain={@domain}
         phx-value-pkey={encode_primary_key(@record)}
       >
-        <.icon name="hero-key" class="h-5 w-5 text-gray-500" />
+        <.icon name="hero-key" class="h-5 w-5 text-slate-500 dark:text-slate-400" />
       </button>
       <div class="px-4 py-5 sm:p-6">
         <div>
@@ -68,7 +68,7 @@ defmodule AshAdmin.Components.Resource.Show do
             <.link
               :if={destroy?(@resource)}
               navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&table=#{@table}&primary_key=#{encode_primary_key(@record)}"}
-              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
             >
               Destroy
             </.link>
@@ -76,7 +76,7 @@ defmodule AshAdmin.Components.Resource.Show do
             <.link
               :if={update?(@resource)}
               navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&table=#{@table}&primary_key=#{encode_primary_key(@record)}"}
-              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
             >
               Update
             </.link>
@@ -94,7 +94,7 @@ defmodule AshAdmin.Components.Resource.Show do
     ~H"""
     <div
       :for={{calculation, calculation_form} <- @calculations}
-      class="shadow-lg overflow-hidden sm:rounded-md mb-2 bg-white"
+      class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md mb-2 bg-white dark:bg-slate-900"
     >
       <div class="px-4 py-5 mt-2">
         <div>{to_name(calculation.name)}</div>
@@ -134,7 +134,7 @@ defmodule AshAdmin.Components.Resource.Show do
             <div class="px-4 py-3 text-right sm:px-6">
               <button
                 type="submit"
-                class="py-2 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+                class="py-2 px-4 mt-2 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-slate-300 dark:border-slate-600 hover:bg-slate-700 dark:hover:bg-slate-300 rounded-md justify-center items-center"
               >
                 Calculate
               </button>
@@ -152,7 +152,7 @@ defmodule AshAdmin.Components.Resource.Show do
     ~H"""
     <div
       :for={relationship <- AshAdmin.Components.Resource.Form.relationships(@resource, :show)}
-      class="shadow-lg overflow-hidden sm:rounded-md mb-2 bg-white"
+      class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md mb-2 bg-white dark:bg-slate-900"
     >
       <div class="px-4 py-5 mt-2">
         <div>
@@ -163,7 +163,7 @@ defmodule AshAdmin.Components.Resource.Show do
             phx-target={@myself}
             phx-value-relationship={relationship.name}
             type="button"
-            class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+            class="flex py-2 ml-4 px-4 mt-2 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-slate-300 dark:border-slate-600 hover:bg-slate-700 dark:hover:bg-slate-300 rounded-md justify-center items-center"
           >
             Load
           </button>
@@ -173,7 +173,7 @@ defmodule AshAdmin.Components.Resource.Show do
             phx-target={@myself}
             phx-value-relationship={relationship.name}
             type="button"
-            class="flex py-2 ml-4 px-4 mt-2 bg-indigo-600 text-white border-gray-600 hover:bg-gray-400 rounded-md justify-center items-center"
+            class="flex py-2 ml-4 px-4 mt-2 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-slate-300 dark:border-slate-600 hover:bg-slate-700 dark:hover:bg-slate-300 rounded-md justify-center items-center"
           >
             Unload
           </button>
@@ -250,7 +250,7 @@ defmodule AshAdmin.Components.Resource.Show do
             <.link
               :if={AshAdmin.Resource.show_action(@destination)}
               navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@destination_domain || Ash.Resource.Info.domain(@destination) || @domain)}&resource=#{AshAdmin.Resource.name(@destination)}&table=#{@context[:data_layer][:table]}&primary_key=#{encode_primary_key(@record)}&action_type=read"}
-              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
             >
               Show
             </.link>
@@ -321,7 +321,9 @@ defmodule AshAdmin.Components.Resource.Show do
           ])
         }
       >
-        <div class="block text-sm font-medium text-gray-700">{to_name(attribute.name)}</div>
+        <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+          {to_name(attribute.name)}
+        </div>
         <div>
           {render_maybe_sensitive_attribute(
             assigns,
@@ -335,7 +337,7 @@ defmodule AshAdmin.Components.Resource.Show do
     </div>
     <div :if={!Enum.empty?(@flags)} class="hidden sm:block" aria-hidden="true">
       <div class="py-5">
-        <div class="border-t border-gray-200" />
+        <div class="border-t border-slate-200 dark:border-slate-700" />
       </div>
     </div>
     <div :if={!Enum.empty?(@flags)} class="grid grid-cols-6 gap-6">
@@ -349,7 +351,9 @@ defmodule AshAdmin.Components.Resource.Show do
           ])
         }
       >
-        <div class="block text-sm font-medium text-gray-700">{to_name(attribute.name)}</div>
+        <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+          {to_name(attribute.name)}
+        </div>
         <div>
           {render_maybe_sensitive_attribute(
             assigns,
@@ -363,7 +367,7 @@ defmodule AshAdmin.Components.Resource.Show do
     </div>
     <div :if={!Enum.empty?(@bottom_attributes)} class="hidden sm:block" aria-hidden="true">
       <div class="py-5">
-        <div class="border-t border-gray-200" />
+        <div class="border-t border-slate-200 dark:border-slate-700" />
       </div>
     </div>
     <div :if={!Enum.empty?(@bottom_attributes)} class="grid grid-cols-6 gap-6">
@@ -378,7 +382,9 @@ defmodule AshAdmin.Components.Resource.Show do
           ])
         }
       >
-        <div class="block text-sm font-medium text-gray-700">{to_name(attribute.name)}</div>
+        <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+          {to_name(attribute.name)}
+        </div>
         <div>
           {render_maybe_sensitive_attribute(
             assigns,
@@ -537,17 +543,17 @@ defmodule AshAdmin.Components.Resource.Show do
     case Map.get(record, name) do
       true ->
         ~H"""
-        <.icon name="hero-check" class="h-4 w-4 text-gray-600" />
+        <.icon name="hero-check" class="h-4 w-4 text-slate-600 dark:text-slate-400" />
         """
 
       false ->
         ~H"""
-        <.icon name="hero-x-mark" class="h-4 w-4 text-gray-600" />
+        <.icon name="hero-x-mark" class="h-4 w-4 text-slate-600 dark:text-slate-400" />
         """
 
       _ ->
         ~H"""
-        <.icon name="hero-minus" class="h-4 w-4 text-gray-600" />
+        <.icon name="hero-minus" class="h-4 w-4 text-slate-600 dark:text-slate-400" />
         """
     end
   end
@@ -659,7 +665,7 @@ defmodule AshAdmin.Components.Resource.Show do
                   rows="3"
                   cols="40"
                   disabled
-                  class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                  class="resize-y mt-1 focus:ring-slate-500 focus:border-slate-400 block w-full shadow-sm sm:text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-md"
                 ><%= value!(Map.get(@record, @attribute.name)) %></textarea>
                 """
 
@@ -669,7 +675,7 @@ defmodule AshAdmin.Components.Resource.Show do
                   rows="1"
                   cols="20"
                   disabled
-                  class="resize-y mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                  class="resize-y mt-1 focus:ring-slate-500 focus:border-slate-400 block w-full shadow-sm sm:text-sm border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-md"
                 ><%= value!(Map.get(@record, @attribute.name)) %></textarea>
                 """
             end

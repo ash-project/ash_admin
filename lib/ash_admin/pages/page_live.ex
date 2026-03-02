@@ -13,7 +13,7 @@ defmodule AshAdmin.PageLive do
   use Phoenix.LiveView
   import AshAdmin.Helpers
   require Ash.Query
-  alias AshAdmin.Components.{Resource, TopNav}
+  alias AshAdmin.Components.{PageHeader, Resource, Sidebar}
 
   require Logger
 
@@ -66,6 +66,7 @@ defmodule AshAdmin.PageLive do
      |> assign(:tenant_mode, tenant_mode)
      |> assign(:tenant_options, tenant_options)
      |> assign(:tenant_suggestions, [])
+     |> assign(:sidebar_open, false)
      |> then(fn socket ->
        assign(socket, AshAdmin.ActorPlug.actor_assigns(socket, session))
      end)
@@ -79,53 +80,65 @@ defmodule AshAdmin.PageLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen flex flex-col">
+    <div class="flex h-full bg-slate-50 dark:bg-slate-950">
       <.live_component
-        module={TopNav}
-        id="top_nav"
+        module={Sidebar}
+        id="sidebar"
         domains={@domains}
         domain={@domain}
-        editing_tenant={@editing_tenant}
-        actor_domain={@actor_domain}
-        actor_tenant={@actor_tenant}
         resource={@resource}
+        prefix={@prefix}
+        open={@sidebar_open}
+        actor={@actor}
+        actor_domain={@actor_domain}
+        actor_resources={@actor_resources}
+        actor_paused={@actor_paused}
+        actor_tenant={@actor_tenant}
+        authorizing={@authorizing}
         tenant={@tenant}
         tenant_mode={@tenant_mode}
         tenant_options={@tenant_options}
         tenant_suggestions={@tenant_suggestions}
-        actor_resources={@actor_resources}
-        authorizing={@authorizing}
-        actor_paused={@actor_paused}
-        actor={@actor}
-        set_tenant="set_tenant"
-        clear_tenant="clear_tenant"
-        toggle_authorizing="toggle_authorizing"
-        toggle_actor_paused="toggle_actor_paused"
-        clear_actor="clear_actor"
-        prefix={@prefix}
+        editing_tenant={@editing_tenant}
       />
-      <div class="flex-1">
-        <.live_component
-          :if={@resource}
-          module={Resource}
-          id={@resource}
+      <%!-- Mobile backdrop --%>
+      <div
+        :if={@sidebar_open}
+        class="fixed inset-0 bg-black/50 z-30 md:hidden"
+        phx-click="toggle_sidebar"
+      />
+      <div class="flex-1 flex flex-col min-w-0 min-h-0">
+        <PageHeader.page_header
           resource={@resource}
-          set_actor="set_actor"
-          primary_key={@primary_key}
-          record={@record}
           domain={@domain}
-          action_type={@action_type}
-          url_path={@url_path}
-          params={@params}
           action={@action}
-          tenant={@tenant}
-          actor={unless @actor_paused, do: @actor}
-          authorizing={@authorizing}
+          action_type={@action_type}
           table={@table}
-          tables={@tables}
-          polymorphic_actions={@polymorphic_actions}
           prefix={@prefix}
         />
+        <main class="flex-1 min-h-0 overflow-y-auto admin-main">
+          <.live_component
+            :if={@resource}
+            module={Resource}
+            id={@resource}
+            resource={@resource}
+            set_actor="set_actor"
+            primary_key={@primary_key}
+            record={@record}
+            domain={@domain}
+            action_type={@action_type}
+            url_path={@url_path}
+            params={@params}
+            action={@action}
+            tenant={@tenant}
+            actor={unless @actor_paused, do: @actor}
+            authorizing={@authorizing}
+            table={@table}
+            tables={@tables}
+            polymorphic_actions={@polymorphic_actions}
+            prefix={@prefix}
+          />
+        </main>
       </div>
     </div>
     """
@@ -167,78 +180,76 @@ defmodule AshAdmin.PageLive do
     if socket.assigns.domain && socket.assigns.resource do
       action_type =
         case action_type do
-          "read" ->
-            :read
-
-          "update" ->
-            :update
-
-          "create" ->
-            :create
-
-          "destroy" ->
-            :destroy
-
-          "action" ->
-            :action
-
-          nil ->
-            if AshAdmin.Domain.default_resource_page(socket.assigns.domain) == :primary_read,
-              do: :read,
-              else: nil
+          "read" -> :read
+          "update" -> :update
+          "create" -> :create
+          "destroy" -> :destroy
+          "action" -> :action
+          nil -> default_action_type(socket.assigns.resource)
         end
 
       if action_type do
-        available_actions =
-          case action_type do
-            :read ->
-              AshAdmin.Resource.read_actions(socket.assigns.resource)
+        available_actions = available_actions(socket.assigns.resource, action_type)
 
-            :update ->
-              AshAdmin.Resource.update_actions(socket.assigns.resource)
-
-            :create ->
-              AshAdmin.Resource.create_actions(socket.assigns.resource)
-
-            :destroy ->
-              AshAdmin.Resource.destroy_actions(socket.assigns.resource)
-
-            :action ->
-              AshAdmin.Resource.generic_actions(socket.assigns.resource)
-          end
-
-        action =
-          Enum.find(
-            available_actions,
-            &(to_string(&1) == action)
-          )
-
-        if action do
-          assign(socket,
-            action_type: action_type,
-            action: Ash.Resource.Info.action(socket.assigns.resource, action)
-          )
+        if available_actions == [] do
+          assign(socket, action_type: nil, action: nil)
         else
           action =
-            Ash.Resource.Info.action(socket.assigns.resource, Enum.at(available_actions, 0))
+            Enum.find(
+              available_actions,
+              &(to_string(&1) == action)
+            )
 
-          if requested_action &&
-               to_string(action.name) != requested_action do
-            raise AshAdmin.Errors.NotFound,
-              thing: "action",
-              key: requested_action
+          if action do
+            assign(socket,
+              action_type: action_type,
+              action: Ash.Resource.Info.action(socket.assigns.resource, action)
+            )
+          else
+            action =
+              Ash.Resource.Info.action(socket.assigns.resource, Enum.at(available_actions, 0))
+
+            if requested_action && action &&
+                 to_string(action.name) != requested_action do
+              raise AshAdmin.Errors.NotFound,
+                thing: "action",
+                key: requested_action
+            end
+
+            if action do
+              assign(socket,
+                action_type: action.type,
+                action: action
+              )
+            else
+              assign(socket, action_type: nil, action: nil)
+            end
           end
-
-          assign(socket,
-            action_type: action.type,
-            action: action
-          )
         end
       else
         assign(socket, action_type: nil, action: nil)
       end
     else
       assign(socket, :action, nil)
+    end
+  end
+
+  defp default_action_type(resource) do
+    cond do
+      AshAdmin.Resource.read_actions(resource) != [] -> :read
+      AshAdmin.Resource.generic_actions(resource) != [] -> :action
+      AshAdmin.Resource.create_actions(resource) != [] -> :create
+      true -> nil
+    end
+  end
+
+  defp available_actions(resource, action_type) do
+    case action_type do
+      :read -> AshAdmin.Resource.read_actions(resource)
+      :update -> AshAdmin.Resource.update_actions(resource)
+      :create -> AshAdmin.Resource.create_actions(resource)
+      :destroy -> AshAdmin.Resource.destroy_actions(resource)
+      :action -> AshAdmin.Resource.generic_actions(resource)
     end
   end
 
@@ -374,6 +385,10 @@ defmodule AshAdmin.PageLive do
   end
 
   @impl true
+  def handle_event("toggle_sidebar", _, socket) do
+    {:noreply, assign(socket, :sidebar_open, !socket.assigns.sidebar_open)}
+  end
+
   def handle_event("toggle_authorizing", _, socket) do
     {:noreply,
      socket

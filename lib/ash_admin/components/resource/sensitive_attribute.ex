@@ -21,13 +21,13 @@ defmodule AshAdmin.Components.Resource.SensitiveAttribute do
       <span :if={@present? && !@viewed} class="italic">
         --redacted--
         <span class="cursor-pointer" phx-click="toggle_sensitive_attribute" phx-target={@myself}>
-          <.icon name="hero-eye-solid" class="w-5 h-5 text-gray-500" />
+          <.icon name="hero-eye-solid" class="w-5 h-5 text-slate-500 dark:text-slate-400" />
         </span>
       </span>
       <span :if={@present? && @viewed}>
         {render_slot(@inner_block)}
         <span class="cursor-pointer" phx-click="toggle_sensitive_attribute" phx-target={@myself}>
-          <.icon name="hero-eye-slash-solid" class="w-5 h-5 text-gray-500" />
+          <.icon name="hero-eye-slash-solid" class="w-5 h-5 text-slate-500 dark:text-slate-400" />
         </span>
       </span>
     </div>

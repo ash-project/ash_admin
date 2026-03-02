@@ -23,12 +23,6 @@ defmodule AshAdmin.Domain do
         default: :*,
         doc: "List of resources that should be included in the admin dashboard"
       ],
-      default_resource_page: [
-        type: {:in, [:schema, :primary_read]},
-        default: :schema,
-        doc:
-          "Set the default page for the resource to be the primary read action or the resource schema. Schema is the default for backwards compatibility, if a resource doesn't have a primary read action it will fallback to the schema view."
-      ],
       resource_group_labels: [
         type: :keyword_list,
         default: [],
@@ -56,10 +50,6 @@ defmodule AshAdmin.Domain do
 
   def show_resources(domain) do
     Spark.Dsl.Extension.get_opt(domain, [:admin], :show_resources, [], true)
-  end
-
-  def default_resource_page(domain) do
-    Spark.Dsl.Extension.get_opt(domain, [:admin], :default_resource_page, :schema, true)
   end
 
   def resource_group_labels(domain) do
