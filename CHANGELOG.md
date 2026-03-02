@@ -11,6 +11,29 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.0.0-rc.0](https://github.com/ash-project/ash_admin/compare/v0.14.0...v1.0.0-rc.0) (2026-03-02)
+### Breaking Changes:
+
+* completely rework the UI w/ dark mode by Zach Daniel
+
+
+
+### Bug Fixes:
+
+* handle missing browser pipeline in installation by Zach Daniel
+
+* Remove custom ID from Cinder tables that had dots in it from the resource module name (#381) by sevenseacat
+
+### Improvements:
+
+* rework json and markdown editors for CSP compliance by Zach Daniel
+
+* add forbidden banner by Zach Daniel
+
+* support typeahead/pills for many cardinality relationships by Zach Daniel
+
+* add list_tenants logic by Zach Daniel
+
 ## [v0.14.0](https://github.com/ash-project/ash_admin/compare/v0.13.26...v0.14.0) (2026-02-11)
 
 
