@@ -13,7 +13,7 @@ defmodule AshAdmin do
         :text
 
       {m, f, a} when is_list(a) ->
-        if function_exported?(m, f, length(a)) do
+        if Code.ensure_loaded?(m) && function_exported?(m, f, length(a)) do
           :dropdown
         else
           :typeahead
