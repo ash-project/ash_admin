@@ -236,6 +236,11 @@ ash_admin "/admin", csp_nonce_assign_key: :csp_nonce_value
 
 This will allow AshAdmin-generated inline CSS and JS blocks to execute normally.
 
+## Action Context
+
+AshAdmin adds `ash_admin?: true` to the context of all AshPhoenix forms it uses (read, update, and
+generic actions). This allows upstream logic to know if an action is being called by AshAdmin.
+
 ## Troubleshooting
 
 #### UI issues
