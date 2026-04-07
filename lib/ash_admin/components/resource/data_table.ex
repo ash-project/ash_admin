@@ -269,6 +269,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
         else
           %{}
         end
+        |> Map.put(:ash_admin?, true)
 
       query =
         socket.assigns[:resource]

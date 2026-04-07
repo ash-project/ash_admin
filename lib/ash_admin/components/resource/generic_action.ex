@@ -253,6 +253,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
         else
           %{}
         end
+        |> Map.put(:ash_admin?, true)
 
       form =
         AshPhoenix.Form.for_action(socket.assigns.resource, socket.assigns.action.name,
