@@ -11,6 +11,17 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.1.0](https://github.com/ash-project/ash_admin/compare/v1.0.0-rc.0...v1.1.0) (2026-04-13)
+### Breaking Changes:
+
+* completely rework the UI w/ dark mode by Zach Daniel
+
+
+
+### Bug Fixes:
+
+* use Code.ensure_loaded? before checking if function exported by Zach Daniel
+
 ## [v1.0.0-rc.0](https://github.com/ash-project/ash_admin/compare/v0.14.0...v1.0.0-rc.0) (2026-03-02)
 ### Breaking Changes:
 
