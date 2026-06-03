@@ -135,94 +135,34 @@ defmodule AshAdmin.Components.Resource.DataTable do
                     </.link>
 
                     <%!-- Edit: direct or dropdown --%>
-                    <%= case update_actions_list(@resource) do %>
-                      <% [] -> %>
-                      <% [one] -> %>
-                        <.link
-                          navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&action=#{one.name}&table=#{@table}&primary_key=#{encode_primary_key(record)}"}
-                          class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                          title="Edit"
-                        >
-                          <AshAdmin.CoreComponents.icon name="hero-pencil" class="h-4 w-4" />
-                        </.link>
-                      <% actions -> %>
-                        <div class="relative">
-                          <button
-                            type="button"
-                            phx-click={
-                              Phoenix.LiveView.JS.toggle(
-                                to: "#edit-dropdown-#{encode_primary_key(record)}"
-                              )
-                            }
-                            class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                            title="Edit"
-                          >
-                            <AshAdmin.CoreComponents.icon name="hero-pencil" class="h-4 w-4" />
-                          </button>
-                          <div
-                            id={"edit-dropdown-#{encode_primary_key(record)}"}
-                            class="hidden absolute right-0 top-full mt-1 w-40 bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 py-1 z-30"
-                            phx-click-away={
-                              Phoenix.LiveView.JS.hide(
-                                to: "#edit-dropdown-#{encode_primary_key(record)}"
-                              )
-                            }
-                          >
-                            <.link
-                              :for={action <- actions}
-                              navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=update&action=#{action.name}&table=#{@table}&primary_key=#{encode_primary_key(record)}"}
-                              class="block px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
-                            >
-                              {action_label(action)}
-                            </.link>
-                          </div>
-                        </div>
-                    <% end %>
+                    <.row_actions
+                      actions={update_actions_list(@resource)}
+                      record={record}
+                      action_type="update"
+                      icon="hero-pencil"
+                      title="Edit"
+                      hover_class="hover:text-slate-600 dark:hover:text-slate-200"
+                      dropdown_id={"edit-dropdown-#{encode_primary_key(record)}"}
+                      prefix={@prefix}
+                      domain={@domain}
+                      resource={@resource}
+                      table={@table}
+                    />
 
                     <%!-- Destroy: direct or dropdown --%>
-                    <%= case destroy_actions_list(@resource) do %>
-                      <% [] -> %>
-                      <% [one] -> %>
-                        <.link
-                          navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&action=#{one.name}&table=#{@table}&primary_key=#{encode_primary_key(record)}"}
-                          class="p-1 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400"
-                          title="Delete"
-                        >
-                          <AshAdmin.CoreComponents.icon name="hero-trash" class="h-4 w-4" />
-                        </.link>
-                      <% actions -> %>
-                        <div class="relative">
-                          <button
-                            type="button"
-                            phx-click={
-                              Phoenix.LiveView.JS.toggle(
-                                to: "#destroy-dropdown-#{encode_primary_key(record)}"
-                              )
-                            }
-                            class="p-1 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400"
-                            title="Delete"
-                          >
-                            <AshAdmin.CoreComponents.icon name="hero-trash" class="h-4 w-4" />
-                          </button>
-                          <div
-                            id={"destroy-dropdown-#{encode_primary_key(record)}"}
-                            class="hidden absolute right-0 top-full mt-1 w-40 bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 py-1 z-30"
-                            phx-click-away={
-                              Phoenix.LiveView.JS.hide(
-                                to: "#destroy-dropdown-#{encode_primary_key(record)}"
-                              )
-                            }
-                          >
-                            <.link
-                              :for={action <- actions}
-                              navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=destroy&action=#{action.name}&table=#{@table}&primary_key=#{encode_primary_key(record)}"}
-                              class="block px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
-                            >
-                              {action_label(action)}
-                            </.link>
-                          </div>
-                        </div>
-                    <% end %>
+                    <.row_actions
+                      actions={destroy_actions_list(@resource)}
+                      record={record}
+                      action_type="destroy"
+                      icon="hero-trash"
+                      title="Delete"
+                      hover_class="hover:text-rose-500 dark:hover:text-rose-400"
+                      dropdown_id={"destroy-dropdown-#{encode_primary_key(record)}"}
+                      prefix={@prefix}
+                      domain={@domain}
+                      resource={@resource}
+                      table={@table}
+                    />
 
                     <%!-- Set as actor --%>
                     <button
@@ -242,6 +182,60 @@ defmodule AshAdmin.Components.Resource.DataTable do
             </div>
           </div>
         </div>
+      </div>
+    </div>
+    """
+  end
+
+  attr :actions, :list, required: true
+  attr :record, :any, required: true
+  attr :action_type, :string, required: true
+  attr :icon, :string, required: true
+  attr :title, :string, required: true
+  attr :hover_class, :string, required: true
+  attr :dropdown_id, :string, required: true
+  attr :prefix, :any, required: true
+  attr :domain, :any, required: true
+  attr :resource, :any, required: true
+  attr :table, :any, required: true
+
+  defp row_actions(%{actions: []} = assigns), do: ~H""
+
+  defp row_actions(%{actions: [_single]} = assigns) do
+    ~H"""
+    <.link
+      navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=#{@action_type}&action=#{hd(@actions).name}&table=#{@table}&primary_key=#{encode_primary_key(@record)}"}
+      class={["p-1 text-slate-400", @hover_class]}
+      title={@title}
+    >
+      <AshAdmin.CoreComponents.icon name={@icon} class="h-4 w-4" />
+    </.link>
+    """
+  end
+
+  defp row_actions(assigns) do
+    ~H"""
+    <div class="relative">
+      <button
+        type="button"
+        phx-click={Phoenix.LiveView.JS.toggle(to: "##{@dropdown_id}")}
+        class={["p-1 text-slate-400", @hover_class]}
+        title={@title}
+      >
+        <AshAdmin.CoreComponents.icon name={@icon} class="h-4 w-4" />
+      </button>
+      <div
+        id={@dropdown_id}
+        class="hidden absolute right-0 top-full mt-1 w-40 bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-slate-200 dark:ring-slate-700 py-1 z-30"
+        phx-click-away={Phoenix.LiveView.JS.hide(to: "##{@dropdown_id}")}
+      >
+        <.link
+          :for={action <- @actions}
+          navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=#{@action_type}&action=#{action.name}&table=#{@table}&primary_key=#{encode_primary_key(@record)}"}
+          class="block px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+        >
+          {action_label(action)}
+        </.link>
       </div>
     </div>
     """

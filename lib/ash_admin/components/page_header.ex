@@ -49,15 +49,17 @@ defmodule AshAdmin.Components.PageHeader do
   end
 
   defp read_action_switcher(assigns) do
-    read_actions = get_read_actions(assigns.resource)
-    assigns = assign(assigns, :read_actions, read_actions)
+    case get_read_actions(assigns.resource) do
+      [] ->
+        ~H""
 
-    ~H"""
-    <div :if={@read_actions != []} class="relative">
-      <%= case @read_actions do %>
-        <% [single] -> %>
+      [single] ->
+        assigns = assign(assigns, :single, single)
+
+        ~H"""
+        <div class="relative">
           <.link
-            navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=read&action=#{single.name}&table=#{@table}"}
+            navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=read&action=#{@single.name}&table=#{@table}"}
             class={[
               "inline-flex items-center px-2.5 py-1 text-sm rounded-md transition-colors",
               if(@action && @action.type == :read,
@@ -66,9 +68,16 @@ defmodule AshAdmin.Components.PageHeader do
               )
             ]}
           >
-            {action_label(single)}
+            {action_label(@single)}
           </.link>
-        <% actions -> %>
+        </div>
+        """
+
+      read_actions ->
+        assigns = assign(assigns, :read_actions, read_actions)
+
+        ~H"""
+        <div class="relative">
           <button
             type="button"
             phx-click={JS.toggle(to: "#read-actions-dropdown")}
@@ -89,7 +98,7 @@ defmodule AshAdmin.Components.PageHeader do
             phx-click-away={JS.hide(to: "#read-actions-dropdown")}
           >
             <.link
-              :for={action <- actions}
+              :for={action <- @read_actions}
               navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=read&action=#{action.name}&table=#{@table}"}
               class={[
                 "block px-3 py-1.5 text-sm transition-colors",
@@ -102,9 +111,9 @@ defmodule AshAdmin.Components.PageHeader do
               {action_label(action)}
             </.link>
           </div>
-      <% end %>
-    </div>
-    """
+        </div>
+        """
+    end
   end
 
   defp generic_actions_dropdown(assigns) do
@@ -151,20 +160,26 @@ defmodule AshAdmin.Components.PageHeader do
   end
 
   defp create_action_button(assigns) do
-    create_actions = get_create_actions(assigns.resource)
-    assigns = assign(assigns, :create_actions, create_actions)
+    case get_create_actions(assigns.resource) do
+      [] ->
+        ~H""
 
-    ~H"""
-    <%= case @create_actions do %>
-      <% [] -> %>
-      <% [single] -> %>
+      [single] ->
+        assigns = assign(assigns, :single, single)
+
+        ~H"""
         <.link
-          navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=create&action=#{single.name}&table=#{@table}"}
+          navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=create&action=#{@single.name}&table=#{@table}"}
           class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 text-white dark:text-slate-900 transition-colors"
         >
           <AshAdmin.CoreComponents.icon name="hero-plus-mini" class="h-4 w-4" /> New
         </.link>
-      <% actions -> %>
+        """
+
+      create_actions ->
+        assigns = assign(assigns, :create_actions, create_actions)
+
+        ~H"""
         <div class="relative">
           <button
             type="button"
@@ -180,7 +195,7 @@ defmodule AshAdmin.Components.PageHeader do
             phx-click-away={JS.hide(to: "#create-actions-dropdown")}
           >
             <.link
-              :for={action <- actions}
+              :for={action <- @create_actions}
               navigate={"#{@prefix}?domain=#{AshAdmin.Domain.name(@domain)}&resource=#{AshAdmin.Resource.name(@resource)}&action_type=create&action=#{action.name}&table=#{@table}"}
               class="block px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
@@ -188,8 +203,8 @@ defmodule AshAdmin.Components.PageHeader do
             </.link>
           </div>
         </div>
-    <% end %>
-    """
+        """
+    end
   end
 
   defp get_read_actions(resource) do

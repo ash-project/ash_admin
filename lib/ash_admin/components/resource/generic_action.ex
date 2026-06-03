@@ -109,23 +109,37 @@ defmodule AshAdmin.Components.Resource.GenericAction do
         </div>
       <% end %>
 
-      <%= case @result do %>
-        <% :pending -> %>
-        <% :ok -> %>
-          <div class="flex justify-center pt-6">
-            <span class="text-sm text-slate-600 dark:text-slate-400">Success</span>
-          </div>
-        <% {:ok, result} -> %>
-          <div class="max-w-2xl mx-auto mt-6">
-            <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-auto sm:rounded-md bg-white dark:bg-slate-900 px-6 py-4">
-              {render_value(assigns, result, @action.returns, @action.constraints)}
-            </div>
-          </div>
-        <% :error -> %>
-          <div class="flex justify-center pt-6">
-            <span class="text-sm text-rose-600 dark:text-rose-400">Action failed</span>
-          </div>
-      <% end %>
+      {render_result(assigns)}
+    </div>
+    """
+  end
+
+  defp render_result(%{result: :pending} = assigns), do: ~H""
+
+  defp render_result(%{result: :ok} = assigns) do
+    ~H"""
+    <div class="flex justify-center pt-6">
+      <span class="text-sm text-slate-600 dark:text-slate-400">Success</span>
+    </div>
+    """
+  end
+
+  defp render_result(%{result: {:ok, result}} = assigns) do
+    assigns = assign(assigns, :result_value, result)
+
+    ~H"""
+    <div class="max-w-2xl mx-auto mt-6">
+      <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-auto sm:rounded-md bg-white dark:bg-slate-900 px-6 py-4">
+        {render_value(assigns, @result_value, @action.returns, @action.constraints)}
+      </div>
+    </div>
+    """
+  end
+
+  defp render_result(%{result: :error} = assigns) do
+    ~H"""
+    <div class="flex justify-center pt-6">
+      <span class="text-sm text-rose-600 dark:text-rose-400">Action failed</span>
     </div>
     """
   end
