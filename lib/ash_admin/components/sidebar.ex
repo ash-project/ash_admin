@@ -22,23 +22,26 @@ defmodule AshAdmin.Components.Sidebar do
   attr :tenant_options, :list, default: []
   attr :tenant_suggestions, :list, default: []
   attr :editing_tenant, :boolean, default: false
+  attr :variant, :atom, default: :desktop
 
   def render(assigns) do
     ~H"""
-    <div class="hidden md:flex md:w-64 md:shrink-0">
+    <div id={@id} class="relative md:flex md:w-64 md:shrink-0">
       <%!-- Mobile sidebar --%>
       <aside class={[
         "fixed inset-y-0 left-0 z-40 w-72 transform transition-transform duration-200 ease-in-out md:hidden",
         "bg-slate-900 dark:bg-slate-900 flex flex-col",
         if(@open, do: "translate-x-0", else: "-translate-x-full")
       ]}>
-        {render_sidebar_content(assigns)}
+        {render_sidebar_content(Map.put(assigns, :variant, :mobile))}
       </aside>
 
-      <%!-- Desktop sidebar --%>
-      <aside class="flex flex-col w-64 bg-slate-900 dark:bg-slate-900 overflow-y-auto">
-        {render_sidebar_content(assigns)}
-      </aside>
+      <div class="hidden md:flex md:w-64 md:shrink-0">
+        <%!-- Desktop sidebar --%>
+        <aside class="flex flex-col w-64 bg-slate-900 dark:bg-slate-900 overflow-y-auto">
+          {render_sidebar_content(Map.put(assigns, :variant, :desktop))}
+        </aside>
+      </div>
     </div>
     """
   end
@@ -107,7 +110,7 @@ defmodule AshAdmin.Components.Sidebar do
     <%!-- Status Panel --%>
     <div class="border-t border-slate-700/50 px-3 py-3 space-y-2">
       <%!-- Actor --%>
-      <div :if={@actor_resources != []} id="sidebar-actor" phx-hook="Actor" class="space-y-1.5">
+      <div :if={@actor_resources != []} id={"sidebar-actor-#{@variant}"} phx-hook="Actor" class="space-y-1.5">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Actor</span>
         </div>
@@ -172,7 +175,7 @@ defmodule AshAdmin.Components.Sidebar do
       <%!-- Tenant --%>
       <div
         :if={show_tenant?(@domains, @tenant_mode)}
-        id="sidebar-tenant"
+        id={"sidebar-tenant-#{@variant}"}
         phx-hook="Tenant"
         class="relative"
       >
@@ -209,11 +212,11 @@ defmodule AshAdmin.Components.Sidebar do
           for={to_form(%{}, as: :tenant)}
           phx-submit="set_tenant"
           phx-change="search_tenants"
-          id="tenant-typeahead-form"
+          id={"tenant-typeahead-form-#{@variant}"}
         >
           <ul
             :if={@tenant_suggestions != []}
-            id="tenant-suggestions"
+            id={"tenant-suggestions-#{@variant}"}
             phx-hook="PositionAbove"
             class="fixed z-50 bg-slate-800 border border-slate-700 rounded-md shadow-lg max-h-40 overflow-auto"
           >
@@ -239,7 +242,7 @@ defmodule AshAdmin.Components.Sidebar do
             />
             <button
               type="button"
-              phx-click={Phoenix.LiveView.JS.dispatch("submit", to: "#tenant-typeahead-form")}
+              phx-click={Phoenix.LiveView.JS.dispatch("submit", to: "#tenant-typeahead-form-#{@variant}")}
               class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
             >
               <AshAdmin.CoreComponents.icon name="hero-check-mini" class="h-4 w-4" />
@@ -268,7 +271,7 @@ defmodule AshAdmin.Components.Sidebar do
     ~H"""
     <div class="mt-1">
       <div :if={@editing_tenant}>
-        <.form for={to_form(%{}, as: :tenant)} phx-submit="set_tenant" id="tenant-form">
+        <.form for={to_form(%{}, as: :tenant)} phx-submit="set_tenant" id={"tenant-form-#{@variant}"}>
           <div class="flex items-center gap-1">
             <input
               type="text"
@@ -278,7 +281,7 @@ defmodule AshAdmin.Components.Sidebar do
             />
             <button
               type="button"
-              phx-click={Phoenix.LiveView.JS.dispatch("submit", to: "#tenant-form")}
+              phx-click={Phoenix.LiveView.JS.dispatch("submit", to: "#tenant-form-#{@variant}")}
               class="text-slate-400 hover:text-white"
             >
               <AshAdmin.CoreComponents.icon name="hero-check-mini" class="h-4 w-4" />
