@@ -24,12 +24,32 @@ defmodule AshAdmin do
   @doc false
   def list_tenants do
     {m, f, a} = Application.get_env(:ash_admin, :list_tenants)
-    apply(m, f, a)
+
+    m
+    |> apply(f, a)
+    |> normalize_tenant_options()
   end
 
   @doc false
   def search_tenants(search) do
     {m, f, a} = Application.get_env(:ash_admin, :list_tenants)
-    apply(m, f, a ++ [search])
+
+    m
+    |> apply(f, a ++ [search])
+    |> normalize_tenant_options()
+  end
+
+  @doc false
+  def normalize_tenant_options(options) do
+    Enum.map(options, &normalize_tenant_option/1)
+  end
+
+  defp normalize_tenant_option(%{label: label, value: value}) do
+    %{label: to_string(label), value: to_string(value)}
+  end
+
+  defp normalize_tenant_option(value) do
+    value = to_string(value)
+    %{label: value, value: value}
   end
 end

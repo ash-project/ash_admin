@@ -62,6 +62,7 @@ defmodule AshAdmin.PageLive do
      |> assign(:record, nil)
      |> assign(:domains, domains)
      |> assign(:tenant, session["tenant"])
+     |> assign(:tenant_label, nil)
      |> assign(:editing_tenant, false)
      |> assign(:tenant_mode, tenant_mode)
      |> assign(:tenant_options, tenant_options)
@@ -96,6 +97,7 @@ defmodule AshAdmin.PageLive do
         actor_tenant={@actor_tenant}
         authorizing={@authorizing}
         tenant={@tenant}
+        tenant_label={@tenant_label}
         tenant_mode={@tenant_mode}
         tenant_options={@tenant_options}
         tenant_suggestions={@tenant_suggestions}
@@ -483,11 +485,13 @@ defmodule AshAdmin.PageLive do
   def handle_event("set_tenant", data, socket) do
     tenant = data["tenant"]
     tenant = if tenant in [nil, ""], do: nil, else: tenant
+    tenant_label = if tenant, do: data["tenant_label"], else: nil
 
     socket =
       socket
       |> assign(:editing_tenant, false)
       |> assign(:tenant, tenant)
+      |> assign(:tenant_label, tenant_label)
       |> assign(:tenant_suggestions, [])
 
     if tenant do
@@ -501,6 +505,7 @@ defmodule AshAdmin.PageLive do
     {:noreply,
      socket
      |> assign(:tenant, nil)
+     |> assign(:tenant_label, nil)
      |> push_event("clear_tenant", %{})}
   end
 

@@ -94,7 +94,7 @@ By default, the tenant field in the admin navbar is a free-text input. You can c
 
 ### Dropdown
 
-If the function referenced by the MFA takes no additional arguments (i.e. the arity equals the length of the args list), AshAdmin renders a dropdown select with the returned list of tenant strings:
+If the function referenced by the MFA takes no additional arguments (i.e. the arity equals the length of the args list), AshAdmin renders a dropdown select. The function can return a list of tenant values:
 
 ```elixir
 config :ash_admin, :list_tenants, {MyApp.Tenants, :list_tenants, []}
@@ -103,15 +103,27 @@ config :ash_admin, :list_tenants, {MyApp.Tenants, :list_tenants, []}
 ```elixir
 defmodule MyApp.Tenants do
   def list_tenants do
-    # Return a list of tenant identifier strings
     ["tenant_a", "tenant_b", "tenant_c"]
+  end
+end
+```
+
+To show friendly labels while submitting tenant ids, return atom-keyed label/value maps:
+
+```elixir
+defmodule MyApp.Tenants do
+  def list_tenants do
+    [
+      %{label: "Dev Lab", value: "1"},
+      %{label: "Production Lab", value: "2"}
+    ]
   end
 end
 ```
 
 ### Typeahead
 
-If the function takes one additional argument beyond the args list, AshAdmin renders a typeahead input. The extra argument is the search text the user has typed:
+If the function takes one additional argument beyond the args list, AshAdmin renders a typeahead input. The extra argument is the search text the user has typed. The function can return tenant values or atom-keyed label/value maps:
 
 ```elixir
 config :ash_admin, :list_tenants, {MyApp.Tenants, :search_tenants, []}
@@ -121,11 +133,10 @@ config :ash_admin, :list_tenants, {MyApp.Tenants, :search_tenants, []}
 defmodule MyApp.Tenants do
   def search_tenants(""), do: []
   def search_tenants(search) do
-    # Return a filtered list of tenant identifier strings
     MyApp.Repo.all(
       from t in "tenants",
         where: ilike(t.name, ^"%#{search}%"),
-        select: t.name
+        select: %{label: t.name, value: t.id}
     )
   end
 end
