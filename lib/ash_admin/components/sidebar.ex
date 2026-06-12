@@ -18,6 +18,7 @@ defmodule AshAdmin.Components.Sidebar do
   attr :actor_tenant, :any, default: nil
   attr :authorizing, :boolean, default: true
   attr :tenant, :any, default: nil
+  attr :tenant_label, :any, default: nil
   attr :tenant_mode, :atom, default: nil
   attr :tenant_options, :list, default: []
   attr :tenant_suggestions, :list, default: []
@@ -197,7 +198,9 @@ defmodule AshAdmin.Components.Sidebar do
           class="w-full text-sm rounded-md bg-slate-800 border-slate-700 text-slate-300 focus:border-slate-500 focus:ring-slate-500"
         >
           <option value="">No tenant</option>
-          <option :for={t <- @tenant_options} value={t} selected={t == @tenant}>{t}</option>
+          <option :for={t <- @tenant_options} value={t.value} selected={t.value == @tenant}>
+            {t.label}
+          </option>
         </select>
       </.form>
     </div>
@@ -224,10 +227,11 @@ defmodule AshAdmin.Components.Sidebar do
               <button
                 type="button"
                 phx-click="set_tenant"
-                phx-value-tenant={s}
+                phx-value-tenant={s.value}
+                phx-value-tenant_label={s.label}
                 class="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-700 cursor-pointer"
               >
-                {s}
+                {s.label}
               </button>
             </li>
           </ul>
@@ -252,7 +256,7 @@ defmodule AshAdmin.Components.Sidebar do
       </div>
       <div :if={!@editing_tenant} class="flex items-center gap-2 text-sm">
         <a href="#" phx-click="start_editing_tenant" class="text-slate-400 hover:text-white">
-          {if @tenant, do: @tenant, else: "No tenant — Set"}
+          {tenant_display(assigns)}
         </a>
         <button
           :if={@tenant}
@@ -291,7 +295,7 @@ defmodule AshAdmin.Components.Sidebar do
       </div>
       <div :if={!@editing_tenant} class="flex items-center gap-2 text-sm">
         <a href="#" phx-click="start_editing_tenant" class="text-slate-400 hover:text-white">
-          {if @tenant, do: @tenant, else: "No tenant — Set"}
+          {tenant_display(assigns)}
         </a>
         <button
           :if={@tenant}
@@ -371,6 +375,14 @@ defmodule AshAdmin.Components.Sidebar do
         if group_index > 0, do: nil, else: nil
     end
   end
+
+  defp tenant_display(%{tenant: tenant}) when tenant in [nil, ""], do: "No tenant — Set"
+
+  defp tenant_display(%{tenant_label: tenant_label}) when tenant_label not in [nil, ""] do
+    tenant_label
+  end
+
+  defp tenant_display(%{tenant: tenant}), do: tenant
 
   defp show_tenant?(_domains, tenant_mode) when tenant_mode in [:dropdown, :typeahead], do: true
 
