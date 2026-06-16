@@ -20,6 +20,12 @@ defmodule AshAdmin.Test.Post do
     attribute :expires_at, :utc_datetime_usec do
       public?(true)
     end
+
+    # primitive array field for testing drag-and-drop reorder in admin forms
+    attribute :tags, {:array, :string} do
+      default([])
+      public?(true)
+    end
   end
 
   actions do

@@ -119,4 +119,34 @@ defmodule AshAdmin.Test.PageLiveTest do
 
     assert render_upload(photo, "small-logo.png") =~ "data-progress=\"100\""
   end
+
+  # simulates the Sortable.js hook pushing update_array_sorting after a drag reorder
+  test "allows reordering primitive array items via drag-and-drop sorting", %{conn: conn} do
+    {:ok, view, _html} =
+      live(conn, "/api/admin?domain=Test&resource=Post&action_type=create")
+
+    view
+    |> element("button[phx-click='append_value'][phx-value-field='tags']")
+    |> render_click()
+
+    view
+    |> element("button[phx-click='append_value'][phx-value-field='tags']")
+    |> render_click()
+
+    view
+    |> form("#form", %{"form" => %{"tags" => %{"0" => "first", "1" => "second"}}})
+    |> render_change()
+
+    # render_hook stands in for the client-side Sortable onEnd callback
+    view
+    |> element("#form_tags_sortable_list")
+    |> render_hook("update_array_sorting", %{
+      "path" => "form",
+      "field" => "tags",
+      "indices" => ["1", "0"]
+    })
+
+    assert has_element?(view, "input[name='form[tags][0]'][value='second']")
+    assert has_element?(view, "input[name='form[tags][1]'][value='first']")
+  end
 end

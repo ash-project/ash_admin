@@ -2003,10 +2003,6 @@ select {
   margin-bottom: 1rem;
 }
 
-.mb-6 {
-  margin-bottom: 1.5rem;
-}
-
 .ml-1 {
   margin-left: 0.25rem;
 }
@@ -2379,6 +2375,10 @@ select {
 
 .animate-spin {
   animation: spin 1s linear infinite;
+}
+
+.cursor-grab {
+  cursor: grab;
 }
 
 .cursor-not-allowed {
@@ -4233,6 +4233,16 @@ main.admin-main::after {
   height: 4rem;
 }
 
+/* Sortable.js drag-and-drop for array fields */
+
+.sortable-ghost {
+  opacity: 0.4;
+}
+
+.sortable-drag {
+  cursor: grabbing;
+}
+
 /* CodeMirror 6 editor styling */
 
 .cm-editor {
@@ -5057,6 +5067,10 @@ main.admin-main::after {
   --tw-ring-offset-width: 2px;
 }
 
+.active\:cursor-grabbing:active {
+  cursor: grabbing;
+}
+
 .active\:border-zinc-400:active {
   --tw-border-opacity: 1;
   border-color: rgb(161 161 170 / var(--tw-border-opacity));
@@ -5291,6 +5305,11 @@ main.admin-main::after {
     color: rgb(148 163 184 / var(--tw-text-opacity));
   }
 
+  .dark\:text-slate-500 {
+    --tw-text-opacity: 1;
+    color: rgb(100 116 139 / var(--tw-text-opacity));
+  }
+
   .dark\:text-slate-900 {
     --tw-text-opacity: 1;
     color: rgb(15 23 42 / var(--tw-text-opacity));
@@ -5392,6 +5411,11 @@ main.admin-main::after {
   .dark\:hover\:text-slate-200:hover {
     --tw-text-opacity: 1;
     color: rgb(226 232 240 / var(--tw-text-opacity));
+  }
+
+  .dark\:hover\:text-slate-300:hover {
+    --tw-text-opacity: 1;
+    color: rgb(203 213 225 / var(--tw-text-opacity));
   }
 
   .dark\:hover\:text-white:hover {
