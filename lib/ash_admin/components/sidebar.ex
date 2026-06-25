@@ -111,7 +111,12 @@ defmodule AshAdmin.Components.Sidebar do
     <%!-- Status Panel --%>
     <div class="border-t border-slate-700/50 px-3 py-3 space-y-2">
       <%!-- Actor --%>
-      <div :if={@actor_resources != []} id={"sidebar-actor-#{@variant}"} phx-hook="Actor" class="space-y-1.5">
+      <div
+        :if={@actor_resources != []}
+        id={"sidebar-actor-#{@variant}"}
+        phx-hook="Actor"
+        class="space-y-1.5"
+      >
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Actor</span>
         </div>
@@ -246,7 +251,9 @@ defmodule AshAdmin.Components.Sidebar do
             />
             <button
               type="button"
-              phx-click={Phoenix.LiveView.JS.dispatch("submit", to: "#tenant-typeahead-form-#{@variant}")}
+              phx-click={
+                Phoenix.LiveView.JS.dispatch("submit", to: "#tenant-typeahead-form-#{@variant}")
+              }
               class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
             >
               <AshAdmin.CoreComponents.icon name="hero-check-mini" class="h-4 w-4" />

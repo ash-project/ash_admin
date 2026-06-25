@@ -120,8 +120,8 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 >
                   {render_field_value(record, field_name, assigns)}
                 </:col>
-                
-    <!-- Action buttons column -->
+
+                <!-- Action buttons column -->
                 <:col :let={record} :if={actions?(@resource)} label="">
                   <div class="flex items-center gap-1">
                     <%!-- Show --%>
