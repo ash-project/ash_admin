@@ -10,8 +10,6 @@ defmodule AshAdmin.Components.Resource.Form do
   import AshAdmin.Helpers
   import AshAdmin.CoreComponents
 
-  require Logger
-
   attr :resource, :any, required: true
   attr :domain, :any, required: true
   attr :record, :any, default: nil
@@ -1253,7 +1251,7 @@ defmodule AshAdmin.Components.Resource.Form do
           name={@name || @form.name <> "[#{@attribute.name}]"}
           placeholder={placeholder(@default)}
         />
-      <% is_map(@attribute) and Map.has_key?(@attribute, :related_resource) && AshAdmin.Resource.label_field(@attribute.related_resource) -> %>
+      <% Map.has_key?(@attribute, :related_resource) && AshAdmin.Resource.label_field(@attribute.related_resource) -> %>
         <.live_component
           module={AshAdmin.Components.Resource.RelationshipField}
           id={@id || "#{@form.name}-#{@attribute.name}"}
@@ -2702,7 +2700,6 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
-  defp only_accepted(attributes, %{type: :read}), do: attributes
   defp only_accepted(_, %{type: :action}), do: []
 
   defp only_accepted(attributes, %{accept: accept}) do

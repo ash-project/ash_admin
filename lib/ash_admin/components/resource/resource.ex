@@ -7,8 +7,6 @@ defmodule AshAdmin.Components.Resource do
   @moduledoc false
   use Phoenix.LiveComponent
 
-  require Ash.Query
-
   alias AshAdmin.Components.Resource.{
     DataTable,
     Form,

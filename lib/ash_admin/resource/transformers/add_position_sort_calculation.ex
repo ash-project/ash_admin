@@ -12,8 +12,6 @@ defmodule AshAdmin.Resource.Transformers.AddPositionSortCalculation do
   use Spark.Dsl.Transformer
   use Ash.Resource.Calculation
 
-  require Logger
-
   alias Spark.Dsl.Transformer
 
   @impl true

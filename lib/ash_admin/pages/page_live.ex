@@ -257,12 +257,7 @@ defmodule AshAdmin.PageLive do
 
   defp assign_tables(socket, table) do
     if socket.assigns.resource do
-      tables =
-        if socket.assigns.resource do
-          AshAdmin.Resource.polymorphic_tables(socket.assigns.resource, socket.assigns.domains)
-        else
-          []
-        end
+      tables = AshAdmin.Resource.polymorphic_tables(socket.assigns.resource, socket.assigns.domains)
 
       if table && table != "" do
         assign(socket,
