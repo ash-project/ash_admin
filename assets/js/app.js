@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: MIT
 
 import topbar from "../vendor/topbar";
+// vendored Sortable.js for drag-and-drop reordering of primitive array fields
+import Sortable from "../vendor/sortable";
 import {
   EditorView, keymap, lineNumbers, highlightActiveLineGutter,
   highlightSpecialChars, drawSelection, dropCursor, rectangularSelection,
@@ -342,6 +344,39 @@ Hooks.MaintainAttrs = {
   },
   updated() {
     this.prevAttrs.forEach(([name, val]) => this.el.setAttribute(name, val));
+  },
+};
+
+// Sortable.js drag-and-drop for array fields
+Hooks.Sortable = {
+  // initialize Sortable on the array container when the LiveView hook mounts
+  mounted() {
+    this.sortable = new Sortable(this.el, {
+      animation: 150,
+      draggable: '[data-sortable="true"]',
+      handle: '[data-sort-handle="true"]',
+      ghostClass: "sortable-ghost",
+      dragClass: "sortable-drag",
+      forceFallback: true,
+      // after a drop, send the new row order to the server
+      onEnd: () => {
+        const indices = Array.from(
+          this.el.querySelectorAll('[data-sortable="true"]')
+        ).map((el) => el.dataset.sortIndex);
+        if (indices.length < 2) return;
+        this.pushEventTo(this.el, "update_array_sorting", {
+          path: this.el.dataset.path,
+          field: this.el.dataset.field,
+          indices: indices,
+        });
+      },
+    });
+  },
+  // tear down the Sortable instance when the hook is destroyed
+  destroyed() {
+    if (this.sortable) {
+      this.sortable.destroy();
+    }
   },
 };
 

@@ -21,6 +21,18 @@ main.admin-main::after {
   height: 4rem;
 }
 
+/* Sortable.js drag-and-drop for array fields */
+
+/* placeholder element is slightly transparent */
+.sortable-ghost {
+  opacity: 0.4;
+}
+
+/* draggable element is styled to indicate it's being dragged */
+.sortable-drag {
+  cursor: grabbing;
+}
+
 /* CodeMirror 6 editor styling */
 .cm-editor {
   min-height: 200px;

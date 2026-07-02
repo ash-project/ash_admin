@@ -1742,6 +1742,9 @@ defmodule AshAdmin.Components.Resource.Form do
     name = name || form.name <> "[#{attribute.name}]"
     id = id || form.id <> "_#{attribute.name}"
 
+    # normalize array items for rendering and Sortable row metadata
+    fallback_list = list_value(value || value(value, form, attribute))
+
     assigns =
       assign(assigns,
         form: form,
@@ -1750,40 +1753,58 @@ defmodule AshAdmin.Components.Resource.Form do
         value: value,
         name: name,
         id: id,
-        union_type: union_type || default_union_type(type, attribute.constraints[:items] || [])
+        union_type: union_type || default_union_type(type, attribute.constraints[:items] || []),
+        fallback_list: fallback_list
       )
 
     ~H"""
     <div>
+      <%!-- Sortable.js container: hook reads data-path/field and row data-sort-index values --%>
       <div
-        :for={
-          {this_value, index} <-
-            Enum.with_index(list_value(@value || value(@value, @form, @attribute)))
-        }
-        class="flex items-start gap-2 mt-1"
+        id={@id <> "_sortable_list"}
+        phx-hook="Sortable"
+        phx-target={@myself}
+        data-path={@form.name}
+        data-field={@attribute.name}
       >
-        <div class="flex-1">
-          {render_attribute_input(
-            assigns,
-            %{@attribute | type: @type, constraints: @attribute.constraints[:items] || []},
-            @form,
-            {:list_value, this_value},
-            @name <> "[#{index}]",
-            @id <> "_#{index}",
-            @union_type
-          )}
-        </div>
-        <button
-          type="button"
-          phx-click="remove_value"
-          phx-target={@myself}
-          phx-value-path={@form.name}
-          phx-value-field={@attribute.name}
-          phx-value-index={index}
-          class="inline-flex items-center gap-1 mt-1 px-2 py-1 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded"
+        <div
+          :for={{this_value, index} <- Enum.with_index(@fallback_list)}
+          data-sortable="true"
+          data-sort-index={index}
+          class="flex items-start gap-2 mt-1"
         >
-          <.icon name="hero-minus" class="h-3 w-3" /> Remove
-        </button>
+          <%!-- grip handle only; inputs stay editable outside the drag handle --%>
+          <button
+            type="button"
+            data-sort-handle="true"
+            class="inline-flex items-center mt-1 p-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 cursor-grab active:cursor-grabbing rounded"
+            aria-label="Drag to reorder"
+          >
+            <.icon name="hero-bars-3" class="h-4 w-4" />
+          </button>
+          <div class="flex-1">
+            {render_attribute_input(
+              assigns,
+              %{@attribute | type: @type, constraints: @attribute.constraints[:items] || []},
+              @form,
+              {:list_value, this_value},
+              @name <> "[#{index}]",
+              @id <> "_#{index}",
+              @union_type
+            )}
+          </div>
+          <button
+            type="button"
+            phx-click="remove_value"
+            phx-target={@myself}
+            phx-value-path={@form.name}
+            phx-value-field={@attribute.name}
+            phx-value-index={index}
+            class="inline-flex items-center gap-1 mt-1 px-2 py-1 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded"
+          >
+            <.icon name="hero-minus" class="h-3 w-3" /> Remove
+          </button>
+        </div>
       </div>
       <button
         type="button"
@@ -2222,6 +2243,24 @@ defmodule AshAdmin.Components.Resource.Form do
      |> assign(:form, form)}
   end
 
+  # handle drag-and-drop reorder events from the Sortable.js LiveView hook
+  def handle_event(
+        "update_array_sorting",
+        %{"path" => path, "field" => field, "indices" => indices},
+        socket
+      ) do
+    form =
+      AshPhoenix.Form.update_form(
+        socket.assigns.form,
+        path,
+        &sort_array_value(&1, field, indices)
+      )
+
+    {:noreply,
+     socket
+     |> assign(:form, form)}
+  end
+
   def handle_event("save", %{"form" => form_params}, socket) do
     form = socket.assigns.form
 
@@ -2436,6 +2475,18 @@ defmodule AshAdmin.Components.Resource.Form do
       else
         new_value
       end
+
+    new_params = Map.put(form.raw_params, field, new_value)
+
+    AshPhoenix.Form.validate(form, new_params)
+  end
+
+  # apply a new row order to array field params and re-validate the form
+  defp sort_array_value(form, field, indices) do
+    new_value =
+      form
+      |> AshPhoenix.Form.value(String.to_existing_atom(field))
+      |> AshAdmin.Helpers.reorder_by_indices(indices)
 
     new_params = Map.put(form.raw_params, field, new_value)
 

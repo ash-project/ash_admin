@@ -137,6 +137,44 @@ defmodule AshAdmin.Helpers do
     Ash.Resource.Info.attribute(resource, field).type in @simple_types
   end
 
+  # Array reordering helpers for Sortable.js drag-and-drop in admin forms
+
+  # normalize a list or map into a dense string-indexed map (%{"0" => ..., "1" => ...})
+  @doc false
+  def to_indexed_map(nil), do: %{}
+
+  def to_indexed_map(map) when is_map(map) do
+    map
+    |> Enum.filter(fn {k, _v} -> String.match?(k, ~r/^[0-9]+$/) end)
+    |> Enum.map(fn {k, v} -> {String.to_integer(k), v} end)
+    |> Enum.sort_by(&elem(&1, 0))
+    |> Enum.map(&elem(&1, 1))
+    |> to_indexed_map()
+  end
+
+  def to_indexed_map(list) when is_list(list) do
+    list
+    |> Enum.with_index()
+    |> Map.new(fn {value, index} -> {to_string(index), value} end)
+  end
+
+  def to_indexed_map(other) do
+    other |> List.wrap() |> to_indexed_map()
+  end
+
+  # reorder values by original indices in their new order (e.g. ["1", "0"] swaps two items)
+  @doc false
+  def reorder_by_indices(value, indices) when is_list(indices) do
+    indexed = to_indexed_map(value)
+
+    indices
+    |> Enum.map(&to_string/1)
+    |> Enum.map(&Map.get(indexed, &1))
+    |> Enum.reject(&is_nil/1)
+    |> Enum.with_index()
+    |> Map.new(fn {value, index} -> {to_string(index), value} end)
+  end
+
   def primary_action(resource, type) do
     actions =
       case type do
