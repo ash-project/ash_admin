@@ -29,19 +29,41 @@ defmodule AshAdmin.Test.Post do
   end
 
   actions do
-    default_accept(:*)
-    defaults(create: :*)
+    defaults([:read, create: :*])
 
     create :create_with_photo do
+      accept(:*)
       argument(:photo, :file)
       argument(:comments, {:array, :map})
 
       change(manage_relationship(:comments, type: :create))
     end
+
+    # read action with an array argument — exercised by DataTable sorting tests
+    read :filter_by_tags do
+      argument :tags, {:array, :string}, allow_nil?: true, public?: true
+    end
+
+    # generic action with an array argument — exercised by GenericAction sorting tests
+    action :echo_tags, {:array, :string} do
+      argument :tags, {:array, :string}, allow_nil?: true, public?: true
+
+      run(fn input, _ ->
+        {:ok, List.wrap(input.arguments[:tags])}
+      end)
+    end
+  end
+
+  calculations do
+    # calculation with an array argument — exercised by Show page sorting tests
+    calculate :join_tags, :string, expr("") do
+      argument :tags, {:array, :string}, allow_nil?: true
+    end
   end
 
   admin do
     resource_group(:group_a)
+    show_calculations([:join_tags])
   end
 
   relationships do

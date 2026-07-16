@@ -703,8 +703,11 @@ defmodule AshAdmin.Components.Resource.Show do
   def handle_event("validate-calculation", %{"calculation" => calculation_name} = params, socket) do
     calculation = Ash.Resource.Info.calculation(socket.assigns.resource, calculation_name)
 
+    arg_params =
+      AshAdmin.Helpers.sanitize_form_params(params[calculation_name] || %{})
+
     arg_form =
-      AshPhoenix.FilterForm.Arguments.new(params[calculation_name], calculation.arguments)
+      AshPhoenix.FilterForm.Arguments.new(arg_params, calculation.arguments)
       |> to_form()
 
     show_calculations =
@@ -728,18 +731,20 @@ defmodule AshAdmin.Components.Resource.Show do
     record = socket.assigns.record
     domain = socket.assigns.domain
 
+    calc_name = String.to_existing_atom(calculation)
+    calc_info = Ash.Resource.Info.calculation(socket.assigns.resource, calc_name)
+
     arguments =
       event
-      |> Map.get(calculation, [])
+      |> Map.get(calculation, %{})
+      |> AshAdmin.Helpers.normalize_argument_params(calc_info.arguments)
       |> Enum.map(fn {attr, value} -> {String.to_atom(attr), value} end)
       # This is a hack, it should not be populated in the form
       # or use used inputs etc.
       |> Enum.reject(fn {_, v} -> v in ["", nil] end)
 
-    calculation = String.to_existing_atom(calculation)
-
     calculations =
-      [{calculation, arguments}]
+      [{calc_name, arguments}]
 
     case Ash.load(
            record,
@@ -754,7 +759,7 @@ defmodule AshAdmin.Components.Resource.Show do
       {:error, errors} ->
         {:noreply,
          assign(socket,
-           calculation_errors: Map.put(socket.assigns.calculation_errors, calculation, errors)
+           calculation_errors: Map.put(socket.assigns.calculation_errors, calc_name, errors)
          )}
     end
   end
@@ -816,6 +821,53 @@ defmodule AshAdmin.Components.Resource.Show do
   # end
   # end
 
+  def handle_event(
+        "update_array_sorting",
+        %{"path" => path, "field" => field, "indices" => indices},
+        socket
+      ) do
+    [calc_name | decoded_path] =
+      path
+      |> Plug.Conn.Query.decode()
+      |> decoded_to_list()
+
+    path_to_params = decoded_path ++ [field]
+
+    calculation = Ash.Resource.Info.calculation(socket.assigns.resource, calc_name)
+
+    keyed_calculations = Map.new(socket.assigns.calculations)
+    current_params = keyed_calculations[calculation].params
+
+    new_value =
+      current_params
+      |> get_in(path_to_params)
+      |> reorder_by_indices(indices)
+
+    new_params = put_in(current_params, path_to_params, new_value)
+
+    arg_form =
+      AshPhoenix.FilterForm.Arguments.new(
+        AshAdmin.Helpers.sanitize_form_params(new_params),
+        calculation.arguments
+      )
+      |> to_form()
+
+    show_calculations =
+      AshAdmin.Resource.show_calculations(socket.assigns.resource)
+
+    calculations =
+      socket.assigns.calculations
+      |> Map.new()
+      |> Map.put(calculation, arg_form)
+      |> Enum.sort_by(fn {calc, _form} ->
+        Enum.find_index(show_calculations, fn name ->
+          name == calc.name
+        end)
+      end)
+
+    {:noreply, assign(socket, :calculations, calculations)}
+  end
+
   def handle_event(event, %{"path" => path, "field" => field} = params, socket)
       when event in ["add_form", "append_value"] do
     to_append =
@@ -842,11 +894,18 @@ defmodule AshAdmin.Components.Resource.Show do
         nil ->
           put_in(current_params, path_to_params, %{"0" => to_append})
 
+        values when is_list(values) ->
+          put_in(
+            current_params,
+            path_to_params,
+            AshAdmin.Helpers.to_indexed_map(values ++ [to_append])
+          )
+
         values ->
           to_place =
             values
             |> Map.keys()
-            |> Enum.filter(&String.match?(&1, ~r/[[:digit]]/))
+            |> Enum.filter(&String.match?(&1, ~r/[[:digit:]]/))
             |> Enum.map(&String.to_integer/1)
             |> case do
               [] -> "0"
@@ -857,7 +916,10 @@ defmodule AshAdmin.Components.Resource.Show do
       end
 
     arg_form =
-      AshPhoenix.FilterForm.Arguments.new(new_params, calculation.arguments)
+      AshPhoenix.FilterForm.Arguments.new(
+        AshAdmin.Helpers.sanitize_form_params(new_params),
+        calculation.arguments
+      )
       |> to_form()
 
     show_calculations =
@@ -897,7 +959,10 @@ defmodule AshAdmin.Components.Resource.Show do
     new_params = pop_in(current_params, decoded_path) |> elem(1)
 
     arg_form =
-      AshPhoenix.FilterForm.Arguments.new(new_params, calculation.arguments)
+      AshPhoenix.FilterForm.Arguments.new(
+        AshAdmin.Helpers.sanitize_form_params(new_params || %{}),
+        calculation.arguments
+      )
       |> to_form()
 
     show_calculations =

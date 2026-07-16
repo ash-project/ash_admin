@@ -37,5 +37,14 @@ defmodule Demo.Accounts.Calculator do
         :ok
       end
     end
+
+    # demo: primitive array arg for drag-and-drop sorting in GenericAction forms
+    action :echo_tags, {:array, :string} do
+      argument :tags, {:array, :string}, allow_nil?: true, public?: true
+
+      run fn input, _ ->
+        {:ok, List.wrap(input.arguments[:tags])}
+      end
+    end
   end
 end

@@ -143,10 +143,10 @@ defmodule AshAdmin.Helpers do
   @doc false
   def to_indexed_map(nil), do: %{}
 
-  def to_indexed_map(map) when is_map(map) do
+  def to_indexed_map(map) when is_map(map) and not is_struct(map) do
     map
-    |> Enum.filter(fn {k, _v} -> String.match?(k, ~r/^[0-9]+$/) end)
-    |> Enum.map(fn {k, v} -> {String.to_integer(k), v} end)
+    |> Enum.filter(fn {k, _v} -> digit_key?(k) end)
+    |> Enum.map(fn {k, v} -> {String.to_integer(to_string(k)), v} end)
     |> Enum.sort_by(&elem(&1, 0))
     |> Enum.map(&elem(&1, 1))
     |> to_indexed_map()
@@ -173,6 +173,75 @@ defmodule AshAdmin.Helpers do
     |> Enum.reject(&is_nil/1)
     |> Enum.with_index()
     |> Map.new(fn {value, index} -> {to_string(index), value} end)
+  end
+
+  # Strip LiveView `_unused_*` keys and keep only digit indexes for array maps.
+  # Prevents polluted tag params from exploding into fake rows on phx-change.
+  @doc false
+  
+  def sanitize_form_params(nil), do: nil
+
+  def sanitize_form_params(params) when is_map(params) and not is_struct(params) do
+    cleaned =
+      params
+      |> Enum.reject(fn {key, _value} -> unused_param?(key) end)
+      |> Map.new(fn {key, value} -> {key, sanitize_form_params(value)} end)
+
+    if indexed_array_map?(cleaned) do
+      to_indexed_map(cleaned)
+    else
+      cleaned
+    end
+  end
+
+  def sanitize_form_params(params) when is_list(params) do
+    Enum.map(params, &sanitize_form_params/1)
+  end
+
+  def sanitize_form_params(other), do: other
+
+
+
+
+  # FilterForm.Arguments casts indexed maps as keys; convert array args to lists first.
+  @doc false
+  def normalize_argument_params(params, arguments) when is_map(params) and is_list(arguments) do
+    params = sanitize_form_params(params)
+
+    Enum.reduce(arguments, params, fn argument, acc ->
+      name = to_string(argument.name)
+
+      case {Map.get(acc, name), argument.type} do
+        {value, {:array, _}} when is_map(value) and not is_struct(value) ->
+          Map.put(acc, name, indexed_map_values(value))
+
+        _ ->
+          acc
+      end
+    end)
+  end
+
+  def normalize_argument_params(params, _arguments), do: params
+
+
+
+
+
+  defp indexed_map_values(map) do
+    map
+    |> to_indexed_map()
+    |> Enum.sort_by(fn {key, _} -> String.to_integer(key) end)
+    |> Enum.map(&elem(&1, 1))
+  end
+
+  defp unused_param?(key), do: String.starts_with?(to_string(key), "_unused_")
+
+  defp digit_key?(key), do: String.match?(to_string(key), ~r/^[0-9]+$/)
+
+  defp indexed_array_map?(map) when map_size(map) == 0, do: false
+
+  defp indexed_array_map?(map) do
+    Enum.all?(Map.keys(map), &digit_key?/1)
   end
 
   def primary_action(resource, type) do

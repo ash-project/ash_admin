@@ -117,7 +117,8 @@ defmodule AshAdmin.MixProject do
       "assets.setup": [
         "tailwind.install --if-missing",
         "esbuild.install --if-missing",
-        "cmd --cd assets npm install"
+        # cmd /c avoids Windows :eacces when Mix tries to spawn npm.cmd directly
+        "cmd --cd assets -- cmd /c npm install"
       ],
       "assets.build": ["tailwind default", "esbuild default"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],

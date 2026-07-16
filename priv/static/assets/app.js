@@ -33683,6 +33683,7 @@ ${text}</tr>
     }
   };
   Hooks.Sortable = {
+    // initialize Sortable on the array container when the LiveView hook mounts
     mounted() {
       this.sortable = new import_sortable.default(this.el, {
         animation: 150,
@@ -33691,6 +33692,7 @@ ${text}</tr>
         ghostClass: "sortable-ghost",
         dragClass: "sortable-drag",
         forceFallback: true,
+        // after a drop, send the new row order to the server
         onEnd: () => {
           const indices = Array.from(
             this.el.querySelectorAll('[data-sortable="true"]')
@@ -33705,6 +33707,7 @@ ${text}</tr>
         }
       });
     },
+    // tear down the Sortable instance when the hook is destroyed
     destroyed() {
       if (this.sortable) {
         this.sortable.destroy();

@@ -1745,7 +1745,7 @@ defmodule AshAdmin.Components.Resource.Form do
     id = id || form.id <> "_#{attribute.name}"
 
     # normalize array items for rendering and Sortable row metadata
-    fallback_list = list_value(value || value(value, form, attribute))
+    fallback_list = list_value(value || value(value, form, attribute), type)
 
     assigns =
       assign(assigns,
@@ -1899,16 +1899,30 @@ defmodule AshAdmin.Components.Resource.Form do
     end
   end
 
-  defp list_value(value) do
-    if is_map(value) do
-      value
-      |> Map.to_list()
-      |> Enum.sort_by(fn {key, _} -> String.to_integer(key) end)
-      |> Enum.map(&elem(&1, 1))
+  defp list_value(value, item_type)
+
+  defp list_value(value, _item_type) when is_map(value) and not is_struct(value) do
+    value
+    |> AshAdmin.Helpers.to_indexed_map()
+    |> Enum.sort_by(fn {key, _} -> String.to_integer(key) end)
+    |> Enum.map(&elem(&1, 1))
+  end
+
+  # Charlists are lists of integers; for string arrays treat as one string, not N tags
+  defp list_value(value, item_type) when is_list(value) do
+    if string_item_type?(item_type) and value != [] and Enum.all?(value, &is_integer/1) do
+      [List.to_string(value)]
     else
-      List.wrap(value)
+      value
     end
   end
+
+  defp list_value(nil, _item_type), do: []
+  defp list_value(value, _item_type) when is_binary(value), do: [value]
+  defp list_value(value, _item_type), do: List.wrap(value)
+
+  defp string_item_type?(type) when type in [:string, Ash.Type.String], do: true
+  defp string_item_type?(_), do: false
 
   defp embedded_type_pkey({:array, type}) do
     embedded_type_pkey(type)
@@ -2278,6 +2292,7 @@ defmodule AshAdmin.Components.Resource.Form do
       form_params
       |> replace_new_union_stubs()
       |> replace_unused()
+      |> AshAdmin.Helpers.sanitize_form_params()
       |> add_file_uploads(socket.assigns.uploaded_files)
 
     case AshPhoenix.Form.submit(form,
@@ -2313,6 +2328,7 @@ defmodule AshAdmin.Components.Resource.Form do
       params
       |> replace_new_union_stubs()
       |> replace_unused()
+      |> AshAdmin.Helpers.sanitize_form_params()
 
     form =
       AshPhoenix.Form.validate(socket.assigns.form, params,
@@ -2406,7 +2422,8 @@ defmodule AshAdmin.Components.Resource.Form do
   end
 
   defp replace_unused(params) when is_map(params) do
-    Map.to_list(params)
+    params
+    |> Map.to_list()
     |> replace_unused()
     |> Map.new()
   end

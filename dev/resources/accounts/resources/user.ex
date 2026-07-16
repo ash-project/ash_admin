@@ -23,15 +23,14 @@ defmodule Demo.Accounts.User do
     end
 
     show_action :read
-    read_actions [:me, :read, :by_id, :by_name]
+    read_actions [:me, :read, :by_id, :by_name, :filter_by_tags]
 
     table_columns [:id, :first_name, :last_name, :representative, :admin, :full_name, :api_key, :date_of_birth]
     table_filterable_columns [:first_name]
     table_sortable_columns [:first_name, :last_name]
 
-    show_calculations [:multi_arguments, :is_super_admin?, :full_name, :nested_embed]
+    show_calculations [:multi_arguments, :is_super_admin?, :full_name, :nested_embed, :join_tags]
   end
-
   multitenancy do
     strategy :attribute
     attribute :org
@@ -65,6 +64,11 @@ defmodule Demo.Accounts.User do
       argument :last_name, :string, allow_nil?: false
 
       filter expr(first_name == ^arg(:first_name) and last_name == ^arg(:last_name))
+    end
+
+    # demo: primitive array arg for drag-and-drop sorting in DataTable query forms
+    read :filter_by_tags do
+      argument :tags, {:array, :string}, allow_nil?: true, public?: true
     end
 
     create :create do
@@ -125,6 +129,11 @@ defmodule Demo.Accounts.User do
 
     calculate :nested_embed, :string, expr(tags) do
       argument :nested_embed, Demo.Accounts.NestedEmbed, allow_nil?: false
+    end
+
+    # demo: primitive array arg for drag-and-drop sorting on Show calculation forms
+    calculate :join_tags, :string, expr("") do
+      argument :tags, {:array, :string}, allow_nil?: true
     end
   end
 

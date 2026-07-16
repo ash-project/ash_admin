@@ -269,14 +269,14 @@ defmodule AshAdmin.Components.Resource.GenericAction do
   end
 
   def handle_event("validate", params, socket) do
-    params = params["form"] || %{}
+    params = AshAdmin.Helpers.sanitize_form_params(params["form"] || %{})
     form = AshPhoenix.Form.validate(socket.assigns.form, params)
 
     {:noreply, assign(socket, form: form)}
   end
 
   def handle_event("save", params, socket) do
-    params = params["form"] || %{}
+    params = AshAdmin.Helpers.sanitize_form_params(params["form"] || %{})
 
     case AshPhoenix.Form.submit(socket.assigns.form, params: params, force?: true) do
       :ok -> {:noreply, assign(socket, result: :ok)}
@@ -345,6 +345,23 @@ defmodule AshAdmin.Components.Resource.GenericAction do
      |> assign(:form, form)}
   end
 
+  def handle_event(
+        "update_array_sorting",
+        %{"path" => path, "field" => field, "indices" => indices},
+        socket
+      ) do
+    form =
+      AshPhoenix.Form.update_form(
+        socket.assigns.form,
+        path,
+        &sort_array_value(&1, field, indices)
+      )
+
+    {:noreply,
+     socket
+     |> assign(:form, form)}
+  end
+
   defp indexed_list(map) when is_map(map) do
     map
     |> Map.keys()
@@ -407,6 +424,17 @@ defmodule AshAdmin.Components.Resource.GenericAction do
       else
         new_value
       end
+
+    new_params = Map.put(form.params, field, new_value)
+
+    AshPhoenix.Form.validate(form, new_params)
+  end
+
+  defp sort_array_value(form, field, indices) do
+    new_value =
+      form
+      |> AshPhoenix.Form.value(String.to_existing_atom(field))
+      |> reorder_by_indices(indices)
 
     new_params = Map.put(form.params, field, new_value)
 

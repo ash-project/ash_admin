@@ -17,8 +17,63 @@ defmodule AshAdmin.HelpersTest do
       assert Helpers.to_indexed_map(%{"0" => "a", "2" => "b"}) == %{"0" => "a", "1" => "b"}
     end
 
+    test "drops non-digit keys such as LiveView _unused_ params" do
+      assert Helpers.to_indexed_map(%{
+               "0" => "a",
+               "_unused_164" => "true",
+               "1" => "b"
+             }) == %{"0" => "a", "1" => "b"}
+    end
+
     test "returns an empty map for nil" do
       assert Helpers.to_indexed_map(nil) == %{}
+    end
+  end
+
+  describe "sanitize_form_params/1" do
+    test "strips _unused_ keys and densifies indexed arrays" do
+      params = %{
+        "tags" => %{
+          "0" => "hello",
+          "2" => "world",
+          "_unused_164" => "true",
+          "_unused_459" => "true"
+        },
+        "_unused_other" => ""
+      }
+
+      assert Helpers.sanitize_form_params(params) == %{
+               "tags" => %{"0" => "hello", "1" => "world"}
+             }
+    end
+
+    test "leaves named nested maps alone" do
+      params = %{"profile" => %{"name" => "Ada", "_unused_1" => ""}}
+
+      assert Helpers.sanitize_form_params(params) == %{
+               "profile" => %{"name" => "Ada"}
+             }
+    end
+  end
+
+  describe "normalize_argument_params/2" do
+    test "converts array argument indexed maps to value lists" do
+      arguments = [
+        %Ash.Resource.Calculation.Argument{
+          name: :tags,
+          type: {:array, Ash.Type.String},
+          allow_nil?: true,
+          constraints: []
+        }
+      ]
+
+      params = %{
+        "tags" => %{"0" => "hello", "1" => "world", "_unused_9" => "true"}
+      }
+
+      assert Helpers.normalize_argument_params(params, arguments) == %{
+               "tags" => ["hello", "world"]
+             }
     end
   end
 

@@ -354,7 +354,11 @@ defmodule AshAdmin.Components.Resource.DataTable do
   end
 
   def handle_event("validate", %{"query" => query}, socket) do
-    query = AshPhoenix.Form.validate(socket.assigns.query, query)
+    query =
+      AshPhoenix.Form.validate(
+        socket.assigns.query,
+        AshAdmin.Helpers.sanitize_form_params(query)
+      )
 
     {:noreply, assign(socket, query: query)}
   end
@@ -363,7 +367,10 @@ defmodule AshAdmin.Components.Resource.DataTable do
     {:noreply,
      push_navigate(
        socket,
-       to: self_path(socket.assigns.url_path, socket.assigns.params, %{"args" => query_params})
+       to:
+         self_path(socket.assigns.url_path, socket.assigns.params, %{
+           "args" => AshAdmin.Helpers.sanitize_form_params(query_params)
+         })
      )}
   end
 
@@ -434,6 +441,23 @@ defmodule AshAdmin.Components.Resource.DataTable do
      |> assign(:query, query)}
   end
 
+  def handle_event(
+        "update_array_sorting",
+        %{"path" => path, "field" => field, "indices" => indices},
+        socket
+      ) do
+    query =
+      AshPhoenix.Form.update_form(
+        socket.assigns.query,
+        path,
+        &sort_array_value(&1, field, indices)
+      )
+
+    {:noreply,
+     socket
+     |> assign(:query, query)}
+  end
+
   defp indexed_list(map) when is_map(map) do
     map
     |> Map.keys()
@@ -496,6 +520,17 @@ defmodule AshAdmin.Components.Resource.DataTable do
       else
         new_value
       end
+
+    new_params = Map.put(form.params, field, new_value)
+
+    AshPhoenix.Form.validate(form, new_params)
+  end
+
+  defp sort_array_value(form, field, indices) do
+    new_value =
+      form
+      |> AshPhoenix.Form.value(String.to_existing_atom(field))
+      |> reorder_by_indices(indices)
 
     new_params = Map.put(form.params, field, new_value)
 

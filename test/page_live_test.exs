@@ -149,4 +149,110 @@ defmodule AshAdmin.Test.PageLiveTest do
     assert has_element?(view, "input[name='form[tags][0]'][value='second']")
     assert has_element?(view, "input[name='form[tags][1]'][value='first']")
   end
+
+  # DataTable query forms use the same Sortable UI; the event is handled on :query
+  test "allows reordering array items on data table query forms", %{conn: conn} do
+    {:ok, view, _html} =
+      live(
+        conn,
+        "/api/admin?domain=Test&resource=Post&action_type=read&action=filter_by_tags"
+      )
+
+    view
+    |> element("button[phx-click='append_value'][phx-value-field='tags']")
+    |> render_click()
+
+    view
+    |> element("button[phx-click='append_value'][phx-value-field='tags']")
+    |> render_click()
+
+    view
+    |> form("form[as=query]", %{"query" => %{"tags" => %{"0" => "first", "1" => "second"}}})
+    |> render_change()
+
+    view
+    |> element("#query_tags_sortable_list")
+    |> render_hook("update_array_sorting", %{
+      "path" => "query",
+      "field" => "tags",
+      "indices" => ["1", "0"]
+    })
+
+    assert has_element?(view, "input[name='query[tags][0]'][value='second']")
+    assert has_element?(view, "input[name='query[tags][1]'][value='first']")
+  end
+
+  # GenericAction parameter forms handle update_array_sorting on :form
+  test "allows reordering array items on generic action forms", %{conn: conn} do
+    {:ok, view, _html} =
+      live(
+        conn,
+        "/api/admin?domain=Test&resource=Post&action_type=action&action=echo_tags"
+      )
+
+    view
+    |> element("button[phx-click='append_value'][phx-value-field='tags']")
+    |> render_click()
+
+    view
+    |> element("button[phx-click='append_value'][phx-value-field='tags']")
+    |> render_click()
+
+    view
+    |> form("form[as=form]", %{"form" => %{"tags" => %{"0" => "first", "1" => "second"}}})
+    |> render_change()
+
+    view
+    |> element("#form_tags_sortable_list")
+    |> render_hook("update_array_sorting", %{
+      "path" => "form",
+      "field" => "tags",
+      "indices" => ["1", "0"]
+    })
+
+    assert has_element?(view, "input[name='form[tags][0]'][value='second']")
+    assert has_element?(view, "input[name='form[tags][1]'][value='first']")
+  end
+
+  # Show page calculations track args as maps, not AshPhoenix.Form structs
+  test "allows reordering array items on show page calculation forms", %{conn: conn} do
+    post =
+      AshAdmin.Test.Post
+      |> Ash.Changeset.for_create(:create, %{body: "hello"})
+      |> Ash.create!()
+
+    primary_key = AshAdmin.Helpers.encode_primary_key(post)
+
+    {:ok, view, _html} =
+      live(
+        conn,
+        "/api/admin?domain=Test&resource=Post&action_type=read&primary_key=#{primary_key}"
+      )
+
+    view
+    |> element("button[phx-click='append_value'][phx-value-field='tags']")
+    |> render_click()
+
+    view
+    |> element("button[phx-click='append_value'][phx-value-field='tags']")
+    |> render_click()
+
+    view
+    |> form("form[phx-change=validate-calculation]", %{
+      "calculation" => "join_tags",
+      "join_tags" => %{"tags" => %{"0" => "first", "1" => "second"}}
+    })
+    |> render_change()
+
+    view
+    |> element("#join_tags_tags_sortable_list")
+    |> render_hook("update_array_sorting", %{
+      "path" => "join_tags",
+      "field" => "tags",
+      "indices" => ["1", "0"]
+    })
+
+    assert has_element?(view, "input[name='join_tags[tags][0]'][value='second']")
+    assert has_element?(view, "input[name='join_tags[tags][1]'][value='first']")
+  end
 end
