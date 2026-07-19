@@ -130,7 +130,8 @@ defmodule AshAdmin.Helpers do
 
   @simple_types [
     Ash.Type.String,
-    Ash.Type.UUID
+    Ash.Type.UUID,
+    Ash.Type.UUIDv7
   ]
 
   defp simple_type?(resource, field) do
