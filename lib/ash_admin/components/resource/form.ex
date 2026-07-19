@@ -1196,7 +1196,7 @@ defmodule AshAdmin.Components.Resource.Form do
         id,
         _
       )
-      when type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID, Ash.Type.Atom] do
+      when type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID, Ash.Type.UUIDv7, Ash.Type.Atom] do
     assigns =
       assign(assigns,
         attribute: attribute,
@@ -2651,7 +2651,7 @@ defmodule AshAdmin.Components.Resource.Form do
           # short text goes at the top
           not short_text?(resource, attribute),
           # Other strings go at the bottom
-          attribute.type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID]
+          attribute.type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID, Ash.Type.UUIDv7]
         }
       end)
 
