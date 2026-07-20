@@ -4235,9 +4235,13 @@ main.admin-main::after {
 
 /* Sortable.js drag-and-drop for array fields */
 
+/* placeholder element is slightly transparent */
+
 .sortable-ghost {
   opacity: 0.4;
 }
+
+/* draggable element is styled to indicate it's being dragged */
 
 .sortable-drag {
   cursor: grabbing;

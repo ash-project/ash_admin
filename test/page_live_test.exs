@@ -120,6 +120,20 @@ defmodule AshAdmin.Test.PageLiveTest do
     assert render_upload(photo, "small-logo.png") =~ "data-progress=\"100\""
   end
 
+  test "a nullable boolean argument renders a select with a nil option", %{conn: conn} do
+    {:ok, view, _html} =
+      live(
+        conn,
+        "/api/admin?domain=Domain&resource=Post&action_type=create&action=create_with_flag"
+      )
+
+    html = view |> element("select[name='form[flag]']") |> render()
+
+    assert html =~ ~s|<option value="">-</option>|
+    assert html =~ ~s|<option value="true">True</option>|
+    assert html =~ ~s|<option value="false">False</option>|
+  end
+
   # simulates the Sortable.js hook pushing update_array_sorting after a drag reorder
   test "allows reordering primitive array items via drag-and-drop sorting", %{conn: conn} do
     {:ok, view, _html} =

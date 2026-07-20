@@ -1101,7 +1101,8 @@ defmodule AshAdmin.Components.Resource.Form do
       id={@id || @form.id <> "_#{@attribute.name}"}
       name={@name || @form.name <> "[#{@attribute.name}]"}
       options={[True: "true", False: "false"]}
-      value={value(@value, @form, @attribute, "true")}
+      prompt={allow_nil_option(@attribute, @value)}
+      value={value(@value, @form, @attribute)}
     />
     """
   end
@@ -1196,7 +1197,13 @@ defmodule AshAdmin.Components.Resource.Form do
         id,
         _
       )
-      when type in [Ash.Type.CiString, Ash.Type.String, Ash.Type.UUID, Ash.Type.UUIDv7, Ash.Type.Atom] do
+      when type in [
+             Ash.Type.CiString,
+             Ash.Type.String,
+             Ash.Type.UUID,
+             Ash.Type.UUIDv7,
+             Ash.Type.Atom
+           ] do
     assigns =
       assign(assigns,
         attribute: attribute,

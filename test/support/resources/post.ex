@@ -38,6 +38,10 @@ defmodule AshAdmin.Test.Post do
 
       change(manage_relationship(:comments, type: :create))
     end
+
+    create :create_with_flag do
+      argument(:flag, :boolean, allow_nil?: true)
+    end
   end
 
   admin do
