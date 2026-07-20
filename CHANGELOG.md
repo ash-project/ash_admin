@@ -11,6 +11,29 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.2.0](https://github.com/ash-project/ash_admin/compare/v1.1.0...v1.2.0) (2026-07-20)
+
+
+
+
+### Features:
+
+* Add drag-and-drop reordering for primitive array fields in forms (#407) by JoyceJ53
+
+### Bug Fixes:
+
+* support tenant option labels (#406) by Jakub Skałecki
+
+* Ensure mobile and desktiop sidebar ids are unique (#404) by capoccias
+
+* update for LV 1.2.0 by Zach Daniel
+
+* format array attribtues in ash_admin by Zach Daniel
+
+### Improvements:
+
+* add support for uuidv7 primary keys (#413) by StephanH90
+
 ## [v1.1.0](https://github.com/ash-project/ash_admin/compare/v1.0.0-rc.0...v1.1.0) (2026-04-13)
 ### Breaking Changes:
 
