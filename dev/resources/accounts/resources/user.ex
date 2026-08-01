@@ -145,6 +145,10 @@ defmodule Demo.Accounts.User do
       public? true
     end
 
+    attribute :preferences, Demo.Accounts.Preferences do
+      public? true
+    end
+
     attribute :representative, :boolean do
       allow_nil? false
       public? true

@@ -486,6 +486,29 @@ defmodule AshAdmin.Components.Resource.Show do
          assigns,
          resource,
          record,
+         %{type: Ash.Type.Struct} = attribute,
+         relationship_name,
+         nested?
+       ) do
+    struct_map =
+      record
+      |> Map.get(attribute.name)
+      |> Map.from_struct()
+
+    render_attribute(
+      assigns,
+      resource,
+      Map.put(record, attribute.name, struct_map),
+      %{attribute | type: Ash.Type.Map},
+      relationship_name,
+      nested?
+    )
+  end
+
+  defp render_attribute(
+         assigns,
+         resource,
+         record,
          %{type: {:array, Ash.Type.Map}} = attribute,
          relationship_name,
          nested?

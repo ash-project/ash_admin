@@ -4,9 +4,8 @@
 # SPDX-License-Identifier: MIT
 
 defmodule Demo.Seeder do
-  require Ash.Query
   alias Ash.Seed
-  alias Demo.Accounts.User
+  alias Demo.Accounts.{User, Preferences}
   alias Demo.Tickets.{Customer, Organization, Representative, Ticket}
 
   @spec insert_admin!(String.t(), String.t()) :: User.t()
@@ -14,7 +13,8 @@ defmodule Demo.Seeder do
     Seed.seed!(User, %{
       first_name: first_name,
       last_name: last_name,
-      admin: true
+      admin: true,
+      preferences: Preferences.new!([])
     })
   end
 
@@ -28,7 +28,8 @@ defmodule Demo.Seeder do
         history: history,
       },
       api_key: api_key,
-      alternate_profiles: []
+      alternate_profiles: [],
+      preferences: Preferences.new!([])
     })
   end
 
