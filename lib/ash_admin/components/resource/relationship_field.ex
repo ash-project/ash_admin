@@ -38,7 +38,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
   def update(assigns, socket) do
     pk_field = Ash.Resource.Info.primary_key(assigns.resource) |> List.first()
     label_field = AshAdmin.Resource.label_field(assigns.resource)
-    current_label = get_current_label(assigns.resource, assigns.value, label_field)
+    current_label = get_current_label(assigns.resource, assigns.value, label_field, ash_opts(assigns))
 
     {:ok,
      assign(socket, assigns)
@@ -51,20 +51,24 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
      )}
   end
 
-  defp get_current_label(_, nil, _) do
+  defp get_current_label(_, nil, _, _) do
     ""
   end
 
-  defp get_current_label(resource, value, label_field) do
-    case resource |> Ash.get(value) do
+  defp get_current_label(resource, value, label_field, opts) do
+    case resource |> Ash.get(value, opts) do
       {:ok, record} ->
         record
-        |> Ash.load!(label_field)
+        |> Ash.load!(label_field, opts)
         |> Map.get(label_field)
 
       _ ->
         ""
     end
+  end
+
+  defp ash_opts(assigns) do
+    [actor: assigns[:actor], authorize?: assigns[:authorizing], tenant: assigns[:tenant]]
   end
 
   @spec render(atom() | %{:resource => atom() | Ash.Query.t(), optional(any()) => any()}) ::
@@ -235,7 +239,8 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
           get_current_label(
             socket.assigns.resource,
             original_value,
-            socket.assigns.label_field
+            socket.assigns.label_field,
+            ash_opts(socket.assigns)
           )
 
         {:noreply,
@@ -315,7 +320,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
     )
     |> Ash.Query.sort(ash_admin_position_sort: {%{search_term: search_term}, :asc})
     |> Ash.Query.limit(assigns.max_items)
-    |> Ash.read!()
+    |> Ash.read!(ash_opts(assigns))
     |> Enum.map(&{Map.get(&1, assigns.label_field), &1.id})
   end
 end
