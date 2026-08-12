@@ -7,6 +7,57 @@ defmodule AshAdmin.HelpersTest do
 
   alias AshAdmin.Helpers
 
+  defmodule CompositeKey do
+    @moduledoc false
+    use Ash.Resource, domain: nil, validate_domain_inclusion?: false
+
+    attributes do
+      attribute :org_id, :integer, primary_key?: true, allow_nil?: false, public?: true
+      attribute :seq, :integer, primary_key?: true, allow_nil?: false, public?: true
+    end
+  end
+
+  describe "decode_primary_key/2" do
+    test "round-trips a composite primary key" do
+      record = struct(CompositeKey, org_id: 1, seq: 2)
+      encoded = Helpers.encode_primary_key(record)
+
+      assert {:ok, decoded} = Helpers.decode_primary_key(CompositeKey, encoded)
+      assert Enum.sort(decoded) == [org_id: 1, seq: 2]
+    end
+
+    test "rejects a forged param carrying an Ash expression struct" do
+      forged =
+        %{org_id: %Ash.Query.Call{name: :fragment, args: ["select pg_sleep(10)"]}, seq: 1}
+        |> :erlang.term_to_binary()
+        |> Base.encode64()
+
+      assert :error = Helpers.decode_primary_key(CompositeKey, forged)
+    end
+
+    test "rejects an oversized param" do
+      oversized =
+        %{org_id: :binary.copy("a", 20_000), seq: 1}
+        |> :erlang.term_to_binary()
+        |> Base.encode64()
+
+      assert :error = Helpers.decode_primary_key(CompositeKey, oversized)
+    end
+
+    test "rejects a compressed payload" do
+      compressed =
+        %{org_id: :binary.copy("a", 5_000), seq: 1}
+        |> :erlang.term_to_binary(compressed: 9)
+        |> Base.encode64()
+
+      assert :error = Helpers.decode_primary_key(CompositeKey, compressed)
+    end
+
+    test "rejects invalid base64" do
+      assert :error = Helpers.decode_primary_key(CompositeKey, "not base64!!!")
+    end
+  end
+
   # unit tests for array reordering helpers used by Sortable.js drag-and-drop
   describe "to_indexed_map/1" do
     test "converts a list to a string-indexed map" do

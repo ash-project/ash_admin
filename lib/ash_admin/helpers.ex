@@ -111,21 +111,57 @@ defmodule AshAdmin.Helpers do
     end
   end
 
+  # A composite primary key encodes to at most a handful of scalar values, so a
+  # legitimate param is tiny. This bounds the decode against a memory-inflation
+  # payload; override with `config :ash_admin, :max_primary_key_byte_size, n`.
+  @default_max_primary_key_byte_size 10_240
+
   def decode_primary_key(resource, string) do
     pkey = Ash.Resource.Info.primary_key(resource)
 
     if Enum.count(pkey) == 1 and simple_type?(resource, Enum.at(pkey, 0)) do
       {:ok, [{Enum.at(pkey, 0), string}]}
     else
-      {:ok,
-       string
-       |> Base.decode64!()
-       |> :erlang.binary_to_term([:safe])
-       |> Map.to_list()}
+      max_byte_size =
+        Application.get_env(
+          :ash_admin,
+          :max_primary_key_byte_size,
+          @default_max_primary_key_byte_size
+        )
+
+      with {:ok, decoded} <- Base.decode64(string),
+           :ok <- check_primary_key_size(decoded, max_byte_size),
+           term <- Ash.Helpers.non_executable_binary_to_term(decoded, [:safe]),
+           :ok <- check_no_expression(term) do
+        {:ok, Map.to_list(term)}
+      else
+        _ -> :error
+      end
     end
   rescue
     _ ->
       :error
+  end
+
+  # Ash only ever encodes primary keys with uncompressed `:erlang.term_to_binary/1`,
+  # so a compressed payload (external term format tag `80`) is never legitimate.
+  # Rejecting it removes the decompression-bomb vector; uncompressed payloads are
+  # then bounded directly by their own byte size.
+  defp check_primary_key_size(<<131, 80, _::binary>>, _max), do: :error
+  defp check_primary_key_size(binary, max) when byte_size(binary) > max, do: :error
+  defp check_primary_key_size(_binary, _max), do: :ok
+
+  # A legitimate encoded primary key only ever contains scalar values. A decoded
+  # term that is or contains an Ash expression (e.g. `%Ash.Query.Call{}`) is a
+  # forged param attempting to inject a filter expression that would be spliced
+  # into the query and evaluated (SQL injection / RCE depending on the data
+  # layer). Reject any such term outright.
+  defp check_no_expression(term) do
+    if Ash.Expr.expr?(term) do
+      :error
+    else
+      :ok
+    end
   end
 
   @simple_types [
