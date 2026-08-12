@@ -11,6 +11,21 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.3.0](https://github.com/ash-project/ash_admin/compare/v1.2.0...v1.3.0) (2026-08-12)
+
+
+
+
+### Features:
+
+* parse struct as map and render as json by Guilherme Bordallo
+
+### Bug Fixes:
+
+* apply the ash binary issue fix to ash_admin as well by Zach Daniel
+
+* pass actor, authorize?, and tenant in RelationshipField reads by Alec Hartung
+
 ## [v1.2.0](https://github.com/ash-project/ash_admin/compare/v1.1.0...v1.2.0) (2026-07-20)
 
 
