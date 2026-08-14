@@ -493,7 +493,10 @@ defmodule AshAdmin.Components.Resource.Show do
     struct_map =
       record
       |> Map.get(attribute.name)
-      |> Map.from_struct()
+      |> case do
+        nil -> nil
+        value -> Map.from_struct(value)
+      end
 
     render_attribute(
       assigns,
