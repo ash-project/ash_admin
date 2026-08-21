@@ -708,21 +708,10 @@ defmodule AshAdmin.Components.Resource.Show do
                 """
             end
 
-          type
-          when type in [
-                 Ash.Type.Date,
-                 Ash.Type.DateTime,
-                 Ash.Type.Time,
-                 Ash.Type.NaiveDatetime,
-                 Ash.Type.UtcDatetime,
-                 Ash.Type.UtcDatetimeUsec
-               ] ->
+          _ ->
             resource
             |> AshAdmin.Resource.format_fields()
             |> FormatHelper.format_attribute(record, attribute)
-
-          _ ->
-            value!(Map.get(record, attribute.name))
         end
       end
     end
