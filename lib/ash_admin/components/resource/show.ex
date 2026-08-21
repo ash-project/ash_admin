@@ -275,6 +275,7 @@ defmodule AshAdmin.Components.Resource.Show do
         data: data,
         destination: destination,
         destination_domain: destination_domain,
+        destination_format_fields: AshAdmin.Resource.format_fields(destination),
         context: context,
         destination_attribute: destination_attribute,
         relationship_name: name
@@ -285,6 +286,7 @@ defmodule AshAdmin.Components.Resource.Show do
       <Table.table
         data={@data}
         resource={@destination}
+        format_fields={@destination_format_fields}
         domain={@destination_domain || Ash.Resource.Info.domain(@destination) || @domain}
         table={@context[:data_layer][:table]}
         prefix={@prefix}
