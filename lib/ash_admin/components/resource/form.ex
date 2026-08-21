@@ -1327,6 +1327,16 @@ defmodule AshAdmin.Components.Resource.Form do
     render_attribute_input(assigns, %{attribute | type: Ash.Type.Map}, form, value, name, id)
   end
 
+  def render_attribute_input(assigns, %{type: Ash.Type.Struct} = attribute, form, value, name, id, _) do
+    value =
+      case value(value, form, attribute) do
+        %_{} = struct -> Map.from_struct(struct)
+        other -> other
+      end
+
+    render_attribute_input(assigns, %{attribute | type: Ash.Type.Map}, form, value, name, id)
+  end
+
   def render_attribute_input(assigns, %{type: Ash.Type.Map} = attribute, form, value, name, id, _) do
     encoded = Jason.encode!(value(value, form, attribute))
 

@@ -74,6 +74,7 @@ defmodule Demo.Accounts.User do
 
     update :update do
       primary? true
+      require_atomic? false
       argument :offices, {:array, :map}
       change manage_relationship(:offices, type: :append_and_remove)
     end
