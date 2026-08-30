@@ -40,6 +40,21 @@ defmodule AshAdmin.Helpers do
       Plug.Conn.Query.encode(Map.merge(socket_params || %{}, Enum.into(new_params, %{})))
   end
 
+  @doc """
+  Builds an admin URL, URL-encoding every query parameter. User-controlled
+  values (e.g. string primary keys) must not be interpolated raw, or they can
+  inject extra query parameters and retarget the link.
+  """
+  def admin_path(prefix, params) do
+    query =
+      params
+      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Enum.map(fn {k, v} -> {k, to_string(v)} end)
+      |> URI.encode_query()
+
+    prefix <> "?" <> query
+  end
+
   def to_name(:id), do: "ID"
 
   def to_name(%{__struct__: Ash.Resource.Attribute, related_resource: resource} = attribute)
