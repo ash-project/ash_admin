@@ -444,37 +444,48 @@ defmodule AshAdmin.PageLive do
         socket
       )
       when not is_nil(resource) and not is_nil(domain) do
-    resource = Module.concat([resource])
+    # Resolve the submitted names against the known shown domains and their actor
+    # resources rather than `Module.concat/1`. `Module.concat/1` interns an atom
+    # for any string (atom-table exhaustion crashing the whole node), and would
+    # also load any resource; the actor picker must only load designated actors.
+    domain = Enum.find(socket.assigns.domains, &(AshAdmin.Domain.name(&1) == domain))
 
-    case decode_primary_key(resource, primary_key) do
-      {:ok, pkey_filter} ->
-        domain = Module.concat([domain])
-        action = AshAdmin.Helpers.primary_action(resource, :read)
-        actor_load = AshAdmin.Resource.actor_load(resource)
+    resource =
+      domain &&
+        domain
+        |> AshAdmin.Domain.show_resources()
+        |> Enum.find(&(AshAdmin.Resource.name(&1) == resource && AshAdmin.Resource.actor?(&1)))
 
-        actor =
-          resource
-          |> Ash.Query.filter(^pkey_filter)
-          |> Ash.Query.load(actor_load)
-          |> Ash.Query.set_tenant(socket.assigns[:tenant])
-          |> Ash.read_one!(action: action, authorize?: false, domain: domain)
+    with true <- not is_nil(resource),
+         {:ok, pkey_filter} <- decode_primary_key(resource, primary_key) do
+      action = AshAdmin.Helpers.primary_action(resource, :read)
+      actor_load = AshAdmin.Resource.actor_load(resource)
 
-        domain_name = AshAdmin.Domain.name(domain)
-        resource_name = AshAdmin.Resource.name(resource)
+      actor =
+        resource
+        |> Ash.Query.filter(^pkey_filter)
+        |> Ash.Query.load(actor_load)
+        |> Ash.Query.set_tenant(socket.assigns[:tenant])
+        |> Ash.read_one!(action: action, authorize?: false, domain: domain)
 
-        {:noreply,
-         socket
-         |> push_event(
-           "set_actor",
-           %{
-             resource: to_string(resource_name),
-             tenant: socket.assigns[:tenant],
-             primary_key: encode_primary_key(actor),
-             action: to_string(action.name),
-             domain: to_string(domain_name)
-           }
-         )
-         |> assign(actor: actor, actor_domain: domain, actor_tenant: socket.assigns[:tenant])}
+      domain_name = AshAdmin.Domain.name(domain)
+      resource_name = AshAdmin.Resource.name(resource)
+
+      {:noreply,
+       socket
+       |> push_event(
+         "set_actor",
+         %{
+           resource: to_string(resource_name),
+           tenant: socket.assigns[:tenant],
+           primary_key: encode_primary_key(actor),
+           action: to_string(action.name),
+           domain: to_string(domain_name)
+         }
+       )
+       |> assign(actor: actor, actor_domain: domain, actor_tenant: socket.assigns[:tenant])}
+    else
+      _ -> {:noreply, socket}
     end
   end
 

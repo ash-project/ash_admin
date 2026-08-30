@@ -740,39 +740,51 @@ defmodule AshAdmin.Components.Resource.Show do
     {:noreply, assign(socket, :calculations, calculations)}
   end
 
-  # sobelow_skip ["DOS.StringToAtom"]
   def handle_event("calculate", %{"calculation" => calculation} = event, socket) do
     record = socket.assigns.record
     domain = socket.assigns.domain
 
-    arguments =
-      event
-      |> Map.get(calculation, [])
-      |> Enum.map(fn {attr, value} -> {String.to_atom(attr), value} end)
-      # This is a hack, it should not be populated in the form
-      # or use used inputs etc.
-      |> Enum.reject(fn {_, v} -> v in ["", nil] end)
+    # Resolve the calculation by matching known calculations by name, and map
+    # each submitted argument key to a *declared* argument. Client-supplied keys
+    # are never passed to String.to_atom/1, which would mint an atom per unique
+    # key and exhaust the atom table (a whole-node DoS).
+    calculation =
+      Enum.find(
+        Ash.Resource.Info.calculations(record.__struct__),
+        &(to_string(&1.name) == calculation)
+      )
 
-    calculation = String.to_existing_atom(calculation)
+    if calculation do
+      arguments =
+        event
+        |> Map.get(to_string(calculation.name), [])
+        |> Enum.flat_map(fn {attr, value} ->
+          case Enum.find(calculation.arguments, &(to_string(&1.name) == attr)) do
+            nil -> []
+            arg -> [{arg.name, value}]
+          end
+        end)
+        |> Enum.reject(fn {_, v} -> v in ["", nil] end)
 
-    calculations =
-      [{calculation, arguments}]
+      case Ash.load(
+             record,
+             [{calculation.name, arguments}],
+             domain: domain,
+             actor: socket.assigns[:actor],
+             authorize?: socket.assigns[:authorizing]
+           ) do
+        {:ok, loaded} ->
+          {:noreply, assign(socket, record: loaded)}
 
-    case Ash.load(
-           record,
-           calculations,
-           domain: domain,
-           actor: socket.assigns[:actor],
-           authorize?: socket.assigns[:authorizing]
-         ) do
-      {:ok, loaded} ->
-        {:noreply, assign(socket, record: loaded)}
-
-      {:error, errors} ->
-        {:noreply,
-         assign(socket,
-           calculation_errors: Map.put(socket.assigns.calculation_errors, calculation, errors)
-         )}
+        {:error, errors} ->
+          {:noreply,
+           assign(socket,
+             calculation_errors:
+               Map.put(socket.assigns.calculation_errors, calculation.name, errors)
+           )}
+      end
+    else
+      {:noreply, socket}
     end
   end
 
