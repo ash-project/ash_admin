@@ -2354,7 +2354,9 @@ defmodule AshAdmin.Components.Resource.Form do
           random_string = for _ <- 1..10, into: "", do: <<Enum.random(~c"0123456789abcdef")>>
 
           tmp_dir = Path.join([System.tmp_dir!(), random_string])
-          tmp_file = Path.join([tmp_dir, entry.client_name])
+          # `entry.client_name` is the browser-supplied filename; strip any path
+          # components so a name like `../../etc/x` cannot escape tmp_dir.
+          tmp_file = Path.join([tmp_dir, Path.basename(entry.client_name)])
 
           File.mkdir_p!(tmp_dir)
           File.cp!(path, tmp_file)
