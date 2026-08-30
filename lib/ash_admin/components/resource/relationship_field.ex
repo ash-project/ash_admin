@@ -174,7 +174,11 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
             >
               <% escaped_term = Regex.escape(@search_term) %>
               <% suggestion_name =
-                String.replace(suggestion_name, ~r/(#{escaped_term})/i, "<b>\\0</b>") %>
+                suggestion_name
+                |> to_string()
+                |> Phoenix.HTML.html_escape()
+                |> Phoenix.HTML.safe_to_string()
+                |> String.replace(~r/(#{escaped_term})/i, "<b>\\0</b>") %>
               {Phoenix.HTML.raw(suggestion_name)}
             </li>
           <% end %>
