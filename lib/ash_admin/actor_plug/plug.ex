@@ -126,7 +126,8 @@ defmodule AshAdmin.ActorPlug.Plug do
       if domain do
         domain
         |> AshAdmin.Domain.show_resources()
-        |> Enum.find(&(AshAdmin.Resource.name(&1) == resource))
+        # The actor picker must only load resources actually designated as actors.
+        |> Enum.find(&(AshAdmin.Resource.name(&1) == resource && AshAdmin.Resource.actor?(&1)))
       end
 
     case resource && decode_primary_key(resource, primary_key) do
