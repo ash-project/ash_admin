@@ -11,6 +11,33 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.3.1](https://github.com/ash-project/ash_admin/compare/v1.3.0...v1.3.1) (2026-08-31)
+
+
+
+
+### Bug Fixes:
+
+* match admin session cookies by exact name (cookie shadowing) (CVE-2026-75757) by Zach Daniel
+
+* generate a per-request CSP nonce instead of a published constant (CVE-2026-81852) by Zach Daniel
+
+* reject non-primary-key fields when decoding composite primary keys (filter oracle) (CVE-2026-81853) by Zach Daniel
+
+* strip path components from uploaded file names (path traversal) (CVE-2026-82673) by Zach Daniel
+
+* URL-encode admin row-action link parameters (query-parameter injection) (CVE-2026-82681) by Zach Daniel
+
+* HTML-escape relationship typeahead labels before highlighting (stored XSS) (CVE-2026-77850) by Zach Daniel
+
+* don't intern atoms from client input in set_actor and calculate events (CVE-2026-82722) by Zach Daniel
+
+* constrain the admin actor picker to resources marked as actors by Zach Daniel
+
+* parse TypedStruct as map in forms for update actions by Amish Patel
+
+* handle nil values when rendering AshTypedStructures by Guilherme Bordallo
+
 ## [v1.3.0](https://github.com/ash-project/ash_admin/compare/v1.2.0...v1.3.0) (2026-08-12)
 
 
