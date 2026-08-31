@@ -28,15 +28,29 @@ defmodule AshAdmin.Test.PageLiveTest do
     assert html =~ "String"
   end
 
-  test "embeds default csp nonces" do
+  test "generates a fresh per-request csp nonce (never the old published constant)" do
     html =
       build_conn()
       |> get("/api/admin")
       |> html_response(200)
 
-    assert html =~ "ash_admin-Ed55GFnX"
-    assert html =~ ~s|<script nonce="ash_admin-Ed55GFnX"|
-    assert html =~ ~s|<style nonce="ash_admin-Ed55GFnX"|
+    # The previously hardcoded, publicly-known nonce must be gone.
+    refute html =~ "ash_admin-Ed55GFnX"
+
+    [_, style_nonce] = Regex.run(~r/<style nonce="([^"]+)"/, html)
+    [_, script_nonce] = Regex.run(~r/<script nonce="([^"]+)"/, html)
+
+    # A real, non-trivial nonce is emitted and shared by the inline tags.
+    assert byte_size(style_nonce) >= 16
+    assert style_nonce == script_nonce
+    assert html =~ ~s|<meta name="csp-nonce-style" content="#{style_nonce}"|
+
+    # And it is random per request.
+    other =
+      build_conn() |> get("/api/admin") |> html_response(200)
+
+    [_, other_nonce] = Regex.run(~r/<style nonce="([^"]+)"/, other)
+    refute other_nonce == style_nonce
   end
 
   test "embeds user selected csp nonces" do
