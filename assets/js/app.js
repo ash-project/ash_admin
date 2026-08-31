@@ -426,12 +426,20 @@ Hooks.Typeahead = {
 };
 
 function getCookie(name) {
-  var re = new RegExp(name + "=([^;]+)");
-  var value = re.exec(document.cookie);
-  if (value == null) return null;
-  var decoded = decodeURIComponent(value[1]);
-  // encodeURIComponent(null) produces the string "null", normalize it back
-  return decoded === "null" || decoded === "undefined" ? null : decoded;
+  // Match the cookie name by exact equality. An unanchored regex would let a
+  // cookie whose name merely ends with `name` (e.g. `xactor_authorizing`,
+  // settable from a sibling subdomain) shadow the real one.
+  var cookies = document.cookie ? document.cookie.split("; ") : [];
+  for (var i = 0; i < cookies.length; i++) {
+    var eq = cookies[i].indexOf("=");
+    if (eq === -1) continue;
+    if (cookies[i].slice(0, eq) === name) {
+      var decoded = decodeURIComponent(cookies[i].slice(eq + 1));
+      // encodeURIComponent(null) produces the string "null", normalize it back
+      return decoded === "null" || decoded === "undefined" ? null : decoded;
+    }
+  }
+  return null;
 }
 
 let params = () => {

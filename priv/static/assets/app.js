@@ -33760,12 +33760,17 @@ ${text}</tr>
     }
   };
   function getCookie(name2) {
-    var re = new RegExp(name2 + "=([^;]+)");
-    var value = re.exec(document.cookie);
-    if (value == null)
-      return null;
-    var decoded = decodeURIComponent(value[1]);
-    return decoded === "null" || decoded === "undefined" ? null : decoded;
+    var cookies = document.cookie ? document.cookie.split("; ") : [];
+    for (var i = 0; i < cookies.length; i++) {
+      var eq = cookies[i].indexOf("=");
+      if (eq === -1)
+        continue;
+      if (cookies[i].slice(0, eq) === name2) {
+        var decoded = decodeURIComponent(cookies[i].slice(eq + 1));
+        return decoded === "null" || decoded === "undefined" ? null : decoded;
+      }
+    }
+    return null;
   }
   var params = () => {
     return {
