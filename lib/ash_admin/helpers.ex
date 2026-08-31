@@ -147,7 +147,8 @@ defmodule AshAdmin.Helpers do
       with {:ok, decoded} <- Base.decode64(string),
            :ok <- check_primary_key_size(decoded, max_byte_size),
            term <- Ash.Helpers.non_executable_binary_to_term(decoded, [:safe]),
-           :ok <- check_no_expression(term) do
+           :ok <- check_no_expression(term),
+           :ok <- check_primary_key_fields(term, pkey) do
         {:ok, Map.to_list(term)}
       else
         _ -> :error
@@ -162,6 +163,23 @@ defmodule AshAdmin.Helpers do
   # so a compressed payload (external term format tag `80`) is never legitimate.
   # Rejecting it removes the decompression-bomb vector; uncompressed payloads are
   # then bounded directly by their own byte size.
+  # A composite primary key must decode to a plain map whose keys are all real
+  # primary-key fields. Without this an attacker can encode a map of any
+  # attribute (e.g. %{api_token: "guess"}) and turn the record lookup into an
+  # equality oracle over sensitive fields; a struct term also injects a bogus
+  # `__struct__` key.
+  defp check_primary_key_fields(term, pkey) when is_map(term) and not is_struct(term) do
+    keys = Map.keys(term)
+
+    if keys != [] and Enum.all?(keys, &(&1 in pkey)) do
+      :ok
+    else
+      :error
+    end
+  end
+
+  defp check_primary_key_fields(_term, _pkey), do: :error
+
   defp check_primary_key_size(<<131, 80, _::binary>>, _max), do: :error
   defp check_primary_key_size(binary, max) when byte_size(binary) > max, do: :error
   defp check_primary_key_size(_binary, _max), do: :ok
