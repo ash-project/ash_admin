@@ -12,11 +12,11 @@ defmodule AshAdmin.Test.RelationshipFieldTest do
     use Ash.Domain, validate_config_inclusion?: false
 
     authorization do
-      require_actor? true
+      require_actor?(true)
     end
 
     resources do
-      allow_unregistered? true
+      allow_unregistered?(true)
     end
   end
 
@@ -28,7 +28,7 @@ defmodule AshAdmin.Test.RelationshipFieldTest do
       extensions: [AshAdmin.Resource]
 
     ets do
-      private? true
+      private?(true)
     end
 
     admin do
@@ -36,16 +36,16 @@ defmodule AshAdmin.Test.RelationshipFieldTest do
     end
 
     actions do
-      defaults [:read]
+      defaults([:read])
 
       create :create do
-        accept [:name]
+        accept([:name])
       end
     end
 
     attributes do
-      uuid_primary_key :id
-      attribute :name, :string, public?: true
+      uuid_primary_key(:id)
+      attribute(:name, :string, public?: true)
     end
   end
 

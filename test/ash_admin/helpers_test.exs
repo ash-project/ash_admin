@@ -12,8 +12,8 @@ defmodule AshAdmin.HelpersTest do
     use Ash.Resource, domain: nil, validate_domain_inclusion?: false
 
     attributes do
-      attribute :org_id, :integer, primary_key?: true, allow_nil?: false, public?: true
-      attribute :seq, :integer, primary_key?: true, allow_nil?: false, public?: true
+      attribute(:org_id, :integer, primary_key?: true, allow_nil?: false, public?: true)
+      attribute(:seq, :integer, primary_key?: true, allow_nil?: false, public?: true)
     end
   end
 

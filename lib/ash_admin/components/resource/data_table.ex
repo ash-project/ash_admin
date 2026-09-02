@@ -127,7 +127,15 @@ defmodule AshAdmin.Components.Resource.DataTable do
                     <%!-- Show --%>
                     <.link
                       :if={AshAdmin.Resource.show_action(@resource)}
-                      navigate={admin_path(@prefix, domain: AshAdmin.Domain.name(@domain), resource: AshAdmin.Resource.name(@resource), table: @table, primary_key: encode_primary_key(record), action_type: "read")}
+                      navigate={
+                        admin_path(@prefix,
+                          domain: AshAdmin.Domain.name(@domain),
+                          resource: AshAdmin.Resource.name(@resource),
+                          table: @table,
+                          primary_key: encode_primary_key(record),
+                          action_type: "read"
+                        )
+                      }
                       class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                       title="View"
                     >
@@ -204,7 +212,16 @@ defmodule AshAdmin.Components.Resource.DataTable do
   defp row_actions(%{actions: [_single]} = assigns) do
     ~H"""
     <.link
-      navigate={admin_path(@prefix, domain: AshAdmin.Domain.name(@domain), resource: AshAdmin.Resource.name(@resource), action_type: @action_type, action: hd(@actions).name, table: @table, primary_key: encode_primary_key(@record))}
+      navigate={
+        admin_path(@prefix,
+          domain: AshAdmin.Domain.name(@domain),
+          resource: AshAdmin.Resource.name(@resource),
+          action_type: @action_type,
+          action: hd(@actions).name,
+          table: @table,
+          primary_key: encode_primary_key(@record)
+        )
+      }
       class={["p-1 text-slate-400", @hover_class]}
       title={@title}
     >
@@ -231,7 +248,16 @@ defmodule AshAdmin.Components.Resource.DataTable do
       >
         <.link
           :for={action <- @actions}
-          navigate={admin_path(@prefix, domain: AshAdmin.Domain.name(@domain), resource: AshAdmin.Resource.name(@resource), action_type: @action_type, action: action.name, table: @table, primary_key: encode_primary_key(@record))}
+          navigate={
+            admin_path(@prefix,
+              domain: AshAdmin.Domain.name(@domain),
+              resource: AshAdmin.Resource.name(@resource),
+              action_type: @action_type,
+              action: action.name,
+              table: @table,
+              primary_key: encode_primary_key(@record)
+            )
+          }
           class="block px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
         >
           {action_label(action)}

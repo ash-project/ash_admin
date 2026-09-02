@@ -38,7 +38,9 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
   def update(assigns, socket) do
     pk_field = Ash.Resource.Info.primary_key(assigns.resource) |> List.first()
     label_field = AshAdmin.Resource.label_field(assigns.resource)
-    current_label = get_current_label(assigns.resource, assigns.value, label_field, ash_opts(assigns))
+
+    current_label =
+      get_current_label(assigns.resource, assigns.value, label_field, ash_opts(assigns))
 
     {:ok,
      assign(socket, assigns)
