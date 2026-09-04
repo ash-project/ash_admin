@@ -16,6 +16,7 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
   import Ash.Expr
 
   require Ash.Query
+  require Logger
 
   alias Phoenix.LiveView.JS
 
@@ -38,9 +39,16 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
   def update(assigns, socket) do
     pk_field = Ash.Resource.Info.primary_key(assigns.resource) |> List.first()
     label_field = AshAdmin.Resource.label_field(assigns.resource)
+    max_items = AshAdmin.Resource.relationship_select_max_items(assigns.resource)
 
     current_label =
       get_current_label(assigns.resource, assigns.value, label_field, ash_opts(assigns))
+
+    {select_options, errors} =
+      case select_options(assigns.resource, label_field, max_items, ash_opts(assigns)) do
+        {:ok, options} -> {options, []}
+        {:error, error} -> {[], [error_message(error, assigns.resource, "load")]}
+      end
 
     {:ok,
      assign(socket, assigns)
@@ -49,7 +57,10 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
        label_field: label_field,
        current_label: current_label,
        selected_id: assigns.value,
-       max_items: AshAdmin.Resource.relationship_select_max_items(assigns.resource)
+       max_items: max_items,
+       limited_select_options: select_options,
+       field_type: field_type(select_options, max_items, errors),
+       errors: errors
      )}
   end
 
@@ -58,12 +69,10 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
   end
 
   defp get_current_label(resource, value, label_field, opts) do
-    case resource |> Ash.get(value, opts) do
-      {:ok, record} ->
-        record
-        |> Ash.load!(label_field, opts)
-        |> Map.get(label_field)
-
+    with {:ok, record} <- Ash.get(resource, value, opts),
+         {:ok, record} <- Ash.load(record, label_field, opts) do
+      label_string(Map.get(record, label_field))
+    else
       _ ->
         ""
     end
@@ -73,15 +82,52 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
     [actor: assigns[:actor], authorize?: assigns[:authorizing], tenant: assigns[:tenant]]
   end
 
+  # Labels are rendered into HTML attributes and highlighted with a regex, so
+  # they must be plain strings. A label the actor may not see comes back as
+  # `%Ash.ForbiddenField{}`, which has no `String.Chars` implementation.
+  @doc false
+  def label_string(nil), do: ""
+  def label_string(value) when is_binary(value), do: value
+  def label_string(%Ash.CiString{} = value), do: to_string(value)
+  def label_string(%Ash.ForbiddenField{}), do: "(forbidden)"
+  def label_string(%Ash.NotLoaded{}), do: ""
+
+  def label_string(value) do
+    if String.Chars.impl_for(value) do
+      to_string(value)
+    else
+      inspect(value)
+    end
+  end
+
+  defp error_message(error, resource, verb) do
+    Logger.warning(
+      "Error while trying to #{verb} #{inspect(resource)} in relationship field\n: #{Exception.format(:error, error)}"
+    )
+
+    detail =
+      case error do
+        %Ash.Error.Forbidden{} ->
+          "forbidden"
+
+        %{errors: [first | _]} when is_exception(first) ->
+          first |> Exception.message() |> String.split("\n", parts: 2) |> hd()
+
+        error when is_exception(error) ->
+          error |> Exception.message() |> String.split("\n", parts: 2) |> hd()
+
+        other ->
+          inspect(other)
+      end
+
+    "Could not #{verb} #{form_control_label(resource)}: #{detail}"
+  end
+
   @spec render(atom() | %{:resource => atom() | Ash.Query.t(), optional(any()) => any()}) ::
           Phoenix.LiveView.Rendered.t()
   def render(assigns) do
-    select_options = select_options!(assigns)
-
     assigns =
       assign(assigns,
-        limited_select_options: select_options,
-        field_type: field_type(select_options, assigns.max_items),
         label: form_control_label(assigns.resource),
         search_term: assigns.search_term
       )
@@ -221,21 +267,20 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
          assign(socket, highlighted_index: new_index, current_suggestion_id: new_suggestion_id)}
 
       key == "Enter" ->
-        if Enum.empty?(socket.assigns.suggestions) do
-          {:noreply, socket.assigns}
+        case Enum.at(socket.assigns.suggestions, max(socket.assigns.highlighted_index, 0)) do
+          nil ->
+            {:noreply, socket}
+
+          {suggestion_name, suggestion_id} ->
+            {:noreply,
+             assign(socket,
+               search_term: suggestion_name,
+               current_label: suggestion_name,
+               selected_id: suggestion_id,
+               suggestions: [],
+               highlighted_index: -1
+             )}
         end
-
-        {suggestion_name, suggestion_id} =
-          Enum.at(socket.assigns.suggestions, socket.assigns.highlighted_index)
-
-        {:noreply,
-         assign(socket,
-           search_term: suggestion_name,
-           current_label: suggestion_name,
-           selected_id: suggestion_id,
-           suggestions: [],
-           highlighted_index: -1
-         )}
 
       key == "Escape" ->
         field_name = Map.get(socket.assigns.attribute, :name)
@@ -258,10 +303,25 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
          )}
 
       true ->
-        suggestions = fetch_suggestions(socket.assigns, search_term)
+        case fetch_suggestions(socket.assigns, search_term) do
+          {:ok, suggestions} ->
+            {:noreply,
+             assign(socket,
+               suggestions: suggestions,
+               search_term: search_term,
+               highlighted_index: -1,
+               errors: []
+             )}
 
-        {:noreply,
-         assign(socket, suggestions: suggestions, search_term: search_term, highlighted_index: -1)}
+          {:error, error} ->
+            {:noreply,
+             assign(socket,
+               suggestions: [],
+               search_term: search_term,
+               highlighted_index: -1,
+               errors: [error_message(error, socket.assigns.resource, "search")]
+             )}
+        end
     end
   end
 
@@ -281,34 +341,37 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
     {:noreply, assign(socket, search_term: "", current_label: "")}
   end
 
-  defp field_type(options, max_items) when length(options) <= max_items, do: :select
-  defp field_type(_options, _max_items), do: :typeahead
+  # When the option list could not be loaded, fall back to the typeahead so the
+  # form still renders and the error is shown next to the field.
+  defp field_type(_options, _max_items, [_ | _]), do: :typeahead
+  defp field_type(options, max_items, []) when length(options) <= max_items, do: :select
+  defp field_type(_options, _max_items, []), do: :typeahead
 
-  defp select_options!(assigns) do
-    resource = assigns.resource
-
-    limit = assigns.max_items + 1
-    label_field = AshAdmin.Resource.label_field(resource)
-    pk_field = Ash.Resource.Info.primary_key(resource)
+  defp select_options(resource, label_field, max_items, opts) do
+    pk_field = resource |> Ash.Resource.Info.primary_key() |> List.first()
 
     resource
     |> Ash.Query.new()
     |> Ash.Query.load([pk_field, label_field])
-    |> Ash.Query.limit(limit)
-    |> Ash.read!(
-      actor: assigns[:actor],
-      authorize?: assigns[:authorizing],
-      tenant: assigns[:tenant]
-    )
-    |> then(fn
-      %Ash.Page.Offset{results: results} -> results
-      results -> results
-    end)
-    |> Enum.map(&{Map.get(&1, label_field), &1.id})
+    |> Ash.Query.limit(max_items + 1)
+    |> Ash.read(opts)
+    |> case do
+      {:ok, %Ash.Page.Offset{results: results}} ->
+        {:ok, to_options(results, pk_field, label_field)}
+
+      {:ok, %Ash.Page.Keyset{results: results}} ->
+        {:ok, to_options(results, pk_field, label_field)}
+
+      {:ok, results} ->
+        {:ok, to_options(results, pk_field, label_field)}
+
+      {:error, error} ->
+        {:error, error}
+    end
   end
 
   defp fetch_suggestions(_assigns, "") do
-    []
+    {:ok, []}
   end
 
   defp fetch_suggestions(assigns, search_term) do
@@ -318,15 +381,45 @@ defmodule AshAdmin.Components.Resource.RelationshipField do
       assigns.pk_field,
       assigns.label_field
     ])
-    |> Ash.Query.filter(
-      contains(
-        ^ref(assigns.label_field),
-        ^%Ash.CiString{string: search_term}
-      )
-    )
+    |> Ash.Query.filter(^search_filter(assigns, search_term))
     |> Ash.Query.sort(ash_admin_position_sort: {%{search_term: search_term}, :asc})
     |> Ash.Query.limit(assigns.max_items)
-    |> Ash.read!(ash_opts(assigns))
-    |> Enum.map(&{Map.get(&1, assigns.label_field), &1.id})
+    |> Ash.read(ash_opts(assigns))
+    |> case do
+      {:ok, results} -> {:ok, to_options(results, assigns.pk_field, assigns.label_field)}
+      {:error, error} -> {:error, error}
+    end
+  end
+
+  # Match on the label, and also on the primary key when the resource has a
+  # single-field primary key and the typed text is a valid value for it (e.g. a
+  # pasted UUID), since the label is the only searchable field otherwise.
+  defp search_filter(assigns, search_term) do
+    label_match =
+      expr(contains(^ref(assigns.label_field), ^%Ash.CiString{string: search_term}))
+
+    case cast_primary_key(assigns.resource, search_term) do
+      {:ok, pk_field, pk_value} ->
+        expr(^label_match or ^ref(pk_field) == ^pk_value)
+
+      :error ->
+        label_match
+    end
+  end
+
+  defp cast_primary_key(resource, search_term) do
+    with [pk_field] <- Ash.Resource.Info.primary_key(resource),
+         %{type: type, constraints: constraints} <-
+           Ash.Resource.Info.attribute(resource, pk_field),
+         {:ok, value} when not is_nil(value) <-
+           Ash.Type.cast_input(type, search_term, constraints) do
+      {:ok, pk_field, value}
+    else
+      _ -> :error
+    end
+  end
+
+  defp to_options(results, pk_field, label_field) do
+    Enum.map(results, &{label_string(Map.get(&1, label_field)), Map.get(&1, pk_field)})
   end
 end

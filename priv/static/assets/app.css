@@ -2863,11 +2863,6 @@ select {
   border-color: rgb(192 132 252 / var(--tw-border-opacity));
 }
 
-.border-purple-500 {
-  --tw-border-opacity: 1;
-  border-color: rgb(168 85 247 / var(--tw-border-opacity));
-}
-
 .border-red-200 {
   --tw-border-opacity: 1;
   border-color: rgb(254 202 202 / var(--tw-border-opacity));
@@ -2992,6 +2987,10 @@ select {
   background-color: rgb(217 70 239 / var(--tw-bg-opacity));
 }
 
+.bg-fuchsia-500\/20 {
+  background-color: rgb(217 70 239 / 0.2);
+}
+
 .bg-fuchsia-600 {
   --tw-bg-opacity: 1;
   background-color: rgb(192 38 211 / var(--tw-bg-opacity));
@@ -3041,6 +3040,10 @@ select {
 .bg-purple-400 {
   --tw-bg-opacity: 1;
   background-color: rgb(192 132 252 / var(--tw-bg-opacity));
+}
+
+.bg-purple-500\/20 {
+  background-color: rgb(168 85 247 / 0.2);
 }
 
 .bg-purple-600 {
@@ -3765,6 +3768,11 @@ select {
   color: rgb(74 222 128 / var(--tw-text-opacity));
 }
 
+.text-purple-100 {
+  --tw-text-opacity: 1;
+  color: rgb(243 232 255 / var(--tw-text-opacity));
+}
+
 .text-purple-300 {
   --tw-text-opacity: 1;
   color: rgb(216 180 254 / var(--tw-text-opacity));
@@ -3963,6 +3971,12 @@ select {
 
 .opacity-75 {
   opacity: 0.75;
+}
+
+.shadow {
+  --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
 .shadow-2xl {
@@ -5137,6 +5151,11 @@ main.admin-main::after {
     border-color: rgb(59 130 246 / var(--tw-border-opacity));
   }
 
+  .dark\:border-blue-700 {
+    --tw-border-opacity: 1;
+    border-color: rgb(29 78 216 / var(--tw-border-opacity));
+  }
+
   .dark\:border-gray-600 {
     --tw-border-opacity: 1;
     border-color: rgb(75 85 99 / var(--tw-border-opacity));
@@ -5183,6 +5202,10 @@ main.admin-main::after {
 
   .dark\:bg-blue-900\/20 {
     background-color: rgb(30 58 138 / 0.2);
+  }
+
+  .dark\:bg-blue-900\/30 {
+    background-color: rgb(30 58 138 / 0.3);
   }
 
   .dark\:bg-gray-700 {
@@ -5237,6 +5260,11 @@ main.admin-main::after {
   .dark\:bg-slate-950 {
     --tw-bg-opacity: 1;
     background-color: rgb(2 6 23 / var(--tw-bg-opacity));
+  }
+
+  .dark\:text-blue-200 {
+    --tw-text-opacity: 1;
+    color: rgb(191 219 254 / var(--tw-text-opacity));
   }
 
   .dark\:text-blue-300 {
