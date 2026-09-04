@@ -11,6 +11,17 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.3.2](https://github.com/ash-project/ash_admin/compare/v1.3.1...v1.3.2) (2026-09-04)
+
+
+
+
+### Bug Fixes:
+
+* properly thread through actor to typeaheads by Zach Daniel
+
+* handle labels in typeaheads better for searching by Zach Daniel
+
 ## [v1.3.1](https://github.com/ash-project/ash_admin/compare/v1.3.0...v1.3.1) (2026-08-31)
 
 
