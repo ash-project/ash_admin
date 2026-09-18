@@ -55,8 +55,8 @@ defmodule AshAdmin.Components.Resource.Show do
         :if={AshAdmin.Resource.actor?(@resource)}
         class="float-right pt-4 pr-4"
         phx-click="set_actor"
-        phx-value-resource={@resource}
-        phx-value-domain={@domain}
+        phx-value-resource={AshAdmin.Resource.name(@resource)}
+        phx-value-domain={AshAdmin.Domain.name(@domain)}
         phx-value-pkey={encode_primary_key(@record)}
       >
         <.icon name="hero-key" class="h-5 w-5 text-slate-500 dark:text-slate-400" />

@@ -176,8 +176,8 @@ defmodule AshAdmin.Components.Resource.DataTable do
                     <button
                       :if={AshAdmin.Resource.actor?(@resource)}
                       phx-click="set_actor"
-                      phx-value-resource={@resource}
-                      phx-value-domain={@domain}
+                      phx-value-resource={AshAdmin.Resource.name(@resource)}
+                      phx-value-domain={AshAdmin.Domain.name(@domain)}
                       phx-value-pkey={encode_primary_key(record)}
                       class="p-1 text-slate-400 hover:text-amber-500 dark:hover:text-amber-400"
                       title="Set as actor"

@@ -30,7 +30,7 @@ defmodule AshAdmin.Test.Post do
 
   actions do
     default_accept(:*)
-    defaults(create: :*)
+    defaults([:read, create: :*])
 
     create :create_with_photo do
       argument(:photo, :file)
@@ -46,6 +46,7 @@ defmodule AshAdmin.Test.Post do
 
   admin do
     resource_group(:group_a)
+    actor?(true)
   end
 
   relationships do

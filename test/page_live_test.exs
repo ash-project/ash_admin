@@ -76,6 +76,64 @@ defmodule AshAdmin.Test.PageLiveTest do
     refute html =~ "ash_admin-Ed55GFnX"
   end
 
+  describe "set_actor" do
+    setup do
+      post =
+        AshAdmin.Test.Post
+        |> Ash.Changeset.for_create(:create, %{body: "actor post"})
+        |> Ash.create!()
+
+      %{post: post}
+    end
+
+    test "clicking the key on the show page sets the record as the actor", %{
+      conn: conn,
+      post: post
+    } do
+      pkey = AshAdmin.Helpers.encode_primary_key(post)
+
+      {:ok, view, _html} =
+        live(
+          conn,
+          "/api/admin?domain=Domain&resource=Post&action_type=read&primary_key=#{pkey}"
+        )
+
+      view
+      |> element("button[phx-click=set_actor]")
+      |> render_click()
+
+      domain_name = AshAdmin.Domain.name(AshAdmin.Test.Domain)
+
+      assert_push_event(view, "set_actor", %{
+        resource: "Post",
+        domain: ^domain_name,
+        primary_key: ^pkey
+      })
+    end
+
+    test "clicking the key in the data table sets the record as the actor", %{
+      conn: conn,
+      post: post
+    } do
+      pkey = AshAdmin.Helpers.encode_primary_key(post)
+
+      {:ok, view, _html} =
+        live(conn, "/api/admin?domain=Domain&resource=Post&action_type=read")
+
+      view
+      |> element("button[phx-click=set_actor][phx-value-pkey=\"#{pkey}\"]")
+      |> render_click()
+
+      domain_name = AshAdmin.Domain.name(AshAdmin.Test.Domain)
+
+      assert_push_event(view, "set_actor", %{
+        resource: "Post",
+        domain: ^domain_name,
+        primary_key: ^pkey
+      })
+    end
+  end
+
   test "allows uploading to an action with an upload argument", %{conn: conn} do
     {:ok, view, _html} =
       live(
