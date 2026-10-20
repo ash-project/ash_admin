@@ -551,6 +551,12 @@ defmodule AshAdmin.Components.Resource.Form do
         </button>
       </div>
     </div>
+    {render_load_relationship_button(assigns)}
+    """
+  end
+
+  defp render_load_relationship_button(assigns) do
+    ~H"""
     <div :if={must_load?(@opts) && !loaded?(@form.source.source, @relationship.name)}>
       <button
         phx-click="load"
@@ -577,7 +583,7 @@ defmodule AshAdmin.Components.Resource.Form do
          relationship,
          form,
          argument,
-         _opts
+         opts
        ) do
     destination = relationship.destination
     pk_field = Ash.Resource.Info.primary_key(destination) |> List.first()
@@ -609,6 +615,7 @@ defmodule AshAdmin.Components.Resource.Form do
         relationship: relationship,
         form: form,
         argument: argument,
+        opts: opts,
         pk_field: pk_field,
         label_field: label_field,
         all_options: all_options,
@@ -619,7 +626,7 @@ defmodule AshAdmin.Components.Resource.Form do
       )
 
     ~H"""
-    <div>
+    <div :if={!must_load?(@opts) || loaded?(@form.source.source, @relationship.name)}>
       <div :if={@selected_ids != []} class="flex flex-wrap gap-1.5 mb-2">
         <.inputs_for :let={inner_form} field={@form[@argument.name]}>
           <.input
@@ -630,6 +637,13 @@ defmodule AshAdmin.Components.Resource.Form do
           />
           <% pk_value = get_pk_from_inner_form(inner_form, @pk_field) %>
           <% pk_string = pk_value && to_string(pk_value) %>
+          <%!-- newly added lookup forms only carry the pk in params, but it must be submitted --%>
+          <.input
+            :if={!Keyword.has_key?(inner_form.hidden, @pk_field)}
+            name={inner_form.name <> "[#{@pk_field}]"}
+            value={pk_string}
+            type="hidden"
+          />
           <% label =
             Enum.find_value(@all_options, pk_string, fn {l, id} ->
               if id == pk_string, do: l
@@ -663,6 +677,7 @@ defmodule AshAdmin.Components.Resource.Form do
         authorizing={@authorizing}
       />
     </div>
+    {render_load_relationship_button(assigns)}
     """
   end
 
