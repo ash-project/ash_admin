@@ -11,6 +11,17 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.3.3](https://github.com/ash-project/ash_admin/compare/v1.3.2...v1.3.3) (2026-10-20)
+
+
+
+
+### Bug Fixes:
+
+* properly render m2m forms in admin by Zach Daniel
+
+* properly encode resource/domain names in admin by Zach Daniel
+
 ## [v1.3.2](https://github.com/ash-project/ash_admin/compare/v1.3.1...v1.3.2) (2026-09-04)
 
 
