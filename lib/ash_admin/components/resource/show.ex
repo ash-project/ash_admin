@@ -319,6 +319,9 @@ defmodule AshAdmin.Components.Resource.Show do
         prefix={@prefix}
         skip={[@destination_attribute]}
         relationship_name={@relationship_name}
+        actor={@actor}
+        tenant={@tenant}
+        authorizing={@authorizing}
       />
     </div>
     """

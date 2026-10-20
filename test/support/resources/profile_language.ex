@@ -7,7 +7,19 @@ defmodule AshAdmin.Test.ProfileLanguage do
   use Ash.Resource,
     domain: AshAdmin.Test.ManyToManyDomain,
     data_layer: Ash.DataLayer.Ets,
-    extensions: [AshAdmin.Resource]
+    extensions: [AshAdmin.Resource],
+    authorizers: [Ash.Policy.Authorizer]
+
+  # with no actor, an authorized read of the join resource sees nothing
+  policies do
+    policy action_type(:read) do
+      authorize_if(actor_present())
+    end
+  end
+
+  admin do
+    relationship_display_fields([:id])
+  end
 
   attributes do
     uuid_primary_key(:id)

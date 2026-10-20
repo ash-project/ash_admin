@@ -40,5 +40,9 @@ defmodule AshAdmin.Test.Profile do
       public?(true)
       through(AshAdmin.Test.ProfileLanguage)
     end
+
+    has_one :language_link, AshAdmin.Test.ProfileLanguage do
+      public?(true)
+    end
   end
 end

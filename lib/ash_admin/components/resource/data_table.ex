@@ -535,7 +535,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
         attribute,
         format_fields,
         show_sensitive_fields,
-        assigns.actor,
+        [actor: assigns.actor, tenant: assigns[:tenant], authorize?: assigns[:authorizing]],
         nil
       )
     else

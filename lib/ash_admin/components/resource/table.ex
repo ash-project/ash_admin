@@ -24,6 +24,8 @@ defmodule AshAdmin.Components.Resource.Table do
   attr :format_fields, :any, default: []
   attr :show_sensitive_fields, :list, default: []
   attr :actor, :any, default: nil
+  attr :tenant, :any, default: nil
+  attr :authorizing, :boolean, default: false
   attr :relationship_name, :atom, default: nil
 
   def table(assigns) do
@@ -47,7 +49,7 @@ defmodule AshAdmin.Components.Resource.Table do
                 attribute,
                 @format_fields,
                 @show_sensitive_fields,
-                @actor,
+                [actor: @actor, tenant: @tenant, authorize?: @authorizing],
                 @relationship_name
               )}
             </td>
@@ -143,7 +145,7 @@ defmodule AshAdmin.Components.Resource.Table do
         attribute,
         formats,
         show_sensitive_fields,
-        actor,
+        load_opts,
         relationship_name
       ) do
     process_attribute(
@@ -152,7 +154,7 @@ defmodule AshAdmin.Components.Resource.Table do
       attribute,
       formats,
       show_sensitive_fields,
-      actor,
+      load_opts,
       relationship_name
     )
   rescue
@@ -166,7 +168,7 @@ defmodule AshAdmin.Components.Resource.Table do
          %module{} = attribute,
          formats,
          show_sensitive_fields,
-         actor,
+         load_opts,
          relationship_name
        )
        when module in [HasOne, BelongsTo] do
@@ -179,7 +181,11 @@ defmodule AshAdmin.Components.Resource.Table do
         if loaded?(record, attribute.name) do
           record
         else
-          Ash.load!(record, [{attribute.name, display_attributes}], actor: actor, domain: domain)
+          Ash.load!(
+            record,
+            [{attribute.name, display_attributes}],
+            Keyword.put(load_opts, :domain, domain)
+          )
         end
 
       relationship = Map.get(record, attribute.name)
@@ -196,7 +202,7 @@ defmodule AshAdmin.Components.Resource.Table do
             x,
             formats,
             show_sensitive_fields,
-            actor,
+            load_opts,
             relationship_name
           )
         end)
@@ -210,7 +216,7 @@ defmodule AshAdmin.Components.Resource.Table do
          %struct{} = attribute,
          formats,
          show_sensitive_fields,
-         _actor,
+         _load_opts,
          relationship_name
        )
        when struct in [Ash.Resource.Attribute, Ash.Resource.Aggregate, Ash.Resource.Calculation] do
@@ -230,7 +236,7 @@ defmodule AshAdmin.Components.Resource.Table do
          _attr,
          _formats,
          _show_sensitive_fields,
-         _actor,
+         _load_opts,
          _relationship_name
        ) do
     "..."

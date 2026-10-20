@@ -16,7 +16,9 @@ defmodule AshAdmin.Test.Components.Resource.ManyToManyFormTest do
     german = Ash.create!(Language, %{name: "German"})
     profile = Ash.create!(Profile, %{name: "Laszlo"})
 
-    Ash.create!(ProfileLanguage, %{profile_id: profile.id, language_id: english.id})
+    Ash.create!(ProfileLanguage, %{profile_id: profile.id, language_id: english.id},
+      authorize?: false
+    )
 
     pkey = AshAdmin.Helpers.encode_primary_key(profile)
 
@@ -69,6 +71,15 @@ defmodule AshAdmin.Test.Components.Resource.ManyToManyFormTest do
     assert language_ids(profile) == []
   end
 
+  test "a forbidden load shows the error instead of crashing", %{view: view} do
+    render_click(view, "toggle_authorizing", %{})
+
+    load_languages(view)
+
+    assert render(view) =~ "forbidden"
+    refute has_element?(view, "select[phx-change=select_item]")
+  end
+
   defp load_languages(view) do
     view
     |> element("button[phx-click=load][phx-value-relationship=languages]")
@@ -83,7 +94,7 @@ defmodule AshAdmin.Test.Components.Resource.ManyToManyFormTest do
 
   defp language_ids(profile) do
     Profile
-    |> Ash.get!(profile.id, load: :languages)
+    |> Ash.get!(profile.id, load: :languages, authorize?: false)
     |> Map.get(:languages)
     |> Enum.map(& &1.id)
     |> Enum.sort()

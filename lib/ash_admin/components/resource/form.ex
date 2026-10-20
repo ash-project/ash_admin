@@ -2219,19 +2219,20 @@ defmodule AshAdmin.Components.Resource.Form do
   def handle_event("load", %{"path" => path, "relationship" => relationship}, socket) do
     relationship = String.to_existing_atom(relationship)
 
-    form =
-      AshPhoenix.Form.update_form(
-        socket.assigns.form,
-        path,
-        fn adding_form ->
-          if adding_form.data do
-            new_data =
-              Ash.load!(adding_form.data, relationship,
-                actor: socket.assigns.actor,
-                tenant: socket.assigns.tenant,
-                domain: socket.assigns.domain
-              )
-
+    with %{data: data} when not is_nil(data) <-
+           AshPhoenix.Form.get_form(socket.assigns.form, path),
+         {:ok, new_data} <-
+           Ash.load(data, relationship,
+             actor: socket.assigns.actor,
+             tenant: socket.assigns.tenant,
+             domain: socket.assigns.domain,
+             authorize?: socket.assigns[:authorizing]
+           ) do
+      form =
+        AshPhoenix.Form.update_form(
+          socket.assigns.form,
+          path,
+          fn adding_form ->
             updated_form =
               adding_form
               |> Map.put(:data, new_data)
@@ -2259,15 +2260,21 @@ defmodule AshAdmin.Components.Resource.Form do
             else
               updated_form
             end
-          else
-            adding_form
           end
-        end
-      )
+        )
 
-    {:noreply,
-     socket
-     |> assign(:form, form)}
+      {:noreply,
+       socket
+       |> assign(:form, form)
+       |> assign(:load_errors, Map.delete(socket.assigns.load_errors, relationship))}
+    else
+      {:error, error} ->
+        {:noreply,
+         assign(socket, :load_errors, Map.put(socket.assigns.load_errors, relationship, error))}
+
+      _ ->
+        {:noreply, socket}
+    end
   end
 
   def handle_event("remove_value", %{"path" => path, "field" => field, "index" => index}, socket) do
