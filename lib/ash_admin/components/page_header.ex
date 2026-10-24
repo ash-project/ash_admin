@@ -28,7 +28,7 @@ defmodule AshAdmin.Components.PageHeader do
         {AshAdmin.Resource.name(@resource)}
       </h1>
       <h1 :if={!@resource} class="text-base font-semibold text-slate-900 dark:text-slate-100">
-        Ash Admin
+        {AshAdmin.title()}
       </h1>
 
       <%!-- Read action switcher --%>

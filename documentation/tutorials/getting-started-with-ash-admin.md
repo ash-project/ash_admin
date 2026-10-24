@@ -88,6 +88,14 @@ end
 
 Start your project (usually by running `mix phx.server` in a terminal) and visit `/admin` in your browser (or the path you configured `ash_admin` with in your router).
 
+## Title
+
+The sidebar, the page header and the browser tab show "Ash Admin" by default. Set a title to show your own product or team name instead:
+
+```elixir
+config :ash_admin, :title, "Acme Back Office"
+```
+
 ## Tenant Selection
 
 By default, the tenant field in the admin navbar is a free-text input. You can configure a `list_tenants` MFA (module, function, args) to provide a better tenant selection experience.

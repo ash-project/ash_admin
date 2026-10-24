@@ -14,6 +14,30 @@ defmodule AshAdmin.Test.PageLiveTest do
     %{conn: build_conn()}
   end
 
+  test "it shows the configured title", %{conn: conn} do
+    previous = Application.get_env(:ash_admin, :title)
+
+    on_exit(fn ->
+      if previous do
+        Application.put_env(:ash_admin, :title, previous)
+      else
+        Application.delete_env(:ash_admin, :title)
+      end
+    end)
+
+    {:ok, _view, html} = live(conn, "/api/admin")
+    assert html =~ "Ash Admin"
+
+    Application.put_env(:ash_admin, :title, "Acme Back Office")
+
+    html = conn |> get("/api/admin") |> html_response(200)
+    assert html =~ "<title>Acme Back Office</title>"
+
+    {:ok, _view, html} = live(conn, "/api/admin")
+    assert html =~ "Acme Back Office"
+    refute html =~ "Ash Admin"
+  end
+
   test "it renders the schema by default", %{conn: conn} do
     {:ok, _view, html} = live(conn, "/api/admin")
 
