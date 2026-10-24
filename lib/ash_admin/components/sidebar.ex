@@ -55,7 +55,7 @@ defmodule AshAdmin.Components.Sidebar do
         navigate={@prefix}
         class="text-lg font-semibold text-white hover:text-slate-300 transition-colors"
       >
-        Ash Admin
+        {AshAdmin.title()}
       </.link>
     </div>
 

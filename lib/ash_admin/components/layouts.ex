@@ -44,7 +44,7 @@ defmodule AshAdmin.Layouts do
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
         <meta name="csrf-token" content={get_csrf_token()} />
         <meta name="csp-nonce-style" content={csp_nonce(@conn, :style, @ash_admin_csp_nonce)} />
-        <title>{assigns[:page_title] || "Ash Admin"}</title>
+        <title>{assigns[:page_title] || AshAdmin.title()}</title>
         <style nonce={csp_nonce(@conn, :style, @ash_admin_csp_nonce)}>
           <%= raw(render("app.css", %{})) %>
         </style>

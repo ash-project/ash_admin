@@ -7,6 +7,11 @@ defmodule AshAdmin do
   @moduledoc false
 
   @doc false
+  def title do
+    Application.get_env(:ash_admin, :title, "Ash Admin")
+  end
+
+  @doc false
   def tenant_mode do
     case Application.get_env(:ash_admin, :list_tenants) do
       nil ->
