@@ -16,6 +16,7 @@ config :phoenix, :json_library, Jason
 config :ash_admin, ecto_repos: [Demo.Repo]
 
 config :ash_admin, DemoWeb.Endpoint,
+  adapter: Bandit.PhoenixAdapter,
   url: [host: "localhost"],
   secret_key_base: "Hu4qQN3iKzTV4fJxhorPQlA/osH9fAMtbtjVS58PFgfw3ja5Z18Q/WSNR9wP4OfW",
   live_view: [signing_salt: "hMegieSe"],

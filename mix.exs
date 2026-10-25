@@ -154,7 +154,7 @@ defmodule AshAdmin.MixProject do
       {:simple_sat, "~> 0.1", only: [:dev, :test]},
       {:esbuild, "~> 0.7", only: [:dev, :test]},
       {:tailwind, "~> 0.5.1", only: [:dev, :test]},
-      {:plug_cowboy, "~> 2.0", only: [:dev, :test]},
+      {:bandit, "~> 1.0", only: [:dev, :test]},
       {:phoenix_live_reload, "~> 1.2", only: [:dev, :test]},
       {:lazy_html, ">= 0.1.0", only: [:dev, :test]},
       {:ash_postgres, "~> 2.0", only: [:dev, :test]},
