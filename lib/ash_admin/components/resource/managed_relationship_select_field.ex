@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 ash_admin contributors <https://github.com/ash-project/ash_admin/graphs/contributors>
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshAdmin.Components.Resource.ManagedRelationshipSelectField do
   @moduledoc """
   A LiveComponent for rendering a managed relationship field as a select/typeahead
