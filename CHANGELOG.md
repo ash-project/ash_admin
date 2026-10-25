@@ -11,6 +11,19 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.4.0](https://github.com/ash-project/ash_admin/compare/v1.3.3...v1.4.0) (2026-10-25)
+
+
+
+
+### Features:
+
+* configurable admin title by zeadhani
+
+### Bug Fixes:
+
+* properly load m2m related data by Zach Daniel
+
 ## [v1.3.3](https://github.com/ash-project/ash_admin/compare/v1.3.2...v1.3.3) (2026-10-20)
 
 
