@@ -67,6 +67,11 @@ defmodule AshAdmin.Router do
 
     * `:live_session_name` - Optional atom to name the `live_session`. Defaults to `:ash_admin`.
 
+    * `:host_app_path` - Optional path to your application. When set, the sidebar shows a link
+      back to it.
+
+    * `:host_app_label` - Optional label for the `:host_app_path` link. Defaults to `"Back to app"`.
+
   ## Examples
       defmodule MyAppWeb.Router do
         use Phoenix.Router
@@ -106,7 +111,15 @@ defmodule AshAdmin.Router do
       live_session opts[:live_session_name] || :ash_admin,
         on_mount: List.wrap(opts[:on_mount]),
         session:
-          {AshAdmin.Router, :__session__, [%{"prefix" => path}, List.wrap(opts[:session])]},
+          {AshAdmin.Router, :__session__,
+           [
+             %{
+               "prefix" => path,
+               "host_app_path" => opts[:host_app_path],
+               "host_app_label" => opts[:host_app_label] || "Back to app"
+             },
+             List.wrap(opts[:session])
+           ]},
         root_layout: {AshAdmin.Layouts, :root} do
         live(
           "#{path}/*route",

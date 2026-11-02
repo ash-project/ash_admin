@@ -12,6 +12,8 @@ defmodule AshAdmin.Components.Sidebar do
   attr :domain, :any, required: true
   attr :resource, :any, required: true
   attr :prefix, :any, required: true
+  attr :host_app_path, :string, default: nil
+  attr :host_app_label, :string, default: nil
   attr :open, :boolean, default: false
 
   # Actor/auth/tenant assigns
@@ -60,6 +62,14 @@ defmodule AshAdmin.Components.Sidebar do
         class="text-lg font-semibold text-white hover:text-slate-300 transition-colors"
       >
         {AshAdmin.title()}
+      </.link>
+      <.link
+        :if={@host_app_path}
+        href={@host_app_path}
+        class="mt-2 flex items-center gap-1 text-sm text-slate-400 hover:text-white transition-colors"
+      >
+        <AshAdmin.CoreComponents.icon name="hero-arrow-left-mini" class="h-4 w-4" />
+        {@host_app_label}
       </.link>
     </div>
 

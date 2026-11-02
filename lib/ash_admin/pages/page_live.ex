@@ -58,6 +58,8 @@ defmodule AshAdmin.PageLive do
     {:ok,
      socket
      |> assign(:prefix, prefix)
+     |> assign(:host_app_path, session["host_app_path"])
+     |> assign(:host_app_label, session["host_app_label"])
      |> assign(:primary_key, nil)
      |> assign(:record, nil)
      |> assign(:domains, domains)
@@ -89,6 +91,8 @@ defmodule AshAdmin.PageLive do
         domain={@domain}
         resource={@resource}
         prefix={@prefix}
+        host_app_path={@host_app_path}
+        host_app_label={@host_app_label}
         open={@sidebar_open}
         actor={@actor}
         actor_domain={@actor_domain}
