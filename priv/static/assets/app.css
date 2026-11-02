@@ -2399,12 +2399,6 @@ select {
   resize: vertical;
 }
 
-.appearance-none {
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
-}
-
 .grid-cols-1 {
   grid-template-columns: repeat(1, minmax(0, 1fr));
 }
@@ -3711,11 +3705,6 @@ select {
 .text-fuchsia-400 {
   --tw-text-opacity: 1;
   color: rgb(232 121 249 / var(--tw-text-opacity));
-}
-
-.text-fuchsia-500 {
-  --tw-text-opacity: 1;
-  color: rgb(217 70 239 / var(--tw-text-opacity));
 }
 
 .text-gray-200 {
@@ -5127,6 +5116,14 @@ main.admin-main::after {
   border-top-width: 2px;
 }
 
+.group\/cinder-filter[data-cinder-partial] .group-data-\[cinder-partial\]\/cinder-filter\:visible {
+  visibility: visible;
+}
+
+.group\/cinder-filters[data-cinder-partial] .group-data-\[cinder-partial\]\/cinder-filters\:visible {
+  visibility: visible;
+}
+
 .phx-submit-loading.phx-submit-loading\:opacity-75 {
   opacity: 0.75;
 }
@@ -5372,10 +5369,6 @@ main.admin-main::after {
     --tw-ring-color: rgb(51 65 85 / var(--tw-ring-opacity));
   }
 
-  .dark\:ring-offset-gray-800 {
-    --tw-ring-offset-color: #1f2937;
-  }
-
   .dark\:file\:bg-slate-700::file-selector-button {
     --tw-bg-opacity: 1;
     background-color: rgb(51 65 85 / var(--tw-bg-opacity));
@@ -5463,11 +5456,6 @@ main.admin-main::after {
   .dark\:focus\:ring-blue-500:focus {
     --tw-ring-opacity: 1;
     --tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity));
-  }
-
-  .dark\:focus\:ring-blue-600:focus {
-    --tw-ring-opacity: 1;
-    --tw-ring-color: rgb(37 99 235 / var(--tw-ring-opacity));
   }
 
   .dark\:focus\:ring-blue-800:focus {
