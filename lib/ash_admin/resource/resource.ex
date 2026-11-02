@@ -124,6 +124,12 @@ defmodule AshAdmin.Resource do
         doc:
           "A list of calculations that can be loaded when this resource is shown. By default, no calculations are included."
       ],
+      show_relationship_fields: [
+        type: :keyword_list,
+        doc: """
+        The fields to render for each relationship on this resource's show page, keyed by relationship name. For example: `show_relationship_fields organizations: [:name, :slug]`. Fields are shown in the given order. Relationships that are not listed show every attribute.
+        """
+      ],
       label_field: [
         type: :atom,
         doc:
@@ -145,7 +151,8 @@ defmodule AshAdmin.Resource do
       AshAdmin.Resource.Transformers.AddPositionSortCalculation
     ],
     verifiers: [
-      AshAdmin.Resource.Verifiers.VerifyFileArgumentsExist
+      AshAdmin.Resource.Verifiers.VerifyFileArgumentsExist,
+      AshAdmin.Resource.Verifiers.VerifyShowRelationshipFields
     ]
 
   @moduledoc """
@@ -269,6 +276,12 @@ defmodule AshAdmin.Resource do
 
   def show_calculations(resource) do
     Spark.Dsl.Extension.get_opt(resource, [:admin], :show_calculations, [], true)
+  end
+
+  def show_relationship_fields(resource, relationship) do
+    resource
+    |> Spark.Dsl.Extension.get_opt([:admin], :show_relationship_fields, [], true)
+    |> Keyword.get(relationship)
   end
 
   def fields(resource) do
