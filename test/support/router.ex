@@ -31,5 +31,16 @@ defmodule AshAdmin.Test.Router do
       live_session_name: :ash_admin_csp_full,
       csp_nonce_assign_key: csp_full
     )
+
+    ash_admin("/host-app/admin",
+      live_session_name: :ash_admin_host_app,
+      host_app_path: "/dashboard",
+      host_app_label: "Back to dashboard"
+    )
+
+    ash_admin("/host-app-default/admin",
+      live_session_name: :ash_admin_host_app_default,
+      host_app_path: "/dashboard"
+    )
   end
 end

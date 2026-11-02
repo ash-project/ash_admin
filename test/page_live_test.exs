@@ -38,6 +38,26 @@ defmodule AshAdmin.Test.PageLiveTest do
     refute html =~ "Ash Admin"
   end
 
+  test "it does not show a host app link when host_app_path is not set", %{conn: conn} do
+    {:ok, view, html} = live(conn, "/api/admin")
+
+    refute html =~ "Back to app"
+    refute has_element?(view, ~s|a[href="/dashboard"]|)
+  end
+
+  test "it shows a link back to the host app when host_app_path is set", %{conn: conn} do
+    {:ok, view, html} = live(conn, "/api/host-app/admin")
+
+    assert html =~ "Back to dashboard"
+    assert has_element?(view, ~s|a[href="/dashboard"]|, "Back to dashboard")
+  end
+
+  test "it uses a default label for the host app link", %{conn: conn} do
+    {:ok, view, _html} = live(conn, "/api/host-app-default/admin")
+
+    assert has_element?(view, ~s|a[href="/dashboard"]|, "Back to app")
+  end
+
   test "it renders the schema by default", %{conn: conn} do
     {:ok, _view, html} = live(conn, "/api/admin")
 
