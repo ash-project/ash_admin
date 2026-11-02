@@ -27,6 +27,7 @@ spark_locals_without_parens = [
   show?: 1,
   show_action: 1,
   show_calculations: 1,
+  show_relationship_fields: 1,
   show_resources: 1,
   show_sensitive_fields: 1,
   table_columns: 1,

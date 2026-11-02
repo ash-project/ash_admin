@@ -257,12 +257,13 @@ defmodule AshAdmin.Components.Resource.Show do
             name: name,
             destination: destination,
             context: context,
-            destination_domain: destination_domain
+            destination_domain: destination_domain,
+            fields: AshAdmin.Resource.show_relationship_fields(assigns.resource, name)
           )
 
         ~H"""
         <div class="mb-10">
-          {render_attributes(assigns, @record, @destination, @name)}
+          {render_attributes(assigns, @record, @destination, @name, @fields)}
           <div class="px-4 py-3 text-right sm:px-6">
             <.link
               :if={AshAdmin.Resource.show_action(@destination)}
@@ -306,7 +307,8 @@ defmodule AshAdmin.Components.Resource.Show do
         destination_format_fields: AshAdmin.Resource.format_fields(destination),
         context: context,
         destination_attribute: destination_attribute,
-        relationship_name: name
+        relationship_name: name,
+        fields: AshAdmin.Resource.show_relationship_fields(assigns.resource, name)
       )
 
     ~H"""
@@ -314,6 +316,7 @@ defmodule AshAdmin.Components.Resource.Show do
       <Table.table
         data={@data}
         resource={@destination}
+        attributes={@fields}
         format_fields={@destination_format_fields}
         domain={@destination_domain || Ash.Resource.Info.domain(@destination) || @domain}
         table={@context[:data_layer][:table]}
@@ -328,9 +331,16 @@ defmodule AshAdmin.Components.Resource.Show do
     """
   end
 
-  defp render_attributes(assigns, record, resource, relationship_name \\ nil) do
-    {attributes, flags, bottom_attributes, _} =
-      AshAdmin.Components.Resource.Form.attributes(resource, :show)
+  defp render_attributes(assigns, record, resource, relationship_name \\ nil, fields \\ nil) do
+    {attributes, flags, bottom_attributes} =
+      case AshAdmin.Components.Resource.Form.attributes(resource, :show) do
+        {attributes, flags, bottom_attributes, _} when is_nil(fields) ->
+          {attributes, flags, bottom_attributes}
+
+        _ ->
+          # An explicit field list keeps the given order in a single grid.
+          {Enum.map(fields, &Ash.Resource.Info.attribute(resource, &1)), [], []}
+      end
 
     assigns =
       assign(assigns,
