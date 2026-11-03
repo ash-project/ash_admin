@@ -86,7 +86,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
         >
           <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-auto sm:rounded-md bg-white dark:bg-slate-900">
             <div class="px-2">
-              <div :if={@ash_query && @has_filters} class="px-6 pt-6">
+              <div :if={@ash_query && (@has_filters || @has_search)} class="px-6 pt-6">
                 <button
                   phx-click="toggle_filters"
                   phx-target={@myself}
@@ -106,7 +106,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 tenant={@tenant}
                 page_size={@page_size}
                 pagination={@pagination_mode}
-                show_filters={@show_filters || @has_search}
+                show_filters={@show_filters}
                 query_opts={[authorize?: @authorizing]}
                 theme={AshAdminTheme}
               >
@@ -122,26 +122,6 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 >
                   {render_field_value(record, field_name, assigns)}
                 </:col>
-
-                <!-- The search box stays visible; the filters show only when toggled on -->
-                <:controls :let={controls}>
-                  <div class={controls.theme.filter_inputs_class}>
-                    <Cinder.Controls.render_search
-                      search={controls.search}
-                      theme={controls.theme}
-                      target={controls.target}
-                    />
-                    <Cinder.Controls.render_filter
-                      :for={{_name, filter} <- controls.filters}
-                      :if={@show_filters}
-                      filter={filter}
-                      theme={controls.theme}
-                      target={controls.target}
-                      filter_values={controls.filter_values}
-                      raw_filter_params={controls.raw_filter_params}
-                    />
-                  </div>
-                </:controls>
 
                 <!-- Action buttons column -->
                 <:col :let={record} :if={actions?(@resource)} label="">
