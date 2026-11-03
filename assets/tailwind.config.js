@@ -16,6 +16,7 @@ module.exports = {
     "./js/**/*.js",
     "./../lib/ash_admin/components/**/*.*ex",
     "./../lib/ash_admin/pages/**/*.*ex",
+    "./../lib/ash_admin/themes/**/*.*ex",
     "../deps/cinder/**/*.*ex",
   ],
   safelist: ["prose", "dark:prose-invert", "max-w-none", "border-l-4"],
