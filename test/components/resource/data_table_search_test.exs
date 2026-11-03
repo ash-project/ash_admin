@@ -21,12 +21,17 @@ defmodule AshAdmin.Test.Components.Resource.DataTableSearchTest do
     {:ok, view, _html} = live(conn, "/api/admin?domain=Domain&resource=Blog&action_type=read")
 
     html = render_async(view)
-    assert html =~ ~s(name="search")
     assert html =~ "Apple pie"
     assert html =~ "Banana bread"
 
-    # No filterable columns, so there is no Filters button
-    refute has_element?(view, "button[phx-click=toggle_filters]")
+    # The search box is hidden with the filters until the Filters button is clicked
+    refute html =~ ~s(name="search")
+
+    view
+    |> element("button[phx-click=toggle_filters]")
+    |> render_click()
+
+    assert render_async(view) =~ ~s(name="search")
 
     view
     |> element("form[phx-change=filter_change]")
@@ -38,7 +43,14 @@ defmodule AshAdmin.Test.Components.Resource.DataTableSearchTest do
   end
 
   test "a table without searchable columns has no search box", %{conn: conn} do
-    {:ok, view, _html} = live(conn, "/api/admin?domain=Domain&resource=Post&action_type=read")
+    {:ok, view, _html} =
+      live(conn, "/api/admin?domain=ManyToMany&resource=Profile&action_type=read")
+
+    render_async(view)
+
+    view
+    |> element("button[phx-click=toggle_filters]")
+    |> render_click()
 
     refute render_async(view) =~ ~s(name="search")
   end
