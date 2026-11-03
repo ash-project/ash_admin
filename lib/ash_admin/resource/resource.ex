@@ -94,6 +94,11 @@ defmodule AshAdmin.Resource do
         doc:
           "The list of columns that can be filtered. If not specified, all columns are filterable."
       ],
+      table_searchable_columns: [
+        type: {:list, :atom},
+        doc:
+          "The list of columns that the table search box searches. A search box shows only when this is set. Each column must also be in the table columns."
+      ],
       format_fields: [
         type: {:list, :any},
         doc: """
@@ -284,6 +289,10 @@ defmodule AshAdmin.Resource do
 
   def table_filterable_columns(resource) do
     Spark.Dsl.Extension.get_opt(resource, [:admin], :table_filterable_columns, nil, true)
+  end
+
+  def table_searchable_columns(resource) do
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :table_searchable_columns, [], true)
   end
 
   defp find_polymorphic_tables(resource, domains) do

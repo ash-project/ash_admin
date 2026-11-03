@@ -18,7 +18,13 @@ defmodule AshAdmin.Test.Blog do
     end
   end
 
+  actions do
+    defaults([:read, create: [:body]])
+  end
+
   admin do
     resource_group(:group_b)
+    table_searchable_columns([:body])
+    table_filterable_columns([])
   end
 end
