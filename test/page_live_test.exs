@@ -279,4 +279,13 @@ defmodule AshAdmin.Test.PageLiveTest do
     assert has_element?(view, "input[name='form[tags][0]'][value='second']")
     assert has_element?(view, "input[name='form[tags][1]'][value='first']")
   end
+
+  # LiveView needs an id on a phx-change form to recover it after a reconnect. The test config
+  # raises on one without (`:test_warnings`), so rendering the page is the regression test.
+  test "a generic action's form has an id", %{conn: conn} do
+    {:ok, view, _html} =
+      live(conn, "/api/admin?domain=Domain&resource=Post&action_type=action&action=echo")
+
+    assert has_element?(view, "form#generic-action-form")
+  end
 end

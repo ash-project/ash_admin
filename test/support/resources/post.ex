@@ -42,6 +42,11 @@ defmodule AshAdmin.Test.Post do
     create :create_with_flag do
       argument(:flag, :boolean, allow_nil?: true)
     end
+
+    action :echo, :string do
+      argument(:text, :string, allow_nil?: false)
+      run(fn input, _context -> {:ok, input.arguments.text} end)
+    end
   end
 
   admin do

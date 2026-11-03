@@ -45,6 +45,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 phx-change="validate"
                 phx-submit="save"
                 phx-target={@myself}
+                id="query-form"
               >
                 {AshAdmin.Components.Resource.Form.render_attributes(
                   assigns,
