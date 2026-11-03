@@ -93,6 +93,12 @@ defmodule AshAdmin.Themes.AshAdminTheme do
   set :filter_clear_button_class,
       "ml-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 text-sm"
 
+  # Search box - left padding leaves room for the magnifier icon
+  set :search_input_class,
+      "w-72 pl-9 pr-3 py-2 border border-slate-300 dark:border-slate-600 rounded text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-slate-500 focus:border-slate-500"
+
+  set :search_icon_class, "h-4 w-4 text-slate-400 dark:text-slate-500"
+
   # Input styling - larger inputs with thicker borders to match table
   set :filter_text_input_class,
       "w-48 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-slate-500 focus:border-slate-500"

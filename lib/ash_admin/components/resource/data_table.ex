@@ -105,7 +105,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
                 tenant={@tenant}
                 page_size={@page_size}
                 pagination={@pagination_mode}
-                show_filters={@show_filters}
+                show_filters={@show_filters || @has_search}
                 query_opts={[authorize?: @authorizing]}
                 theme={AshAdminTheme}
               >
@@ -117,9 +117,30 @@ defmodule AshAdmin.Components.Resource.DataTable do
                   label={to_name(field_name)}
                   filter={filterable?(@resource, field_name)}
                   sort={sortable?(@resource, field_name)}
+                  search={searchable?(@resource, field_name)}
                 >
                   {render_field_value(record, field_name, assigns)}
                 </:col>
+
+                <!-- The search box stays visible; the filters show only when toggled on -->
+                <:controls :let={controls}>
+                  <div class={controls.theme.filter_inputs_class}>
+                    <Cinder.Controls.render_search
+                      search={controls.search}
+                      theme={controls.theme}
+                      target={controls.target}
+                    />
+                    <Cinder.Controls.render_filter
+                      :for={{_name, filter} <- controls.filters}
+                      :if={@show_filters}
+                      filter={filter}
+                      theme={controls.theme}
+                      target={controls.target}
+                      filter_values={controls.filter_values}
+                      raw_filter_params={controls.raw_filter_params}
+                    />
+                  </div>
+                </:controls>
 
                 <!-- Action buttons column -->
                 <:col :let={record} :if={actions?(@resource)} label="">
@@ -330,12 +351,14 @@ defmodule AshAdmin.Components.Resource.DataTable do
       {page_size, pagination_mode} = pagination_config(socket.assigns.action)
 
       has_filters = AshAdmin.Resource.table_filterable_columns(socket.assigns.resource) != []
+      has_search = AshAdmin.Resource.table_searchable_columns(socket.assigns.resource) != []
 
       socket =
         assign(socket,
           page_size: page_size,
           pagination_mode: pagination_mode,
-          has_filters: has_filters
+          has_filters: has_filters,
+          has_search: has_search
         )
 
       {:ok,
@@ -566,6 +589,11 @@ defmodule AshAdmin.Components.Resource.DataTable do
       nil -> true
       list -> field_name in list && has_attribute?(resource, field_name)
     end
+  end
+
+  # Check if a field is searched by the table search box
+  defp searchable?(resource, field_name) do
+    field_name in AshAdmin.Resource.table_searchable_columns(resource)
   end
 
   # Check if field is an actual resource attribute (not a relationship or calculated field)
