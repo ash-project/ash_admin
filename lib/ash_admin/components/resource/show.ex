@@ -130,6 +130,7 @@ defmodule AshAdmin.Components.Resource.Show do
             phx-change="validate-calculation"
             phx-submit="calculate"
             phx-target={@myself}
+            id={"calculation-form-#{calculation.name}"}
           >
             <.input type="hidden" name="calculation" value={calculation.name} />
             {AshAdmin.Components.Resource.Form.render_attributes(

@@ -32,6 +32,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
             phx-change="validate"
             phx-submit="save"
             phx-target={@myself}
+            id="generic-action-form"
           >
             <div
               :if={form.source.submitted_once?}
@@ -73,6 +74,7 @@ defmodule AshAdmin.Components.Resource.GenericAction do
                 phx-change="validate"
                 phx-submit="save"
                 phx-target={@myself}
+                id="generic-action-form"
               >
                 <div
                   :if={form.source.submitted_once?}

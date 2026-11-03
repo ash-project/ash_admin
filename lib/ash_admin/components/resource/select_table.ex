@@ -23,7 +23,13 @@ defmodule AshAdmin.Components.Resource.SelectTable do
         @resource && @tables != [] &&
           (is_nil(@polymorphic_actions) || @action.name in @polymorphic_actions)
       }>
-        <.form :let={form} for={to_form(%{}, as: :table)} phx-change={@on_change} phx-target={@target}>
+        <.form
+          :let={form}
+          for={to_form(%{}, as: :table)}
+          phx-change={@on_change}
+          phx-target={@target}
+          id="_table_form"
+        >
           <.input type="select" field={form[:table]} options={@tables} value={@table} />
         </.form>
       </div>

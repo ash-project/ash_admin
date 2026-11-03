@@ -81,6 +81,9 @@ if config_env() == :test do
 
   config :ash, :disable_async?, true
 
+  # Fail on duplicate ids and on phx-change forms without an id (no form recovery).
+  config :phoenix_live_view, :test_warnings, :raise
+
   config :ash_admin,
     ash_domains: [
       AshAdmin.Test.Domain,
