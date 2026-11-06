@@ -12,6 +12,11 @@ defmodule AshAdmin do
   end
 
   @doc false
+  def reveal_sensitive_fields? do
+    Application.get_env(:ash_admin, :reveal_sensitive_fields?, true)
+  end
+
+  @doc false
   def tenant_mode do
     case Application.get_env(:ash_admin, :list_tenants) do
       nil ->

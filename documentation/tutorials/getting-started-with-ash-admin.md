@@ -96,6 +96,16 @@ The sidebar, the page header and the browser tab show "Ash Admin" by default. Se
 config :ash_admin, :title, "Acme Back Office"
 ```
 
+## Sensitive Fields
+
+Attributes and calculations marked `sensitive?: true` show as `--redacted--`, with an eye icon that reveals the value. To keep them redacted, for example when the admin can be opened on production data, turn the reveal off:
+
+```elixir
+config :ash_admin, :reveal_sensitive_fields?, false
+```
+
+The values are then never sent to the browser. There is no eye icon, and a reveal event sent without it is refused. Sensitive columns can't be filtered, sorted or searched on, because the rows that match would tell something about the value. Update forms leave sensitive attributes out instead of filling them with the stored value, so the admin can only set them when creating a record. Fields listed in a resource's `show_sensitive_fields` are still shown, and a sensitive primary key still appears in links.
+
 ## Tenant Selection
 
 By default, the tenant field in the admin navbar is a free-text input. You can configure a `list_tenants` MFA (module, function, args) to provide a better tenant selection experience.

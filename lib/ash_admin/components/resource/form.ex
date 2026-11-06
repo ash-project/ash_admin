@@ -2648,12 +2648,21 @@ defmodule AshAdmin.Components.Resource.Form do
       |> Enum.reject(fn attribute ->
         Enum.any?(arguments, &(&1.name == attribute.name))
       end)
+      |> reject_never_revealed(resource, action)
 
     attributes
     |> Enum.concat(arguments)
     |> sort_attributes(resource, action)
     |> relate_attributes(resource)
   end
+
+  # An update form fills each input with the stored value, so a sensitive attribute that is
+  # never revealed is left out of it.
+  defp reject_never_revealed(attributes, resource, %{type: :update}) do
+    Enum.reject(attributes, &never_revealed?(resource, &1))
+  end
+
+  defp reject_never_revealed(attributes, _resource, _action), do: attributes
 
   defp sort_attributes(attributes, resource, action \\ nil) do
     {relationship_args, rest} =

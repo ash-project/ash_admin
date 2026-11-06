@@ -14,17 +14,29 @@ defmodule AshAdmin.Components.Resource.SensitiveAttribute do
   end
 
   def render(assigns) do
-    assigns = assign(assigns, present?: assigns.value not in [nil, ""])
+    revealable? = AshAdmin.reveal_sensitive_fields?()
+
+    assigns =
+      assign(assigns,
+        present?: assigns.value not in [nil, ""],
+        revealable?: revealable?,
+        revealed?: revealable? && assigns.viewed
+      )
 
     ~H"""
     <div>
-      <span :if={@present? && !@viewed} class="italic">
+      <span :if={@present? && !@revealed?} class="italic">
         --redacted--
-        <span class="cursor-pointer" phx-click="toggle_sensitive_attribute" phx-target={@myself}>
+        <span
+          :if={@revealable?}
+          class="cursor-pointer"
+          phx-click="toggle_sensitive_attribute"
+          phx-target={@myself}
+        >
           <.icon name="hero-eye-solid" class="w-5 h-5 text-slate-500 dark:text-slate-400" />
         </span>
       </span>
-      <span :if={@present? && @viewed}>
+      <span :if={@present? && @revealed?}>
         {render_slot(@inner_block)}
         <span class="cursor-pointer" phx-click="toggle_sensitive_attribute" phx-target={@myself}>
           <.icon name="hero-eye-slash-solid" class="w-5 h-5 text-slate-500 dark:text-slate-400" />
@@ -34,7 +46,12 @@ defmodule AshAdmin.Components.Resource.SensitiveAttribute do
     """
   end
 
+  # The event can be sent without the icon, so it is refused here, not only hidden.
   def handle_event("toggle_sensitive_attribute", _params, socket) do
-    {:noreply, assign(socket, viewed: !socket.assigns.viewed)}
+    if AshAdmin.reveal_sensitive_fields?() do
+      {:noreply, assign(socket, viewed: !socket.assigns.viewed)}
+    else
+      {:noreply, socket}
+    end
   end
 end
