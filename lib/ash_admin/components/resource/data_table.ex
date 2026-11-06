@@ -332,7 +332,11 @@ defmodule AshAdmin.Components.Resource.DataTable do
       {page_size, pagination_mode} = pagination_config(socket.assigns.action)
 
       has_filters = AshAdmin.Resource.table_filterable_columns(socket.assigns.resource) != []
-      has_search = AshAdmin.Resource.table_searchable_columns(socket.assigns.resource) != []
+
+      has_search =
+        socket.assigns.resource
+        |> AshAdmin.Resource.table_searchable_columns()
+        |> Enum.any?(&searchable?(socket.assigns.resource, &1))
 
       socket =
         assign(socket,
@@ -554,10 +558,11 @@ defmodule AshAdmin.Components.Resource.DataTable do
   defp sortable?(resource, field_name) do
     sortable_columns = AshAdmin.Resource.table_sortable_columns(resource)
 
-    case sortable_columns do
+    cond do
+      never_revealed_column?(resource, field_name) -> false
       # If not specified, everything is sortable
-      nil -> true
-      list -> field_name in list
+      is_nil(sortable_columns) -> true
+      true -> field_name in sortable_columns
     end
   end
 
@@ -565,16 +570,24 @@ defmodule AshAdmin.Components.Resource.DataTable do
   defp filterable?(resource, field_name) do
     filterable_columns = AshAdmin.Resource.table_filterable_columns(resource)
 
-    case filterable_columns do
+    cond do
+      never_revealed_column?(resource, field_name) -> false
       # If not specified, everything is filterable
-      nil -> true
-      list -> field_name in list && has_attribute?(resource, field_name)
+      is_nil(filterable_columns) -> true
+      true -> field_name in filterable_columns && has_attribute?(resource, field_name)
     end
   end
 
   # Check if a field is searched by the table search box
   defp searchable?(resource, field_name) do
-    field_name in AshAdmin.Resource.table_searchable_columns(resource)
+    field_name in AshAdmin.Resource.table_searchable_columns(resource) &&
+      !never_revealed_column?(resource, field_name)
+  end
+
+  # Which rows match a filter, a sort or a search on a value tells something about it,
+  # so a value that is never revealed offers none of them.
+  defp never_revealed_column?(resource, field_name) do
+    never_revealed?(resource, Ash.Resource.Info.field(resource, field_name))
   end
 
   # Check if field is an actual resource attribute (not a relationship or calculated field)

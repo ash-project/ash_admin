@@ -90,6 +90,13 @@ defmodule AshAdmin.Helpers do
     false
   end
 
+  # Redacted with no way to reveal it: `config :ash_admin, :reveal_sensitive_fields?, false`
+  # and not listed in the resource's `show_sensitive_fields`.
+  def never_revealed?(resource, field) do
+    !AshAdmin.reveal_sensitive_fields?() and sensitive?(field) and
+      field.name not in AshAdmin.Resource.show_sensitive_fields(resource)
+  end
+
   def short_description(nil), do: {:not_split, nil}
 
   def short_description(description) do
