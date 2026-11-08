@@ -1151,6 +1151,50 @@
   var import_topbar = __toESM(require_topbar());
   var import_sortable = __toESM(require_sortable());
 
+  // ../_build/dev/phoenix-colocated/cinder/Cinder.FilterManager/147_fjtctlw6awecf7g7zhwdncwyqq.js
+  var fjtctlw6awecf7g7zhwdncwyqq_default = {
+    mounted() {
+      this.js().ignoreAttributes(this.el, "data-cinder-partial");
+      for (const type of ["input", "keyup", "focusout"]) {
+        this.el.addEventListener(type, () => this.sync());
+      }
+      this.el.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-cinder-clear]");
+        if (!button)
+          return;
+        const scope = button.closest("[data-cinder-filter]") || this.el;
+        this.partialInputs(scope).forEach((input) => this.clear(input));
+        this.sync();
+      });
+      this.sync();
+    },
+    clear(input) {
+      const type = input.type;
+      input.type = "text";
+      input.value = "";
+      input.type = type;
+    },
+    updated() {
+      this.sync();
+    },
+    partialInputs(scope) {
+      return [...scope.querySelectorAll("input")].filter((input) => input.validity.badInput);
+    },
+    sync() {
+      this.el.toggleAttribute("data-cinder-partial", this.partialInputs(this.el).length > 0);
+      this.el.querySelectorAll("[data-cinder-filter]").forEach((filter) => {
+        const partial = this.partialInputs(filter).length > 0;
+        if (partial)
+          this.js().ignoreAttributes(filter, "data-cinder-partial");
+        filter.toggleAttribute("data-cinder-partial", partial);
+      });
+    }
+  };
+
+  // ../_build/dev/phoenix-colocated/cinder/index.js
+  var imp_nbxw623t = {};
+  imp_nbxw623t["Cinder.FilterManager.PartialInputs"] = fjtctlw6awecf7g7zhwdncwyqq_default;
+
   // node_modules/@marijn/find-cluster-break/src/index.js
   var rangeFrom = [];
   var rangeTo = [];
@@ -33423,7 +33467,7 @@ ${text}</tr>
   ];
   var socketPath = document.querySelector("html").getAttribute("phx-socket") || "/live";
   var csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
-  var Hooks = {};
+  var Hooks = __spreadValues({}, imp_nbxw623t);
   var editors = {};
   function isDarkMode() {
     return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;

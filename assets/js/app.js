@@ -6,6 +6,9 @@
 import topbar from "../vendor/topbar";
 // vendored Sortable.js for drag-and-drop reordering of primitive array fields
 import Sortable from "../vendor/sortable";
+// Cinder's colocated hooks, such as the filters' Cinder.FilterManager.PartialInputs.
+// `mix compile` extracts them into _build, which esbuild's NODE_PATH includes.
+import { hooks as cinderHooks } from "phoenix-colocated/cinder";
 import {
   EditorView, keymap, lineNumbers, highlightActiveLineGutter,
   highlightSpecialChars, drawSelection, dropCursor, rectangularSelection,
@@ -58,7 +61,7 @@ let socketPath =
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
-let Hooks = {};
+let Hooks = { ...cinderHooks };
 const editors = {};
 
 function isDarkMode() {

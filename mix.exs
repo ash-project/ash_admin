@@ -119,8 +119,13 @@ defmodule AshAdmin.MixProject do
         "esbuild.install --if-missing",
         "cmd --cd assets npm install"
       ],
-      "assets.build": ["tailwind default", "esbuild default"],
-      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
+      "assets.build": ["compile", "tailwind default", "esbuild default"],
+      "assets.deploy": [
+        "compile",
+        "tailwind default --minify",
+        "esbuild default --minify",
+        "phx.digest"
+      ],
       "spark.cheat_sheets_in_search":
         "spark.cheat_sheets_in_search --extensions AshAdmin.Domain,AshAdmin.Resource",
       "spark.cheat_sheets": "spark.cheat_sheets --extensions AshAdmin.Domain,AshAdmin.Resource"
