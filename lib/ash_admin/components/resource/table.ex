@@ -27,8 +27,16 @@ defmodule AshAdmin.Components.Resource.Table do
   attr :tenant, :any, default: nil
   attr :authorizing, :boolean, default: false
   attr :relationship_name, :atom, default: nil
+  attr :domains, :list, default: nil, doc: "The domains the admin shows, to link foreign keys"
 
   def table(assigns) do
+    assigns =
+      assign(
+        assigns,
+        :foreign_key_targets,
+        foreign_key_targets(assigns.resource, assigns.domain, assigns.domains)
+      )
+
     ~H"""
     <div>
       <table class="rounded-t-lg m-5 w-5/6 mx-auto text-left">
@@ -50,7 +58,12 @@ defmodule AshAdmin.Components.Resource.Table do
                 @format_fields,
                 @show_sensitive_fields,
                 [actor: @actor, tenant: @tenant, authorize?: @authorizing],
-                @relationship_name
+                @relationship_name,
+                foreign_key_path(
+                  @prefix,
+                  @foreign_key_targets[attribute.name],
+                  Map.get(record, attribute.name)
+                )
               )}
             </td>
             <td :if={@actions && actions?(@resource)}>
@@ -146,7 +159,8 @@ defmodule AshAdmin.Components.Resource.Table do
         formats,
         show_sensitive_fields,
         load_opts,
-        relationship_name
+        relationship_name,
+        link_path \\ nil
       ) do
     process_attribute(
       domain,
@@ -155,7 +169,8 @@ defmodule AshAdmin.Components.Resource.Table do
       formats,
       show_sensitive_fields,
       load_opts,
-      relationship_name
+      relationship_name,
+      link_path
     )
   rescue
     _ ->
@@ -169,7 +184,8 @@ defmodule AshAdmin.Components.Resource.Table do
          formats,
          show_sensitive_fields,
          load_opts,
-         relationship_name
+         relationship_name,
+         _link_path
        )
        when module in [HasOne, BelongsTo] do
     display_attributes = AshAdmin.Resource.relationship_display_fields(attribute.destination)
@@ -217,7 +233,8 @@ defmodule AshAdmin.Components.Resource.Table do
          formats,
          show_sensitive_fields,
          _load_opts,
-         relationship_name
+         relationship_name,
+         link_path
        )
        when struct in [Ash.Resource.Attribute, Ash.Resource.Aggregate, Ash.Resource.Calculation] do
     data = FormatHelper.format_attribute(formats, record, attribute)
@@ -226,7 +243,9 @@ defmodule AshAdmin.Components.Resource.Table do
          not Enum.member?(show_sensitive_fields, attribute.name) do
       format_sensitive_value(data, attribute, record, relationship_name)
     else
-      format_attribute_value(data, attribute)
+      data
+      |> format_attribute_value(attribute)
+      |> maybe_link(link_path)
     end
   end
 
@@ -237,7 +256,8 @@ defmodule AshAdmin.Components.Resource.Table do
          _formats,
          _show_sensitive_fields,
          _load_opts,
-         _relationship_name
+         _relationship_name,
+         _link_path
        ) do
     "..."
   end

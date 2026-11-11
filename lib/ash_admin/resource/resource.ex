@@ -140,6 +140,12 @@ defmodule AshAdmin.Resource do
         default: 50,
         doc:
           "The maximum number of items to show in a select field when this resource is shown as a relationship on another resource's form. If the number of related resources is higher, a typeahead selector will be used."
+      ],
+      link_relationships?: [
+        type: :boolean,
+        default: true,
+        doc:
+          "Whether `belongs_to` foreign key attributes (e.g. `user_id`) are rendered as links to the related record's show page."
       ]
     ]
   }
@@ -228,6 +234,10 @@ defmodule AshAdmin.Resource do
 
   def relationship_select_max_items(resource) do
     Spark.Dsl.Extension.get_opt(resource, [:admin], :relationship_select_max_items, 50, true)
+  end
+
+  def link_relationships?(resource) do
+    Spark.Dsl.Extension.get_opt(resource, [:admin], :link_relationships?, true, true)
   end
 
   def actor?(resource) do
