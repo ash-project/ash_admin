@@ -667,4 +667,19 @@ defmodule AshAdmin.CoreComponents do
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
+
+  @doc """
+  Wraps `content` in a navigation link to `path`, or returns `content` as is when `path` is nil.
+  """
+  def maybe_link(content, nil), do: content
+
+  def maybe_link(content, path) do
+    assigns = %{content: content, path: path}
+
+    ~H"""
+    <.link navigate={@path} class="underline hover:text-slate-700 dark:hover:text-slate-300">
+      {@content}
+    </.link>
+    """
+  end
 end
