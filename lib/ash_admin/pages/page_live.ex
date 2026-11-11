@@ -154,6 +154,7 @@ defmodule AshAdmin.PageLive do
             tables={@tables}
             polymorphic_actions={@polymorphic_actions}
             prefix={@prefix}
+            domains={@domains}
           />
         </main>
       </div>
@@ -337,7 +338,18 @@ defmodule AshAdmin.PageLive do
               |> to_one_relationships(socket.assigns.domain)
               |> Enum.reduce(record, fn
                 rel, {:ok, record} ->
-                  case Ash.load(record, rel,
+                  load =
+                    relationship_load(
+                      socket.assigns.resource,
+                      rel,
+                      socket.assigns.domain,
+                      socket.assigns.domains,
+                      actor: actor,
+                      tenant: socket.assigns[:tenant],
+                      authorize?: socket.assigns.authorizing
+                    )
+
+                  case Ash.load(record, load,
                          actor: actor,
                          domain: socket.assigns.domain,
                          tenant: socket.assigns[:tenant],
@@ -351,7 +363,7 @@ defmodule AshAdmin.PageLive do
 
                     {:error, error} ->
                       Logger.warning(
-                        "Error while loading relationship #{inspect(rel)} on admin dashboard\n: #{Exception.format(:error, error)}"
+                        "Error while loading relationship #{inspect(rel.name)} on admin dashboard\n: #{Exception.format(:error, error)}"
                       )
 
                       {:ok, record}
@@ -395,7 +407,6 @@ defmodule AshAdmin.PageLive do
       domain = Ash.Resource.Info.domain(relationship.destination) || relationship.domain || domain
       AshAdmin.Domain.show?(domain) && relationship.cardinality == :one
     end)
-    |> Enum.map(& &1.name)
   end
 
   @impl true

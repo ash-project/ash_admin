@@ -24,6 +24,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   attr :prefix, :any, required: true
   attr :tenant, :any, required: true
   attr :polymorphic_actions, :any, required: true
+  attr :domains, :list, default: nil
 
   def render(assigns) do
     ~H"""
@@ -282,7 +283,18 @@ defmodule AshAdmin.Components.Resource.DataTable do
     if assigns[:initialized] do
       {:ok, socket}
     else
-      socket = assign(socket, assigns)
+      foreign_key_targets =
+        foreign_key_targets(assigns.resource, assigns.domain, assigns[:domains],
+          actor: assigns[:actor],
+          tenant: assigns[:tenant],
+          authorize?: assigns[:authorizing]
+        )
+
+      socket =
+        socket
+        |> assign(assigns)
+        |> assign(:foreign_key_targets, foreign_key_targets)
+
       params = socket.assigns[:params] || %{}
       arguments = params["args"]
 
@@ -302,7 +314,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
           actor: socket.assigns[:actor],
           tenant: socket.assigns[:tenant],
           authorize?: socket.assigns[:authorizing],
-          prepare_source: &load_fields/1,
+          prepare_source: &load_fields(&1, foreign_key_targets),
           context: context
         )
 
@@ -349,10 +361,21 @@ defmodule AshAdmin.Components.Resource.DataTable do
     end
   end
 
-  defp load_fields(query) do
+  defp load_fields(query, foreign_key_targets) do
+    columns = AshAdmin.Resource.table_columns(query.resource)
+
+    # A shown foreign key needs its related record to link, unless a
+    # relationship column (e.g. `:post`) loads that record already.
+    link_load =
+      foreign_key_targets
+      |> Map.take(columns)
+      |> link_load()
+      |> Enum.reject(fn {name, _} -> name in columns end)
+
     query
     |> Ash.Query.select([])
-    |> Ash.Query.load(AshAdmin.Resource.table_columns(query.resource))
+    |> Ash.Query.load(columns)
+    |> Ash.Query.load(link_load)
   end
 
   defp pagination_config(action) do
@@ -541,7 +564,12 @@ defmodule AshAdmin.Components.Resource.DataTable do
         format_fields,
         show_sensitive_fields,
         [actor: assigns.actor, tenant: assigns[:tenant], authorize?: assigns[:authorizing]],
-        nil
+        nil,
+        foreign_key_path(
+          assigns[:prefix],
+          assigns[:foreign_key_targets][attribute.name],
+          record
+        )
       )
     else
       "..."

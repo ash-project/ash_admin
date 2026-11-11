@@ -55,6 +55,178 @@ defmodule AshAdmin.Helpers do
     prefix <> "?" <> query
   end
 
+  @doc """
+  Resolves where the admin shows the destination of `relationship`, as a map of
+  `:domain`, `:resource`, `:table` and the `:relationship` name, or returns `nil`
+  when the destination can't be opened in this admin.
+
+  `domains` is the list of domains the admin shows (its `:ash_domains`). A link
+  to any other domain would silently open the first shown domain instead.
+  """
+  def relationship_target(relationship, current_domain, domains) do
+    destination = relationship.destination
+    domain = destination_domain(relationship, current_domain)
+
+    if visible_resource?(domain, destination, domains) do
+      %{
+        domain: domain,
+        resource: destination,
+        table: relationship.context[:data_layer][:table],
+        relationship: relationship.name
+      }
+    end
+  end
+
+  @doc """
+  Returns the domain of the destination of `relationship`: the relationship's own
+  `domain`, else the destination resource's domain, else `current_domain`.
+  """
+  def destination_domain(relationship, current_domain) do
+    relationship.domain || Ash.Resource.Info.domain(relationship.destination) || current_domain
+  end
+
+  @doc """
+  Returns the admin show path of `record` at a target from `relationship_target/3`.
+  """
+  def record_path(prefix, %{domain: domain, resource: resource, table: table}, record) do
+    admin_path(prefix,
+      domain: AshAdmin.Domain.name(domain),
+      resource: AshAdmin.Resource.name(resource),
+      table: table,
+      primary_key: encode_primary_key(record),
+      action_type: "read"
+    )
+  end
+
+  @doc """
+  Returns a map of the `belongs_to` foreign key attributes of `resource` that
+  should link to the related record, to their target (see `relationship_target/3`).
+
+  Empty when the resource sets `link_relationships?` to `false`.
+
+  `auth_opts` holds the `:actor`, `:tenant` and `:authorize?` of the page. When
+  `:authorize?` is true, a destination the actor can't read is left out, so its
+  key renders as plain text and the related record isn't loaded. Loading it
+  would make a policy that forbids the read outright fail the whole read.
+
+  Resolve it once per resource and look attributes up in it, instead of
+  resolving it for every rendered value.
+  """
+  def foreign_key_targets(resource, current_domain, domains, auth_opts) do
+    if AshAdmin.Resource.link_relationships?(resource) do
+      resource
+      |> Ash.Resource.Info.relationships()
+      |> Enum.filter(&(&1.type == :belongs_to))
+      |> Enum.flat_map(fn relationship ->
+        with %{} = target <- relationship_target(relationship, current_domain, domains),
+             true <- can_read_related?(relationship, target.domain, auth_opts) do
+          [{relationship.source_attribute, target}]
+        else
+          _ -> []
+        end
+      end)
+      |> Map.new()
+    else
+      %{}
+    end
+  end
+
+  # Loading a relationship reads its destination with the relationship's read
+  # action, or the primary read action. A `:maybe` answer (e.g. a filter policy)
+  # counts as readable: the load then filters the record out instead of failing.
+  defp can_read_related?(relationship, domain, auth_opts) do
+    if auth_opts[:authorize?] do
+      destination = relationship.destination
+
+      action =
+        relationship.read_action ||
+          case Ash.Resource.Info.primary_action(destination, :read) do
+            %{name: name} -> name
+            nil -> nil
+          end
+
+      # `Ash.can/3` rejects a `:domain` option, so the query carries it.
+      not is_nil(action) and
+        match?(
+          {:ok, allowed} when allowed != false,
+          destination
+          |> Ash.Query.new(domain: domain)
+          |> Ash.Query.set_tenant(auth_opts[:tenant])
+          |> Ash.Query.for_read(action, %{}, actor: auth_opts[:actor])
+          |> Ash.can(auth_opts[:actor], maybe_is: :maybe)
+        )
+    else
+      true
+    end
+  end
+
+  @doc """
+  Returns the load statement that fetches the related records of `targets`
+  (from `foreign_key_targets/4`), selecting only their primary key.
+
+  The foreign key doesn't have to reference the destination's primary key, so
+  the link is built from the loaded record rather than from the key's value.
+  """
+  def link_load(targets) do
+    targets
+    |> Map.values()
+    |> Enum.map(fn %{relationship: name, resource: resource} ->
+      {name, Ash.Query.select(resource, [])}
+    end)
+  end
+
+  @doc """
+  Returns the load statement for `relationship` of `resource` that also loads
+  the related records' own linked `belongs_to` relationships (see
+  `link_load/1`).
+
+  Only the foreign keys that the show page of `resource` renders for the
+  relationship are loaded: those in its `show_relationship_fields`, if set, and
+  never the key of a to-many relationship that points back to `resource`.
+  """
+  def relationship_load(resource, relationship, current_domain, domains, auth_opts) do
+    destination = relationship.destination
+    domain = destination_domain(relationship, current_domain)
+    fields = AshAdmin.Resource.show_relationship_fields(resource, relationship.name)
+
+    skip =
+      if relationship.cardinality == :many, do: [relationship.destination_attribute], else: []
+
+    destination
+    |> foreign_key_targets(domain, domains, auth_opts)
+    |> Map.filter(fn {attribute, _} ->
+      attribute not in skip and (is_nil(fields) or attribute in fields)
+    end)
+    |> link_load()
+    |> case do
+      [] -> relationship.name
+      link_load -> {relationship.name, Ash.Query.load(destination, link_load)}
+    end
+  end
+
+  @doc """
+  Returns the admin show path of the record `record` references through the
+  foreign key of `target`, or `nil` when there is no target or the related
+  record isn't loaded (see `link_load/1`).
+  """
+  def foreign_key_path(_prefix, nil, _record), do: nil
+  def foreign_key_path(nil, _target, _record), do: nil
+
+  def foreign_key_path(prefix, %{relationship: name, resource: resource} = target, record) do
+    case Map.get(record, name) do
+      %^resource{} = related -> record_path(prefix, target, related)
+      _ -> nil
+    end
+  end
+
+  defp visible_resource?(domain, resource, domains) when is_list(domains) do
+    domain in domains and AshAdmin.Domain.show?(domain) and
+      resource in AshAdmin.Domain.show_resources(domain) and
+      not is_nil(AshAdmin.Resource.show_action(resource))
+  end
+
+  defp visible_resource?(_domain, _resource, _domains), do: false
+
   def to_name(:id), do: "ID"
 
   def to_name(%{__struct__: Ash.Resource.Attribute, related_resource: resource} = attribute)

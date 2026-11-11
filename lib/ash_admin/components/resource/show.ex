@@ -24,6 +24,7 @@ defmodule AshAdmin.Components.Resource.Show do
   attr :tenant, :any
   attr :table, :any, required: true
   attr :prefix, :any, required: true
+  attr :domains, :list, default: nil
 
   def render(assigns) do
     ~H"""
@@ -379,13 +380,11 @@ defmodule AshAdmin.Components.Resource.Show do
     |> then(&{:ok, &1})
   end
 
-  defp render_relationship_data(assigns, record, %{
-         cardinality: :one,
-         name: name,
-         destination: destination,
-         context: context,
-         domain: destination_domain
-       }) do
+  defp render_relationship_data(
+         assigns,
+         record,
+         %{cardinality: :one, name: name, destination: destination} = relationship
+       ) do
     case Map.get(record, name) do
       nil ->
         "None"
@@ -396,8 +395,7 @@ defmodule AshAdmin.Components.Resource.Show do
             record: record,
             name: name,
             destination: destination,
-            context: context,
-            destination_domain: destination_domain,
+            target: relationship_target(relationship, assigns[:domain], assigns[:domains]),
             fields: AshAdmin.Resource.show_relationship_fields(assigns.resource, name)
           )
 
@@ -406,19 +404,8 @@ defmodule AshAdmin.Components.Resource.Show do
           {render_attributes(assigns, @record, @destination, @name, @fields)}
           <div class="px-4 py-3 text-right sm:px-6">
             <.link
-              :if={AshAdmin.Resource.show_action(@destination)}
-              navigate={
-                admin_path(@prefix,
-                  domain:
-                    AshAdmin.Domain.name(
-                      @destination_domain || Ash.Resource.Info.domain(@destination) || @domain
-                    ),
-                  resource: AshAdmin.Resource.name(@destination),
-                  table: @context[:data_layer][:table],
-                  primary_key: encode_primary_key(@record),
-                  action_type: "read"
-                )
-              }
+              :if={@target}
+              navigate={record_path(@prefix, @target, @record)}
               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-200 dark:hover:bg-slate-300 dark:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
             >
               Show
@@ -429,21 +416,24 @@ defmodule AshAdmin.Components.Resource.Show do
     end
   end
 
-  defp render_relationship_data(assigns, record, %{
-         cardinality: :many,
-         name: name,
-         destination: destination,
-         context: context,
-         destination_attribute: destination_attribute,
-         domain: destination_domain
-       }) do
+  defp render_relationship_data(
+         assigns,
+         record,
+         %{
+           cardinality: :many,
+           name: name,
+           destination: destination,
+           context: context,
+           destination_attribute: destination_attribute
+         } = relationship
+       ) do
     data = Map.get(record, name)
 
     assigns =
       assign(assigns,
         data: data,
         destination: destination,
-        destination_domain: destination_domain,
+        destination_domain: destination_domain(relationship, assigns[:domain]),
         destination_format_fields: AshAdmin.Resource.format_fields(destination),
         context: context,
         destination_attribute: destination_attribute,
@@ -458,9 +448,10 @@ defmodule AshAdmin.Components.Resource.Show do
         resource={@destination}
         attributes={@fields}
         format_fields={@destination_format_fields}
-        domain={@destination_domain || Ash.Resource.Info.domain(@destination) || @domain}
+        domain={@destination_domain}
         table={@context[:data_layer][:table]}
         prefix={@prefix}
+        domains={@domains}
         skip={[@destination_attribute]}
         relationship_name={@relationship_name}
         actor={@actor}
@@ -490,7 +481,13 @@ defmodule AshAdmin.Components.Resource.Show do
         attributes: attributes,
         flags: flags,
         bottom_attributes: bottom_attributes,
-        relationship_name: relationship_name
+        relationship_name: relationship_name,
+        foreign_key_targets:
+          foreign_key_targets(resource, assigns[:domain], assigns[:domains],
+            actor: assigns[:actor],
+            tenant: assigns[:tenant],
+            authorize?: assigns[:authorizing]
+          )
       )
 
     ~H"""
@@ -863,8 +860,15 @@ defmodule AshAdmin.Components.Resource.Show do
             nested: nested?
           )
 
+        link_path =
+          foreign_key_path(
+            assigns[:prefix],
+            assigns[:foreign_key_targets][attribute.name],
+            record
+          )
+
         case attribute.type do
-          Ash.Type.String ->
+          Ash.Type.String when is_nil(link_path) ->
             cond do
               short_text?(resource, attribute) ->
                 value!(Map.get(record, attribute.name))
@@ -894,6 +898,7 @@ defmodule AshAdmin.Components.Resource.Show do
             resource
             |> AshAdmin.Resource.format_fields()
             |> FormatHelper.format_attribute(record, attribute)
+            |> maybe_link(link_path)
         end
       end
     end
@@ -975,9 +980,22 @@ defmodule AshAdmin.Components.Resource.Show do
     domain = socket.assigns.domain
     relationship = String.to_existing_atom(relationship)
 
+    resource = socket.assigns.resource
+
+    load =
+      relationship_load(
+        resource,
+        Ash.Resource.Info.relationship(resource, relationship),
+        domain,
+        socket.assigns[:domains],
+        actor: socket.assigns[:actor],
+        tenant: socket.assigns[:tenant],
+        authorize?: socket.assigns[:authorizing]
+      )
+
     case Ash.load(
            record,
-           relationship,
+           load,
            domain: domain,
            actor: socket.assigns[:actor],
            authorize?: socket.assigns[:authorizing]
