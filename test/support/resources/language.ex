@@ -20,6 +20,18 @@ defmodule AshAdmin.Test.Language do
 
   actions do
     defaults([:read, :destroy, create: [:name], update: [:name]])
+
+    update :rename_with_receipt do
+      accept([:name])
+      require_atomic?(false)
+      metadata(:receipt, :string)
+
+      change(
+        after_action(fn _changeset, language, _context ->
+          {:ok, Ash.Resource.put_metadata(language, :receipt, "renamed to #{language.name}")}
+        end)
+      )
+    end
   end
 
   admin do

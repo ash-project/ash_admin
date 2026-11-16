@@ -25,6 +25,7 @@ defmodule AshAdmin.Components.Resource do
   attr :params, :map, default: %{}
   attr :primary_key, :any, default: nil
   attr :record, :any, default: nil
+  attr :action_metadata, :map, default: nil
   attr :table, :any, default: nil
   attr :tables, :any, default: nil
   attr :prefix, :any, default: nil
@@ -93,6 +94,7 @@ defmodule AshAdmin.Components.Resource do
           domain={@domain}
           id={show_id(@resource)}
           record={unwrap(@record)}
+          action_metadata={@action_metadata}
           actor={@actor}
           authorizing={@authorizing}
           tenant={@tenant}

@@ -2048,11 +2048,17 @@ defmodule AshAdmin.Components.Resource.Form do
 
   defp text_input_type(_, _), do: "text"
 
+  # Patches rather than redirects, so the page keeps what the action returned besides the record
+  # (`Ash.Resource.put_metadata/3`), such as a token, and `Show` shows it with the record.
   defp redirect_to(socket, record) do
+    action = socket.assigns.action
+    metadata = Map.take(record.__metadata__, Enum.map(action.metadata, & &1.name))
+    send(self(), {:action_metadata, %{action: action, metadata: metadata}})
+
     if AshAdmin.Resource.show_action(socket.assigns.resource) do
       {:noreply,
        socket
-       |> redirect(
+       |> push_patch(
          to:
            "#{socket.assigns.prefix || "/"}?domain=#{AshAdmin.Domain.name(socket.assigns.domain)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}&table=#{socket.assigns.table}&primary_key=#{encode_primary_key(record)}&action_type=read"
        )}
@@ -2060,7 +2066,7 @@ defmodule AshAdmin.Components.Resource.Form do
       case AshAdmin.Helpers.primary_action(socket.assigns.resource, :update) do
         nil ->
           {:noreply,
-           redirect(socket,
+           push_patch(socket,
              to:
                "#{socket.assigns.prefix || "/"}?domain=#{AshAdmin.Domain.name(socket.assigns.domain)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}"
            )}
@@ -2068,7 +2074,7 @@ defmodule AshAdmin.Components.Resource.Form do
         _update ->
           {:noreply,
            socket
-           |> redirect(
+           |> push_patch(
              to:
                "#{socket.assigns.prefix || "/"}?domain=#{AshAdmin.Domain.name(socket.assigns.domain)}&resource=#{AshAdmin.Resource.name(socket.assigns.resource)}&action_type=update&table=#{socket.assigns.table}&primary_key=#{encode_primary_key(record)}"
            )}

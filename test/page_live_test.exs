@@ -288,4 +288,24 @@ defmodule AshAdmin.Test.PageLiveTest do
 
     assert has_element?(view, "form#generic-action-form")
   end
+
+  test "an update action's metadata is shown with the updated record", %{conn: conn} do
+    language = Ash.create!(AshAdmin.Test.Language, %{name: "Englsh"})
+
+    {:ok, view, _html} =
+      live(
+        conn,
+        "/api/admin?domain=ManyToMany&resource=Language&action_type=update&action=rename_with_receipt&primary_key=#{language.id}"
+      )
+
+    view |> form("#form", form: %{name: "English"}) |> render_submit()
+
+    assert assert_patch(view) =~ "action_type=read"
+    assert has_element?(view, "#action-metadata", "renamed to English")
+    assert render(view) =~ "English"
+
+    # It belongs to that save, so it's gone once the page moves elsewhere.
+    render_patch(view, "/api/admin?domain=ManyToMany&resource=Language&action_type=read")
+    refute has_element?(view, "#action-metadata")
+  end
 end

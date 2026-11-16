@@ -15,6 +15,7 @@ defmodule AshAdmin.Components.Resource.Show do
 
   attr :resource, :any
   attr :record, :any, default: nil
+  attr :action_metadata, :map, default: nil
   attr :domain, :any, default: nil
   attr :action, :any
   attr :authorizing, :boolean, default: false
@@ -26,6 +27,15 @@ defmodule AshAdmin.Components.Resource.Show do
   def render(assigns) do
     ~H"""
     <div class="md:pt-10 sm:mt-0">
+      <div
+        :if={@action_metadata && @action_metadata.metadata != %{}}
+        id="action-metadata"
+        class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10"
+      >
+        <div class="mt-5 md:mt-0 md:col-span-2">
+          {render_action_metadata(assigns, @action_metadata)}
+        </div>
+      </div>
       <div class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10">
         <div class="mt-5 md:mt-0 md:col-span-2">
           {render_show(assigns, @record, @resource)}
@@ -40,6 +50,24 @@ defmodule AshAdmin.Components.Resource.Show do
         <div class="mt-5 md:mt-0 md:col-span-2">
           {render_relationships(assigns, @record, @resource)}
         </div>
+      </div>
+    </div>
+    """
+  end
+
+  # What the create or update action that led here returned besides the record: a map with a field
+  # for each metadata the action declares.
+  defp render_action_metadata(assigns, %{action: action, metadata: metadata}) do
+    fields = Enum.map(action.metadata, &{&1.name, [type: &1.type, constraints: &1.constraints]})
+
+    assigns =
+      assign(assigns, metadata_action: action, metadata: metadata, metadata_fields: fields)
+
+    ~H"""
+    <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md bg-white dark:bg-slate-900">
+      <h1 class="pt-2 pl-4 text-lg">{to_name(@metadata_action)}</h1>
+      <div class="px-4 py-5 sm:p-6">
+        {render_value(assigns, @metadata, Ash.Type.Map, fields: @metadata_fields)}
       </div>
     </div>
     """
@@ -161,6 +189,109 @@ defmodule AshAdmin.Components.Resource.Show do
       </div>
     </div>
     """
+  end
+
+  # A value of an Ash type: a generic action's result (`AshAdmin.Components.Resource.GenericAction`),
+  # or a create or update action's metadata (`AshAdmin.Components.Resource.Form`).
+  @doc false
+  def render_value(assigns, nil, _, _) do
+    ~H"""
+    None
+    """
+  end
+
+  def render_value(assigns, value, {:array, type}, constraints) do
+    assigns = assign(assigns, value: value, type: type, constraints: constraints[:items] || [])
+
+    ~H"""
+    <%= for inner_value <- List.wrap(@value) do %>
+      {render_value(assigns, inner_value, @type, @constraints)}
+      <hr />
+    <% end %>
+    """
+  end
+
+  def render_value(assigns, value, type, constraints) do
+    assigns = assign(assigns, value: value, type: type)
+
+    cond do
+      Ash.Type.NewType.new_type?(type) ->
+        inner_type = Ash.Type.NewType.subtype_of(type)
+        constraints = Ash.Type.NewType.constraints(type, constraints)
+        render_value(assigns, value, inner_type, constraints)
+
+      Ash.Type.embedded_type?(type) ->
+        AshAdmin.Components.Resource.Show.render_show(assigns, value, type, nil, false)
+
+      (type == Ash.Type.Struct and
+         constraints[:instance_of]) && Ash.Resource.Info.resource?(constraints[:instance_of]) ->
+        AshAdmin.Components.Resource.Show.render_show(
+          assigns,
+          value,
+          constraints[:instance_of],
+          nil,
+          false
+        )
+
+      type in [Ash.Type.Map, Ash.Type.Keyword, Ash.Type.Struct] ->
+        render_keyed_value(assigns, value, type, constraints)
+
+      type == Ash.Type.Union ->
+        case value do
+          %Ash.Union{type: type, value: value} ->
+            type = constraints[type][:type]
+            union_constraints = constraints[type][:constraints] || []
+
+            if type do
+              render_value(assigns, value, type, union_constraints)
+            else
+              raw_value(value)
+            end
+
+          value ->
+            raw_value(value)
+        end
+
+      true ->
+        raw_value(value)
+    end
+  end
+
+  defp raw_value(value) when is_binary(value), do: value
+
+  defp raw_value(nil), do: "None"
+
+  defp raw_value(value) do
+    inspect(value)
+  end
+
+  defp render_keyed_value(assigns, value, _type, constraints) do
+    assigns = assign(assigns, value: value, constraints: constraints)
+
+    if (is_map(value) || Keyword.keyword?(value)) && Keyword.keyword?(constraints[:fields]) do
+      ~H"""
+      <%= for {key, config} <- @constraints[:fields] do %>
+        <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+          {to_name(key)}
+        </div>
+        <div>
+          {render_value(assigns, get_key(@value, key), config[:type], config[:constraints])}
+        </div>
+      <% end %>
+      """
+    else
+      raw_value(value)
+    end
+  end
+
+  defp get_key(value, key) when is_map(value), do: Map.get(value, key)
+
+  defp get_key(value, key) do
+    if Keyword.keyword?(value) do
+      value[key]
+    else
+      nil
+    end
   end
 
   defp render_relationships(assigns, _record, resource) do
