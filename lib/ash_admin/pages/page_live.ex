@@ -131,6 +131,7 @@ defmodule AshAdmin.PageLive do
             set_actor="set_actor"
             primary_key={@primary_key}
             record={@record}
+            action_metadata={@action_metadata}
             domain={@domain}
             action_type={@action_type}
             url_path={@url_path}
@@ -293,6 +294,7 @@ defmodule AshAdmin.PageLive do
       |> assign_action(params["action"], params["action_type"])
       |> assign_tables(params["table"])
       |> assign(primary_key: params["primary_key"])
+      |> assign(:action_metadata, nil)
 
     socket =
       if socket.assigns[:primary_key] do
@@ -520,7 +522,14 @@ defmodule AshAdmin.PageLive do
      |> push_event("clear_tenant", %{})}
   end
 
+  # What a create or update action returned besides the record, shown with the record until the
+  # page moves elsewhere. `AshAdmin.Components.Resource.Form` sends it as it patches to the record,
+  # so it arrives after that patch's `handle_params/3`, which clears it.
   @impl true
+  def handle_info({:action_metadata, metadata}, socket) do
+    {:noreply, assign(socket, :action_metadata, metadata)}
+  end
+
   def handle_info({:filter_builder_value, _filter, filter_query}, socket) do
     {:noreply,
      socket

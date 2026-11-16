@@ -7,8 +7,6 @@ defmodule AshAdmin.Components.Resource.GenericAction do
   @moduledoc false
   use Phoenix.LiveComponent
 
-  import AshAdmin.Helpers
-
   attr :resource, :atom
   attr :domain, :atom
   attr :action, :any
@@ -132,7 +130,12 @@ defmodule AshAdmin.Components.Resource.GenericAction do
     ~H"""
     <div class="max-w-2xl mx-auto mt-6">
       <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-auto sm:rounded-md bg-white dark:bg-slate-900 px-6 py-4">
-        {render_value(assigns, @result_value, @action.returns, @action.constraints)}
+        {AshAdmin.Components.Resource.Show.render_value(
+          assigns,
+          @result_value,
+          @action.returns,
+          @action.constraints
+        )}
       </div>
     </div>
     """
@@ -144,106 +147,6 @@ defmodule AshAdmin.Components.Resource.GenericAction do
       <span class="text-sm text-rose-600 dark:text-rose-400">Action failed</span>
     </div>
     """
-  end
-
-  defp render_value(assigns, nil, _, _) do
-    ~H"""
-    None
-    """
-  end
-
-  defp render_value(assigns, value, {:array, type}, constraints) do
-    assigns = assign(assigns, value: value, type: type, constraints: constraints[:items] || [])
-
-    ~H"""
-    <%= for inner_value <- List.wrap(@value) do %>
-      {render_value(assigns, inner_value, @type, @constraints)}
-      <hr />
-    <% end %>
-    """
-  end
-
-  defp render_value(assigns, value, type, constraints) do
-    assigns = assign(assigns, value: value, type: type)
-
-    cond do
-      Ash.Type.NewType.new_type?(type) ->
-        inner_type = Ash.Type.NewType.subtype_of(type)
-        constraints = Ash.Type.NewType.constraints(type, constraints)
-        render_value(assigns, value, inner_type, constraints)
-
-      Ash.Type.embedded_type?(type) ->
-        AshAdmin.Components.Resource.Show.render_show(assigns, value, type, nil, false)
-
-      (type == Ash.Type.Struct and
-         constraints[:instance_of]) && Ash.Resource.Info.resource?(constraints[:instance_of]) ->
-        AshAdmin.Components.Resource.Show.render_show(
-          assigns,
-          value,
-          constraints[:instance_of],
-          nil,
-          false
-        )
-
-      type in [Ash.Type.Map, Ash.Type.Keyword, Ash.Type.Struct] ->
-        render_keyed_value(assigns, value, type, constraints)
-
-      type == Ash.Type.Union ->
-        case value do
-          %Ash.Union{type: type, value: value} ->
-            type = constraints[type][:type]
-            union_constraints = constraints[type][:constraints] || []
-
-            if type do
-              render_value(assigns, value, type, union_constraints)
-            else
-              raw_value(value)
-            end
-
-          value ->
-            raw_value(value)
-        end
-
-      true ->
-        raw_value(value)
-    end
-  end
-
-  defp raw_value(value) when is_binary(value), do: value
-
-  defp raw_value(nil), do: "None"
-
-  defp raw_value(value) do
-    inspect(value)
-  end
-
-  defp render_keyed_value(assigns, value, _type, constraints) do
-    assigns = assign(assigns, value: value, constraints: constraints)
-
-    if (is_map(value) || Keyword.keyword?(value)) && Keyword.keyword?(constraints[:fields]) do
-      ~H"""
-      <%= for {key, config} <- @constraints[:fields] do %>
-        <div class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-          {to_name(key)}
-        </div>
-        <div>
-          {render_value(assigns, get_key(@value, key), config[:type], config[:constraints])}
-        </div>
-      <% end %>
-      """
-    else
-      raw_value(value)
-    end
-  end
-
-  defp get_key(value, key) when is_map(value), do: Map.get(value, key)
-
-  defp get_key(value, key) do
-    if Keyword.keyword?(value) do
-      value[key]
-    else
-      nil
-    end
   end
 
   def mount(socket) do

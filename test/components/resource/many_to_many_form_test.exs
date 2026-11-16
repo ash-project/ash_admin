@@ -54,7 +54,8 @@ defmodule AshAdmin.Test.Components.Resource.ManyToManyFormTest do
              "input[type=hidden][name='form[languages][1][id]'][value='#{german.id}']"
            )
 
-    assert {:error, {:redirect, _}} = view |> form("#form") |> render_submit()
+    view |> form("#form") |> render_submit()
+    assert_patch(view)
 
     assert language_ids(profile) == Enum.sort([english.id, german.id])
   end
@@ -66,7 +67,8 @@ defmodule AshAdmin.Test.Components.Resource.ManyToManyFormTest do
     |> element("button[phx-click=remove_form][phx-value-path='form[languages][0]']")
     |> render_click()
 
-    assert {:error, {:redirect, _}} = view |> form("#form") |> render_submit()
+    view |> form("#form") |> render_submit()
+    assert_patch(view)
 
     assert language_ids(profile) == []
   end
