@@ -28,7 +28,7 @@ defmodule AshAdmin.Components.Resource.Show do
     ~H"""
     <div class="md:pt-10 sm:mt-0">
       <div
-        :if={@action_metadata && @action_metadata.metadata != %{}}
+        :if={@action_metadata}
         id="action-metadata"
         class="md:grid md:grid-cols-3 md:gap-6 md:mx-16 md:mt-10"
       >

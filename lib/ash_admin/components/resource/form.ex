@@ -2053,7 +2053,10 @@ defmodule AshAdmin.Components.Resource.Form do
   defp redirect_to(socket, record) do
     action = socket.assigns.action
     metadata = Map.take(record.__metadata__, Enum.map(action.metadata, & &1.name))
-    send(self(), {:action_metadata, %{action: action, metadata: metadata}})
+
+    if metadata != %{} do
+      send(self(), {:action_metadata, %{action: action, metadata: metadata}})
+    end
 
     if AshAdmin.Resource.show_action(socket.assigns.resource) do
       {:noreply,
