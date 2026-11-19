@@ -25,6 +25,7 @@ defmodule AshAdmin.Components.Sidebar do
   attr :actor_tenant, :any, default: nil
   attr :authorizing, :boolean, default: true
   attr :tenant, :any, default: nil
+  attr :tenant_controls, :boolean, default: false
   attr :tenant_label, :any, default: nil
   attr :tenant_mode, :atom, default: nil
   attr :tenant_options, :list, default: []
@@ -205,6 +206,16 @@ defmodule AshAdmin.Components.Sidebar do
         </div>
         {render_tenant(assigns)}
       </div>
+    </div>
+    """
+  end
+
+  # The actor plug sets the tenant, so it is shown but can't be changed here.
+  defp render_tenant(%{tenant_controls: tenant_controls} = assigns)
+       when tenant_controls != true do
+    ~H"""
+    <div class="mt-1 text-sm text-slate-400">
+      {tenant_option_label(@tenant_options, @tenant) || "No tenant"}
     </div>
     """
   end
@@ -409,6 +420,17 @@ defmodule AshAdmin.Components.Sidebar do
   end
 
   defp tenant_display(%{tenant: tenant}), do: tenant
+
+  defp tenant_option_label(_options, tenant) when tenant in [nil, ""], do: nil
+
+  defp tenant_option_label(options, tenant)
+       when is_binary(tenant) or is_number(tenant) or is_atom(tenant) do
+    tenant = to_string(tenant)
+    Enum.find_value(options, tenant, &(&1.value == tenant && &1.label))
+  end
+
+  # An actor plug may return any value Ash accepts as a tenant, such as a record.
+  defp tenant_option_label(_options, tenant), do: inspect(tenant)
 
   defp show_tenant?(_domains, tenant_mode) when tenant_mode in [:dropdown, :typeahead], do: true
 

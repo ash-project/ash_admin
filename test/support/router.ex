@@ -48,6 +48,11 @@ defmodule AshAdmin.Test.Router do
       session: {AshAdmin.Test.ActorPlug, :custom_session, []}
     )
 
+    ash_admin("/custom-actor-tenant/admin",
+      live_session_name: :ash_admin_custom_actor_tenant,
+      session: {AshAdmin.Test.ActorPlug, :custom_session_with_tenant, []}
+    )
+
     ash_admin("/custom-actor-controls/admin",
       live_session_name: :ash_admin_custom_actor_controls,
       session: {AshAdmin.Test.ActorPlug, :custom_session_with_controls, []}

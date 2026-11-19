@@ -323,6 +323,93 @@ defmodule AshAdmin.Test.PageLiveTest do
     end
   end
 
+  describe "tenant controls" do
+    setup do
+      suffix = System.unique_integer([:positive])
+
+      for org <- ["acme", "globex"] do
+        AshAdmin.Test.TenantNote
+        |> Ash.Changeset.for_create(:create, %{body: "#{org} note #{suffix}"}, tenant: org)
+        |> Ash.create!()
+      end
+
+      %{acme_note: "acme note #{suffix}", globex_note: "globex note #{suffix}"}
+    end
+
+    defp notes_path(prefix),
+      do: "/api#{prefix}?domain=Tenants&resource=TenantNote&action_type=read"
+
+    test "with the default actor plug, the tenant can be set", %{conn: conn} = context do
+      {:ok, view, _html} = live(conn, notes_path("/admin"))
+
+      render_hook(view, "set_tenant", %{"tenant" => "globex"})
+      assert_push_event(view, "set_tenant", %{tenant: "globex"})
+
+      html = render_patch(view, notes_path("/admin"))
+      assert html =~ context.globex_note
+      refute html =~ context.acme_note
+
+      render_hook(view, "clear_tenant", %{})
+      assert_push_event(view, "clear_tenant", %{})
+    end
+
+    test "with a custom actor plug, its tenant is used and the controls are not rendered",
+         %{conn: conn} = context do
+      {:ok, view, html} = live(conn, notes_path("/custom-actor-tenant/admin"))
+
+      assert html =~ context.acme_note
+      refute html =~ context.globex_note
+
+      assert has_element?(view, "#sidebar-tenant-desktop", "acme")
+      refute has_element?(view, "[phx-click=start_editing_tenant]")
+      refute has_element?(view, "[phx-click=clear_tenant]")
+      refute has_element?(view, "#sidebar-tenant-desktop form")
+    end
+
+    test "with a custom actor plug, the tenant cookie is ignored", %{conn: conn} = context do
+      # The plug sets no tenant, as in the getting started guide.
+      {:ok, view, html} =
+        conn
+        |> put_req_cookie("tenant", "globex")
+        |> live(notes_path("/custom-actor/admin"))
+
+      refute html =~ context.globex_note
+      assert has_element?(view, "#sidebar-tenant-desktop", "No tenant")
+    end
+
+    test "with a custom actor plug, tenant events are ignored", %{conn: conn} = context do
+      {:ok, view, _html} = live(conn, notes_path("/custom-actor-tenant/admin"))
+
+      render_hook(view, "set_tenant", %{"tenant" => "globex"})
+      html = render_patch(view, notes_path("/custom-actor-tenant/admin"))
+      assert html =~ context.acme_note
+      refute html =~ context.globex_note
+      refute_push_event(view, "set_tenant", %{})
+
+      render_hook(view, "clear_tenant", %{})
+      refute_push_event(view, "clear_tenant", %{})
+      assert render_patch(view, notes_path("/custom-actor-tenant/admin")) =~ context.acme_note
+
+      render_hook(view, "start_editing_tenant", %{})
+      refute has_element?(view, "#sidebar-tenant-desktop form")
+    end
+
+    test "with a custom actor plug that allows them, the tenant can be set",
+         %{conn: conn} = context do
+      {:ok, view, html} = live(conn, notes_path("/custom-actor-controls/admin"))
+
+      assert html =~ context.acme_note
+      assert has_element?(view, "#sidebar-tenant-desktop [phx-click=start_editing_tenant]")
+
+      render_hook(view, "set_tenant", %{"tenant" => "globex"})
+      assert_push_event(view, "set_tenant", %{tenant: "globex"})
+
+      html = render_patch(view, notes_path("/custom-actor-controls/admin"))
+      assert html =~ context.globex_note
+      refute html =~ context.acme_note
+    end
+  end
+
   test "allows uploading to an action with an upload argument", %{conn: conn} do
     {:ok, view, _html} =
       live(
