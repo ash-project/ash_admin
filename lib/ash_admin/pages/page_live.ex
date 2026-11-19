@@ -63,7 +63,6 @@ defmodule AshAdmin.PageLive do
      |> assign(:primary_key, nil)
      |> assign(:record, nil)
      |> assign(:domains, domains)
-     |> assign(:tenant, session["tenant"])
      |> assign(:tenant_label, nil)
      |> assign(:editing_tenant, false)
      |> assign(:tenant_mode, tenant_mode)
@@ -74,6 +73,12 @@ defmodule AshAdmin.PageLive do
        assign(socket, AshAdmin.ActorPlug.actor_assigns(socket, session))
      end)
      |> assign_new(:actor_controls?, fn -> false end)
+     |> assign_new(:tenant_controls?, fn -> false end)
+     # The tenant the actor plug returns wins. Without one, the tenant cookie is used only
+     # if the dashboard user may change the tenant anyway.
+     |> assign_new(:tenant, fn %{tenant_controls?: tenant_controls?} ->
+       if tenant_controls?, do: session["tenant"]
+     end)
      |> assign_new(:actor_domain, fn -> nil end)
      |> assign_new(:actor_resources, fn %{actor_controls?: actor_controls?} ->
        if actor_controls?, do: actor_resources(domains), else: []
@@ -105,6 +110,7 @@ defmodule AshAdmin.PageLive do
         actor_tenant={@actor_tenant}
         authorizing={@authorizing}
         tenant={@tenant}
+        tenant_controls={@tenant_controls?}
         tenant_label={@tenant_label}
         tenant_mode={@tenant_mode}
         tenant_options={@tenant_options}
@@ -402,6 +408,13 @@ defmodule AshAdmin.PageLive do
   def handle_event(event, _params, socket)
       when event in ~w(toggle_authorizing toggle_actor_paused clear_actor set_actor) and
              socket.assigns.actor_controls? != true do
+    {:noreply, socket}
+  end
+
+  # Likewise, the actor plug decides whether the dashboard user may change the tenant.
+  def handle_event(event, _params, socket)
+      when event in ~w(start_editing_tenant stop_editing_tenant search_tenants set_tenant clear_tenant) and
+             socket.assigns.tenant_controls? != true do
     {:noreply, socket}
   end
 

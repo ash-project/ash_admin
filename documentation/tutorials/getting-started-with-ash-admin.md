@@ -100,6 +100,8 @@ config :ash_admin, :title, "Acme Back Office"
 
 By default, the tenant field in the admin navbar is a free-text input. You can configure a `list_tenants` MFA (module, function, args) to provide a better tenant selection experience.
 
+With a custom actor plug, the tenant can only be picked if the plug allows it. See [Security](#security) below.
+
 ### Dropdown
 
 If the function referenced by the MFA takes no additional arguments (i.e. the arity equals the length of the args list), AshAdmin renders a dropdown select. The function can return a list of tenant values:
@@ -240,6 +242,20 @@ def actor_assigns(socket, _session) do
 end
 ```
 Changes made with these controls last until the page is reloaded, when your plug sets the actor again.
+
+The tenant works the same way. With a custom actor plug, the dashboard uses the tenant your plug returns, or no tenant if it returns none, and shows it without letting the user change it. To set the tenant from the current user, return it as `tenant`. To let some users pick a tenant, as described in [Tenant Selection](#tenant-selection), return `tenant_controls?: true` for them:
+```
+def actor_assigns(socket, _session) do
+  user = socket.assigns[:current_user]
+
+  [
+    actor: user,
+    tenant: user.organization_id,
+    tenant_controls?: user.role == :admin
+  ]
+end
+```
+When your plug returns a `tenant`, a tenant picked in the dashboard lasts until the page is reloaded. When it returns none, the dashboard remembers the picked tenant in a cookie, as it does without a custom actor plug.
 
 ### Content Security Policy
 

@@ -90,6 +90,7 @@ if config_env() == :test do
     ash_domains: [
       AshAdmin.Test.Domain,
       AshAdmin.Test.ManyToManyDomain,
-      AshAdmin.Test.RelationshipFieldsDomain
+      AshAdmin.Test.RelationshipFieldsDomain,
+      AshAdmin.Test.TenantDomain
     ]
 end
