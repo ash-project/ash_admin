@@ -81,6 +81,8 @@ if config_env() == :test do
 
   config :ash, :disable_async?, true
 
+  config :ash_admin, :actor_plug, AshAdmin.Test.ActorPlug
+
   # Fail on duplicate ids and on phx-change forms without an id (no form recovery).
   config :phoenix_live_view, :test_warnings, :raise
 

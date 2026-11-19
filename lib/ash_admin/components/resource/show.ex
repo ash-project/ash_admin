@@ -20,6 +20,7 @@ defmodule AshAdmin.Components.Resource.Show do
   attr :action, :any
   attr :authorizing, :boolean, default: false
   attr :actor, :any
+  attr :actor_controls, :boolean, default: false
   attr :tenant, :any
   attr :table, :any, required: true
   attr :prefix, :any, required: true
@@ -74,13 +75,21 @@ defmodule AshAdmin.Components.Resource.Show do
   end
 
   def render_show(assigns, record, resource, title \\ nil, buttons? \\ true) do
-    assigns = assign(assigns, record: record, resource: resource, title: title, buttons: buttons?)
+    assigns =
+      assign(assigns,
+        record: record,
+        resource: resource,
+        title: title,
+        buttons: buttons?,
+        # render_show is also reached from other components that know nothing of actors
+        actor_controls: assigns[:actor_controls] == true
+      )
 
     ~H"""
     <div class="shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 overflow-hidden sm:rounded-md bg-white dark:bg-slate-900">
       <h1 :if={@title} class="pt-2 pl-4 text-lg">{@title}</h1>
       <button
-        :if={AshAdmin.Resource.actor?(@resource)}
+        :if={@actor_controls && AshAdmin.Resource.actor?(@resource)}
         class="float-right pt-4 pr-4"
         phx-click="set_actor"
         phx-value-resource={AshAdmin.Resource.name(@resource)}
@@ -455,6 +464,7 @@ defmodule AshAdmin.Components.Resource.Show do
         skip={[@destination_attribute]}
         relationship_name={@relationship_name}
         actor={@actor}
+        actor_controls={@actor_controls}
         tenant={@tenant}
         authorizing={@authorizing}
       />

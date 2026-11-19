@@ -16,6 +16,9 @@ defmodule AshAdmin.ActorPlug.Plug do
     session = Phoenix.LiveView.get_connect_params(socket) || session
 
     [
+      # This plug takes the actor and authorization settings from the browser, so the
+      # dashboard user may change them. Custom actor plugs leave this off by default.
+      actor_controls?: true,
       actor: actor_from_session(socket.endpoint, session),
       actor_domain: actor_domain_from_session(socket.endpoint, session),
       actor_resources: actor_resources(domains),
@@ -86,13 +89,6 @@ defmodule AshAdmin.ActorPlug.Plug do
       nil ->
         default
     end
-  end
-
-  defp actor_resources(domains) do
-    for domain <- domains,
-        resource <- AshAdmin.Domain.show_resources(domain),
-        AshAdmin.Helpers.primary_action(resource, :read) && AshAdmin.Resource.actor?(resource),
-        do: {domain, resource}
   end
 
   defp domains(otp_app) do

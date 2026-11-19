@@ -178,6 +178,151 @@ defmodule AshAdmin.Test.PageLiveTest do
     end
   end
 
+  describe "actor controls with the default actor plug" do
+    test "toggling authorization is allowed", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/api/admin")
+
+      render_hook(view, "toggle_authorizing", %{})
+      assert_push_event(view, "toggle_authorizing", %{})
+
+      render_hook(view, "toggle_actor_paused", %{})
+      assert_push_event(view, "toggle_actor_paused", %{})
+
+      render_hook(view, "clear_actor", %{})
+      assert_push_event(view, "clear_actor", %{})
+    end
+  end
+
+  describe "actor controls with a custom actor plug" do
+    setup do
+      language = Ash.create!(AshAdmin.Test.Language, %{name: "English"})
+      profile = Ash.create!(AshAdmin.Test.Profile, %{name: "Laszlo"})
+
+      # Its read policy forbids reads without an actor, and the custom plug sets none.
+      link =
+        Ash.create!(
+          AshAdmin.Test.ProfileLanguage,
+          %{profile_id: profile.id, language_id: language.id},
+          authorize?: false
+        )
+
+      post =
+        AshAdmin.Test.Post
+        |> Ash.Changeset.for_create(:create, %{body: "actor post"})
+        |> Ash.create!()
+
+      %{link: link, post: post}
+    end
+
+    defp show_link_path(link) do
+      pkey = AshAdmin.Helpers.encode_primary_key(link)
+
+      "/api/custom-actor/admin?domain=ManyToMany&resource=ProfileLanguage" <>
+        "&action_type=read&primary_key=#{pkey}"
+    end
+
+    test "the actor and authorization controls are not rendered", %{conn: conn, post: post} do
+      pkey = AshAdmin.Helpers.encode_primary_key(post)
+
+      {:ok, view, _html} =
+        live(conn, "/api/custom-actor/admin?domain=Domain&resource=Post&action_type=read")
+
+      refute has_element?(view, "[phx-click=toggle_authorizing]")
+      refute has_element?(view, "[phx-click=toggle_actor_paused]")
+      refute has_element?(view, "[phx-click=clear_actor]")
+      refute has_element?(view, "[phx-click=set_actor]")
+
+      {:ok, view, _html} =
+        live(
+          conn,
+          "/api/custom-actor/admin?domain=Domain&resource=Post&action_type=read&primary_key=#{pkey}"
+        )
+
+      refute has_element?(view, "[phx-click=set_actor]")
+    end
+
+    test "authorization is still enforced without any toggling", %{conn: conn, link: link} do
+      {:ok, _view, html} = live(conn, show_link_path(link))
+
+      refute html =~ link.id
+    end
+
+    test "a toggle_authorizing event does not bypass authorization", %{conn: conn, link: link} do
+      {:ok, view, _html} = live(conn, show_link_path(link))
+
+      render_hook(view, "toggle_authorizing", %{})
+
+      refute render_patch(view, show_link_path(link)) =~ link.id
+      refute_push_event(view, "toggle_authorizing", %{})
+    end
+
+    test "a clear_actor event does not bypass authorization", %{conn: conn, link: link} do
+      {:ok, view, _html} = live(conn, show_link_path(link))
+
+      render_hook(view, "clear_actor", %{})
+
+      refute render_patch(view, show_link_path(link)) =~ link.id
+      refute_push_event(view, "clear_actor", %{})
+    end
+
+    test "a toggle_actor_paused event is ignored", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/api/custom-actor/admin")
+
+      render_hook(view, "toggle_actor_paused", %{})
+      refute_push_event(view, "toggle_actor_paused", %{})
+    end
+
+    test "a set_actor event does not change the actor", %{conn: conn, post: post} do
+      {:ok, view, _html} = live(conn, "/api/custom-actor/admin")
+
+      render_hook(view, "set_actor", %{
+        "resource" => "Post",
+        "domain" => AshAdmin.Domain.name(AshAdmin.Test.Domain),
+        "pkey" => AshAdmin.Helpers.encode_primary_key(post)
+      })
+
+      refute_push_event(view, "set_actor", %{})
+    end
+  end
+
+  describe "actor controls with a custom actor plug that allows them" do
+    test "the controls are rendered and take effect", %{conn: conn} do
+      language = Ash.create!(AshAdmin.Test.Language, %{name: "French"})
+      profile = Ash.create!(AshAdmin.Test.Profile, %{name: "Nadja"})
+
+      link =
+        Ash.create!(
+          AshAdmin.Test.ProfileLanguage,
+          %{profile_id: profile.id, language_id: language.id},
+          authorize?: false
+        )
+
+      path =
+        "/api/custom-actor-controls/admin?domain=ManyToMany&resource=ProfileLanguage" <>
+          "&action_type=read&primary_key=#{AshAdmin.Helpers.encode_primary_key(link)}"
+
+      {:ok, view, html} = live(conn, path)
+
+      refute html =~ link.id
+      assert has_element?(view, "[phx-click=toggle_authorizing]")
+
+      view
+      |> element("#sidebar-actor-desktop ~ div [phx-click=toggle_authorizing]")
+      |> render_click()
+
+      assert_push_event(view, "toggle_authorizing", %{authorizing: "false"})
+      assert render_patch(view, path) =~ link.id
+
+      {:ok, view, _html} =
+        live(
+          conn,
+          "/api/custom-actor-controls/admin?domain=Domain&resource=Post&action_type=read"
+        )
+
+      assert has_element?(view, "[phx-click=set_actor]")
+    end
+  end
+
   test "allows uploading to an action with an upload argument", %{conn: conn} do
     {:ok, view, _html} =
       live(

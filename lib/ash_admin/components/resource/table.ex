@@ -24,6 +24,7 @@ defmodule AshAdmin.Components.Resource.Table do
   attr :format_fields, :any, default: []
   attr :show_sensitive_fields, :list, default: []
   attr :actor, :any, default: nil
+  attr :actor_controls, :boolean, default: false
   attr :tenant, :any, default: nil
   attr :authorizing, :boolean, default: false
   attr :relationship_name, :atom, default: nil
@@ -107,7 +108,7 @@ defmodule AshAdmin.Components.Resource.Table do
                 </div>
 
                 <button
-                  :if={AshAdmin.Resource.actor?(@resource)}
+                  :if={@actor_controls && AshAdmin.Resource.actor?(@resource)}
                   phx-click="set_actor"
                   phx-value-resource={AshAdmin.Resource.name(@resource)}
                   phx-value-domain={AshAdmin.Domain.name(@domain)}

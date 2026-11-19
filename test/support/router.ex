@@ -42,5 +42,15 @@ defmodule AshAdmin.Test.Router do
       live_session_name: :ash_admin_host_app_default,
       host_app_path: "/dashboard"
     )
+
+    ash_admin("/custom-actor/admin",
+      live_session_name: :ash_admin_custom_actor,
+      session: {AshAdmin.Test.ActorPlug, :custom_session, []}
+    )
+
+    ash_admin("/custom-actor-controls/admin",
+      live_session_name: :ash_admin_custom_actor_controls,
+      session: {AshAdmin.Test.ActorPlug, :custom_session_with_controls, []}
+    )
   end
 end

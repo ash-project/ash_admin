@@ -231,6 +231,16 @@ and then configure it like so
 config :ash_admin, :actor_plug, MyAppWeb.AshAdminActorPlug
 ```
 
+With a custom actor plug, authorization is always enforced and the dashboard user can't change the actor: the controls for switching, pausing or clearing the actor and for bypassing authorization are hidden, and the dashboard ignores those events if a client sends them anyway. To give some users those controls (super admins, for example), return `actor_controls?: true` for them from `actor_assigns/2`:
+```
+def actor_assigns(socket, _session) do
+  user = socket.assigns[:current_user]
+
+  [actor: user, actor_controls?: user.role == :admin]
+end
+```
+Changes made with these controls last until the page is reloaded, when your plug sets the actor again.
+
 ### Content Security Policy
 
 If your app specifies a content security policy header, eg. via
