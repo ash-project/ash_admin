@@ -245,6 +245,15 @@ defmodule AshAdmin.Helpers do
     |> Map.new(fn {value, index} -> {to_string(index), value} end)
   end
 
+  @doc false
+  # The resources the dashboard user can pick an actor from, as `{domain, resource}` pairs.
+  def actor_resources(domains) do
+    for domain <- domains,
+        resource <- AshAdmin.Domain.show_resources(domain),
+        primary_action(resource, :read) && AshAdmin.Resource.actor?(resource),
+        do: {domain, resource}
+  end
+
   def primary_action(resource, type) do
     actions =
       case type do

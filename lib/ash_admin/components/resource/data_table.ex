@@ -16,6 +16,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   attr :action, :any
   attr :authorizing, :boolean
   attr :actor, :any
+  attr :actor_controls, :boolean, default: false
   attr :url_path, :any
   attr :params, :any
   attr :table, :any, required: true
@@ -176,7 +177,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
 
                     <%!-- Set as actor --%>
                     <button
-                      :if={AshAdmin.Resource.actor?(@resource)}
+                      :if={@actor_controls && AshAdmin.Resource.actor?(@resource)}
                       phx-click="set_actor"
                       phx-value-resource={AshAdmin.Resource.name(@resource)}
                       phx-value-domain={AshAdmin.Domain.name(@domain)}

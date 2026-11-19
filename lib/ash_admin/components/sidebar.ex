@@ -18,6 +18,7 @@ defmodule AshAdmin.Components.Sidebar do
 
   # Actor/auth/tenant assigns
   attr :actor, :any, default: nil
+  attr :actor_controls, :boolean, default: false
   attr :actor_domain, :any, default: nil
   attr :actor_resources, :any, default: []
   attr :actor_paused, :boolean, default: false
@@ -126,7 +127,7 @@ defmodule AshAdmin.Components.Sidebar do
     <div class="border-t border-slate-700/50 px-3 py-3 space-y-2">
       <%!-- Actor --%>
       <div
-        :if={@actor_resources != []}
+        :if={@actor_controls && @actor_resources != []}
         id={"sidebar-actor-#{@variant}"}
         phx-hook="Actor"
         class="space-y-1.5"
@@ -176,7 +177,7 @@ defmodule AshAdmin.Components.Sidebar do
       </div>
 
       <%!-- Authorizing --%>
-      <div :if={@actor_resources != []} class="flex items-center gap-2">
+      <div :if={@actor_controls && @actor_resources != []} class="flex items-center gap-2">
         <button
           type="button"
           phx-click="toggle_authorizing"

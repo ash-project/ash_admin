@@ -73,8 +73,11 @@ defmodule AshAdmin.PageLive do
      |> then(fn socket ->
        assign(socket, AshAdmin.ActorPlug.actor_assigns(socket, session))
      end)
+     |> assign_new(:actor_controls?, fn -> false end)
      |> assign_new(:actor_domain, fn -> nil end)
-     |> assign_new(:actor_resources, fn -> [] end)
+     |> assign_new(:actor_resources, fn %{actor_controls?: actor_controls?} ->
+       if actor_controls?, do: actor_resources(domains), else: []
+     end)
      |> assign_new(:authorizing, fn -> true end)
      |> assign_new(:actor_paused, fn -> false end)
      |> assign_new(:actor_tenant, fn -> nil end)}
@@ -95,6 +98,7 @@ defmodule AshAdmin.PageLive do
         host_app_label={@host_app_label}
         open={@sidebar_open}
         actor={@actor}
+        actor_controls={@actor_controls?}
         actor_domain={@actor_domain}
         actor_resources={@actor_resources}
         actor_paused={@actor_paused}
@@ -128,7 +132,7 @@ defmodule AshAdmin.PageLive do
             module={Resource}
             id={@resource}
             resource={@resource}
-            set_actor="set_actor"
+            actor_controls={@actor_controls?}
             primary_key={@primary_key}
             record={@record}
             action_metadata={@action_metadata}
@@ -391,6 +395,14 @@ defmodule AshAdmin.PageLive do
   @impl true
   def handle_event("toggle_sidebar", _, socket) do
     {:noreply, assign(socket, :sidebar_open, !socket.assigns.sidebar_open)}
+  end
+
+  # The actor plug decides whether the dashboard user may change the actor or turn off
+  # authorization. Hiding the controls is not enough, since a client can send any event.
+  def handle_event(event, _params, socket)
+      when event in ~w(toggle_authorizing toggle_actor_paused clear_actor set_actor) and
+             socket.assigns.actor_controls? != true do
+    {:noreply, socket}
   end
 
   def handle_event("toggle_authorizing", _, socket) do

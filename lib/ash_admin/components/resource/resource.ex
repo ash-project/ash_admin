@@ -19,6 +19,7 @@ defmodule AshAdmin.Components.Resource do
   attr :domain, :any, required: true
   attr :action, :any
   attr :actor, :any, required: true
+  attr :actor_controls, :boolean, default: false
   attr :authorizing, :boolean, required: true
   attr :tenant, :string, required: true
   attr :url_path, :string, default: ""
@@ -90,6 +91,7 @@ defmodule AshAdmin.Components.Resource do
         <.live_component
           :if={match?({:ok, %_{}}, @record) && @action_type == :read}
           module={Show}
+          actor_controls={@actor_controls}
           resource={@resource}
           domain={@domain}
           id={show_id(@resource)}
@@ -122,6 +124,7 @@ defmodule AshAdmin.Components.Resource do
         <.live_component
           :if={@action_type == :read && !match?({:ok, %_{}}, @record)}
           module={DataTable}
+          actor_controls={@actor_controls}
           polymorphic_actions={@polymorphic_actions}
           resource={@resource}
           action={@action}
