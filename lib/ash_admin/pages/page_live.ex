@@ -154,6 +154,7 @@ defmodule AshAdmin.PageLive do
             tables={@tables}
             polymorphic_actions={@polymorphic_actions}
             prefix={@prefix}
+            domains={@domains}
           />
         </main>
       </div>

@@ -24,6 +24,7 @@ defmodule AshAdmin.Components.Resource.DataTable do
   attr :prefix, :any, required: true
   attr :tenant, :any, required: true
   attr :polymorphic_actions, :any, required: true
+  attr :domains, :list, default: nil
 
   def render(assigns) do
     ~H"""
@@ -282,7 +283,21 @@ defmodule AshAdmin.Components.Resource.DataTable do
     if assigns[:initialized] do
       {:ok, socket}
     else
-      socket = assign(socket, assigns)
+      socket =
+        socket
+        |> assign(assigns)
+        |> then(fn socket ->
+          assign(
+            socket,
+            :foreign_key_targets,
+            foreign_key_targets(
+              socket.assigns.resource,
+              socket.assigns.domain,
+              socket.assigns[:domains]
+            )
+          )
+        end)
+
       params = socket.assigns[:params] || %{}
       arguments = params["args"]
 
@@ -541,7 +556,12 @@ defmodule AshAdmin.Components.Resource.DataTable do
         format_fields,
         show_sensitive_fields,
         [actor: assigns.actor, tenant: assigns[:tenant], authorize?: assigns[:authorizing]],
-        nil
+        nil,
+        foreign_key_path(
+          assigns[:prefix],
+          assigns[:foreign_key_targets][attribute.name],
+          Map.get(record, attribute.name)
+        )
       )
     else
       "..."

@@ -30,6 +30,7 @@ defmodule AshAdmin.Components.Resource do
   attr :table, :any, default: nil
   attr :tables, :any, default: nil
   attr :prefix, :any, default: nil
+  attr :domains, :list, default: nil
   attr :action_type, :atom
   attr :polymorphic_actions, :any
 
@@ -102,6 +103,7 @@ defmodule AshAdmin.Components.Resource do
           tenant={@tenant}
           table={@table}
           prefix={@prefix}
+          domains={@domains}
         />
         <.live_component
           :if={@action_type == :create}
@@ -137,6 +139,7 @@ defmodule AshAdmin.Components.Resource do
           table={@table}
           tables={@tables}
           prefix={@prefix}
+          domains={@domains}
           tenant={@tenant}
         />
         <.live_component

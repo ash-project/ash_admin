@@ -15,6 +15,7 @@ spark_locals_without_parens = [
   format_fields: 1,
   generic_actions: 1,
   label_field: 1,
+  link_relationships?: 1,
   max_file_size: 1,
   name: 1,
   polymorphic_actions: 1,
