@@ -11,6 +11,37 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.5.0](https://github.com/ash-project/ash_admin/compare/v1.4.0...v1.5.0) (2026-11-20)
+
+
+
+
+### Features:
+
+* show what a create or update action returns besides the record by Fredrik Teschke
+
+* choose the fields shown for each relationship on the show page by Etienne Lacoursiere
+
+* hide the table search with the filters by Etienne Lacoursiere
+
+* searchable table columns via table_searchable_columns by Etienne Lacoursiere
+
+* add host_app_path option to link back to the host app by Etienne Lacoursiere
+
+### Bug Fixes:
+
+* only let the actor plug grant tenant controls by Paul Schoenfelder
+
+* only let the actor plug grant actor and authorization controls by Paul Schoenfelder
+
+* send no metadata message when an action returns none by Fredrik Teschke
+
+* register Cinder's colocated hooks in the admin bundle by azmaveth
+
+* spark formatter entry and Tailwind scan of the theme by Etienne Lacoursiere
+
+* give phx-change forms an id by Fredrik Teschke
+
 ## [v1.4.0](https://github.com/ash-project/ash_admin/compare/v1.3.3...v1.4.0) (2026-10-25)
 
 
